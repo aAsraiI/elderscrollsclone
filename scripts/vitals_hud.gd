@@ -1,33 +1,86 @@
 class_name VitalsHUD
 extends CanvasLayer
-## Skyrim-inspired Health, Magicka and Stamina bars.
+## Skyrim-style Health, Magicka and Stamina bars, each on its own: magicka bottom-left,
+## health bottom-middle, stamina bottom-right. Thin bars, a pale "trail" shows what you just
+## lost, and each bar fades away on its own once it is full again (Settings > Interface can keep
+## them showing, and turn the numbers off).
 ## Setup: add a CanvasLayer named VitalsHUD as a child of Player and attach this script.
 ## It automatically finds the Player's Stats node, or you can assign Stats in the Inspector.
 
 @export var stats: Stats
 @export var show_values := true
 @export var hide_when_paused := true
-@export var bottom_offset := 28.0
-@export var bar_width := 230.0
-@export var fade_delay := 4.0
-@export var fade_duration := 1.0
+@export var bottom_offset := 30.0
+@export var side_offset := 40.0
+@export var bar_width := 240.0
+@export var health_width := 300.0
+@export var bar_height := 6.0
+## Seconds a full bar stays on screen after it last changed
+@export var fade_delay := 3.0
+@export var fade_duration := 0.6
+## Never fade the bars
+@export var always_visible := false
 
 const VITALS := [
-	{"id": "health", "label": "HEALTH", "max": "max_health", "color": Color(0.72, 0.12, 0.13)},
-	{"id": "magicka", "label": "MAGICKA", "max": "max_magicka", "color": Color(0.16, 0.34, 0.78)},
-	{"id": "stamina", "label": "STAMINA", "max": "max_stamina", "color": Color(0.18, 0.58, 0.25)},
+	{"id": "health", "label": "Health", "max": "max_health", "color": Color(0.78, 0.16, 0.16)},
+	{"id": "magicka", "label": "Magicka", "max": "max_magicka", "color": Color(0.22, 0.42, 0.90)},
+	{"id": "stamina", "label": "Stamina", "max": "max_stamina", "color": Color(0.24, 0.66, 0.30)},
 ]
+
+
+# One thin bar: a dark track, the pale trail of what was just lost, the colored fill
+class VitalBar extends Control:
+	var color := Color.WHITE
+	var value := 1.0
+	var max_value := 1.0
+	var trail := 1.0
+	var _trail_wait := 0.0
+
+	func set_values(v: float, m: float) -> void:
+		var old := value
+		value = v
+		max_value = maxf(m, 1.0)
+		if v < old:
+			_trail_wait = 0.5  # hold the trail a moment, then let it drain
+		if trail < v:
+			trail = v
+		queue_redraw()
+
+	func _process(delta: float) -> void:
+		if trail > value:
+			_trail_wait -= delta
+			if _trail_wait <= 0.0:
+				trail = move_toward(trail, value, max_value * delta * 0.6)
+				queue_redraw()
+
+	func _draw() -> void:
+		var r := Rect2(Vector2.ZERO, size)
+		draw_rect(r.grow(1.0), Color(0, 0, 0, 0.55))
+		draw_rect(r, Color(0.06, 0.06, 0.07, 0.85))
+		var t := clampf(trail / max_value, 0.0, 1.0)
+		var f := clampf(value / max_value, 0.0, 1.0)
+		# Bars shrink toward the middle, like Skyrim's
+		var mid := size.x * 0.5
+		if t > f:
+			draw_rect(Rect2(mid - mid * t, 0.0, size.x * t, size.y), Color(1.0, 0.92, 0.75, 0.55))
+		if f > 0.0:
+			draw_rect(Rect2(mid - mid * f, 0.0, size.x * f, size.y), color)
+			draw_rect(Rect2(mid - mid * f, 0.0, size.x * f, 1.0), color.lightened(0.35))  # a thin highlight on top
+		draw_rect(r.grow(1.0), Color(0.93, 0.80, 0.48, 0.30), false, 1.0)
+
 
 var _root: Control
 var _bars: Dictionary = {}
 var _value_labels: Dictionary = {}
-var _time_since_activity := 0.0
+var _groups: Dictionary = {}  # vital id -> the Control holding its bar and label
+var _since: Dictionary = {}  # vital id -> seconds since it last changed
 
 
 func _ready() -> void:
 	# Keep the HUD responsive while menus pause the game.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 6
+	add_to_group("settings_listener")
 
 	if stats == null:
 		stats = get_parent().get_node_or_null("Stats") as Stats
@@ -38,23 +91,33 @@ func _ready() -> void:
 		return
 
 	_build_ui()
+	apply_settings()
 	stats.vital_changed.connect(_on_vital_changed)
 	stats.stat_changed.connect(_on_stat_changed)
+	_refresh_all()
+	for vital in VITALS:
+		_since[vital["id"]] = 0.0
+
+
+## GameSettings changed (numbers on the bars, never fade)
+func apply_settings() -> void:
+	show_values = bool(GameSettings.get_value("hud_values"))
+	always_visible = bool(GameSettings.get_value("hud_always"))
 	_refresh_all()
 
 
 func _process(delta: float) -> void:
 	if _root == null:
 		return
-
 	if hide_when_paused:
 		_root.visible = not get_tree().paused
-
-	_time_since_activity += delta
-	var target_alpha := 1.0 if _time_since_activity < fade_delay else 0.0
-	var tint := _root.modulate
-	tint.a = move_toward(tint.a, target_alpha, delta / maxf(fade_duration, 0.001))
-	_root.modulate = tint
+	for vital in VITALS:
+		var id: String = vital["id"]
+		_since[id] = float(_since.get(id, 0.0)) + delta
+		var full := _get_current_vital(id) >= stats.get_stat(vital["max"]) - 0.01
+		var want := always_visible or not full or float(_since[id]) < fade_delay
+		var g: Control = _groups[id]
+		g.modulate.a = move_toward(g.modulate.a, 1.0 if want else 0.0, delta / maxf(fade_duration, 0.001))
 
 
 func _build_ui() -> void:
@@ -64,100 +127,71 @@ func _build_ui() -> void:
 	_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
 
-	var panel := PanelContainer.new()
-	panel.name = "VitalsPanel"
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.anchor_left = 0.5
-	panel.anchor_right = 0.5
-	panel.anchor_top = 1.0
-	panel.anchor_bottom = 1.0
-	# Three bars plus two row gaps, inner margins and panel borders.
-	# The previous width calculation was too small for three full-width bars,
-	# which caused the panel contents to extend off-center.
-	var panel_width := bar_width * 3.0 + 24.0 + 12.0 + 2.0
-	panel.offset_left = -panel_width / 2.0
-	panel.offset_right = panel_width / 2.0
-	panel.offset_top = -bottom_offset - 42.0
-	panel.offset_bottom = -bottom_offset
-	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.025, 0.025, 0.03, 0.72)
-	panel_style.border_color = Color(0.65, 0.58, 0.40, 0.65)
-	panel_style.set_border_width_all(1)
-	panel_style.set_corner_radius_all(5)
-	panel.add_theme_stylebox_override("panel", panel_style)
-	_root.add_child(panel)
-
-	var margin := MarginContainer.new()
-	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 6)
-	panel.add_child(margin)
-
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	margin.add_child(row)
-
 	for vital in VITALS:
-		var holder := Control.new()
-		holder.custom_minimum_size = Vector2(bar_width, 25)
-		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(holder)
-
-		var bar := ProgressBar.new()
-		bar.name = String(vital["id"]).capitalize() + "Bar"
-		bar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		bar.min_value = 0.0
-		bar.max_value = 100.0
-		bar.value = 100.0
-		bar.show_percentage = false
-		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var fill := StyleBoxFlat.new()
-		fill.bg_color = vital["color"]
-		fill.set_corner_radius_all(3)
-		var back := StyleBoxFlat.new()
-		back.bg_color = Color(0.055, 0.055, 0.06, 0.98)
-		back.set_corner_radius_all(3)
-		bar.add_theme_stylebox_override("fill", fill)
-		bar.add_theme_stylebox_override("background", back)
-		holder.add_child(bar)
+		var id: String = vital["id"]
+		var width := health_width if id == "health" else bar_width
+		var group := Control.new()
+		group.name = id.capitalize() + "Group"
+		group.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		group.anchor_top = 1.0
+		group.anchor_bottom = 1.0
+		group.offset_top = -bottom_offset - bar_height - 18.0
+		group.offset_bottom = -bottom_offset
+		match id:
+			"health":
+				group.anchor_left = 0.5
+				group.anchor_right = 0.5
+				group.offset_left = -width / 2.0
+				group.offset_right = width / 2.0
+			"magicka":
+				group.offset_left = side_offset
+				group.offset_right = side_offset + width
+			_:
+				group.anchor_left = 1.0
+				group.anchor_right = 1.0
+				group.offset_left = -side_offset - width
+				group.offset_right = -side_offset
+		_root.add_child(group)
 
 		var label := Label.new()
 		label.name = "ValueLabel"
-		label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		label.add_theme_font_size_override("font_size", 12)
-		label.add_theme_color_override("font_color", Color.WHITE)
-		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
-		label.add_theme_constant_override("outline_size", 4)
-		holder.add_child(label)
+		label.anchor_right = 1.0
+		label.offset_bottom = 16.0
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 11)
+		label.add_theme_color_override("font_color", Color(1, 1, 1, 0.75))
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		label.add_theme_constant_override("outline_size", 3)
+		group.add_child(label)
 
-		_bars[vital["id"]] = bar
-		_value_labels[vital["id"]] = label
+		var bar := VitalBar.new()
+		bar.name = id.capitalize() + "Bar"
+		bar.color = vital["color"]
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bar.anchor_top = 1.0
+		bar.anchor_bottom = 1.0
+		bar.anchor_right = 1.0
+		bar.offset_top = -bar_height
+		group.add_child(bar)
+
+		_bars[id] = bar
+		_value_labels[id] = label
+		_groups[id] = group
 
 
 func _on_vital_changed(vital: String, _current: float, _maximum: float) -> void:
 	_refresh_vital(vital)
-	_reveal_hud()
+	_since[vital] = 0.0
 
 
 func _on_stat_changed(_stat: String) -> void:
 	# Maximum vitals can change when equipment or effects modify stats.
 	_refresh_all()
-	_reveal_hud()
-
-
-func _reveal_hud() -> void:
-	_time_since_activity = 0.0
-	if _root != null:
-		var tint := _root.modulate
-		tint.a = 1.0
-		_root.modulate = tint
 
 
 func _refresh_all() -> void:
-	if stats == null:
+	if stats == null or _bars.is_empty():
 		return
 	for vital in VITALS:
 		_refresh_vital(vital["id"])
@@ -176,15 +210,11 @@ func _refresh_vital(vital_id: String) -> void:
 
 	var current := _get_current_vital(vital_id)
 	var maximum := maxf(stats.get_stat(definition["max"]), 0.0)
-	var bar: ProgressBar = _bars[vital_id]
-	bar.max_value = maxf(maximum, 1.0)
-	bar.value = clampf(current, 0.0, maximum)
+	var bar: VitalBar = _bars[vital_id]
+	bar.set_values(clampf(current, 0.0, maximum), maximum)
 
 	var label: Label = _value_labels[vital_id]
-	if show_values:
-		label.text = "%s  %.0f / %.0f" % [definition["label"], current, maximum]
-	else:
-		label.text = definition["label"]
+	label.text = "%.0f / %.0f" % [current, maximum] if show_values else ""
 
 
 func _get_current_vital(vital_id: String) -> float:

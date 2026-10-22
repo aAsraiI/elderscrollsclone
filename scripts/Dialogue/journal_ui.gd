@@ -55,7 +55,7 @@ func open() -> void:
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_refresh()
-	_search.grab_focus()
+	_filters.grab_focus()  # click the search box to type (so 1-4 and Tab still switch pages)
 	opened.emit()
 
 
@@ -255,8 +255,9 @@ func _build_ui() -> void:
 	var center := CenterContainer.new()
 	_root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.offset_top = UITheme.HUB_BAR_HEIGHT  # room for the Tab menu bar
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(1000, 600)
+	panel.custom_minimum_size = Vector2(960, 540)
 	center.add_child(panel)
 	var margin := MarginContainer.new()
 	for side in ["left", "right", "top", "bottom"]:
@@ -269,9 +270,7 @@ func _build_ui() -> void:
 	var top := HBoxContainer.new()
 	top.add_theme_constant_override("separation", 12)
 	vbox.add_child(top)
-	var title := Label.new()
-	title.text = "Journal"
-	title.add_theme_font_size_override("font_size", 26)
+	var title := UITheme.heading("Journal")
 	top.add_child(title)
 	_search = LineEdit.new()
 	_search.placeholder_text = "Search everything ever mentioned..."

@@ -124,8 +124,18 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 ## model shown in your hands (dagger, sword, greatsword, hammer, shield).
 @export var animation_set: StringName = &""
 ## Optional model held in first person. Its origin is the grip; the blade points along +Y.
-## Empty = a placeholder built from boxes.
+## Empty = a placeholder built from boxes. Any item worn in the main or off hand shows it.
 @export var view_scene: PackedScene
+
+@export_group("Models")
+## Moves the first-person model from the grip point (meters: x right, y up along the blade, z back)
+@export var view_offset := Vector3.ZERO
+## Turns the first-person model (degrees). E.g. a model made lying down needs x = -90.
+@export var view_rotation := Vector3.ZERO
+## Makes the first-person model bigger or smaller
+@export var view_scale := 1.0
+## Makes the world model (World Scene, or View Scene if that is all there is) bigger or smaller
+@export var world_scale := 1.0
 
 
 ## true for food and potions the player can eat or drink

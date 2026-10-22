@@ -49,6 +49,17 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var _sprint_timer := 0.0
 var _dead := false
+## Set from Settings (GameSettings): mouse_sensitivity, invert_y and the camera's field of view
+var invert_y := false
+
+
+## GameSettings changed: mouse and field of view
+func apply_settings() -> void:
+	mouse_sensitivity = float(GameSettings.get_value("mouse_sensitivity"))
+	invert_y = bool(GameSettings.get_value("invert_y"))
+	var cam := get_node_or_null("Head/Camera3D") as Camera3D
+	if cam != null:
+		cam.fov = float(GameSettings.get_value("fov"))
 
 func _ready() -> void:
 	add_to_group("player")  # enemies look for this group
@@ -56,6 +67,8 @@ func _ready() -> void:
 	# Registered first so the physics loop never asks for an action that doesn't exist yet
 	_register_input_actions()
 	_ensure_helpers()
+	add_to_group("settings_listener")
+	GameSettings.apply(get_tree())  # also calls apply_settings() below
 
 	var sword: ItemData = load("res://scripts/Resources/iron_sword.tres")
 	var armor: ItemData = load("res://scripts/Resources/iron_chestplate.tres")
@@ -99,7 +112,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Mouse look: yaw rotates the body, pitch rotates only the head
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
-		head.rotate_x(-event.relative.y * mouse_sensitivity)
+		head.rotate_x(-event.relative.y * mouse_sensitivity * (-1.0 if invert_y else 1.0))
 		head.rotation.x = clampf(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
 
 	# Esc opens the pause screen (PauseMenu). A click captures the mouse again if it got loose.
@@ -192,6 +205,10 @@ func _ensure_helpers() -> void:
 		var journal := JournalUI.new()
 		journal.name = "JournalUI"
 		add_child(journal)
+	if get_node_or_null("MenuHub") == null:
+		var hub := MenuHub.new()
+		hub.name = "MenuHub"
+		add_child(hub)
 
 
 func _on_died() -> void:
@@ -201,15 +218,42 @@ func _on_died() -> void:
 	layer.layer = 20
 	var label := Label.new()
 	label.text = "YOU DIED"
-	label.add_theme_font_size_override("font_size", 64)
+	label.add_theme_font_size_override("font_size", 48)
 	label.add_theme_color_override("font_color", Color(0.75, 0.1, 0.1))
 	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	layer.add_child(label)
 	add_child(layer)
-	if reload_on_death:
+	# With a save to go back to: Load Last Save / Main Menu buttons. Without one: start over.
+	var sm := get_tree().get_first_node_in_group("save_manager") as SaveManager
+	var last := sm.latest_slot() if sm != null else ""
+	var buttons := HBoxContainer.new()
+	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	buttons.add_theme_constant_override("separation", 10)
+	buttons.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	buttons.offset_top = 50
+	buttons.offset_bottom = 84
+	buttons.offset_left = -200
+	buttons.offset_right = 200
+	buttons.modulate.a = 0.0
+	layer.add_child(buttons)
+	if last != "":
+		var load_b := Button.new()
+		load_b.text = "Load Last Save"
+		load_b.pressed.connect(func() -> void: sm.load_game(last))
+		buttons.add_child(load_b)
+	var menu_b := Button.new()
+	menu_b.text = "Main Menu"
+	menu_b.pressed.connect(func() -> void: SaveManager.go_to_main_menu(get_tree()))
+	buttons.add_child(menu_b)
+	var tween := create_tween()
+	tween.tween_interval(1.0)
+	tween.tween_property(buttons, "modulate:a", 1.0, 0.6)
+	if reload_on_death and last == "":
 		await get_tree().create_timer(3.0).timeout
+		if not is_inside_tree():
+			return
 		get_tree().paused = false
 		get_tree().reload_current_scene()
 

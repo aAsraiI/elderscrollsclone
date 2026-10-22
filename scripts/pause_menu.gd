@@ -1,6 +1,6 @@
 class_name PauseMenu
 extends CanvasLayer
-## The pause screen (Esc): Resume, Save Game, Load Game, Quit Game. Built in code and created by
+## The pause screen (Esc): Resume, Save Game, Load Game, Settings, Main Menu, Quit Game. Built in code and created by
 ## player.gd. Save and Load open the slot screen from SaveManager (the F10 screen) and come back
 ## here when it closes. Quit asks you to press it twice.
 ##
@@ -20,6 +20,10 @@ var _resume: Button
 var _save: Button
 var _load: Button
 var _quit: Button
+var _settings_button: Button
+var _menu_button: Button
+var _menu_confirming := false
+var _settings: SettingsMenu
 var _status: Label
 var _open := false
 var _paused_last := false
@@ -116,22 +120,20 @@ func _build_ui() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(340, 0)
+	panel.custom_minimum_size = Vector2(300, 0)
 	center.add_child(panel)
 
 	var margin := MarginContainer.new()
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 22)
+		margin.add_theme_constant_override("margin_" + side, 8)
 	panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 10)
 	margin.add_child(vbox)
 
-	var title := Label.new()
-	title.text = "Paused"
+	var title := UITheme.heading("Paused", 20)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 30)
 	vbox.add_child(title)
 
 	_info = Label.new()
@@ -145,6 +147,10 @@ func _build_ui() -> void:
 	vbox.add_child(_save)
 	_load = _make_button("Load Game", _on_load)
 	vbox.add_child(_load)
+	_settings_button = _make_button("Settings", _on_settings)
+	vbox.add_child(_settings_button)
+	_menu_button = _make_button("Main Menu", _on_main_menu)
+	vbox.add_child(_menu_button)
 	_quit = _make_button("Quit Game", _on_quit)
 	vbox.add_child(_quit)
 
@@ -153,17 +159,15 @@ func _build_ui() -> void:
 	_status.add_theme_color_override("font_color", Color(1.0, 0.45, 0.4))
 	vbox.add_child(_status)
 
-	var hint := Label.new()
-	hint.text = "[Esc] Resume    [F5] Quicksave    [F9] Quickload"
+	var hint := UITheme.hint("[Esc] Resume    [F5] Quicksave    [F9] Quickload")
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.modulate = Color(1, 1, 1, 0.5)
 	vbox.add_child(hint)
 
 
 func _make_button(text: String, handler: Callable) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(0, 40)
+	b.custom_minimum_size = Vector2(0, 32)
 	b.pressed.connect(handler)
 	return b
 
@@ -216,7 +220,8 @@ func _on_slots_closed() -> void:
 
 
 func _on_quit() -> void:
-	if not _confirming:
+	if not _confirming or _menu_confirming:
+		_clear_confirm()
 		_confirming = true
 		_confirm_time = CONFIRM_SECONDS
 		_quit.text = "Quit? Unsaved progress is lost"
@@ -228,5 +233,34 @@ func _on_quit() -> void:
 
 func _clear_confirm() -> void:
 	_confirming = false
+	_menu_confirming = false
 	if _quit != null:
 		_quit.text = "Quit Game"
+		_menu_button.text = "Main Menu"
+
+
+# Same two-press confirmation as Quit
+func _on_main_menu() -> void:
+	if not _menu_confirming:
+		_clear_confirm()
+		_menu_confirming = true
+		_confirming = true  # runs the same timer
+		_confirm_time = CONFIRM_SECONDS
+		_menu_button.text = "Leave? Unsaved progress is lost"
+		return
+	_clear_confirm()
+	SaveManager.go_to_main_menu(get_tree())
+
+
+# The Settings screen sits on top; this menu comes back when it closes
+func _on_settings() -> void:
+	if _settings == null:
+		_settings = SettingsMenu.new()
+		_settings.name = "SettingsMenu"
+		add_child(_settings)
+		_settings.closed.connect(func() -> void:
+			if is_inside_tree():
+				open())
+	_open = false
+	_root.visible = false
+	_settings.open()

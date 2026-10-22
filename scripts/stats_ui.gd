@@ -79,6 +79,20 @@ func _ready() -> void:
 		skills.player_leveled_up.connect(func(_level): _refresh())
 
 
+func is_open() -> bool:
+	return _is_open
+
+
+func open() -> void:
+	if _root != null and not _is_open:
+		_set_open(true)
+
+
+func close() -> void:
+	if _root != null and _is_open:
+		_set_open(false)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if _root == null:
 		return
@@ -140,19 +154,15 @@ func _build_ui() -> void:
 	var center := CenterContainer.new()
 	_root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.offset_top = UITheme.HUB_BAR_HEIGHT  # room for the Tab menu's bar
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(860, 590)
+	panel.custom_minimum_size = Vector2(860, 540)
 	center.add_child(panel)
 
-	var margin := MarginContainer.new()
-	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 16)
-	panel.add_child(margin)
-
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 8)
-	margin.add_child(vbox)
+	vbox.add_theme_constant_override("separation", 6)
+	panel.add_child(vbox)
 
 	_build_header(vbox)
 
@@ -171,8 +181,7 @@ func _build_ui() -> void:
 	_skills_page.visible = false
 	vbox.add_child(_skills_page)
 
-	_hint_label = Label.new()
-	_hint_label.modulate = Color(1, 1, 1, 0.55)
+	_hint_label = UITheme.hint("")
 	vbox.add_child(_hint_label)
 	_update_hint()
 
@@ -182,9 +191,7 @@ func _build_header(vbox: VBoxContainer) -> void:
 	header.add_theme_constant_override("separation", 12)
 	vbox.add_child(header)
 
-	var title := Label.new()
-	title.text = "Character"
-	title.add_theme_font_size_override("font_size", 24)
+	var title := UITheme.heading("Character")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
 
@@ -192,13 +199,13 @@ func _build_header(vbox: VBoxContainer) -> void:
 		return
 
 	_level_label = Label.new()
-	_level_label.add_theme_font_size_override("font_size", 20)
+	_level_label.add_theme_font_size_override("font_size", 16)
 	_level_label.add_theme_color_override("font_color", GOLD)
 	header.add_child(_level_label)
 
 	_xp_bar = ProgressBar.new()
 	_xp_bar.show_percentage = false
-	_xp_bar.custom_minimum_size = Vector2(220, 18)
+	_xp_bar.custom_minimum_size = Vector2(220, 6)
 	_xp_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = Color(0.85, 0.7, 0.25)
@@ -232,7 +239,7 @@ func _build_attributes_page() -> Control:
 
 		var bar := ProgressBar.new()
 		bar.show_percentage = false
-		bar.custom_minimum_size = Vector2(0, 20)
+		bar.custom_minimum_size = Vector2(0, 8)
 		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var fill := StyleBoxFlat.new()
@@ -284,7 +291,8 @@ func _build_attributes_page() -> Control:
 
 	var equipped_title := Label.new()
 	equipped_title.text = "Equipped"
-	equipped_title.add_theme_font_size_override("font_size", 18)
+	equipped_title.add_theme_font_size_override("font_size", 14)
+	equipped_title.add_theme_color_override("font_color", GOLD)
 	side.add_child(equipped_title)
 
 	_equipped_label = Label.new()
@@ -330,7 +338,7 @@ func _build_skills_page() -> Control:
 
 
 func _update_hint() -> void:
-	var t := "[C / Esc] Close"
+	var t := "[C / Tab / Esc] Close"
 	if skills != null:
 		t += "   [Q / E] Switch tab"
 		if _tabs.current_tab == 1 and skills.is_debug_enabled():

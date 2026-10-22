@@ -41,6 +41,12 @@ const AUTOSAVE := "autosave"
 @export_range(0.0, 60.0, 0.5) var autosave_minutes := 5.0
 ## Create the Save / Load menu (F10)
 @export var show_menu := true
+## Empty = the game scene itself (loading reloads it). The main menu sets this to the game
+## scene, so loading or starting a game switches to it instead.
+@export_file("*.tscn") var game_scene := ""
+
+const MAIN_MENU_SCENE := "res://main_menu.tscn"
+const GAME_SCENE := "res://test_level.tscn"
 
 var menu: SaveMenu
 
@@ -51,6 +57,9 @@ var _last_error := ""
 
 func _ready() -> void:
 	add_to_group("save_manager")
+	if game_scene == "":
+		add_to_group("settings_listener")
+		apply_settings()
 	_register_action("quicksave", KEY_F5)
 	_register_action("quickload", KEY_F9)
 	if show_menu:
@@ -66,7 +75,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if _loading:
+	if _loading or game_scene != "":
 		return
 	SaveSession.playtime += delta
 	if autosave_minutes > 0.0:
@@ -90,6 +99,32 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 # ---------------------------------------------------------------- public API
+
+## GameSettings changed (the autosave interval)
+func apply_settings() -> void:
+	autosave_minutes = float(GameSettings.get_value("autosave_minutes"))
+
+
+## Leaves the game for the main menu (the pause menu and the death screen use this)
+static func go_to_main_menu(tree: SceneTree) -> void:
+	SaveSession.pending = {}
+	tree.paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	tree.change_scene_to_file(MAIN_MENU_SCENE)
+
+
+## The slot saved most recently ("" = no saves at all). The main menu's Continue uses it.
+func latest_slot() -> String:
+	var best := ""
+	var best_time := -1.0
+	for s in list_slots():
+		if not s["exists"]:
+			continue
+		var t := float((s["meta"] as Dictionary).get("time_unix", 0.0))
+		if t > best_time:
+			best_time = t
+			best = s["id"]
+	return best
 
 func is_loading() -> bool:
 	return _loading
@@ -186,7 +221,7 @@ func load_game(slot: String) -> bool:
 	_loading = true
 	SaveSession.begin_load(data, slot)
 	get_tree().paused = false
-	var err := get_tree().reload_current_scene()
+	var err := _start_scene()
 	if err != OK:
 		_loading = false
 		return _load_fail(slot, "Could not restart the scene (error %d). Run the game from a saved scene." % err)
@@ -229,7 +264,14 @@ func new_game(seed_text: String) -> void:
 	var blank := seed_text.strip_edges() == ""
 	SaveSession.begin_new_game(0 if blank else SaveSession.seed_from_text(seed_text), blank)
 	get_tree().paused = false
-	get_tree().reload_current_scene()
+	_start_scene()
+
+
+# Reloads the game scene, or switches to it from the main menu
+func _start_scene() -> Error:
+	if game_scene != "":
+		return get_tree().change_scene_to_file(game_scene)
+	return get_tree().reload_current_scene()
 
 
 ## Everything that goes into a save file

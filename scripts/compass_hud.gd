@@ -74,7 +74,7 @@ func show_banner(title: String, subtitle: String = "") -> void:
 
 func _process(delta: float) -> void:
 	var paused := get_tree().paused
-	_strip.visible = not paused
+	_strip.visible = not paused and bool(GameSettings.get_value("show_compass"))
 	_banner_time = maxf(_banner_time - delta, 0.0)
 	var a := clampf(_banner_time / 0.8, 0.0, 1.0) * (0.0 if paused else 1.0)
 	_banner.modulate.a = a

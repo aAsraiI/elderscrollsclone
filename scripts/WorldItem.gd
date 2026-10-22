@@ -7,7 +7,9 @@ extends RigidBody3D
 @export var item: ItemData
 @export var count: int = 1
 
+const WORLD_LAYER := 1  # physics layer 1
 const INTERACTABLE_LAYER := 4  # physics layer 3
+const ITEM_LAYER := 32  # physics layer 6 "Items": loose items bump into each other
 
 
 static func spawn(item_data: ItemData, amount: int, parent: Node, pos: Vector3) -> WorldItem:
@@ -21,25 +23,32 @@ static func spawn(item_data: ItemData, amount: int, parent: Node, pos: Vector3) 
 
 func _ready() -> void:
 	add_to_group("persistent")  # SaveManager saves everything in this group
-	# Interactable layer only: the interaction ray finds it, and it still lands on the floor
-	# (it collides with layer 1), but players, enemies and attack rays pass through loose items.
-	collision_layer = INTERACTABLE_LAYER
+	# Interactable layer: the interaction ray finds it. Items layer: loose items land on each other
+	# (and on the floor, layer 1) instead of sinking into one another. Players, enemies and attack
+	# rays still pass through loose items.
+	collision_layer = INTERACTABLE_LAYER | ITEM_LAYER
+	collision_mask = WORLD_LAYER | ITEM_LAYER
+	continuous_cd = true  # small, fast things would otherwise fall through each other
 	if item != null:
 		mass = maxf(item.weight * count, 0.1)  # heavier stacks push back harder once physics matters
+
+	# The model (ItemModels: World Scene, View Scene, or a placeholder), lying down and centered,
+	# with a collision box that fits around it
+	var model := ItemModels.build_world(item)
+	if item != null and item.world_scene == null and (item.item_type == ItemData.ItemType.WEAPON or item.equip_slot == ItemData.EquipSlot.OFF_HAND):
+		# hand models stand upright (blade along +Y): lay them on the ground
+		model.rotation_degrees = Vector3(90, 0, 0) if item.secondary_action == ItemData.SecondaryAction.BLOCK else Vector3(0, 0, 90)
+	var holder := Node3D.new()
+	holder.name = "Model"
+	holder.add_child(model)
+	var bounds := ItemModels.get_bounds(holder)
+	model.position -= bounds.get_center()
+	add_child(holder)
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
-	box.size = Vector3(0.3, 0.3, 0.3)
+	box.size = bounds.size.max(Vector3(0.06, 0.06, 0.06))
 	shape.shape = box
 	add_child(shape)
-
-	if item and item.world_scene:
-		add_child(item.world_scene.instantiate())
-	else:
-		var mesh := MeshInstance3D.new()
-		var bm := BoxMesh.new()
-		bm.size = Vector3(0.3, 0.3, 0.3)
-		mesh.mesh = bm
-		add_child(mesh)
 
 
 func interact(target_inventory: Inventory) -> void:

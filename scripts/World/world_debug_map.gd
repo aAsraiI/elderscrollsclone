@@ -512,12 +512,14 @@ func _build_ui() -> void:
 	for side in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 24)
 	_root.add_child(margin)
+	margin.add_theme_constant_override("margin_top", UITheme.HUB_BAR_HEIGHT + 10)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 6)
 	margin.add_child(vbox)
 	_title = Label.new()
-	_title.add_theme_font_size_override("font_size", 18)
+	_title.add_theme_font_size_override("font_size", 15)
+	_title.add_theme_color_override("font_color", UITheme.GOLD)
 	vbox.add_child(_title)
 	_view = MapView.new()
 	_view.owner_map = self

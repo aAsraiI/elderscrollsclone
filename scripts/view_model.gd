@@ -10,7 +10,7 @@ extends Node3D
 ##   blocking   the shield comes up to the middle; a parry window shows as a fast raise
 ## Slashes alternate direction down a combo. Hits kick the weapon back; blocks and parries kick the
 ## shield. It also lowers the weapons when you stand close to a wall, so they never poke through it.
-## To use your own models, set "View Scene" on the ItemData: this is only the placeholder.
+## To use your own models, set "View Scene" on the ItemData (see ItemModels): boxes are only the placeholder.
 
 @export var combat: MeleeCombat
 @export var bob_enabled := true
@@ -21,10 +21,6 @@ enum Swing { SLASH, THRUST, CHOP }
 
 const MAIN := ItemData.EquipSlot.MAIN_HAND
 const OFF := ItemData.EquipSlot.OFF_HAND
-const METAL := Color(0.72, 0.74, 0.80)
-const DARK := Color(0.30, 0.30, 0.34)
-const WOOD := Color(0.38, 0.26, 0.15)
-const SKIN := Color(0.80, 0.62, 0.50)
 
 # Poses are [position, rotation in degrees], relative to the camera. Blades point along +Y.
 const REST_MAIN := [Vector3(0.30, -0.28, -0.55), Vector3(-20.0, 0.0, -14.0)]
@@ -42,7 +38,6 @@ const CHOP_STRIKE := [Vector3(0.12, -0.36, -0.72), Vector3(-105.0, 0.0, 0.0)]
 
 var _hands := {}  # hand slot -> {"node", "item", "p", "r"}
 var _kick := {MAIN: Vector3.ZERO, OFF: Vector3.ZERO}
-var _materials := {}
 var _exclude: Array[RID] = []
 var _player: CharacterBody3D
 var _bob_t := 0.0
@@ -50,6 +45,8 @@ var _bob_amp := 0.0
 
 
 func _ready() -> void:
+	add_to_group("settings_listener")
+	apply_settings()
 	if combat == null:
 		combat = _find_combat()
 	var n: Node = get_parent()
@@ -271,7 +268,7 @@ func _refresh_models() -> void:
 	for slot in _hands:
 		var h: Dictionary = _hands[slot]
 		var item: ItemData = combat.equipment.get_equipped(slot) if combat.equipment != null else null
-		if slot == MAIN and item != null and item.item_type != ItemData.ItemType.WEAPON:
+		if slot == MAIN and item != null and item.item_type != ItemData.ItemType.WEAPON and item.view_scene == null:
 			item = null
 		if bool(h["built"]) and h["item"] == item:
 			continue
@@ -284,67 +281,14 @@ func _refresh_models() -> void:
 			node.add_child(_build_model(item))
 
 
+# The model itself comes from ItemModels: the item's View Scene, or a placeholder
 func _build_model(item: ItemData) -> Node3D:
-	var root := Node3D.new()
-	if item == null:
-		_box(root, Vector3(0.10, 0.10, 0.14), Vector3.ZERO, SKIN)  # bare fist
-		return root
-	if item.view_scene != null:
-		root.add_child(item.view_scene.instantiate())
-		return root
-	match String(item.animation_set):
-		"dagger":
-			_blade(root, 0.30, 0.04, 0.10, 0.12)
-		"greatsword":
-			_blade(root, 1.05, 0.10, 0.26, 0.34)
-		"hammer":
-			_box(root, Vector3(0.045, 0.95, 0.045), Vector3(0.0, 0.30, 0.0), WOOD)
-			_box(root, Vector3(0.30, 0.20, 0.22), Vector3(0.0, 0.82, 0.0), DARK)
-			_box(root, Vector3(0.05, 0.05, 0.05), Vector3(0.0, -0.20, 0.0), DARK)
-		"shield":
-			_shield(root)
-		_:
-			if item.secondary_action == ItemData.SecondaryAction.BLOCK:
-				_shield(root)
-			elif item.two_handed:
-				_blade(root, 0.95, 0.09, 0.24, 0.30)
-			else:
-				_blade(root, 0.72, 0.06, 0.20, 0.16)
+	var root := ItemModels.build_view(item)
+	for g in root.find_children("*", "GeometryInstance3D", true, false):
+		(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
 
 
-# Grip at the origin, blade along +Y
-func _blade(root: Node3D, blade_len: float, blade_w: float, guard_w: float, handle_len: float) -> void:
-	_box(root, Vector3(0.035, handle_len, 0.035), Vector3.ZERO, WOOD)
-	_box(root, Vector3(0.05, 0.03, 0.05), Vector3(0.0, -handle_len * 0.5 - 0.015, 0.0), DARK)
-	_box(root, Vector3(guard_w, 0.025, 0.04), Vector3(0.0, handle_len * 0.5 + 0.0125, 0.0), DARK)
-	_box(root, Vector3(blade_w, blade_len, 0.014), Vector3(0.0, handle_len * 0.5 + 0.025 + blade_len * 0.5, 0.0), METAL)
-
-
-func _shield(root: Node3D) -> void:
-	_box(root, Vector3(0.58, 0.70, 0.03), Vector3(0.0, 0.0, 0.025), DARK)
-	_box(root, Vector3(0.52, 0.64, 0.05), Vector3.ZERO, Color(0.55, 0.57, 0.62))
-	_box(root, Vector3(0.15, 0.15, 0.08), Vector3(0.0, 0.0, -0.05), METAL)
-
-
-func _box(parent: Node3D, size: Vector3, pos: Vector3, color: Color) -> void:
-	var mesh := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = size
-	mesh.mesh = box
-	mesh.material_override = _material(color)
-	mesh.position = pos
-	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	parent.add_child(mesh)
-
-
-func _material(color: Color) -> StandardMaterial3D:
-	var key := color.to_html()
-	if _materials.has(key):
-		return _materials[key]
-	var m := StandardMaterial3D.new()
-	m.albedo_color = color
-	m.roughness = 0.55
-	m.metallic = 0.35 if color == METAL else 0.0
-	_materials[key] = m
-	return m
+## GameSettings changed (weapon sway)
+func apply_settings() -> void:
+	bob_enabled = bool(GameSettings.get_value("head_bob"))

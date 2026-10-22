@@ -31,6 +31,9 @@ var _slots: Array[Dictionary] = []
 var _confirm := ""
 var _confirm_time := 0.0
 var _toast_time := 0.0
+var _load_only := false
+var _new_row: HBoxContainer
+var _title: Label
 
 
 func _ready() -> void:
@@ -65,7 +68,10 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(ACTION):
 		if not _is_open and get_tree().paused:
 			return  # another menu is already open
-		_set_open(not _is_open)
+		if not _is_open:
+			open_menu()
+		else:
+			_set_open(false)
 		get_viewport().set_input_as_handled()
 	elif _is_open and event.is_action_pressed("ui_cancel"):
 		if _seed_edit.has_focus():
@@ -76,9 +82,15 @@ func _input(event: InputEvent) -> void:
 
 
 ## Opens the slot screen directly (the pause menu uses this). `hint` goes in the status line.
-func open_menu(hint: String = "") -> void:
+## load_only hides Save and New Game (the main menu's Load Game).
+func open_menu(hint: String = "", load_only: bool = false) -> void:
 	if manager == null or manager.is_loading() or _is_open:
 		return
+	load_only = load_only or manager.game_scene != ""  # the main menu has nothing to save
+	_load_only = load_only
+	_save_button.visible = not load_only
+	_new_row.visible = not load_only
+	_title.text = "Load Game" if load_only else "Save / Load"
 	_set_open(true)
 	_status.text = hint
 
@@ -128,7 +140,7 @@ func _build_ui() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(960, 560)
+	panel.custom_minimum_size = Vector2(880, 500)
 	center.add_child(panel)
 
 	var margin := MarginContainer.new()
@@ -142,11 +154,9 @@ func _build_ui() -> void:
 
 	var header := HBoxContainer.new()
 	vbox.add_child(header)
-	var title := Label.new()
-	title.text = "Save / Load"
-	title.add_theme_font_size_override("font_size", 24)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(title)
+	_title = UITheme.heading("Save / Load")
+	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(_title)
 	_seed_label = Label.new()
 	_seed_label.add_theme_color_override("font_color", GOLD)
 	header.add_child(_seed_label)
@@ -189,6 +199,7 @@ func _build_ui() -> void:
 	var new_row := HBoxContainer.new()
 	new_row.add_theme_constant_override("separation", 8)
 	vbox.add_child(new_row)
+	_new_row = new_row
 	var seed_title := Label.new()
 	seed_title.text = "New game seed:"
 	new_row.add_child(seed_title)
@@ -204,9 +215,7 @@ func _build_ui() -> void:
 	_status.add_theme_color_override("font_color", GOLD)
 	vbox.add_child(_status)
 
-	var hints := Label.new()
-	hints.text = "[Enter / double-click] Load (or Save into an empty slot)   [F10 / Esc] Close   Load, Delete and New Game need a second press"
-	hints.modulate = Color(1, 1, 1, 0.55)
+	var hints := UITheme.hint("[Enter / double-click] Load (or Save into an empty slot)   [F10 / Esc] Close   Load, Delete and New Game need a second press")
 	vbox.add_child(hints)
 
 	# Toast and loading screen live on their own layer so they show even when this menu is closed
@@ -314,7 +323,7 @@ func _on_activated() -> void:
 		return
 	if s["exists"]:
 		_on_load()
-	else:
+	elif not _load_only:
 		_on_save()
 
 
@@ -335,7 +344,7 @@ func _on_load() -> void:
 	var s := _selected_slot()
 	if s.is_empty() or not s["exists"]:
 		return
-	if not _confirmed("load", _load_button, "Load? Unsaved progress is lost"):
+	if not _load_only and not _confirmed("load", _load_button, "Load? Unsaved progress is lost"):
 		return
 	if not manager.load_game(s["id"]):
 		_status.text = "Could not load: " + manager.get_last_error()

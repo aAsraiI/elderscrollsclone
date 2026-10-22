@@ -46,14 +46,20 @@ func open_page(index: int) -> void:
 	var now := current_page()
 	if now == index:
 		return
-	if now >= 0:
-		_page(now).call("close")
 	var p := _page(index)
 	if p == null:
 		return
+	# Closing a page captures the mouse, which jumps it to the middle of the screen:
+	# put it back where it was once the next page is open
+	var mouse := get_viewport().get_mouse_position()
+	if now >= 0:
+		_page(now).call("close")
 	p.call("open")
 	if p.call("is_open"):
 		_last = index
+	if now >= 0:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		get_viewport().warp_mouse(mouse)
 
 
 func close_menu() -> void:
@@ -176,8 +182,8 @@ func _build_ui() -> void:
 		b.toggle_mode = true
 		b.button_group = group
 		b.focus_mode = Control.FOCUS_NONE
-		b.text = "%s  %d" % [PAGES[i]["label"], i + 1]
-		b.custom_minimum_size = Vector2(118, 0)
+		b.text = PAGES[i]["label"]
+		b.custom_minimum_size = Vector2(104, 0)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var idx := i
 		b.pressed.connect(func() -> void: open_page(idx))

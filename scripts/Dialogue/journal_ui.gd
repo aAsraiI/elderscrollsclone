@@ -136,13 +136,24 @@ func _refresh() -> void:
 		var t := String(e.get("topic", ""))
 		if t != "":
 			topics[t] = int(topics.get(t, 0)) + 1
+	# Guild jobs: active ones first, finished ones marked
+	var jobs := {}
+	for q: Dictionary in QuestManager.all_quests():
+		jobs[q["id"]] = q
+		quests[q["id"]] = String(q["name"])
 	_add_header("Quests")
 	if quests.is_empty():
 		_add_header("   (none yet)")
 	var qkeys := quests.keys()
-	qkeys.sort_custom(func(a: String, b: String) -> bool: return String(quests[a]) < String(quests[b]))
+	qkeys.sort_custom(func(a: String, b: String) -> bool:
+		var da: bool = jobs.has(a) and jobs[a]["status"] == "done"
+		var db: bool = jobs.has(b) and jobs[b]["status"] == "done"
+		if da != db:
+			return db
+		return String(quests[a]) < String(quests[b]))
 	for q in qkeys:
-		_add_row("   " + String(quests[q]), "quest", q)
+		var done: bool = jobs.has(q) and jobs[q]["status"] == "done"
+		_add_row("   " + String(quests[q]) + ("  (done)" if done else ""), "quest", q)
 	_add_header("Topics")
 	var tkeys := topics.keys()
 	tkeys.sort_custom(func(a: String, b: String) -> bool: return a.to_lower() < b.to_lower())
@@ -154,8 +165,23 @@ func _refresh() -> void:
 			_filters.select(i)
 
 	var shown := filter(entries, _search.text, _filter_kind, _filter_value)
+	var job: Dictionary = jobs.get(_filter_value, {}) if _filter_kind == "quest" else {}
 	_count.text = "%d of %d entries" % [shown.size(), entries.size()]
 	_text.clear()
+	if not job.is_empty():
+		# The job itself first: what to do, and whether it's finished
+		var status := "Finished" if job["status"] == "done" else "In progress"
+		_text.append_text("[color=#ffd95a][b]%s[/b]  ·  %s  ·  %s[/color]\n" % [DialogueUI._esc(String(job["name"])), Factions.display_name(String(job["faction"])), status])
+		if job["status"] != "done":
+			_text.append_text("[color=#e8e0c8]Objective: %s[/color]\n" % DialogueUI._esc(String(job["objective"])))
+		_text.append_text("\n")
+	elif _filter_kind == "all" and _search.text.strip_edges() == "":
+		var active := PackedStringArray()
+		for j: Dictionary in jobs.values():
+			if j["status"] == "active":
+				active.append("[color=#ffd95a]%s[/color]: %s" % [DialogueUI._esc(String(j["name"])), DialogueUI._esc(String(j["objective"]))])
+		if not active.is_empty():
+			_text.append_text("[b]Active quests[/b]\n" + "\n".join(active) + "\n\n")
 	if entries.is_empty():
 		_text.append_text("[i]Nothing written yet. Talk to people: what they tell you is written down here.[/i]")
 		return

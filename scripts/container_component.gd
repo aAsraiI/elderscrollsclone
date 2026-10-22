@@ -66,6 +66,9 @@ func _ready() -> void:
 		if WorldState.has_record(save_id):
 			from_dict(WorldState.get_record(save_id))
 		inventory.changed.connect(_store_state)
+		var quests := get_tree().get_first_node_in_group("quests") as QuestManager
+		if quests != null:
+			quests.fill_container(self)  # a guild job may have hidden its item in here
 
 	var parent := get_parent()
 	var bodies := _find_bodies(parent)

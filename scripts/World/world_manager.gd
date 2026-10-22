@@ -56,6 +56,7 @@ var encounters: EncounterManager
 var clock: WorldClock
 var life: TownLife
 var crime: CrimeManager
+var quests: QuestManager
 
 var _chunks := {}      # Vector2i -> TerrainChunk
 var _inflight := {}    # Vector2i -> worker task id
@@ -116,6 +117,9 @@ func _ready() -> void:
 		life = TownLife.new()
 		life.name = "TownLife"
 		add_child(life)
+	quests = QuestManager.new()
+	quests.name = "QuestManager"
+	add_child(quests)
 	crime = CrimeManager.new()
 	crime.name = "CrimeManager"
 	add_child(crime)
@@ -330,6 +334,16 @@ func _spawn_garrison(p: PlacedPOI) -> void:
 		_garrison_root.name = "Garrisons"
 		add_child(_garrison_root)
 	_garrisons[p.id] = Population.spawn_garrison(p, map, _garrison_root)
+	if quests != null:
+		for e in quests.on_garrison(p, _garrison_root):  # bandit chiefs wanted by guild jobs
+			_garrisons[p.id].append(e)
+
+
+## Adds a creature to a point of interest's garrison (it then comes and goes with its chunk)
+func add_to_garrison(id: String, e: Enemy) -> void:
+	if not _garrisons.has(id):
+		_garrisons[id] = []
+	_garrisons[id].append(e)
 
 
 func _free_garrison(id: String) -> void:

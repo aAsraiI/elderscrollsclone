@@ -39,7 +39,7 @@ extends Resource
 
 
 func will_buy(item: ItemData) -> bool:
-	if item == null or item.item_type == ItemData.ItemType.KEY or item.id == &"gold":
+	if item == null or item.item_type == ItemData.ItemType.KEY or item.id == &"gold" or QuestItems.is_quest_item(item):
 		return false
 	if buys.has("all"):
 		return true

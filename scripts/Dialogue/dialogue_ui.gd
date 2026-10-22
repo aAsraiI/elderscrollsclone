@@ -62,6 +62,9 @@ func open_with(e: Enemy) -> bool:
 		DialogueState.change_disposition(speaker.id, speaker.base_disposition, -3)  # nobody likes being woken
 	for t in DialogueEngine.greeting_topics(speaker):
 		DialogueState.learn(t)
+	if _world != null and _world.quests != null:
+		for t in _world.quests.extra_topics(speaker):  # a guild leader's membership, a delivery...
+			DialogueState.learn(t)
 	_open = true
 	_root.visible = true
 	get_tree().paused = true

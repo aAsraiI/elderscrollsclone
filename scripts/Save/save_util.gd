@@ -27,6 +27,8 @@ static func item_to_path(item: ItemData) -> String:
 static func path_to_item(path: String) -> ItemData:
 	if KeyRing.is_key_path(path):
 		return KeyRing.from_path(path)
+	if QuestItems.is_path(path):
+		return QuestItems.from_path(path)
 	if path == "" or not ResourceLoader.exists(path):
 		return null
 	return load(path) as ItemData

@@ -212,7 +212,10 @@ func _once(key: String, seconds: float) -> bool:
 ## MeleeCombat calls this when the player hits someone who wasn't hostile
 func on_player_hurt(victim: Enemy, killed: bool) -> void:
 	if killed:
-		report("murder", 0, victim)
+		Factions.note_crime("murders")  # the Assassins Cult hears of it, seen or not
+		var res := report("murder", 0, victim)
+		if world != null and world.quests != null:
+			world.quests.on_murder(victim, bool(res["witnessed"]))
 	elif _once("assault|%d" % victim.get_instance_id(), 15.0):
 		report("assault", 0, victim)
 
@@ -220,6 +223,7 @@ func on_player_hurt(victim: Enemy, killed: bool) -> void:
 ## ContainerUI calls this when the player takes from an owned container
 func on_taken(item: ItemData, count: int) -> void:
 	add_stolen(item, count)
+	Factions.note_crime("thefts")
 	report("theft", item.value * count)
 
 

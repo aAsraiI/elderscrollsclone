@@ -237,6 +237,14 @@ func draw_overlay(canvas: Control) -> void:
 		var big := poi.poi is DungeonEntrancePOIData
 		canvas.draw_circle(dot, 3.5 if big else 2.5, Color.BLACK)
 		canvas.draw_circle(dot, 2.5 if big else 1.6, poi.poi.map_color)
+	# Active quest targets: a gold diamond with the quest's name
+	for target in QuestManager.active_targets():
+		var qat: Vector2 = ((target["pos"] as Vector2) - b.position) * scale_to_view
+		var diamond := PackedVector2Array([qat + Vector2(0, -7), qat + Vector2(7, 0), qat + Vector2(0, 7), qat + Vector2(-7, 0)])
+		canvas.draw_colored_polygon(diamond, Color(1.0, 0.85, 0.2))
+		canvas.draw_polyline(PackedVector2Array([diamond[0], diamond[1], diamond[2], diamond[3], diamond[0]]), Color.BLACK, 1.5)
+		canvas.draw_string_outline(font, qat + Vector2(9, -6), String(target["name"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color.BLACK)
+		canvas.draw_string(font, qat + Vector2(9, -6), String(target["name"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.9, 0.4))
 	var p := _manager.player
 	if p == null or not is_instance_valid(p):
 		return

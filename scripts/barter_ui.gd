@@ -56,8 +56,13 @@ func open_for(s: DialogueEngine.Speaker) -> bool:
 	var zone := LevelCurve.zone_range(world.map, b.world_pos)
 	var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
 	var kind := int((s.town.poi as TownData).kind) if s.town != null else 1
-	shop = Barter.open_shop(b.id, status["merchant"], clock.day if clock != null else 1, zone.x, zone.y, Barter.GOLD_SCALE[clampi(kind, 0, 2)])
+	var merchant: MerchantData = status["merchant"]
+	if Factions.leader_of(s, world) == "thieves" and Factions.is_member("thieves"):
+		merchant = merchant.duplicate() as MerchantData  # for guild members the contact is a fence
+		merchant.buys_stolen = true
+	shop = Barter.open_shop(b.id, merchant, clock.day if clock != null else 1, zone.x, zone.y, Barter.GOLD_SCALE[clampi(kind, 0, 2)])
 	deal = Barter.deal_for(_player, DialogueEngine.get_disposition(s))
+	deal.guild = Factions.discount_for(merchant)
 	_title.text = "%s  ·  %s" % [b.display_name, s.name]
 	_message.text = ""
 	_open = true

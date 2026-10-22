@@ -17,8 +17,10 @@ const FACTIONS := {
 	"Fighters Guild": "fighters",
 	"Mages Guild": "mages",
 	"Knightly Order": "knights",
+	"Thieves Guild": "thieves",
+	"Assassins Cult": "assassins",
 }
-const GENERIC := ["background", "my trade", "latest rumors", "little advice", "duties", "the law"]
+const GENERIC := ["background", "my trade", "latest rumors", "little advice", "duties", "membership", "advancement", "clear bounty", "a delivery", "the law"]
 
 
 ## Who is talking: built from an Enemy body (and its NpcData, for townspeople)
@@ -268,6 +270,9 @@ static func can_discuss(s: Speaker, topic: String, world: WorldManager) -> bool:
 		if t != null and t.pick(get_disposition(s)) != null:
 			return true
 	var e: Dictionary = index(world).entries.get(topic.to_lower(), {})
+	# Guild leaders' topics (membership, advancement...) and job topics only for those who have them
+	if QuestManager.TOPICS.has(topic):
+		return world != null and world.quests != null and world.quests.extra_topics(s).has(topic)
 	match String(e.get("kind", "")):
 		"generic":
 			return topic != "the law" or s.data != null
@@ -291,6 +296,8 @@ static func can_discuss(s: Speaker, topic: String, world: WorldManager) -> bool:
 
 static func greeting(s: Speaker, world: WorldManager) -> String:
 	var disp := get_disposition(s)
+	if s.enemy != null and is_instance_valid(s.enemy) and s.enemy.has_meta("greeting"):
+		return String(s.enemy.get_meta("greeting"))  # a special person's own words (the Assassins Cult's contacts)
 	if s.asleep:
 		return "Wha-? Who's there? What are you doing in here? ...Fine. What do you want?"
 	var clock: WorldClock = world.clock if world != null else null
@@ -319,6 +326,10 @@ static func greeting(s: Speaker, world: WorldManager) -> String:
 ## "learn" (extra topics), "response" (DialogueResponse when hand-written)}
 static func respond(s: Speaker, topic: String, world: WorldManager) -> Dictionary:
 	var disp := get_disposition(s)
+	if world != null and world.quests != null and not s.asleep:
+		var job := world.quests.respond(s, topic)  # guild membership and jobs
+		if not job.is_empty():
+			return job
 	for d in _custom_for(s):
 		var t := d.get_topic(topic)
 		var r: DialogueResponse = t.pick(disp) if t != null else null
@@ -527,6 +538,14 @@ static func _about_faction(s: Speaker, faction: String, world: WorldManager) -> 
 			text = "The %s keeps old books and older secrets. They study magic, though few of them will show you any." % name
 		"knights":
 			text = "The %s swears to protect the roads and the realm. Proud folk, but brave." % name
+		"thieves":
+			if Factions.leader_of(s, world) == "thieves" or Factions.is_member("thieves"):
+				return "You're talking to the right person. Ask me about membership, quietly."
+			return "Thieves? There's no such guild. Though they say the pawnbrokers in the cities hear things."
+		"assassins":
+			if Factions.leader_of(s, world) == "assassins":
+				return "You found us. Or we found you. Ask about membership."
+			return ["Don't say that name out loud.", "The Assassins Cult? A story to scare children. ...Isn't it?", "Some say they find you, after you kill. I'd rather not know."][_pick(s, "assassins", 3)]
 	var hall := ""
 	if s.town != null and s.town.town != null:
 		for b in s.town.town.buildings:

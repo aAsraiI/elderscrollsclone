@@ -32,6 +32,8 @@ enum Activity { SLEEP, WORK, LEISURE, PATROL }
 ## How they look and fight
 @export var body: EnemyData
 @export var level := 1
+## Guards: the gate they stand watch at (0 or 1), or -1 to walk rounds
+@export var post := -1
 ## Placeholder body color
 @export var color := Color(0.4, 0.5, 0.6)
 ## Short lines for the speech bubble (used when there is no dialogue window)

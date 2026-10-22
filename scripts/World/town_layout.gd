@@ -308,6 +308,8 @@ func _place_buildings(rng: RandomNumberGenerator) -> void:
 	var trades := NameGen.TRADES.keys()
 	for i in d.roll_count(rng, d.shops_min, d.shops_max):
 		var trade: String = "general" if i == 0 else trades[rng.randi_range(1, trades.size() - 1)]
+		if i == 1 and d.kind == TownData.Kind.CITY:
+			trade = "pawnbroker"  # every city has one: the Thieves Guild's contact
 		wanted.append({"kind": BuildingPlot.Kind.SHOP, "trade": trade})
 	for i in d.roll_count(rng, d.smithies_min, d.smithies_max):
 		wanted.append({"kind": BuildingPlot.Kind.SMITHY})

@@ -215,6 +215,12 @@ func _goal_for(r: Resident, act: int) -> Dictionary:
 	var pick := ("%s|%d" % [d.id, clock.day if clock != null else 1]).hash() & 0x7FFFFFFF
 	match act:
 		NpcData.Activity.PATROL:
+			if d.post >= 0 and d.post < layout.gates.size():
+				# a gate post: just inside the gate, beside the road
+				var gate := layout.gates[d.post]
+				var inward := -gate.normalized()
+				var side := Vector3(-inward.z, 0.0, inward.x) * (4.0 if d.post == 0 else -4.0)
+				return {"outside": gate + inward * 6.0 + side}
 			return {"patrol": true}
 		NpcData.Activity.SLEEP:
 			return {"inside": d.home_id}

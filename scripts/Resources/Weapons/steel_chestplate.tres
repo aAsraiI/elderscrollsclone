@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+display_name = "Steel Armor"
+description = "Well-forged steel with a keen edge. Heavy armor for the chest."
+item_type = 2
+equip_slot = 2
+weight = 15.0
+value = 100
+governing_skill = "heavy_armor"
+tier = 2
+min_level = 6
+stat_modifiers = {
+"armor": 33.0
+}
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

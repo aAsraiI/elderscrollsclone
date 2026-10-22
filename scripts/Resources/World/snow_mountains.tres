@@ -1,0 +1,65 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3 uid="uid://cc3boqjbwt1wu"]
+
+[ext_resource type="Script" uid="uid://bula71da23th1" path="res://scripts/World/biome_data.gd" id="1_biome"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/snow_reavers.tres" id="enc_0"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/snow_beasts.tres" id="enc_1"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/snow_trapper.tres" id="enc_2"]
+[ext_resource type="Script" uid="uid://0fpv5k8e3f4r" path="res://scripts/World/encounter_data.gd" id="enc_script"]
+[ext_resource type="Resource" path="res://scripts/Resources/World/POIs/cave_entrance.tres" id="poi_0"]
+[ext_resource type="Resource" uid="uid://ctkcd8v0rjb18" path="res://scripts/Resources/World/POIs/watchtower.tres" id="poi_1"]
+[ext_resource type="Resource" uid="uid://bk7ydnyeb77t0" path="res://scripts/Resources/World/POIs/bandit_camp.tres" id="poi_2"]
+[ext_resource type="Resource" path="res://scripts/Resources/World/POIs/glowing_shrine.tres" id="poi_3"]
+[ext_resource type="Script" uid="uid://clkfbb8lga0d6" path="res://scripts/World/poi_rule.gd" id="rule_script"]
+
+[sub_resource type="Resource" id="rule_0"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_0")
+count_min = 2.0
+count_max = 3.0
+extra_spacing = 40
+
+[sub_resource type="Resource" id="rule_1"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_1")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 60
+
+[sub_resource type="Resource" id="rule_2"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_2")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 40
+
+[sub_resource type="Resource" id="rule_3"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_3")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 60
+
+[resource]
+script = ExtResource("1_biome")
+id = &"snow_mountains"
+display_name = "Snowy Mountains"
+map_color = Color(0.85, 0.9, 0.97, 1)
+blend_distance = 380.0
+base_height = 55.0
+hills_amplitude = 18.0
+hills_scale = 280.0
+mountain_amplitude = 120.0
+mountain_scale = 800.0
+mountain_coverage = 0.65
+ground_color = Color(0.82, 0.86, 0.9, 1)
+ground_color_alt = Color(0.74, 0.8, 0.86, 1)
+steep_color = Color(0.36, 0.36, 0.4, 1)
+steep_slope_start = 32.0
+steep_slope_full = 52.0
+peak_color = Color(0.97, 0.98, 1, 1)
+peak_height = 110.0
+peak_blend = 40.0
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3")])
+level_min = 12
+level_max = 28
+encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2")])

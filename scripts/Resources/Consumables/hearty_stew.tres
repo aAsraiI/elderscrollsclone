@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://d2jljtjlplxn6" path="res://scripts/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"hearty_stew"
+display_name = "Hearty Stew"
+description = "A thick stew. A long, strong recovery and noticeably quicker stamina."
+item_type = 3
+weight = 0.8
+value = 25
+stackable = true
+max_stack = 99
+use_verb = "Eat"
+effect_group = "food"
+heal_amount = 90.0
+effect_duration = 120.0
+stamina_regen_bonus = 0.4

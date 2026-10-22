@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+display_name = "Obsidian Armor"
+description = "Volcanic glass ground to a razor edge, tougher than it looks. Heavy armor for the chest."
+item_type = 2
+equip_slot = 2
+weight = 16.5
+value = 560
+governing_skill = "heavy_armor"
+tier = 4
+min_level = 18
+stat_modifiers = {
+"armor": 52.0
+}
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

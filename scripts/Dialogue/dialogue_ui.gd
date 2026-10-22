@@ -1,0 +1,350 @@
+class_name DialogueUI
+extends CanvasLayer
+## The conversation window, Morrowind style. Opens when you press E on someone who talks (NpcTalk
+## calls open_with). Created by player.gd. The game pauses while it is open.
+##
+##   top     their name, job and town, and how much they like you
+##   left    what has been said; highlighted words are topics: click one to ask about it
+##   right   the topics you know that this person can talk about
+##   bottom  Persuade (Admire / Intimidate / Joke / Bribe, with the chance of success), Journal, Goodbye
+##
+## Every topic named in an answer is learned. Answers worth remembering go into the journal (J).
+
+signal opened
+signal closed
+signal answered(topic: String, result: Dictionary)
+
+const GOLD := Color(1.0, 0.85, 0.35)
+const LINK := "#e8c46a"
+const TOPIC_COLOR := "#9fc7ff"
+
+var speaker: DialogueEngine.Speaker
+
+var _open := false
+var _world: WorldManager
+var _player: Node
+var _root: Control
+var _name_label: Label
+var _sub_label: Label
+var _disp_bar: ProgressBar
+var _disp_label: Label
+var _log: RichTextLabel
+var _topics: VBoxContainer
+var _persuade_row: HBoxContainer
+var _persuade_buttons: Array[Button] = []
+var _barter_button: Button
+var _rng := RandomNumberGenerator.new()
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	layer = 15
+	add_to_group("dialogue_ui")
+	_player = get_parent()
+	_rng.randomize()
+	_build_ui()
+	_root.visible = false
+
+
+func is_open() -> bool:
+	return _open
+
+
+## Starts talking to this body. Returns false if they won't talk (hostile, fighting, running, dead).
+func open_with(e: Enemy) -> bool:
+	if _open or e == null or not is_instance_valid(e) or e.is_dead():
+		return false
+	if e.disposition == Enemy.Disposition.HOSTILE or e.state in [Enemy.State.CHASE, Enemy.State.ATTACK, Enemy.State.FLEE, Enemy.State.STAGGER]:
+		return false
+	_world = get_tree().get_first_node_in_group("world_manager") as WorldManager
+	speaker = DialogueEngine.speaker_for(e, _world)
+	if speaker.asleep:
+		DialogueState.change_disposition(speaker.id, speaker.base_disposition, -3)  # nobody likes being woken
+	for t in DialogueEngine.greeting_topics(speaker):
+		DialogueState.learn(t)
+	_open = true
+	_root.visible = true
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_persuade_row.visible = false
+	_log.clear()
+	_say(speaker.name, DialogueEngine.greeting(speaker, _world), "")
+	_refresh()
+	opened.emit()
+	return true
+
+
+func close() -> void:
+	if not _open:
+		return
+	_open = false
+	_root.visible = false
+	var journal := get_tree().get_first_node_in_group("journal_ui") as JournalUI
+	var barter := get_tree().get_first_node_in_group("barter_ui") as BarterUI
+	if barter != null and barter.is_open():
+		barter.close()
+	if journal == null or not journal.is_open():
+		get_tree().paused = false
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	closed.emit()
+
+
+## Asks about a topic (what clicking it does). Returns DialogueEngine.respond()'s result.
+func ask(topic: String) -> Dictionary:
+	if not _open or speaker == null:
+		return {}
+	var r := DialogueEngine.respond(speaker, topic, _world)
+	var text := String(r["text"])
+	_say(speaker.name, text, topic)
+	var ix := DialogueEngine.index(_world)
+	for f in DialogueEngine.find_topics(text, ix):
+		DialogueState.learn(String(f["name"]))
+	for t in r.get("learn", PackedStringArray()):
+		DialogueState.learn(String(t))
+	var resp := r.get("response") as DialogueResponse
+	if resp != null:
+		if resp.set_flag != "":
+			DialogueState.set_flag(resp.set_flag)
+		if resp.give_item != null:
+			var inv := _player.get_node_or_null("Inventory") as Inventory if _player != null else null
+			if inv != null:
+				inv.add_item(resp.give_item, maxi(resp.give_count, 1))
+				_note("You received %s." % resp.give_item.display_name)
+	if bool(r.get("journal", false)):
+		var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
+		var added := DialogueState.add_journal({
+			"text": text,
+			"speaker": speaker.name,
+			"topic": topic,
+			"place": speaker.town.town.display_name if speaker.town != null and speaker.town.town != null else "",
+			"day": clock.day if clock != null else 1,
+			"time": clock.get_time_text() if clock != null else "",
+			"quest_id": r.get("quest_id", ""),
+			"quest_name": r.get("quest_name", ""),
+		})
+		if added:
+			_note("Your journal has been updated.")
+	_refresh()
+	answered.emit(topic, r)
+	return r
+
+
+## One persuasion attempt (what the Persuade buttons do)
+func persuade(kind: Persuasion.Kind) -> Dictionary:
+	if not _open or speaker == null:
+		return {}
+	var res := Persuasion.attempt(kind, speaker, _player, _rng)
+	_log.append_text("\n[i]You try: %s.[/i]  %s\n" % [Persuasion.LABELS[kind], "[color=#8fd18f]It works.[/color]" if res["success"] else "[color=#e07a6f]It doesn't work.[/color]"])
+	_say(speaker.name, String(res["text"]), "")
+	_refresh()
+	return res
+
+
+## Opens the trade window with this person (their shop must be open). Returns false if not.
+func open_barter() -> bool:
+	var barter := get_tree().get_first_node_in_group("barter_ui") as BarterUI
+	if not _open or barter == null:
+		return false
+	if not barter.closed.is_connected(_refresh):
+		barter.closed.connect(_refresh)  # disposition and Speech may have changed
+	return barter.open_for(speaker)
+
+
+func _input(event: InputEvent) -> void:
+	if not _open or not event.is_action_pressed("ui_cancel"):
+		return
+	var journal := get_tree().get_first_node_in_group("journal_ui") as JournalUI
+	if journal != null and journal.is_open():
+		return  # Esc closes the journal first
+	var barter := get_tree().get_first_node_in_group("barter_ui") as BarterUI
+	if barter != null and barter.is_open():
+		return  # and the trade window
+	close()
+	get_viewport().set_input_as_handled()
+
+
+# ---------------------------------------------------------------- showing things
+
+func _say(who: String, text: String, topic: String) -> void:
+	if topic != "":
+		_log.append_text("\n[color=%s][b]%s[/b][/color]\n" % [TOPIC_COLOR, _esc(topic)])
+	else:
+		_log.append_text("\n")
+	_log.append_text("[color=#d9cfbf]%s:[/color] %s\n" % [_esc(who), linkify(text, DialogueEngine.index(_world))])
+
+
+func _note(text: String) -> void:
+	_log.append_text("[color=#8fd18f][i]%s[/i][/color]\n" % _esc(text))
+
+
+## The text as BBCode with every topic name made a clickable link
+static func linkify(text: String, ix: DialogueEngine.Index) -> String:
+	var out := ""
+	var pos := 0
+	for f in DialogueEngine.find_topics(text, ix):
+		out += _esc(text.substr(pos, int(f["at"]) - pos))
+		# the link target is URI-encoded: names like "Brenna's House" would break the BBCode otherwise
+		out += "[color=%s][url=%s]%s[/url][/color]" % [LINK, String(f["name"]).uri_encode(), _esc(text.substr(int(f["at"]), int(f["end"]) - int(f["at"])))]
+		pos = int(f["end"])
+	return out + _esc(text.substr(pos))
+
+
+static func _esc(t: String) -> String:
+	return t.replace("[", "[lb]")
+
+
+func _refresh() -> void:
+	if speaker == null:
+		return
+	var role := NpcData.role_name(speaker.role) if speaker.data != null else "Traveler"
+	var where := speaker.town.town.display_name if speaker.data != null and speaker.town != null and speaker.town.town != null else ""
+	_name_label.text = speaker.name
+	_sub_label.text = role + ((", " + where) if where != "" else "")
+	var disp := DialogueEngine.get_disposition(speaker)
+	_disp_bar.value = disp
+	_disp_label.text = "Disposition %d" % disp
+	for c in _topics.get_children():
+		c.queue_free()
+	for t in DialogueEngine.topics_for(speaker, _world):
+		var b := Button.new()
+		b.text = t
+		b.flat = true
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0) if not DialogueEngine.GENERIC.has(t) else Color(1, 1, 1))
+		b.pressed.connect(ask.bind(t))
+		_topics.add_child(b)
+	var trade := Barter.trade_status(speaker, _world)
+	_barter_button.visible = trade["merchant"] != null
+	_barter_button.disabled = not trade["open"]
+	_barter_button.text = "Barter" if trade["open"] else "Barter (%s)" % trade["why"]
+	for i in _persuade_buttons.size():
+		var kind := i as Persuasion.Kind
+		var why := Persuasion.blocked(kind, _player)
+		var btn := _persuade_buttons[i]
+		btn.disabled = why != ""
+		btn.text = "%s  %d%%" % [Persuasion.LABELS[i], roundi(Persuasion.chance_for(kind, speaker, _player) * 100.0)] if why == "" else "%s  (%s)" % [Persuasion.LABELS[i], why]
+
+
+# ---------------------------------------------------------------- building
+
+func _build_ui() -> void:
+	_root = Control.new()
+	add_child(_root)
+	_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.45)
+	_root.add_child(dim)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	var center := CenterContainer.new()
+	_root.add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(980, 580)
+	center.add_child(panel)
+	var margin := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 16)
+	panel.add_child(margin)
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 10)
+	margin.add_child(vbox)
+
+	# header
+	var header := HBoxContainer.new()
+	vbox.add_child(header)
+	var names := VBoxContainer.new()
+	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(names)
+	_name_label = Label.new()
+	_name_label.add_theme_font_size_override("font_size", 26)
+	names.add_child(_name_label)
+	_sub_label = Label.new()
+	_sub_label.add_theme_color_override("font_color", GOLD)
+	names.add_child(_sub_label)
+	var disp_box := VBoxContainer.new()
+	disp_box.custom_minimum_size = Vector2(220, 0)
+	header.add_child(disp_box)
+	_disp_label = Label.new()
+	_disp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	disp_box.add_child(_disp_label)
+	_disp_bar = ProgressBar.new()
+	_disp_bar.max_value = 100
+	_disp_bar.show_percentage = false
+	_disp_bar.custom_minimum_size = Vector2(220, 14)
+	disp_box.add_child(_disp_bar)
+
+	# talk and topics
+	var split := HBoxContainer.new()
+	split.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	split.add_theme_constant_override("separation", 12)
+	vbox.add_child(split)
+	_log = RichTextLabel.new()
+	_log.bbcode_enabled = true
+	_log.scroll_following = true
+	_log.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_log.size_flags_stretch_ratio = 2.6
+	_log.meta_clicked.connect(func(meta: Variant) -> void: ask(String(meta).uri_decode()))
+	_log.add_theme_font_size_override("normal_font_size", 17)
+	_log.add_theme_font_size_override("bold_font_size", 17)
+	split.add_child(_log)
+	var right := VBoxContainer.new()
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	split.add_child(right)
+	var topics_title := Label.new()
+	topics_title.text = "Topics"
+	topics_title.add_theme_color_override("font_color", GOLD)
+	right.add_child(topics_title)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	right.add_child(scroll)
+	_topics = VBoxContainer.new()
+	_topics.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(_topics)
+
+	# persuasion
+	_persuade_row = HBoxContainer.new()
+	_persuade_row.add_theme_constant_override("separation", 6)
+	vbox.add_child(_persuade_row)
+	for i in Persuasion.LABELS.size():
+		var b := Button.new()
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.pressed.connect(func() -> void: persuade(i as Persuasion.Kind))
+		_persuade_row.add_child(b)
+		_persuade_buttons.append(b)
+
+	# buttons
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 10)
+	vbox.add_child(buttons)
+	var persuade_btn := Button.new()
+	persuade_btn.text = "Persuade"
+	persuade_btn.custom_minimum_size = Vector2(140, 36)
+	persuade_btn.pressed.connect(func() -> void: _persuade_row.visible = not _persuade_row.visible)
+	buttons.add_child(persuade_btn)
+	_barter_button = Button.new()
+	_barter_button.text = "Barter"
+	_barter_button.custom_minimum_size = Vector2(140, 36)
+	_barter_button.pressed.connect(open_barter)
+	buttons.add_child(_barter_button)
+	var journal_btn := Button.new()
+	journal_btn.text = "Journal"
+	journal_btn.custom_minimum_size = Vector2(140, 36)
+	journal_btn.pressed.connect(func() -> void:
+		var j := get_tree().get_first_node_in_group("journal_ui") as JournalUI
+		if j != null:
+			j.open())
+	buttons.add_child(journal_btn)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	buttons.add_child(spacer)
+	var hint := Label.new()
+	hint.text = "Click a topic or a highlighted word    [Esc] Goodbye"
+	hint.modulate = Color(1, 1, 1, 0.5)
+	buttons.add_child(hint)
+	var bye := Button.new()
+	bye.text = "Goodbye"
+	bye.custom_minimum_size = Vector2(140, 36)
+	bye.pressed.connect(close)
+	buttons.add_child(bye)

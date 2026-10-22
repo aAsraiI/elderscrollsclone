@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="1_ed"]
+
+[resource]
+script = ExtResource("1_ed")
+id = &"townsfolk"
+display_name = "Townsperson"
+disposition = 2
+color = Color(0.45, 0.4, 0.35, 1)
+health_mult = 0.7
+damage_mult = 0.5
+loot_quality = 0.3
+armor_tier_offset = -9
+kit = 0
+move_speed = 3.0
+wander_radius = 4.0

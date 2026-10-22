@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="1_ed"]
+
+[resource]
+script = ExtResource("1_ed")
+id = &"dune_stalker"
+display_name = "Dune Stalker"
+disposition = 0
+color = Color(0.8, 0.65, 0.4, 1)
+body_scale = 0.85
+health_mult = 0.9
+damage_mult = 1.0
+poise_mult = 0.7
+loot_quality = 0.0
+weapon_tier_offset = 0
+armor_tier_offset = -9
+kit = 0
+move_speed = 4.8
+detection_range = 18.0
+telegraph_time = 0.15
+heavy_chance = 0.0
+chain_chance = 0.5
+attack_pause_min = 0.2
+attack_pause_max = 0.8
+knockback_resistance = 0.0
+wander_radius = 0.0
+talk_name = "Dune Stalker"

@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="TownData" format=3]
+
+[ext_resource type="Script" path="res://scripts/World/town_data.gd" id="1_town"]
+
+[resource]
+script = ExtResource("1_town")
+id = &"town"
+display_name = "Town"
+map_color = Color(1, 0.65, 0.25, 1)
+footprint_radius = 92.0
+flatten_radius = 80.0
+max_slope_deg = 11.0
+random_rotation = false
+kind = 1
+layout_style = 1
+weight = 1.0
+houses_min = 7
+houses_max = 10
+farms_min = 0
+farms_max = 1
+shops_min = 2
+shops_max = 2
+inns_min = 1
+inns_max = 1
+smithies_min = 1
+smithies_max = 1
+temples_min = 0
+temples_max = 1
+guild_halls_min = 1
+guild_halls_max = 1
+wall_color = Color(0.66, 0.6, 0.5, 1)
+house_locked_chance = 0.75
+house_lock_min = 5
+house_lock_max = 35

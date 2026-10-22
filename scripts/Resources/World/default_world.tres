@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WorldSettings" format=3]
+
+[ext_resource type="Script" path="res://scripts/World/world_settings.gd" id="1_ws"]
+[ext_resource type="Script" path="res://scripts/World/biome_placement.gd" id="2_bp"]
+[ext_resource type="Resource" path="res://scripts/Resources/World/plains.tres" id="3_plains"]
+
+[sub_resource type="Resource" id="Resource_plains"]
+script = ExtResource("2_bp")
+biome = ExtResource("3_plains")
+cell = Vector2i(-2, -2)
+size_cells = Vector2i(4, 4)
+
+[resource]
+script = ExtResource("1_ws")
+world_seed = 1337
+placements = Array[ExtResource("2_bp")]([SubResource("Resource_plains")])

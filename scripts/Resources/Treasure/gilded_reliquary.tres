@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://d2jljtjlplxn6" path="res://scripts/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"gilded_reliquary"
+display_name = "Gilded Reliquary"
+description = "A small golden box made to hold something holy."
+item_type = 0
+weight = 2
+value = 700
+stackable = false
+max_stack = 1
+min_level = 20
+treasure = true

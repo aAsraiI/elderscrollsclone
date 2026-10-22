@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://d2jljtjlplxn6" path="res://scripts/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"minor_health_potion"
+display_name = "Minor Health Potion"
+description = "A small red vial. Drink it and the wounds close within seconds."
+item_type = 3
+weight = 0.3
+value = 25
+stackable = true
+max_stack = 99
+use_verb = "Drink"
+effect_group = "potion"
+heal_amount = 40.0
+effect_duration = 2.5

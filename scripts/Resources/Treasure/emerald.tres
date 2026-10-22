@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://d2jljtjlplxn6" path="res://scripts/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"emerald"
+display_name = "Emerald"
+description = "A brilliant green gem, rare and prized."
+item_type = 0
+weight = 0.1
+value = 600
+stackable = true
+max_stack = 99
+min_level = 18
+treasure = true

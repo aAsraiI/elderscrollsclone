@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+display_name = "Dragonbone Shield"
+description = "Carved from the bones of great wyrms. Hold right click to block. Raise it just before a hit lands to parry. Left click while blocking to bash."
+item_type = 2
+equip_slot = 7
+weight = 9.6
+value = 2250
+governing_skill = "block"
+tier = 6
+min_level = 33
+stat_modifiers = {
+"armor": 31.0
+}
+secondary_action = 1
+block_reduction = 0.7
+block_angle = 120.0
+parry_window = 0.2
+bash_damage = 15.6
+bash_poise = 45.0
+bash_stamina_cost = 8.0
+animation_set = &"shield"
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

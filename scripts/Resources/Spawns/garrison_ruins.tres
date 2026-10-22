@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3 uid="uid://cebwjxwskg3cu"]
+
+[ext_resource type="Script" uid="uid://dg8b8xgiyxnc8" path="res://scripts/enemy_data.gd" id="ed"]
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/pilgrim.tres" id="e_pilgrim"]
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/skeleton.tres" id="e_skeleton"]
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/skeleton_knight.tres" id="e_skeleton_knight"]
+[ext_resource type="Script" uid="uid://bq60lvmw1j4xb" path="res://scripts/spawn_entry.gd" id="s"]
+[ext_resource type="Script" uid="uid://cri67k8ygdytl" path="res://scripts/spawn_table.gd" id="t"]
+
+[sub_resource type="Resource" id="entry_0"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("e_skeleton")])
+weight = 3.0
+count_min = 2
+count_max = 3
+
+[sub_resource type="Resource" id="entry_1"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("e_skeleton_knight")])
+min_level = 5
+
+[sub_resource type="Resource" id="entry_2"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("e_pilgrim")])
+
+[resource]
+script = ExtResource("t")
+entries = Array[ExtResource("s")]([SubResource("entry_0"), SubResource("entry_1"), SubResource("entry_2")])

@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="MerchantData" format=3]
+
+[ext_resource type="Script" path="res://scripts/merchant_data.gd" id="1_m"]
+[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/loot_entry.gd" id="2_l"]
+[ext_resource type="Resource" path="res://scripts/Resources/Consumables/minor_health_potion.tres" id="i_minor"]
+[ext_resource type="Resource" path="res://scripts/Resources/Consumables/health_potion.tres" id="i_potion"]
+[ext_resource type="Resource" path="res://scripts/Resources/Consumables/greater_health_potion.tres" id="i_greater"]
+[ext_resource type="Resource" path="res://scripts/Resources/Consumables/apple.tres" id="i_apple"]
+
+[sub_resource type="Resource" id="s0"]
+script = ExtResource("2_l")
+item = ExtResource("i_minor")
+min_count = 3
+max_count = 6
+chance = 1
+
+[sub_resource type="Resource" id="s1"]
+script = ExtResource("2_l")
+item = ExtResource("i_potion")
+min_count = 2
+max_count = 4
+chance = 0.9
+
+[sub_resource type="Resource" id="s2"]
+script = ExtResource("2_l")
+item = ExtResource("i_greater")
+min_count = 1
+max_count = 2
+chance = 0.5
+
+[sub_resource type="Resource" id="s3"]
+script = ExtResource("2_l")
+item = ExtResource("i_apple")
+min_count = 1
+max_count = 4
+chance = 0.3
+
+[resource]
+script = ExtResource("1_m")
+id = &"alchemy"
+display_name = "Alchemist"
+stock = Array[ExtResource("2_l")]([SubResource("s0"), SubResource("s1"), SubResource("s2"), SubResource("s3")])
+gold_min = 500
+gold_max = 900
+buys = PackedStringArray("consumable", "ingredient")
+sell_rate = 0.5
+markup = 1.3

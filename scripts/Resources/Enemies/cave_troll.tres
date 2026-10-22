@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="1_ed"]
+
+[resource]
+script = ExtResource("1_ed")
+id = &"cave_troll"
+display_name = "Cave Troll"
+disposition = 0
+color = Color(0.35, 0.5, 0.35, 1)
+body_scale = 1.5
+health_mult = 5.5
+damage_mult = 1.5
+poise_mult = 3.0
+loot_quality = 0.0
+weapon_tier_offset = 0
+armor_tier_offset = -9
+kit = 0
+move_speed = 3.0
+detection_range = 14.0
+telegraph_time = 0.55
+heavy_chance = 0.4
+chain_chance = 0.2
+attack_pause_min = 0.3
+attack_pause_max = 1.0
+knockback_resistance = 0.6
+wander_radius = 0.0
+talk_name = "Cave Troll"

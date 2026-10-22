@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/World/dungeon_entrance_poi_data.gd" id="ep"]
+[ext_resource type="Resource" path="res://scripts/Resources/World/Dungeons/dark_cave.tres" id="dg"]
+[ext_resource type="Resource" path="res://scripts/Resources/Spawns/garrison_cave_mouth.tres" id="garrison_table"]
+
+[resource]
+script = ExtResource("ep")
+id = &"cave_entrance"
+display_name = "Cave Entrance"
+map_color = Color(1, 0.3, 0.3, 1)
+footprint_radius = 18.0
+flatten_radius = 9.0
+max_slope_deg = 12.0
+dungeon = ExtResource("dg")
+shape = 0
+color = Color(0.42, 0.40, 0.37, 1)
+enter_name = "Dark Cave"
+garrison = ExtResource("garrison_table")
+garrison_groups_min = 1
+garrison_groups_max = 1

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+display_name = "Silver Armor"
+description = "Silvered steel that gleams even in the dark. Heavy armor for the chest."
+item_type = 2
+equip_slot = 2
+weight = 15.75
+value = 240
+governing_skill = "heavy_armor"
+tier = 3
+min_level = 12
+stat_modifiers = {
+"armor": 42.0
+}
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

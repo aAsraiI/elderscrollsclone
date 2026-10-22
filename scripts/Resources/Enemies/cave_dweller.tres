@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="1_ed"]
+
+[resource]
+script = ExtResource("1_ed")
+id = &"cave_dweller"
+display_name = "Cave Dweller"
+disposition = 0
+color = Color(0.35, 0.4, 0.3, 1)
+body_scale = 0.9
+health_mult = 1.0
+damage_mult = 1.0
+poise_mult = 0.9
+loot_quality = 0.0
+weapon_tier_offset = 0
+armor_tier_offset = -9
+kit = 0
+move_speed = 3.5
+detection_range = 14.0
+telegraph_time = 0.25
+heavy_chance = 0.1
+chain_chance = 0.5
+attack_pause_min = 0.3
+attack_pause_max = 1.0
+knockback_resistance = 0.0
+wander_radius = 0.0
+talk_name = "Cave Dweller"

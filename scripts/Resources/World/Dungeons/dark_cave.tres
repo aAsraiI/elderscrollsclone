@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="DungeonData" format=3 uid="uid://53kbamq7sbt6"]
+
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/cave_troll.tres" id="boss"]
+[ext_resource type="Script" uid="uid://ci0vbba2cennc" path="res://scripts/World/dungeon_data.gd" id="dd"]
+[ext_resource type="Resource" path="res://scripts/Resources/iron_dagger.tres" id="item_0"]
+[ext_resource type="Resource" path="res://scripts/Resources/iron_shield.tres" id="item_1"]
+[ext_resource type="Resource" uid="uid://ccs0i8i2yls70" path="res://scripts/Resources/iron_sword.tres" id="item_2"]
+[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/loot_entry.gd" id="loot"]
+[ext_resource type="Resource" uid="uid://cyo84k7vfqqtb" path="res://scripts/Resources/Spawns/dungeon_cave.tres" id="spawn_table"]
+
+[sub_resource type="Resource" id="loot_0"]
+script = ExtResource("loot")
+item = ExtResource("item_0")
+chance = 0.7
+
+[sub_resource type="Resource" id="loot_1"]
+script = ExtResource("loot")
+item = ExtResource("item_1")
+chance = 0.4
+
+[sub_resource type="Resource" id="loot_2"]
+script = ExtResource("loot")
+item = ExtResource("item_2")
+chance = 0.4
+
+[resource]
+script = ExtResource("dd")
+id = &"dark_cave"
+loot_table = Array[ExtResource("loot")]([SubResource("loot_0"), SubResource("loot_1"), SubResource("loot_2")])
+spawn_table = ExtResource("spawn_table")
+enemies_per_room_max = 1
+boss = ExtResource("boss")
+wall_color = Color(0.3, 0.27, 0.24, 1)
+floor_color = Color(0.2, 0.18, 0.16, 1)

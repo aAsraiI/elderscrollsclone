@@ -1,0 +1,70 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3 uid="uid://d4q5idmw0rql"]
+
+[ext_resource type="Script" uid="uid://bula71da23th1" path="res://scripts/World/biome_data.gd" id="1_biome"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/desert_raiders.tres" id="enc_0"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/desert_beasts.tres" id="enc_1"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/desert_prospector.tres" id="enc_2"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/desert_caravan.tres" id="enc_3"]
+[ext_resource type="Script" uid="uid://0fpv5k8e3f4r" path="res://scripts/World/encounter_data.gd" id="enc_script"]
+[ext_resource type="Resource" uid="uid://4kobovt0lhye" path="res://scripts/Resources/World/POIs/ruined_shrine.tres" id="poi_0"]
+[ext_resource type="Resource" path="res://scripts/Resources/World/POIs/standing_stones.tres" id="poi_1"]
+[ext_resource type="Resource" path="res://scripts/Resources/World/POIs/cave_entrance.tres" id="poi_2"]
+[ext_resource type="Resource" path="res://scripts/Resources/World/POIs/crypt_entrance.tres" id="poi_3"]
+[ext_resource type="Resource" uid="uid://bk7ydnyeb77t0" path="res://scripts/Resources/World/POIs/bandit_camp.tres" id="poi_4"]
+[ext_resource type="Script" uid="uid://clkfbb8lga0d6" path="res://scripts/World/poi_rule.gd" id="rule_script"]
+
+[sub_resource type="Resource" id="rule_0"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_0")
+count_min = 2.0
+count_max = 3.0
+extra_spacing = 40
+
+[sub_resource type="Resource" id="rule_1"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_1")
+count_min = 0.5
+count_max = 1.5
+extra_spacing = 40
+
+[sub_resource type="Resource" id="rule_2"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_2")
+count_min = 1.5
+count_max = 2.5
+extra_spacing = 40
+
+[sub_resource type="Resource" id="rule_3"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_3")
+count_min = 1.5
+count_max = 2.5
+extra_spacing = 50
+
+[sub_resource type="Resource" id="rule_4"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_4")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 40
+
+[resource]
+script = ExtResource("1_biome")
+id = &"desert"
+display_name = "Desert"
+map_color = Color(0.9, 0.78, 0.45, 1)
+blend_distance = 260.0
+base_height = 14.0
+hills_amplitude = 14.0
+hills_scale = 320.0
+hills_octaves = 2
+detail_amplitude = 0.25
+detail_scale = 7.0
+ground_color = Color(0.78, 0.66, 0.4, 1)
+ground_color_alt = Color(0.84, 0.72, 0.46, 1)
+patch_scale = 70.0
+steep_color = Color(0.5, 0.38, 0.28, 1)
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4")])
+level_min = 6
+level_max = 18
+encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3")])

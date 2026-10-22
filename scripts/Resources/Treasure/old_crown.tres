@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" uid="uid://d2jljtjlplxn6" path="res://scripts/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"old_crown"
+display_name = "Old Crown"
+description = "The crown of a king whose name is lost."
+item_type = 0
+weight = 2.5
+value = 1200
+stackable = false
+max_stack = 1
+min_level = 32
+treasure = true

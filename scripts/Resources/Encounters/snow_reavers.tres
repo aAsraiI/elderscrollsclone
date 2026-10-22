@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/World/encounter_data.gd" id="1_enc"]
+[ext_resource type="Resource" path="res://scripts/Resources/Spawns/enc_snow_reavers.tres" id="2_table"]
+
+[resource]
+script = ExtResource("1_enc")
+id = &"snow_reavers"
+display_name = "Reaver Raid"
+table = ExtResource("2_table")
+weight = 3.0
+aggro = true
+avoid_view = true
+distance_min = 40.0
+distance_max = 75.0
+group_spread = 3.0
+cooldown = 120.0
+message = "Reavers charge out of the snow!"

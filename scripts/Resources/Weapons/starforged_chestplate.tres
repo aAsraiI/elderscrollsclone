@@ -1,19 +1,23 @@
 [gd_resource type="Resource" script_class="ItemData" format=3]
 
-[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_item"]
 
 [resource]
 script = ExtResource("1_item")
-display_name = "Starforged Armor"
+id = &"starforged_chestplate"
+display_name = "Starforged Cuirass"
 description = "Forged from fallen star-metal that hums faintly. Heavy armor for the chest."
 item_type = 2
 equip_slot = 2
-weight = 18.75
-value = 6800
+weight = 18.8
+value = 6885
 governing_skill = "heavy_armor"
-tier = 7
-min_level = 42
 stat_modifiers = {
-"armor": 78.0
+"armor": 35.1
 }
+tier = 7
+min_level = 74
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"starforged_heavy"
+animation_set = &"cuirass"
 metadata/_custom_type_script = "uid://dd71arb7pvb2r"

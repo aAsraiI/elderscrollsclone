@@ -21,3 +21,15 @@ func get_rect(cell_size: float) -> Rect2:
 
 func is_valid() -> bool:
 	return biome != null and size_cells.x > 0 and size_cells.y > 0
+
+
+## Overrides the biome's level range for this rectangle only (0 = use the biome's own). The same
+## biome can then be easy in one corner of the world and hard in another.
+@export var level_min := 0
+@export var level_max := 0
+
+
+func get_level_range() -> Vector2i:
+	var lo := level_min if level_min > 0 else biome.level_min
+	var hi := level_max if level_max > 0 else biome.level_max
+	return Vector2i(lo, maxi(hi, lo))

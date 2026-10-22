@@ -315,6 +315,8 @@ func _refresh() -> void:
 	var first_row: TreeItem = null
 	var keep_row: TreeItem = null
 
+	var skills := get_parent().get_node_or_null("Skills") as Skills
+	var player_level := skills.get_player_level() if skills != null else 1
 	var shown: Array = []
 	for s in inventory.stacks:
 		var item: ItemData = s.item
@@ -339,8 +341,7 @@ func _refresh() -> void:
 		row.set_text(0, ("E" if worn < 2 else "E%d" % worn) if show_e else "")
 		row.set_custom_color(0, UITheme.GOLD)
 		row.set_text(1, item.display_name + (" (%d)" % s.count if s.count > 1 else ""))
-		if item.treasure:
-			row.set_custom_color(1, Color(0.75, 0.85, 1.0))
+		row.set_custom_color(1, ItemCatalog.rarity_color(item, player_level))
 		row.set_text(2, "%.1f" % item.weight)
 		row.set_text(3, str(item.value))
 		row.set_text_alignment(0, HORIZONTAL_ALIGNMENT_CENTER)

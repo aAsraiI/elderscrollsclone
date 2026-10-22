@@ -34,9 +34,10 @@ static func get_skill(skill_id: StringName) -> SkillData:
 
 # ---------------------------------------------------------------- XP curves
 
-## XP needed to go from `level` to `level + 1` in one skill
+## XP needed to go from `level` to `level + 1` in one skill. The squared part makes high skill
+## levels slower and slower: level 10 needs 55, level 50 needs 335, level 90 needs 775.
 static func xp_to_next_level(level: int) -> float:
-	return 10.0 + 4.0 * level
+	return 10.0 + 4.0 * level + 0.05 * level * level
 
 
 ## Player XP earned when a skill reaches `level` (Skyrim style: reaching level N is worth N).
@@ -45,10 +46,19 @@ static func skill_player_xp(level: int) -> int:
 	return ((level * (level + 1)) >> 1) - 1
 
 
-## Total player XP needed to be player level `level` (level 1 = 0, level 2 = 100, level 3 = 225, ...)
+## Total player XP needed to be player level `level` (level 1 = 0, level 2 = 100, level 3 = 225, ...).
+## Each level costs 25 more than the one before. Skills alone reach about level 80; the rest of
+## the way to LevelCurve.MAX_LEVEL (100) comes from deeds (Skills.add_deed_xp: quests, bosses,
+## new places).
 static func player_xp_to_reach(level: int) -> int:
 	var n := level - 1
 	return 75 * n + ((25 * n * (n + 1)) >> 1)
+
+
+## Player XP for a deed at this level: a finished quest, a dungeon boss, a newly found place.
+## size: 1 = finding a place, 3 = a boss, 5 = a quest
+static func deed_xp(level: int, size: float) -> int:
+	return int(round((10.0 + 2.0 * level) * size))
 
 
 # ---------------------------------------------------------------- the table

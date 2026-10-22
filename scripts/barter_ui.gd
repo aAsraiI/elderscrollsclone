@@ -106,6 +106,33 @@ func sell(item: ItemData, count: int = 1) -> Dictionary:
 	return r
 
 
+## Sells every junk item (clutter like tankards and plates) the merchant will buy.
+## Returns {"count": items sold, "gold": earned}.
+func sell_junk() -> Dictionary:
+	var count := 0
+	var gold := 0
+	var junk: Array[ItemData] = []
+	for st in _inventory.stacks:
+		if st.item.junk and not junk.has(st.item):
+			junk.append(st.item)
+	for item in junk:
+		var r := Barter.sell(shop, _inventory, _equipment, item, _inventory.get_count(item), deal)
+		if r["error"] == "":
+			count += int(r["count"])
+			gold += int(r["gold"])
+	if count > 0:
+		_message.text = "Sold %d pieces of junk for %d gold" % [count, gold]
+		_message.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
+		var skills := _player.get_node_or_null("Skills") as Skills
+		if skills != null:
+			skills.add_xp(&"speech", maxf(float(gold) / 40.0, 0.5))
+	else:
+		_message.text = "Nothing they want to buy."
+		_message.add_theme_color_override("font_color", Color(1.0, 0.45, 0.4))
+	_refresh()
+	return {"count": count, "gold": gold}
+
+
 func _after_trade(r: Dictionary, bought: bool, item: ItemData) -> void:
 	if r["error"] != "":
 		_message.text = r["error"]
@@ -283,6 +310,11 @@ func _build_ui() -> void:
 	bottom.add_child(_gold_label)
 	_message = Label.new()
 	bottom.add_child(_message)
+	var junk := Button.new()
+	junk.text = "Sell all junk"
+	junk.focus_mode = Control.FOCUS_NONE
+	junk.pressed.connect(sell_junk)
+	bottom.add_child(junk)
 	var done := Button.new()
 	done.text = "Done"
 	done.custom_minimum_size = Vector2(120, 34)

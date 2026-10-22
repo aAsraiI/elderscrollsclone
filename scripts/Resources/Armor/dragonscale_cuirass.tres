@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_g041v"]
+
+[resource]
+script = ExtResource("1_g041v")
+id = &"dragonscale_cuirass"
+display_name = "Dragonscale Armor"
+description = "Shed scales of a dragon, still warm. Light armor for the chest."
+item_type = 2
+equip_slot = 2
+weight = 7.2
+value = 2430
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 20.5
+}
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"dragonbone_light"
+animation_set = &"cuirass"

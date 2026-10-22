@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_2x61a"]
+
+[resource]
+script = ExtResource("1_2x61a")
+id = &"steel_helmet"
+display_name = "Steel Helmet"
+description = "Well-forged steel with a keen edge. Heavy armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 5.0
+value = 34
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 5.7
+}
+tier = 2
+min_level = 8
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"steel_heavy"
+animation_set = &"helmet"

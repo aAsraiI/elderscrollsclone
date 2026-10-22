@@ -566,6 +566,8 @@ func take_damage(info: DamageInfo) -> float:
 
 	# 4. Armor, then health
 	var armor := stats.get_stat("armor")
+	if info.weapon != null:
+		armor *= 1.0 - info.weapon.armor_pierce  # maces crush through part of it
 	amount *= 1.0 - clampf(armor * ARMOR_REDUCTION_PER_POINT, 0.0, MAX_ARMOR_REDUCTION)
 	var final := maxf(amount, 0.0)
 	if final > 0.0:

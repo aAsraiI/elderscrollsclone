@@ -1,12 +1,12 @@
-[gd_resource type="Resource" script_class="DungeonData" format=3 uid="uid://53kbamq7sbt6"]
+[gd_resource type="Resource" script_class="DungeonData" format=3]
 
 [ext_resource type="Resource" path="res://scripts/Resources/Enemies/cave_troll.tres" id="boss"]
-[ext_resource type="Script" uid="uid://ci0vbba2cennc" path="res://scripts/World/dungeon_data.gd" id="dd"]
+[ext_resource type="Script" path="res://scripts/World/dungeon_data.gd" id="dd"]
 [ext_resource type="Resource" path="res://scripts/Resources/iron_dagger.tres" id="item_0"]
 [ext_resource type="Resource" path="res://scripts/Resources/iron_shield.tres" id="item_1"]
-[ext_resource type="Resource" uid="uid://ccs0i8i2yls70" path="res://scripts/Resources/iron_sword.tres" id="item_2"]
-[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/loot_entry.gd" id="loot"]
-[ext_resource type="Resource" uid="uid://cyo84k7vfqqtb" path="res://scripts/Resources/Spawns/dungeon_cave.tres" id="spawn_table"]
+[ext_resource type="Resource" path="res://scripts/Resources/iron_sword.tres" id="item_2"]
+[ext_resource type="Script" path="res://scripts/loot_entry.gd" id="loot"]
+[ext_resource type="Resource" path="res://scripts/Resources/Spawns/dungeon_cave.tres" id="spawn_table"]
 
 [sub_resource type="Resource" id="loot_0"]
 script = ExtResource("loot")

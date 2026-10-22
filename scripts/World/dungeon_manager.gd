@@ -32,6 +32,11 @@ var _saved_env := {}
 var _hidden_lights: Array[Node] = []
 var _saved_rescue := true
 var _fade: ColorRect
+## Dungeons: which floor you are on (0 = the top) and how many there are
+var current_floor := 0
+var floor_count := 1
+var _next_floor := 0
+var _arrive_down := false
 
 
 func _ready() -> void:
@@ -88,6 +93,7 @@ func to_dict() -> Dictionary:
 		"entrance": current_entrance_id,
 		"return": SaveUtil.vec3_to_array(_return_position),
 		"yaw": _return_yaw,
+		"floor": current_floor,
 	}
 
 
@@ -95,7 +101,33 @@ func to_dict() -> Dictionary:
 func restore(d: Dictionary) -> bool:
 	if not bool(d.get("inside", false)):
 		return false
+	_next_floor = int(d.get("floor", 0))
+	_arrive_down = false
 	return _open(String(d.get("entrance", "")), SaveUtil.array_to_vec3(d.get("return")), float(d.get("yaw", 0.0)), false)
+
+
+## Takes the stairs: rebuilds the dungeon as floor n (0 = the top). Going up, you arrive by the
+## stairs down of that floor; going down, by its stairs up.
+func go_floor(n: int) -> void:
+	if _busy or _root == null or n < 0:
+		return
+	_busy = true
+	await _fade_to(1.0)
+	var entrance := current_entrance_id
+	_arrive_down = n < current_floor
+	_next_floor = n
+	_clear_entities_inside()
+	remove_child(_root)
+	_root.queue_free()  # not free(): the stairs that called us are inside it
+	_root = null
+	_set_dark(false)
+	var world := _get_world()
+	if world != null:
+		world.rescue_fallen_player = _saved_rescue
+	_open(entrance, _return_position, _return_yaw, true)
+	_arrive_down = false
+	await _fade_to(0.0)
+	_busy = false
 
 
 ## Goes into the dungeon behind the entrance with this id. return_position / yaw = where to come back out.
@@ -104,6 +136,8 @@ func enter(entrance_id: String, return_position: Vector3, return_yaw: float) -> 
 		return false
 	_busy = true
 	await _fade_to(1.0)
+	_next_floor = 0
+	_arrive_down = false
 	var ok := _open(entrance_id, return_position, return_yaw, true)
 	await _fade_to(0.0)
 	_busy = false
@@ -152,7 +186,8 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 	var ambient := Color(0.03, 0.03, 0.04)
 	var building := world.get_building(entrance_id)
 	if building != null:
-		result = InteriorBuilder.build(building, ("%d|interior|%s" % [world.world_seed, entrance_id]).hash())
+		var lvl := LevelCurve.place_level(world.map, building.world_pos)
+		result = InteriorBuilder.build(building, ("%d|interior|%s" % [world.world_seed, entrance_id]).hash(), lvl, world.clock.day if world.clock != null else 1)
 		ambient = result["ambient"]
 		current_spots = result["spots"]
 		_root = result["root"]
@@ -165,7 +200,12 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 			return false
 		var dungeon_seed := ("%d|dungeon|%s" % [world.world_seed, entrance_id]).hash()
 		var zone := LevelCurve.zone_range(world.map, placed.position)  # a dungeon is as hard as the land around its door
-		result = DungeonBuilder.build(poi.dungeon, dungeon_seed, entrance_id, zone.x, zone.y)
+		result = DungeonBuilder.build(poi.dungeon, dungeon_seed, entrance_id, zone.x, zone.y, _next_floor)
+		current_floor = int(result.get("floor", 0))
+		floor_count = int(result.get("floors", 1))
+		if _arrive_down and result.get("down_spot") != null:
+			result["start"] = result["down_spot"]  # came up the stairs: arrive by the stairs down
+			result["start_yaw"] = float(result["start_yaw"]) + PI
 		ambient = poi.dungeon.ambient_color
 		current_spots = {}
 		_root = result["root"]

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_8nu8q"]
+
+[resource]
+script = ExtResource("1_8nu8q")
+id = &"snowberries"
+display_name = "Snowberries"
+description = "An alchemical ingredient. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 3
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "snow")

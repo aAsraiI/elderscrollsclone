@@ -82,6 +82,10 @@ func use_item(item: ItemData) -> bool:
 	if not inventory.has_item(item):
 		return _fail(&"missing")
 	inventory.remove_item(item, 1)
+	if item.restore_stamina > 0.0:
+		stats.modify_vital("stamina", item.restore_stamina)
+	if item.restore_magicka > 0.0:
+		stats.modify_vital("magicka", item.restore_magicka)
 	apply_effect(item)
 	_cooldown = use_cooldown
 	item_used.emit(item)

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_gtoqh"]
+
+[resource]
+script = ExtResource("1_gtoqh")
+id = &"frost_mirriam"
+display_name = "Frost Mirriam"
+description = "An alchemical ingredient. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 9
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "snow", "ice")

@@ -216,6 +216,7 @@ static func add_containers(root: Node3D, list: Array[POIContainer], placed: Plac
 			var zone := LevelCurve.zone_range(map, placed.position)
 			loot.append_array(ItemCatalog.curve_loot(zone.x, zone.y, 0.7))
 			loot.append_array(ItemCatalog.treasure_loot(zone.x, zone.y, 0.8))
+			loot.append(ItemCatalog.gold_loot((zone.x + zone.y) / 2, 0.6))
 		var chest := make_chest(c.display_name, loot, "%s/c%d" % [placed.id, i], (placed.seed_value + i * 7919) | 1)
 		root.add_child(chest)
 		chest.position = Vector3(c.offset.x, gy + 0.35 + c.offset.y, c.offset.z)

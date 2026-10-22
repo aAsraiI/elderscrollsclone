@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="ItemData" format=3]
 
-[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_item"]
 
 [resource]
 script = ExtResource("1_item")
+id = &"starforged_greatsword"
 display_name = "Starforged Greatsword"
 description = "Forged from fallen star-metal that hums faintly. Two-handed. Slow, with a long reach and a wide swing. One clean hit staggers most foes."
 item_type = 1
@@ -12,8 +13,9 @@ weight = 17.5
 value = 11900
 governing_skill = "two_handed"
 tier = 7
-min_level = 42
-weapon_damage = 122.4
+min_level = 74
+loot_tags = PackedStringArray("weapon", "smithy")
+weapon_damage = 133.2
 reach = 3.2
 attack_style = 1
 arc_degrees = 130.0
@@ -27,8 +29,6 @@ combo_length = 2
 two_handed = true
 heavy_charge_time = 0.6
 heavy_windup = 0.25
-heavy_damage_mult = 1.7
-heavy_stamina_mult = 2.0
 heavy_poise_mult = 1.6
 heavy_reach_bonus = 0.4
 animation_set = &"greatsword"

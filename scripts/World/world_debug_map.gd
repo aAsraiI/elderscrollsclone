@@ -66,6 +66,9 @@ var _dragging := false
 var _drag_moved := 0.0
 var _mouse := Vector2.ZERO
 var _time := 0.0
+var _pending_travel := ""  # a place clicked once: a second click travels
+var _notice := ""
+var _notice_time := 0.0
 
 
 func _ready() -> void:
@@ -191,6 +194,8 @@ func map_input(event: InputEvent) -> void:
 				if mb.pressed:
 					zoom_at(mb.position, 0.8)
 			MOUSE_BUTTON_LEFT:
+				if not mb.pressed and _dragging and _drag_moved < 5.0:
+					click_place(mb.position)  # a click, not a drag: fast travel
 				_dragging = mb.pressed
 				_drag_moved = 0.0
 			MOUSE_BUTTON_RIGHT:
@@ -406,16 +411,20 @@ func draw_map(canvas: Control) -> void:
 			for p: Vector3 in road["points"]:
 				line.append(world_to_screen(Vector2(p.x, p.z)))
 			canvas.draw_polyline(line, Color(0.28, 0.18, 0.09, 0.95), clampf(5.0 * scale, 1.5, 6.0))
-	# places
+	# places you have found (a cleared dungeon gets a tick)
 	for poi in _manager.pois:
-		if poi.poi is TownData:
+		if poi.poi is TownData or not Discovery.is_found(poi.id):
 			continue
 		var dot := world_to_screen(Vector2(poi.position.x, poi.position.z))
 		if not Rect2(Vector2.ZERO, canvas.size).grow(10).has_point(dot):
 			continue
 		var big := poi.poi is DungeonEntrancePOIData
-		canvas.draw_circle(dot, 4.0 if big else 3.0, Color.BLACK)
-		canvas.draw_circle(dot, 3.0 if big else 2.0, poi.poi.map_color)
+		canvas.draw_circle(dot, 5.0 if big else 4.0, Color.BLACK)
+		canvas.draw_circle(dot, 4.0 if big else 3.0, poi.poi.map_color)
+		if big and Discovery.is_cleared(poi.id):
+			canvas.draw_polyline(PackedVector2Array([dot + Vector2(-3, 0), dot + Vector2(-1, 3), dot + Vector2(4, -3)]), Color.WHITE, 1.5)
+		if poi.id == _pending_travel:
+			canvas.draw_arc(dot, 9.0, 0.0, TAU, 24, Color(1.0, 0.85, 0.35), 2.0)
 	# towns
 	for t in _manager.towns:
 		var at := world_to_screen(Vector2(t.position.x, t.position.z))
@@ -471,15 +480,53 @@ func hover_name(at: Vector2) -> String:
 		if d < best_d and t.town != null:
 			best_d = d
 			best = "%s (%s)" % [t.town.display_name, (t.poi as TownData).display_name.to_lower()]
+			if Discovery.is_found(t.id):
+				best += "\nclick to travel"
 	for poi in _manager.pois:
-		if poi.poi is TownData:
+		if poi.poi is TownData or not Discovery.is_found(poi.id):
 			continue
 		var d := world_to_screen(Vector2(poi.position.x, poi.position.z)).distance_to(at)
 		if d < best_d:
 			best_d = d
-			var n := DialogueEngine.poi_topic_name(_manager, poi)
-			best = n if n != "" else poi.poi.display_name
+			best = "%s\nlevel %d%s  ·  click to travel" % [Discovery.place_name(_manager, poi), LevelCurve.place_level(_manager.map, poi.position),
+				"  ·  cleared" if Discovery.is_cleared(poi.id) else ""]
 	return best
+
+
+## The town or found place under the mouse (null = none)
+func place_at(at: Vector2) -> PlacedPOI:
+	var best: PlacedPOI = null
+	var best_d := 14.0
+	for poi in _manager.pois:
+		if not Discovery.is_found(poi.id):
+			continue
+		var d := world_to_screen(Vector2(poi.position.x, poi.position.z)).distance_to(at)
+		if d < best_d:
+			best_d = d
+			best = poi
+	return best
+
+
+## Clicking a found place asks first; clicking it again travels there
+func click_place(at: Vector2) -> void:
+	var poi := place_at(at)
+	var disc := _manager.discovery
+	if poi == null or disc == null:
+		_pending_travel = ""
+		return
+	var why := disc.can_travel_to(poi)
+	if why != "":
+		_notice = why
+		_notice_time = 3.0
+		return
+	if _pending_travel != poi.id:
+		_pending_travel = poi.id
+		_notice = "Travel to %s? About %.1f hours. Click it again to go." % [Discovery.place_name(_manager, poi), disc.travel_hours(poi)]
+		_notice_time = 4.0
+		return
+	_pending_travel = ""
+	if disc.travel_to(poi) == "":
+		close()
 
 
 func _update_text() -> void:
@@ -495,7 +542,12 @@ func _update_text() -> void:
 	if name != "":
 		_tooltip.text = name
 		_tooltip.position = _view.position + _mouse + Vector2(16, 12)
-	_status.text = "[Wheel / + -] Zoom   [Drag / WASD] Move   [C] Center on me   [M / Esc] Close" + ("   [Right click] Teleport (debug)" if can_teleport() else "")
+	_notice_time -= get_process_delta_time()
+	if _notice_time > 0.0:
+		_status.text = _notice
+		return
+	_pending_travel = ""
+	_status.text = "[Click a found place] Fast travel   [Wheel / + -] Zoom   [Drag / WASD] Move   [C] Center on me   [M / Esc] Close" + ("   [Right click] Teleport (debug)" if can_teleport() else "")
 
 
 # ---------------------------------------------------------------- building

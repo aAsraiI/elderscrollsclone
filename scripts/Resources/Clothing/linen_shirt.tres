@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_vempj"]
+
+[resource]
+script = ExtResource("1_vempj")
+id = &"linen_shirt"
+display_name = "Linen Shirt"
+description = "Everyday clothes. No protection, but they look the part."
+item_type = 2
+equip_slot = 2
+weight = 1.0
+value = 3
+loot_tags = PackedStringArray("home", "clothes")

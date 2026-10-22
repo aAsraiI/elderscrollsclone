@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_3ohgy"]
+
+[resource]
+script = ExtResource("1_3ohgy")
+id = &"first_chieftain_horn"
+display_name = "Horn of the First Chieftain"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 2.0
+value = 800
+min_level = 35
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("barrow")

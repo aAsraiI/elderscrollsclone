@@ -8,7 +8,7 @@ extends Resource
 ## Put it in a SpawnTable (garrisons, dungeons, random encounters) to use it.
 
 ## What it fights with. The weapon's tier comes from the level, not from here.
-enum Kit { UNARMED, SWORD, SWORD_SHIELD, DAGGER, DAGGER_PAIR, GREATSWORD, WARHAMMER }
+enum Kit { UNARMED, SWORD, SWORD_SHIELD, DAGGER, DAGGER_PAIR, GREATSWORD, WARHAMMER, WAR_AXE, MACE, SPEAR, BATTLEAXE, MACE_SHIELD, AXE_SHIELD }
 
 @export var id: StringName
 @export var display_name := "Bandit"
@@ -108,14 +108,37 @@ func apply(e: Enemy, level: int, rng: RandomNumberGenerator) -> void:
 			e.starting_weapon = ItemCatalog.get_weapon(ItemCatalog.Weapon.GREATSWORD, weapon_tier)
 		Kit.WARHAMMER:
 			e.starting_weapon = ItemCatalog.get_weapon(ItemCatalog.Weapon.WARHAMMER, weapon_tier)
+		Kit.WAR_AXE:
+			e.starting_weapon = ItemCatalog.get_weapon(ItemCatalog.Weapon.WAR_AXE, weapon_tier)
+		Kit.MACE:
+			e.starting_weapon = ItemCatalog.get_weapon(ItemCatalog.Weapon.MACE, weapon_tier)
+		Kit.SPEAR:
+			e.starting_weapon = ItemCatalog.get_weapon(ItemCatalog.Weapon.SPEAR, weapon_tier)
+		Kit.BATTLEAXE:
+			e.starting_weapon = ItemCatalog.get_weapon(ItemCatalog.Weapon.BATTLEAXE, weapon_tier)
+		Kit.MACE_SHIELD:
+			e.starting_weapon = ItemCatalog.get_weapon(ItemCatalog.Weapon.MACE, weapon_tier)
+			e.starting_off_hand = ItemCatalog.get_shield(weapon_tier)
+		Kit.AXE_SHIELD:
+			e.starting_weapon = ItemCatalog.get_weapon(ItemCatalog.Weapon.WAR_AXE, weapon_tier)
+			e.starting_off_hand = ItemCatalog.get_shield(weapon_tier)
 	if weapon_override != null:
 		e.starting_weapon = weapon_override
 
+	# Armor: the cuirass, helmet and greaves of the tier (heavy if it carries a shield or a
+	# two-handed weapon, light otherwise); all five pieces when it is a tier ahead
 	var armor_tier := tier + armor_tier_offset
 	if armor_tier >= 0:
-		var armor := ItemCatalog.get_chest(clampi(armor_tier, 0, LevelCurve.MAX_TIER))
-		if armor != null:
-			e.starting_armor.append(armor)
+		armor_tier = clampi(armor_tier, 0, LevelCurve.MAX_TIER)
+		var heavy := e.starting_off_hand != null and e.starting_off_hand != e.starting_weapon \
+			or (e.starting_weapon != null and e.starting_weapon.two_handed)
+		var pieces: Array[String] = ["cuirass", "helmet", "greaves"]
+		if armor_tier_offset >= 0:
+			pieces.append_array(["gauntlets", "boots"])
+		for piece in pieces:
+			var armor := ItemCatalog.get_armor(armor_tier, piece, heavy)
+			if armor != null:
+				e.starting_armor.append(armor)
 
 	var drops: Array[LootEntry] = extra_loot.duplicate()
 	drops.append_array(ItemCatalog.enemy_loot(level, loot_quality))

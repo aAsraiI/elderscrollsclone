@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_s0o5j"]
+
+[resource]
+script = ExtResource("1_s0o5j")
+id = &"dragonbone_waraxe"
+display_name = "Dragonbone War Axe"
+description = "Carved from the bones of great wyrms. A one-handed axe. A little quicker than a sword and bites deeper, with a shorter arc."
+item_type = 1
+equip_slot = 6
+weight = 8.4
+value = 2250
+governing_skill = "one_handed"
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("weapon", "smithy")
+weapon_damage = 57.2
+attack_style = 1
+arc_degrees = 80.0
+attack_cooldown = 0.62
+attack_windup = 0.11
+attack_active = 0.13
+stamina_cost = 8.13
+knockback = 2.5
+poise_damage = 27.0
+animation_set = &"axe"

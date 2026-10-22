@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="DungeonData" format=3]
+
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/smuggler_chief.tres" id="1_mhdwv"]
+[ext_resource type="Script" path="res://scripts/loot_entry.gd" id="2_bd64x"]
+[ext_resource type="Script" path="res://scripts/World/dungeon_data.gd" id="3_hgqvy"]
+[ext_resource type="Resource" path="res://scripts/Resources/Spawns/dungeon_sewers.tres" id="4_1xn8g"]
+
+[resource]
+script = ExtResource("3_hgqvy")
+id = &"sewers"
+display_name = "Old Sewers"
+max_rooms = 8
+room_size = 12.0
+ceiling_height = 3.6
+spawn_table = ExtResource("4_1xn8g")
+enemies_per_room_max = 1
+boss = ExtResource("1_mhdwv")
+wall_color = Color(0.3, 0.32, 0.26, 1)
+floor_color = Color(0.2, 0.22, 0.18, 1)
+light_color = Color(0.8, 0.9, 0.6, 1)
+light_energy = 1.2
+theme = "sewer"
+rooms_per_10_levels = 1.0

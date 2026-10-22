@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_6jg3n"]
+
+[resource]
+script = ExtResource("1_6jg3n")
+id = &"ebonweave_helmet"
+display_name = "Ebonweave Hood"
+description = "Ebon rings woven fine as cloth. Light armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 2.3000000000000003
+value = 346
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 6.0
+}
+tier = 5
+min_level = 41
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"ebon_light"
+animation_set = &"helmet"

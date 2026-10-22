@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/loot_entry.gd" id="1_uktn8"]
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="2_cbs1k"]
+
+[resource]
+script = ExtResource("2_cbs1k")
+id = &"deserter_captain"
+display_name = "Deserter Captain"
+color = Color(0.5, 0.42, 0.3, 1)
+body_scale = 1.25
+health_mult = 5.0
+damage_mult = 1.2
+poise_mult = 2.8
+loot_quality = 2.5
+armor_tier_offset = 1
+kit = 12
+knockback_resistance = 0.5
+talk_name = "Deserter Captain"
+talk_lines = PackedStringArray()

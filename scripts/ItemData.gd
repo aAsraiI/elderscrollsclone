@@ -41,6 +41,14 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 ## Gems, jewelry, relics: worth little to carry but a lot to sell. Jewelers and pawnbrokers pay
 ## close to full value for them (see MerchantData.treasure_rate).
 @export var treasure: bool = false
+## An ancient relic (found in ruins, barrows and vaults). The Antiquarian Society pays full value.
+@export var artifact: bool = false
+## Clutter worth selling but not keeping: "Sell all junk" at a merchant sells every junk item.
+@export var junk: bool = false
+## Where this turns up when rooms are furnished (see RoomDecorator), e.g. ["kitchen", "tavern"]
+@export var loot_tags: PackedStringArray = []
+## Armor pieces of one set share this id. Wearing all five gives +10% armor.
+@export var armor_set: StringName = &""
 
 @export_group("Consumable (food and potions)")
 ## Button text in the inventory: "Eat", "Drink", "Use"
@@ -54,6 +62,9 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 @export var effect_duration: float = 1.0
 ## Added to the stamina regen multiplier while the effect lasts (0.5 = stamina comes back 50% faster)
 @export var stamina_regen_bonus: float = 0.0
+## Stamina / magicka given back at once when drunk
+@export var restore_stamina: float = 0.0
+@export var restore_magicka: float = 0.0
 
 @export_group("Weapon")
 ## Added to the wielder's base damage stat. Each hand hits with its own weapon's damage.
@@ -74,6 +85,8 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 @export var stamina_cost: float = 0.0
 ## Push the target away on a hit (meters per second of velocity)
 @export var knockback: float = 0.0
+## Share of the target's armor this weapon ignores (maces: 0.25)
+@export_range(0.0, 1.0, 0.01) var armor_pierce: float = 0.0
 ## How much one hit chips at the target's poise. When poise runs out the target staggers
 ## (can't act for a moment and takes bonus damage). Daggers low, hammers and greatswords high.
 @export var poise_damage: float = 15.0
@@ -140,7 +153,7 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 
 ## true for food and potions the player can eat or drink
 func is_consumable() -> bool:
-	return item_type == ItemType.CONSUMABLE and effect_duration > 0.0 and (heal_amount > 0.0 or stamina_regen_bonus > 0.0)
+	return item_type == ItemType.CONSUMABLE and effect_duration > 0.0 and (heal_amount > 0.0 or stamina_regen_bonus > 0.0 or restore_stamina > 0.0 or restore_magicka > 0.0)
 
 
 ## The stat modifiers the effect holds while it is active (see StatusEffects)
@@ -160,9 +173,16 @@ func get_combat_description() -> String:
 	if is_consumable():
 		if heal_amount > 0.0:
 			t += "Restores %s health over %s s\n" % [String.num(heal_amount).trim_suffix(".0"), String.num(effect_duration).trim_suffix(".0")]
+		if restore_stamina > 0.0:
+			t += "Restores %d stamina at once\n" % roundi(restore_stamina)
+		if restore_magicka > 0.0:
+			t += "Restores %d magicka at once\n" % roundi(restore_magicka)
 		if stamina_regen_bonus > 0.0:
 			t += "Stamina regen +%d%% for %s s\n" % [roundi(stamina_regen_bonus * 100.0), String.num(effect_duration).trim_suffix(".0")]
-		t += "Quick-drink with H\n" if effect_group == "potion" and heal_amount > 0.0 else "Only one meal works at a time\n"
+		if effect_group == "potion" and heal_amount > 0.0:
+			t += "Quick-drink with H\n"
+		elif effect_group == "food":
+			t += "Only one meal works at a time\n"
 	if item_type == ItemType.WEAPON:
 		t += "Damage %s   Reach %.1f m   Swing %.2f s\n" % [String.num(weapon_damage).trim_suffix(".0"), reach, attack_cooldown]
 		var style := "Swing arc %d°" % int(arc_degrees) if attack_style == AttackStyle.ARC else "Single target"
@@ -172,6 +192,8 @@ func get_combat_description() -> String:
 			style += "  ·  Can dual wield"
 		t += style + "\n"
 		t += "Stagger %s   Combo x%d\n" % [String.num(poise_damage).trim_suffix(".0"), combo_length]
+		if armor_pierce > 0.0:
+			t += "Ignores %d%% of armor\n" % roundi(armor_pierce * 100.0)
 		t += "Hold left click: heavy attack  x%.1f damage, x%.1f stagger\n" % [heavy_damage_mult, heavy_poise_mult]
 	match secondary_action:
 		SecondaryAction.BLOCK:

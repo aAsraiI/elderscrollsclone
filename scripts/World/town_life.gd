@@ -462,8 +462,8 @@ func _free_body(r: Resident) -> void:
 	r.node_inside = false
 
 
-func _alive(e: Enemy) -> bool:
-	return e != null and is_instance_valid(e) and not e.is_queued_for_deletion() and not e.is_dead()
+func _alive(e: Object) -> bool:  # untyped on purpose: a freed body must not crash the check
+	return e != null and is_instance_valid(e) and not (e as Enemy).is_queued_for_deletion() and not (e as Enemy).is_dead()
 
 
 # ---------------------------------------------------------------- inside buildings

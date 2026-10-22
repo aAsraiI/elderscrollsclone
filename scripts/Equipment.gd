@@ -26,6 +26,32 @@ func _ready() -> void:
 	if stats == null:
 		stats = get_node_or_null("../Stats")
 	inventory.changed.connect(_on_inventory_changed)
+	equipped.connect(func(_s, _i): _update_set_bonus())
+	unequipped.connect(func(_s, _i): _update_set_bonus())
+
+
+## All five pieces of one armor set worn: +10% armor
+const SET_PIECES := 5
+const SET_BONUS := {"armor_pct": 0.1}
+
+
+func has_full_set() -> bool:
+	var counts := {}
+	for slot in slots:
+		var item: ItemData = slots[slot]
+		if item != null and item.armor_set != &"":
+			counts[item.armor_set] = int(counts.get(item.armor_set, 0)) + 1
+			if counts[item.armor_set] >= SET_PIECES:
+				return true
+	return false
+
+
+func _update_set_bonus() -> void:
+	if stats == null:
+		return
+	stats.remove_modifiers("equip_set")
+	if has_full_set():
+		stats.add_modifiers("equip_set", SET_BONUS)
 
 
 func equip(item: ItemData) -> bool:
@@ -173,3 +199,4 @@ func from_dict(data: Dictionary) -> void:
 		slots[slot] = item
 		stats.add_modifiers(_source(slot), item.stat_modifiers)
 		equipped.emit(slot, item)
+	_update_set_bonus()

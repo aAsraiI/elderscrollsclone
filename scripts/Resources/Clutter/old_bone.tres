@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_wet5g"]
+
+[resource]
+script = ExtResource("1_wet5g")
+id = &"old_bone"
+display_name = "Old Bone"
+description = "Worth a few coins to the right buyer."
+weight = 0.5
+value = 1
+stackable = true
+max_stack = 99
+junk = true
+loot_tags = PackedStringArray("crypt", "cave")

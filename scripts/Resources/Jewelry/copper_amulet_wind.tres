@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_t3488"]
+
+[resource]
+script = ExtResource("1_t3488")
+id = &"copper_amulet_wind"
+display_name = "Copper Amulet of Second Wind"
+description = "+15% stamina regen while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 84
+stat_modifiers = {
+"stamina_regen_mult": 0.15
+}
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

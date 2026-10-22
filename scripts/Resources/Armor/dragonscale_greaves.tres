@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_fib85"]
+
+[resource]
+script = ExtResource("1_fib85")
+id = &"dragonscale_greaves"
+display_name = "Dragonscale Leggings"
+description = "Shed scales of a dragon, still warm. Light armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 3.8000000000000003
+value = 1080
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 9.1
+}
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"dragonbone_light"
+animation_set = &"greaves"

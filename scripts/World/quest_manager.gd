@@ -22,6 +22,10 @@ const STATE := "quests"
 const TOPICS: Array[String] = ["membership", "advancement", "clear bounty", "a delivery"]
 const PERSUADE_GOAL := 70
 const CHIEF_BODY := "res://scripts/Resources/Enemies/bandit_brute.tres"
+const BEAST_BODY := "res://scripts/Resources/Enemies/frost_bear.tres"
+## What Antiquarian Society jobs send you after, and the beasts the Hunters' Lodge wants dead
+const ARTIFACT_FINDS := ["Bronze Funerary Mask", "Engraved Clay Seal", "Gilded Votive Figure", "Runed Bone Tablet", "Shard of an Old Crown", "Sunstone Amulet"]
+const BEASTS := ["the White Stag", "Old Gnasher", "the Ashen Wolf", "Greyback", "the Marsh Hag", "Ironhide"]
 const CONTACT_LINES := ["...", "Not here. Not now."]
 
 var world: WorldManager
@@ -43,6 +47,7 @@ func _ready() -> void:
 
 func _apply_perks() -> void:
 	Factions.apply_perks(_player())
+	MuseumCase.apply_bonus(_player())  # the Antiquarian Society's collection
 
 
 # ---------------------------------------------------------------- the list of jobs
@@ -132,7 +137,7 @@ func offer(faction: String, s: DialogueEngine.Speaker, only_type: String = "") -
 	if q["type"] == "deliver":
 		var inv := _player().get_node("Inventory") as Inventory
 		inv.add_item(QuestItems.get_item(qid, String(q["item_name"])))
-	if q["type"] == "kill" and world.get_poi_node(String(q["target"])) != null:
+	if q["type"] in ["kill", "hunt", "excavate"] and world.get_poi_node(String(q["target"])) != null:
 		var placed := world.get_poi(String(q["target"]))
 		for e in on_garrison(placed, world.get_poi_node(placed.id)):
 			world.add_to_garrison(placed.id, e)
@@ -151,7 +156,11 @@ func _make(type: String, qid: String, town: PlacedPOI, s: DialogueEngine.Speaker
 			if options.is_empty():
 				return {}
 			var p := options[rng.randi_range(0, mini(options.size(), 4) - 1)]
-			var things := ["Silver Locket", "Old Family Sword", "Lost Journal", "Carved Amulet", "Map of the Old Roads"] if s.faction != "mages" else ["Ancient Tome", "Star Chart", "Crystal Focus", "Sealed Grimoire"]
+			var things := ["Silver Locket", "Old Family Sword", "Lost Journal", "Carved Amulet", "Map of the Old Roads"]
+			if s.faction == "mages":
+				things = ["Ancient Tome", "Star Chart", "Crystal Focus", "Sealed Grimoire"]
+			elif s.faction == "antiquarians":
+				things = ARTIFACT_FINDS
 			var thing: String = things[rng.randi_range(0, things.size() - 1)]
 			var where := _place_name(p)
 			return {"type": type, "name": "The %s" % thing, "target": p.id, "container": "dungeon/%s/chest_boss" % p.id,
@@ -178,6 +187,47 @@ func _make(type: String, qid: String, town: PlacedPOI, s: DialogueEngine.Speaker
 			return {"type": type, "name": "A Quiet Job in %s" % house.town_name, "target": house.id, "container": "building/%s/chest_0" % house.id,
 				"item_name": thing, "pos": [house.world_pos.x, house.world_pos.z], "target_name": house.display_name,
 				"objective": "Steal %s from the chest in %s, in %s. Don't get caught. Bring it to %s." % [thing, house.display_name, house.town_name, s.name]}
+		"excavate":
+			# a ruin or other old place nearby; the artifact is buried there (a DigSpot appears)
+			var options: Array[PlacedPOI] = []
+			for p in _pois_near(from, 2800.0):
+				if p.poi is SimplePOIData and p.poi.garrison != null:
+					options.append(p)
+			if options.is_empty():
+				return {}
+			var p := options[rng.randi_range(0, mini(options.size(), 5) - 1)]
+			var thing: String = ARTIFACT_FINDS[rng.randi_range(0, ARTIFACT_FINDS.size() - 1)]
+			var where := _place_name(p)
+			return {"type": type, "name": "Excavation: %s" % where, "target": p.id, "item_name": thing,
+				"pos": [p.position.x, p.position.z], "target_name": where,
+				"objective": "Dig up the %s at the %s (bring a pickaxe or shovel) and bring it to %s." % [thing, where, s.name]}
+		"survey":
+			# reach the bottom of a dungeon and defeat what lives there: the Society can then map it
+			var options: Array[PlacedPOI] = []
+			for p in _pois_near(from, 3000.0):
+				var e := p.poi as DungeonEntrancePOIData
+				if e != null and e.dungeon != null and e.dungeon.boss != null and not Discovery.is_cleared(p.id):
+					options.append(p)
+			if options.is_empty():
+				return {}
+			var p := options[rng.randi_range(0, mini(options.size(), 4) - 1)]
+			var where := _place_name(p)
+			return {"type": type, "name": "Survey of the %s" % where, "target": p.id, "pos": [p.position.x, p.position.z], "target_name": where,
+				"objective": "Reach the deepest hall of the %s and defeat its master, so the Society can map it. Then report to %s." % [where, s.name]}
+		"hunt":
+			# a named beast, met at a place out in the wild
+			var options: Array[PlacedPOI] = []
+			for p in _pois_near(from, 2400.0):
+				if p.poi is SimplePOIData and p.poi.garrison != null:
+					options.append(p)
+			if options.is_empty():
+				return {}
+			var p := options[rng.randi_range(0, mini(options.size(), 4) - 1)]
+			var beast: String = BEASTS[rng.randi_range(0, BEASTS.size() - 1)]
+			var where := _place_name(p)
+			return {"type": type, "name": "The Hunt for %s" % beast, "target": p.id, "chief": beast,
+				"pos": [p.position.x, p.position.z], "target_name": where,
+				"objective": "Track down %s, seen near the %s, and kill it. Then report to %s." % [beast, where, s.name]}
 		"persuade", "deliver", "assassinate":
 			var r := _pick_person(town, rng, type == "persuade")
 			if r == null:
@@ -264,10 +314,12 @@ func _pick_person(town: PlacedPOI, rng: RandomNumberGenerator, friendly_check: b
 func is_ready(q: Dictionary) -> bool:
 	var inv := _player().get_node("Inventory") as Inventory
 	match String(q["type"]):
-		"retrieve", "steal":
+		"retrieve", "steal", "excavate":
 			return inv.has_item(QuestItems.get_item(String(q["id"]), String(q.get("item_name", ""))))
-		"kill":
+		"kill", "hunt":
 			return WorldState.has_record("kill/quest/%s/chief" % q["id"])
+		"survey":
+			return Discovery.is_cleared(String(q["target"]))
 		"persuade":
 			var r: TownLife.Resident = world.life.get_resident(String(q["target"])) if world.life != null else null
 			return r != null and DialogueState.get_disposition(r.data.id, r.data.base_disposition) >= PERSUADE_GOAL
@@ -289,6 +341,9 @@ func complete(q: Dictionary) -> int:
 		gold = roundi(gold * 1.5)
 	Currency.add_gold(inv, gold)
 	Factions.add_quest_done(String(q["faction"]))
+	var skills := p.get_node_or_null("Skills") as Skills
+	if skills != null:
+		skills.add_deed_xp(SkillDatabase.deed_xp(skills.get_player_level(), 5.0))  # a deed: helps past level 80
 	q["status"] = "done"
 	_update_quest(q)
 	return gold
@@ -321,21 +376,45 @@ func on_garrison(placed: PlacedPOI, parent: Node3D) -> Array[Enemy]:
 	if body == null or placed == null:
 		return out
 	for q: Dictionary in all_quests():
-		if q["status"] != "active" or q["type"] != "kill" or q["target"] != placed.id:
+		if q["status"] != "active" or q["target"] != placed.id:
+			continue
+		var zone := LevelCurve.zone_range(world.map, placed.position)
+		if q["type"] == "excavate":
+			_place_dig_spot(q, placed, zone.y)
+			continue
+		if q["type"] != "kill" and q["type"] != "hunt":
 			continue
 		var key := "quest/%s/chief" % q["id"]
 		if WorldState.has_record("kill/" + key):
 			continue
 		var rng := RandomNumberGenerator.new()
 		rng.seed = key.hash()
-		var zone := LevelCurve.zone_range(world.map, placed.position)
 		var at := placed.position + Vector3(2.0, 0.6, 2.0)
 		at.y = world.get_height_at(at.x, at.z) + 0.6
-		var e := Population.spawn_enemy(body, zone.y + 2, parent, at, rng, {"key": key, "persist_mode": Enemy.PersistMode.CORPSE_ONLY})
+		var kind := body if q["type"] == "kill" else load(BEAST_BODY) as EnemyData
+		var e := Population.spawn_enemy(kind, zone.y + 2, parent, at, rng, {"key": key, "persist_mode": Enemy.PersistMode.CORPSE_ONLY})
 		e.display_name = String(q["chief"])
 		e.set_meta("quest_id", q["id"])
 		out.append(e)
 	return out
+
+
+# An excavation job's dig spot, on the place itself (it goes away with the place's chunk)
+func _place_dig_spot(q: Dictionary, placed: PlacedPOI, level: int) -> void:
+	if WorldState.has_record("dig/" + String(q["id"])):
+		return
+	var host := world.get_poi_node(placed.id)
+	if host == null or host.get_node_or_null("Dig_" + String(q["id"])) != null:
+		return
+	var spot := DigSpot.new()
+	spot.name = "Dig_" + String(q["id"])
+	spot.quest_id = q["id"]
+	spot.item_name = q["item_name"]
+	spot.level = level
+	var at := placed.position + Vector3(-5.0, 0.0, 4.0)
+	at.y = world.get_height_at(at.x, at.z) + 0.1
+	host.add_child(spot)
+	spot.global_position = at
 
 
 # ---------------------------------------------------------------- talking

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_maiha"]
+
+[resource]
+script = ExtResource("1_maiha")
+id = &"leather_helmet"
+display_name = "Leather Hood"
+description = "Boiled and hardened leather. Light armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 2.0
+value = 27
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 3.7
+}
+tier = 2
+min_level = 8
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"steel_light"
+animation_set = &"helmet"

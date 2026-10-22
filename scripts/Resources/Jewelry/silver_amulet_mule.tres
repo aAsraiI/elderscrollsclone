@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_8fh6w"]
+
+[resource]
+script = ExtResource("1_8fh6w")
+id = &"silver_amulet_mule"
+display_name = "Silver Amulet of the Mule"
+description = "+45 carry capacity while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 252
+stat_modifiers = {
+"carry_capacity": 45.0
+}
+tier = 3
+min_level = 15
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

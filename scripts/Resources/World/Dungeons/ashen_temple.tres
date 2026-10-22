@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="DungeonData" format=3]
+
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/ashen_priest.tres" id="1_7luh1"]
+[ext_resource type="Script" path="res://scripts/loot_entry.gd" id="2_mpf0l"]
+[ext_resource type="Script" path="res://scripts/World/dungeon_data.gd" id="3_j22hk"]
+[ext_resource type="Resource" path="res://scripts/Resources/Spawns/dungeon_ashen.tres" id="4_tcuy0"]
+
+[resource]
+script = ExtResource("3_j22hk")
+id = &"ashen_temple"
+display_name = "Ashen Temple"
+min_rooms = 8
+max_rooms = 12
+room_size = 15.0
+ceiling_height = 6.0
+spawn_table = ExtResource("4_tcuy0")
+enemies_per_room_max = 1
+boss = ExtResource("1_7luh1")
+level_offset = 2
+wall_color = Color(0.2, 0.17, 0.16, 1)
+floor_color = Color(0.15, 0.12, 0.11, 1)
+light_color = Color(1, 0.45, 0.2, 1)
+theme = "ashen"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_v2w6u"]
+
+[resource]
+script = ExtResource("1_v2w6u")
+id = &"bone_dice"
+display_name = "Bone Dice"
+description = "Worth a few coins to the right buyer."
+weight = 0.1
+value = 5
+stackable = true
+max_stack = 99
+junk = true
+loot_tags = PackedStringArray("tavern", "camp")

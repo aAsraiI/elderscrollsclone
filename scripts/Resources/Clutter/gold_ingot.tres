@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_rvg1p"]
+
+[resource]
+script = ExtResource("1_rvg1p")
+id = &"gold_ingot"
+display_name = "Gold Ingot"
+description = "Useful, or worth selling."
+weight = 1.0
+value = 80
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("jeweler", "rich_home", "vault")

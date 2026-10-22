@@ -11,7 +11,7 @@ extends RefCounted
 ## Ask them about "membership" to join, "duties" for work, "advancement" for promotion.
 
 const DIR := "res://scripts/Resources/Factions/"
-const IDS: Array[String] = ["fighters", "mages", "knights", "thieves", "assassins"]
+const IDS: Array[String] = ["fighters", "mages", "knights", "thieves", "assassins", "antiquarians", "hunters", "merchants"]
 const HISTORY := "crime/history"
 
 static var _cache := {}

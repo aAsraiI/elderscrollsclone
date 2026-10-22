@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/spawn_entry.gd" id="1_jk0uu"]
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="2_b60t2"]
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/deep_crawler.tres" id="3_amuen"]
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/bandit.tres" id="4_8civa"]
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/cave_dweller.tres" id="5_tivtu"]
+[ext_resource type="Script" path="res://scripts/spawn_table.gd" id="6_a1ip6"]
+
+[sub_resource type="Resource" id="Resource_221jf"]
+script = ExtResource("1_jk0uu")
+members = Array[ExtResource("2_b60t2")]([ExtResource("3_amuen")])
+weight = 4.0
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_n08k1"]
+script = ExtResource("1_jk0uu")
+members = Array[ExtResource("2_b60t2")]([ExtResource("4_8civa")])
+weight = 2.0
+count_max = 2
+
+[sub_resource type="Resource" id="Resource_0hfn3"]
+script = ExtResource("1_jk0uu")
+members = Array[ExtResource("2_b60t2")]([ExtResource("5_tivtu")])
+count_max = 2
+
+[resource]
+script = ExtResource("6_a1ip6")
+entries = Array[ExtResource("1_jk0uu")]([SubResource("Resource_221jf"), SubResource("Resource_n08k1"), SubResource("Resource_0hfn3")])

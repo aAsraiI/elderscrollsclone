@@ -33,6 +33,9 @@ const GUILD_HALLS := {
 	"mages": "Mages Guild Hall",
 	"knights": "Knightly Order Chapterhouse",
 	"thieves": "Thieves Den",
+	"antiquarians": "Antiquarian Museum",
+	"hunters": "Hunters' Lodge",
+	"merchants": "Consortium Counting House",
 }
 
 

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_saoku"]
+
+[resource]
+script = ExtResource("1_saoku")
+id = &"gold_ring_mule"
+display_name = "Gold Ring of the Mule"
+description = "+50 carry capacity while worn."
+item_type = 2
+equip_slot = 8
+weight = 0.1
+value = 500
+stat_modifiers = {
+"carry_capacity": 50.0
+}
+tier = 5
+min_level = 35
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

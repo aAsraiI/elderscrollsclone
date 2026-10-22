@@ -199,7 +199,7 @@ func _swing_type(item: ItemData, kind: int) -> int:
 		return Swing.CHOP
 	if item == null:
 		return Swing.THRUST
-	if item.animation_set == &"hammer":
+	if item.animation_set == &"hammer" or item.animation_set == &"mace":
 		return Swing.CHOP
 	if item.attack_style == ItemData.AttackStyle.ARC:
 		return Swing.SLASH

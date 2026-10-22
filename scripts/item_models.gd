@@ -97,6 +97,21 @@ static func _placeholder(root: Node3D, item: ItemData) -> void:
 				_box(root, Vector3(0.05, 0.05, 0.05), Vector3(0.0, -0.20, 0.0), DARK)
 			"shield":
 				_shield(root)
+			"axe":
+				_box(root, Vector3(0.04, 0.62, 0.04), Vector3(0.0, 0.18, 0.0), WOOD)
+				_box(root, Vector3(0.20, 0.16, 0.025), Vector3(0.09, 0.44, 0.0), METAL)
+			"battleaxe":
+				_box(root, Vector3(0.05, 1.10, 0.05), Vector3(0.0, 0.30, 0.0), WOOD)
+				_box(root, Vector3(0.30, 0.26, 0.03), Vector3(0.14, 0.72, 0.0), METAL)
+				_box(root, Vector3(0.22, 0.20, 0.03), Vector3(-0.11, 0.72, 0.0), METAL)
+			"mace":
+				_box(root, Vector3(0.04, 0.55, 0.04), Vector3(0.0, 0.15, 0.0), WOOD)
+				_sphere(root, 0.09, Vector3(0.0, 0.48, 0.0), METAL)
+				for a in 4:
+					_box(root, Vector3(0.05, 0.12, 0.05), Vector3(cos(a * PI / 2.0) * 0.08, 0.48, sin(a * PI / 2.0) * 0.08), DARK)
+			"spear":
+				_box(root, Vector3(0.035, 1.55, 0.035), Vector3(0.0, 0.45, 0.0), WOOD)
+				_box(root, Vector3(0.06, 0.22, 0.015), Vector3(0.0, 1.32, 0.0), METAL)
 			_:
 				if item.secondary_action == ItemData.SecondaryAction.BLOCK:
 					_shield(root)
@@ -114,7 +129,23 @@ static func _placeholder(root: Node3D, item: ItemData) -> void:
 					_ring(root)
 					_gem(root, Vector3(0.0, -0.06, 0.0), Color(0.6, 0.2, 0.8))
 				ItemData.EquipSlot.HEAD:
-					_box(root, Vector3(0.26, 0.22, 0.28), Vector3.ZERO, METAL)
+					_box(root, Vector3(0.26, 0.22, 0.28), Vector3.ZERO, _armor_color(item))
+				ItemData.EquipSlot.HANDS:
+					_box(root, Vector3(0.10, 0.06, 0.16), Vector3(-0.08, 0.0, 0.0), _armor_color(item))
+					_box(root, Vector3(0.10, 0.06, 0.16), Vector3(0.08, 0.0, 0.0), _armor_color(item))
+				ItemData.EquipSlot.LEGS:
+					_box(root, Vector3(0.13, 0.50, 0.14), Vector3(-0.09, 0.0, 0.0), _armor_color(item))
+					_box(root, Vector3(0.13, 0.50, 0.14), Vector3(0.09, 0.0, 0.0), _armor_color(item))
+					_box(root, Vector3(0.34, 0.10, 0.16), Vector3(0.0, 0.26, 0.0), DARK)
+				ItemData.EquipSlot.FEET:
+					for side in [-1.0, 1.0]:
+						_box(root, Vector3(0.10, 0.18, 0.10), Vector3(side * 0.08, 0.05, -0.04), _armor_color(item))
+						_box(root, Vector3(0.10, 0.07, 0.20), Vector3(side * 0.08, -0.06, 0.02), _armor_color(item))
+				ItemData.EquipSlot.CHEST:
+					var c := _armor_color(item)
+					_box(root, Vector3(0.46, 0.52, 0.22), Vector3.ZERO, c)  # chest
+					_box(root, Vector3(0.16, 0.14, 0.20), Vector3(-0.30, 0.18, 0.0), DARK)  # shoulders
+					_box(root, Vector3(0.16, 0.14, 0.20), Vector3(0.30, 0.18, 0.0), DARK)
 				_:
 					_box(root, Vector3(0.46, 0.52, 0.22), Vector3.ZERO, METAL)  # chest
 					_box(root, Vector3(0.16, 0.14, 0.20), Vector3(-0.30, 0.18, 0.0), DARK)  # shoulders
@@ -146,7 +177,54 @@ static func _placeholder(root: Node3D, item: ItemData) -> void:
 				else:
 					_gem(root, Vector3.ZERO, _gem_color(lower))
 			else:
-				_box(root, Vector3(0.22, 0.14, 0.16), Vector3.ZERO, CLOTH)  # a bundle
+				_clutter(root, item)
+
+
+# Light armor and clothes are cloth / leather coloured, heavy armor metal
+static func _armor_color(item: ItemData) -> Color:
+	if item.governing_skill == "heavy_armor":
+		return METAL
+	if item.governing_skill == "light_armor":
+		return Color(0.42, 0.30, 0.20)
+	return CLOTH
+
+
+# Everyday things: shaped from the words in their name
+static func _clutter(root: Node3D, item: ItemData) -> void:
+	var n := item.display_name.to_lower()
+	if n.contains("book") or n.contains("journal") or n.contains("ledger"):
+		_box(root, Vector3(0.18, 0.05, 0.24), Vector3.ZERO, Color(0.35, 0.15, 0.12))
+		_box(root, Vector3(0.17, 0.04, 0.23), Vector3(0.006, 0.0, 0.0), Color(0.9, 0.86, 0.75))
+	elif n.contains("ingot"):
+		_box(root, Vector3(0.20, 0.06, 0.08), Vector3.ZERO, GOLD if n.contains("gold") else (Color(0.85, 0.86, 0.9) if n.contains("silver") else DARK))
+	elif n.contains("ore"):
+		_sphere(root, 0.07, Vector3.ZERO, Color(0.45, 0.40, 0.36))
+	elif n.contains("pelt") or n.contains("leather"):
+		_box(root, Vector3(0.45, 0.02, 0.35), Vector3.ZERO, Color(0.45, 0.38, 0.30))
+	elif n.contains("tankard") or n.contains("cup") or n.contains("goblet"):
+		_cylinder(root, 0.04, 0.11, Vector3.ZERO, Color(0.8, 0.8, 0.85) if n.contains("silver") or n.contains("pewter") else Color(0.6, 0.4, 0.3))
+	elif n.contains("plate") or n.contains("bowl"):
+		_cylinder(root, 0.11, 0.025, Vector3.ZERO, Color(0.70, 0.55, 0.40))
+	elif n.contains("candlestick") or n.contains("lantern"):
+		_cylinder(root, 0.03, 0.22, Vector3.ZERO, Color(0.85, 0.85, 0.9) if n.contains("silver") else DARK)
+		_cylinder(root, 0.015, 0.06, Vector3(0.0, 0.14, 0.0), Color(0.95, 0.92, 0.8))
+	elif n.contains("skull"):
+		_sphere(root, 0.08, Vector3.ZERO, Color(0.88, 0.86, 0.78))
+	elif n.contains("bone"):
+		_box(root, Vector3(0.03, 0.03, 0.26), Vector3.ZERO, Color(0.88, 0.86, 0.78))
+	elif n.contains("urn") or n.contains("bucket"):
+		_cylinder(root, 0.10, 0.22, Vector3.ZERO, Color(0.55, 0.40, 0.30))
+	elif n.contains("scroll") or n.contains("quill"):
+		_cylinder(root, 0.02, 0.22, Vector3.ZERO, Color(0.92, 0.88, 0.76))
+	elif n.contains("pickaxe") or n.contains("shovel") or n.contains("hammer") or n.contains("tongs") or n.contains("broom"):
+		_box(root, Vector3(0.035, 0.80, 0.035), Vector3.ZERO, WOOD)
+		_box(root, Vector3(0.30, 0.05, 0.05), Vector3(0.0, 0.38, 0.0), DARK)
+	elif n.contains("sack"):
+		_sphere(root, 0.16, Vector3.ZERO, Color(0.70, 0.62, 0.45))
+	elif item.item_type == ItemData.ItemType.INGREDIENT:
+		_sphere(root, 0.04, Vector3.ZERO, Color(0.4, 0.6, 0.3))
+	else:
+		_box(root, Vector3(0.22, 0.14, 0.16), Vector3.ZERO, CLOTH)  # a bundle
 
 
 static func _gem_color(item_name: String) -> Color:

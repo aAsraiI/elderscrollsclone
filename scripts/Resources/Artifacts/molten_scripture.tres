@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_8lq7h"]
+
+[resource]
+script = ExtResource("1_8lq7h")
+id = &"molten_scripture"
+display_name = "Molten Scripture"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 3.0
+value = 3200
+min_level = 75
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("ashen")

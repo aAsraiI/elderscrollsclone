@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_n1b3b"]
+
+[resource]
+script = ExtResource("1_n1b3b")
+id = &"vault_keystone"
+display_name = "Vault Keystone Fragment"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 5.0
+value = 2800
+min_level = 70
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("vault")

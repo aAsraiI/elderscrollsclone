@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_twvjc"]
+
+[resource]
+script = ExtResource("1_twvjc")
+id = &"gemmed_amulet_wind"
+display_name = "Gemmed Amulet of Second Wind"
+description = "+75% stamina regen while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 1960
+stat_modifiers = {
+"stamina_regen_mult": 0.75
+}
+tier = 7
+min_level = 60
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

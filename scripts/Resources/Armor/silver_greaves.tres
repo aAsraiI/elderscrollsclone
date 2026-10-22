@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_bx7qj"]
+
+[resource]
+script = ExtResource("1_bx7qj")
+id = &"silver_greaves"
+display_name = "Silver Greaves"
+description = "Silvered steel that gleams even in the dark. Heavy armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 8.4
+value = 108
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 9.200000000000001
+}
+tier = 3
+min_level = 17
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"silver_heavy"
+animation_set = &"greaves"

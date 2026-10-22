@@ -9,6 +9,8 @@ extends StaticBody3D
 @export var label := "Enter"
 ## true = the way out, inside the dungeon
 @export var is_exit := false
+## Stairs inside a dungeon: the floor they lead to (-1 = not stairs)
+@export var target_floor := -1
 ## Entrance only: where the player is put back when they leave (relative to this door, local space)
 @export var return_offset := Vector3(0.0, 0.0, -4.0)
 
@@ -34,7 +36,9 @@ func interact(_actor: Inventory) -> void:
 	if manager == null:
 		push_error("DungeonDoor: no DungeonManager found. The World node creates one.")
 		return
-	if is_exit:
+	if target_floor >= 0:
+		manager.go_floor(target_floor)
+	elif is_exit:
 		manager.exit()
 	else:
 		manager.enter(entrance_id, to_global(return_offset), global_rotation.y)

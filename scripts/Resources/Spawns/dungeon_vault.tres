@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/spawn_entry.gd" id="1_jq4b3"]
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="2_74eyg"]
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/vault_sentinel.tres" id="3_4e7ui"]
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/skeleton_knight.tres" id="4_t1d82"]
+[ext_resource type="Script" path="res://scripts/spawn_table.gd" id="5_4l042"]
+
+[sub_resource type="Resource" id="Resource_owltl"]
+script = ExtResource("1_jq4b3")
+members = Array[ExtResource("2_74eyg")]([ExtResource("3_4e7ui")])
+weight = 4.0
+count_max = 2
+
+[sub_resource type="Resource" id="Resource_0325q"]
+script = ExtResource("1_jq4b3")
+members = Array[ExtResource("2_74eyg")]([ExtResource("4_t1d82")])
+weight = 2.0
+count_max = 2
+
+[resource]
+script = ExtResource("5_4l042")
+entries = Array[ExtResource("1_jq4b3")]([SubResource("Resource_owltl"), SubResource("Resource_0325q")])

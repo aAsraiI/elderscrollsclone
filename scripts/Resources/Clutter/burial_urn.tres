@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_dth6s"]
+
+[resource]
+script = ExtResource("1_dth6s")
+id = &"burial_urn"
+display_name = "Burial Urn"
+description = "Worth a few coins to the right buyer."
+weight = 3.0
+value = 6
+stackable = true
+max_stack = 99
+junk = true
+loot_tags = PackedStringArray("crypt", "barrow")

@@ -148,7 +148,8 @@ static func _restock(s: Shop, day: int, level_min: int, level_max: int, gold_sca
 	s.inventory.stacks.clear()
 	var entries: Array[LootEntry] = s.data.stock.duplicate()
 	if s.data.curve_stock:
-		entries.append_array(ItemCatalog.curve_loot(level_min, level_max, s.data.curve_quality))
+		# merchants carry the better end of the land's gear
+		entries.append_array(ItemCatalog.curve_loot(maxi(level_min, level_max - 3), level_max, s.data.curve_quality))
 	if s.data.treasure_stock:
 		entries.append_array(ItemCatalog.treasure_loot(level_min, level_max, 2.5))
 	for e in entries:

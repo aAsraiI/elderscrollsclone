@@ -27,6 +27,10 @@ var levels: Dictionary = {}  # StringName -> int
 var xp: Dictionary = {}  # StringName -> float, progress inside the current level
 var _applied: Dictionary = {}  # StringName -> Dictionary, last modifiers pushed to Stats
 var _player_level := 1
+## Player XP from deeds, see add_deed_xp()
+var deed_xp := 0
+
+const DEED_KEY := "_deeds"
 
 
 func _ready() -> void:
@@ -129,8 +133,20 @@ func meets(skill_id: StringName, required_level: int) -> bool:
 	return get_level(skill_id) >= required_level
 
 
+## Player XP from deeds (quests, bosses, new places) on top of skills. Skills alone reach about
+## level 80; deeds carry you the rest of the way to 100.
+func add_deed_xp(amount: int) -> void:
+	if amount <= 0:
+		return
+	deed_xp += amount
+	var new_level := get_player_level()
+	while _player_level < new_level:
+		_player_level += 1
+		player_leveled_up.emit(_player_level)
+
+
 func get_player_xp() -> int:
-	var total := 0
+	var total := deed_xp
 	for id in levels:
 		total += SkillDatabase.skill_player_xp(levels[id])
 	return total
@@ -139,7 +155,7 @@ func get_player_xp() -> int:
 func get_player_level() -> int:
 	var total := get_player_xp()
 	var level := 1
-	while total >= SkillDatabase.player_xp_to_reach(level + 1):
+	while level < LevelCurve.MAX_LEVEL and total >= SkillDatabase.player_xp_to_reach(level + 1):
 		level += 1
 	return level
 
@@ -161,6 +177,7 @@ func to_dict() -> Dictionary:
 	var out := {}
 	for id in levels:
 		out[String(id)] = {"level": levels[id], "xp": xp[id]}
+	out[DEED_KEY] = deed_xp
 	return out
 
 
@@ -169,6 +186,7 @@ func from_dict(data: Dictionary) -> void:
 		var entry: Dictionary = data.get(String(id), {})
 		levels[id] = clampi(int(entry.get("level", SkillDatabase.START_LEVEL)), SkillDatabase.START_LEVEL, SkillDatabase.MAX_LEVEL)
 		xp[id] = float(entry.get("xp", 0.0))
+	deed_xp = int(data.get(DEED_KEY, 0))
 	_player_level = get_player_level()
 	_apply_all()
 

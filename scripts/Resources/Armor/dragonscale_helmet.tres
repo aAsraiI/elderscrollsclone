@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_tsrd1"]
+
+[resource]
+script = ExtResource("1_tsrd1")
+id = &"dragonscale_helmet"
+display_name = "Dragonscale Hood"
+description = "Shed scales of a dragon, still warm. Light armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 2.4000000000000004
+value = 810
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 6.800000000000001
+}
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"dragonbone_light"
+animation_set = &"helmet"

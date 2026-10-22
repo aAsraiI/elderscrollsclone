@@ -1,16 +1,16 @@
 [gd_resource type="Resource" script_class="ItemData" format=3]
 
-[ext_resource type="Script" uid="uid://d2jljtjlplxn6" path="res://scripts/ItemData.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_item"]
 
 [resource]
 script = ExtResource("1_item")
 id = &"silver_necklace"
 display_name = "Silver Necklace"
 description = "A fine silver chain with a small pendant."
-item_type = 0
 weight = 0.2
 value = 150
 stackable = true
 max_stack = 99
 min_level = 5
 treasure = true
+loot_tags = PackedStringArray("jeweler", "rich_home", "crypt")

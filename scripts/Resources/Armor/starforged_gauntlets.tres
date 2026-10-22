@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_ep8t7"]
+
+[resource]
+script = ExtResource("1_ep8t7")
+id = &"starforged_gauntlets"
+display_name = "Starforged Gauntlets"
+description = "Forged from fallen star-metal that hums faintly. Heavy armor for the hands."
+item_type = 2
+equip_slot = 3
+weight = 3.8000000000000003
+value = 1530
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 7.800000000000001
+}
+tier = 7
+min_level = 74
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"starforged_heavy"
+animation_set = &"gauntlets"

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_lam76"]
+
+[resource]
+script = ExtResource("1_lam76")
+id = &"steel_ingot"
+display_name = "Steel Ingot"
+description = "Useful, or worth selling."
+weight = 1.0
+value = 15
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("smithy")

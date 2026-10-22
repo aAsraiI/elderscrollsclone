@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_5q3sp"]
+
+[resource]
+script = ExtResource("1_5q3sp")
+id = &"ebon_boots"
+display_name = "Ebon Boots"
+description = "Blackened ebon steel, cold to the touch. Heavy armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 4.6000000000000005
+value = 288
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 6.2
+}
+tier = 5
+min_level = 41
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"ebon_heavy"
+animation_set = &"boots"

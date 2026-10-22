@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_rmiw8"]
+
+[resource]
+script = ExtResource("1_rmiw8")
+id = &"dragonbone_greaves"
+display_name = "Dragonbone Greaves"
+description = "Carved from the bones of great wyrms. Heavy armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 9.600000000000001
+value = 1350
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 14.0
+}
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"dragonbone_heavy"
+animation_set = &"greaves"

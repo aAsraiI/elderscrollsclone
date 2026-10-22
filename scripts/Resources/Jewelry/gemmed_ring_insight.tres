@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_4onrd"]
+
+[resource]
+script = ExtResource("1_4onrd")
+id = &"gemmed_ring_insight"
+display_name = "Gemmed Ring of Insight"
+description = "+55 maximum magicka while worn."
+item_type = 2
+equip_slot = 8
+weight = 0.1
+value = 1400
+stat_modifiers = {
+"max_magicka": 55.0
+}
+tier = 7
+min_level = 60
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

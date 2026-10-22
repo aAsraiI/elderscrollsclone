@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" format=3]
 
-[ext_resource type="Script" uid="uid://d2jljtjlplxn6" path="res://scripts/ItemData.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_item"]
 
 [resource]
 script = ExtResource("1_item")
@@ -12,6 +12,7 @@ weight = 0.5
 value = 140
 stackable = true
 max_stack = 99
+loot_tags = PackedStringArray("alchemist", "vault")
 use_verb = "Drink"
 effect_group = "potion"
 heal_amount = 150.0

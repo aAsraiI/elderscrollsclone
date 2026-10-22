@@ -1,19 +1,23 @@
 [gd_resource type="Resource" script_class="ItemData" format=3]
 
-[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_item"]
 
 [resource]
 script = ExtResource("1_item")
-display_name = "Dragonbone Armor"
+id = &"dragonbone_chestplate"
+display_name = "Dragonbone Cuirass"
 description = "Carved from the bones of great wyrms. Heavy armor for the chest."
 item_type = 2
 equip_slot = 2
 weight = 18.0
-value = 3000
+value = 3038
 governing_skill = "heavy_armor"
-tier = 6
-min_level = 33
 stat_modifiers = {
-"armor": 71.0
+"armor": 31.5
 }
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"dragonbone_heavy"
+animation_set = &"cuirass"
 metadata/_custom_type_script = "uid://dd71arb7pvb2r"

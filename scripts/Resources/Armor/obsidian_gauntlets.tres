@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_8f6ki"]
+
+[resource]
+script = ExtResource("1_8f6ki")
+id = &"obsidian_gauntlets"
+display_name = "Obsidian Gauntlets"
+description = "Volcanic glass ground to a razor edge, tougher than it looks. Heavy armor for the hands."
+item_type = 2
+equip_slot = 3
+weight = 3.3000000000000003
+value = 126
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 5.4
+}
+tier = 4
+min_level = 28
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"obsidian_heavy"
+animation_set = &"gauntlets"

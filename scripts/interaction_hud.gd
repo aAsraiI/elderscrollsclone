@@ -17,6 +17,7 @@ var _label: Label
 # Small dot in the middle of the screen; grows a gold ring when you're looking at something usable
 class Crosshair extends Control:
 	var active := false
+	var steal := false  # the ring turns red when taking it is a crime
 
 	func set_active(value: bool) -> void:
 		if value != active:
@@ -28,7 +29,7 @@ class Crosshair extends Control:
 		draw_circle(c, 4.0 if active else 3.0, Color(0, 0, 0, 0.55))  # dark outline for contrast
 		draw_circle(c, 2.5 if active else 1.8, Color(1.0, 0.85, 0.35) if active else Color(1, 1, 1, 0.9))
 		if active:
-			draw_arc(c, 9.0, 0.0, TAU, 32, Color(1.0, 0.85, 0.35, 0.9), 1.5, true)
+			draw_arc(c, 9.0, 0.0, TAU, 32, Color(1.0, 0.4, 0.35, 0.95) if steal else Color(1.0, 0.85, 0.35, 0.9), 1.5, true)
 
 
 func _ready() -> void:
@@ -92,7 +93,9 @@ func _on_prompt_changed(text: String) -> void:
 	_label.text = "[%s] %s" % [_key_name(), text] if show_key_hint else text
 	# Taking it is a crime: say so in red
 	_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.35) if text.begins_with("Steal") else Color.WHITE)
+	_crosshair.steal = text.begins_with("Steal")
 	_crosshair.set_active(true)
+	_crosshair.queue_redraw()
 
 
 func _key_name() -> String:

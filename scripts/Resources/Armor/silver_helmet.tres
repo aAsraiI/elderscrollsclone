@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_t3g8h"]
+
+[resource]
+script = ExtResource("1_t3g8h")
+id = &"silver_helmet"
+display_name = "Silver Helmet"
+description = "Silvered steel that gleams even in the dark. Heavy armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 5.300000000000001
+value = 81
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 6.9
+}
+tier = 3
+min_level = 17
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"silver_heavy"
+animation_set = &"helmet"

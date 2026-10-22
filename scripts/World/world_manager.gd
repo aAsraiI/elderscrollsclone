@@ -60,6 +60,8 @@ var life: TownLife
 var crime: CrimeManager
 var quests: QuestManager
 var road_life: RoadLife
+## Found places and fast travel
+var discovery: Discovery
 
 var _chunks := {}      # Vector2i -> TerrainChunk
 var _inflight := {}    # Vector2i -> worker task id
@@ -132,6 +134,9 @@ func _ready() -> void:
 	crime = CrimeManager.new()
 	crime.name = "CrimeManager"
 	add_child(crime)
+	discovery = Discovery.new()
+	discovery.name = "Discovery"
+	add_child(discovery)
 	if settings.debug_map_enabled:
 		_debug_map = WorldDebugMap.new()
 		_debug_map.name = "WorldDebugMap"

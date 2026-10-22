@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_dbp1q"]
+
+[resource]
+script = ExtResource("1_dbp1q")
+id = &"quiet_ash_censer"
+display_name = "Censer of Quiet Ash"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 2.0
+value = 600
+min_level = 30
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("crypt", "temple")

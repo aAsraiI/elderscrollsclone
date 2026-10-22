@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_adi3v"]
+
+[resource]
+script = ExtResource("1_adi3v")
+id = &"gemmed_amulet_insight"
+display_name = "Gemmed Amulet of Insight"
+description = "+83 maximum magicka while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 1960
+stat_modifiers = {
+"max_magicka": 82.5
+}
+tier = 7
+min_level = 60
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

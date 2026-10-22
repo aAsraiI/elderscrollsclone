@@ -1,34 +1,28 @@
 [gd_resource type="Resource" script_class="ItemData" format=3]
 
-[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_item"]
 
 [resource]
 script = ExtResource("1_item")
+id = &"steel_sword"
 display_name = "Steel Sword"
 description = "Well-forged steel with a keen edge. A balanced blade. Swings in an arc and can hit several enemies. Tap to chain a combo, hold to charge a heavy attack."
 item_type = 1
 equip_slot = 6
 weight = 5.0
-value = 62
+value = 63
 governing_skill = "one_handed"
 tier = 2
-min_level = 6
+min_level = 8
+loot_tags = PackedStringArray("weapon", "smithy")
 weapon_damage = 15.0
 reach = 2.2
 attack_style = 1
 arc_degrees = 100.0
 attack_cooldown = 0.7
 attack_windup = 0.12
-attack_active = 0.14
 stamina_cost = 6.3
-knockback = 2.62
+knockback = 2.63
 poise_damage = 16.5
-combo_length = 3
-heavy_charge_time = 0.45
-heavy_windup = 0.18
-heavy_damage_mult = 1.7
-heavy_stamina_mult = 2.0
-heavy_poise_mult = 2.0
-heavy_reach_bonus = 0.3
 animation_set = &"sword"
 metadata/_custom_type_script = "uid://dd71arb7pvb2r"

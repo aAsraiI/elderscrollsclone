@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="DungeonData" format=3]
+
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/crawler_queen.tres" id="1_s8ouo"]
+[ext_resource type="Script" path="res://scripts/loot_entry.gd" id="2_1l2vb"]
+[ext_resource type="Script" path="res://scripts/World/dungeon_data.gd" id="3_my4w5"]
+[ext_resource type="Resource" path="res://scripts/Resources/Spawns/dungeon_mine.tres" id="4_xel4j"]
+
+[resource]
+script = ExtResource("3_my4w5")
+id = &"abandoned_mine"
+display_name = "Abandoned Mine"
+min_rooms = 6
+max_rooms = 10
+spawn_table = ExtResource("4_xel4j")
+enemies_per_room_max = 1
+boss = ExtResource("1_s8ouo")
+wall_color = Color(0.35, 0.3, 0.25, 1)
+floor_color = Color(0.25, 0.22, 0.18, 1)
+light_color = Color(1, 0.75, 0.45, 1)
+light_energy = 1.5
+theme = "mine"

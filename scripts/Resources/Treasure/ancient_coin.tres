@@ -1,16 +1,15 @@
 [gd_resource type="Resource" script_class="ItemData" format=3]
 
-[ext_resource type="Script" uid="uid://d2jljtjlplxn6" path="res://scripts/ItemData.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_item"]
 
 [resource]
 script = ExtResource("1_item")
 id = &"ancient_coin"
 display_name = "Ancient Coin"
 description = "A worn coin from a realm nobody remembers. Collectors pay for these."
-item_type = 0
 weight = 0.05
 value = 25
 stackable = true
 max_stack = 99
-min_level = 1
 treasure = true
+loot_tags = PackedStringArray("crypt", "barrow", "ruin", "rich_home")

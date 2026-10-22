@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://scripts/Resources/World/Dungeons/abandoned_mine.tres" id="1_2d5h3"]
+[ext_resource type="Script" path="res://scripts/World/dungeon_entrance_poi_data.gd" id="2_js3tp"]
+
+[resource]
+script = ExtResource("2_js3tp")
+dungeon = ExtResource("1_2d5h3")
+color = Color(0.4, 0.33, 0.26, 1)
+enter_name = "Abandoned Mine"
+id = &"abandoned_mine_entrance"
+display_name = "Mine Entrance"
+map_color = Color(0.75, 0.6, 0.35, 1)
+footprint_radius = 14.0
+flatten_radius = 7.0

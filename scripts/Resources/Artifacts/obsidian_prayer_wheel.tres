@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_tsbxg"]
+
+[resource]
+script = ExtResource("1_tsbxg")
+id = &"obsidian_prayer_wheel"
+display_name = "Obsidian Prayer Wheel"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 3.0
+value = 1600
+min_level = 50
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("ashen")

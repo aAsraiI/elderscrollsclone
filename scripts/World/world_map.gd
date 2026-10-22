@@ -68,12 +68,16 @@ var _near_empty := {}                  # cell index -> PackedFloat64Array of x0,
 var _edge_reach := 1                   # cells: how far the cliff ring reaches inward
 # Leveled ground under POIs (see set_pads)
 const PAD_CELL := 128.0
+## Meters over which level ranges blend across a biome border (half on each side)
+const LEVEL_BLEND := 900.0
 var _pad_x := PackedFloat64Array()
 var _pad_z := PackedFloat64Array()
 var _pad_flat := PackedFloat64Array()
 var _pad_out := PackedFloat64Array()
 var _pad_h := PackedFloat64Array()
 var _pad_grid := {}  # Vector2i -> PackedInt32Array of pad indices
+## Town centers (x, z): places are easier near towns and roads, harder deep in the wild
+var _towns := PackedVector2Array()
 ## Roads and town streets (see set_roads). null = no roads.
 var roads: RoadNetwork
 
@@ -137,7 +141,10 @@ func set_pads(list: Array[PlacedPOI]) -> void:
 	_pad_out.clear()
 	_pad_h.clear()
 	_pad_grid.clear()
+	_towns.clear()
 	for p in list:
+		if p.town != null:
+			_towns.append(Vector2(p.position.x, p.position.z))
 		if p.poi.flatten_radius <= 0.0:
 			continue
 		var flat := minf(p.poi.flatten_radius, p.poi.footprint_radius)
@@ -214,6 +221,39 @@ func get_placement_index_at(x: float, z: float) -> int:
 			best_w = weight
 			best = i
 	return best if union_sdf <= 0.0 else -1
+
+
+## The level range of the land here: each nearby biome rectangle's range (BiomePlacement can
+## override the biome's), blended across borders the same way the ground color blends.
+## Returns Vector2(min, max) as floats; LevelCurve.zone_range() rounds it and narrows it by how
+## far the spot is from a town.
+func get_level_band(x: float, z: float) -> Vector2:
+	if _count == 0:
+		return Vector2(1, 10)
+	var wp := _warped(x, z)
+	var lo := 0.0
+	var hi := 0.0
+	var total := 0.0
+	for i in _count:
+		# levels blend over a much wider zone than the ground does, so they never jump at a border
+		var w := 1.0 - smoothstep(-LEVEL_BLEND, LEVEL_BLEND, _sdf(i, wp.x, wp.y))
+		if w <= 0.0:
+			continue
+		var r := placements[i].get_level_range()
+		lo += w * r.x
+		hi += w * r.y
+		total += w
+	if total <= 0.0:
+		return Vector2(1, 10)
+	return Vector2(lo / total, hi / total)
+
+
+## Meters to the nearest town center (INF if the world has no towns)
+func get_town_distance(x: float, z: float) -> float:
+	var best := INF
+	for t in _towns:
+		best = minf(best, t.distance_to(Vector2(x, z)))
+	return best
 
 
 func get_biome_at(x: float, z: float) -> BiomeData:

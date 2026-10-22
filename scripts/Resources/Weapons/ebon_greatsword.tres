@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="ItemData" format=3]
 
-[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_item"]
 
 [resource]
 script = ExtResource("1_item")
+id = &"ebon_greatsword"
 display_name = "Ebon Greatsword"
 description = "Blackened ebon steel, cold to the touch. Two-handed. Slow, with a long reach and a wide swing. One clean hit staggers most foes."
 item_type = 1
@@ -12,7 +13,8 @@ weight = 16.1
 value = 2240
 governing_skill = "two_handed"
 tier = 5
-min_level = 25
+min_level = 41
+loot_tags = PackedStringArray("weapon", "smithy")
 weapon_damage = 70.2
 reach = 3.2
 attack_style = 1
@@ -27,8 +29,6 @@ combo_length = 2
 two_handed = true
 heavy_charge_time = 0.6
 heavy_windup = 0.25
-heavy_damage_mult = 1.7
-heavy_stamina_mult = 2.0
 heavy_poise_mult = 1.6
 heavy_reach_bonus = 0.4
 animation_set = &"greatsword"

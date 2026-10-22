@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_cj1c1"]
+
+[resource]
+script = ExtResource("1_cj1c1")
+id = &"ember_heart"
+display_name = "Ember Heart of Ash"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 1.0
+value = 2300
+min_level = 60
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("ashen")

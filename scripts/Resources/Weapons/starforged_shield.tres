@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="ItemData" format=3]
 
-[ext_resource type="Script" uid="uid://dd71arb7pvb2r" path="res://scripts/ItemData.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_item"]
 
 [resource]
 script = ExtResource("1_item")
+id = &"starforged_shield"
 display_name = "Starforged Shield"
 description = "Forged from fallen star-metal that hums faintly. Hold right click to block. Raise it just before a hit lands to parry. Left click while blocking to bash."
 item_type = 2
@@ -11,17 +12,15 @@ equip_slot = 7
 weight = 10.0
 value = 5100
 governing_skill = "block"
-tier = 7
-min_level = 42
 stat_modifiers = {
 "armor": 37.0
 }
+tier = 7
+min_level = 74
+loot_tags = PackedStringArray("armor", "smithy")
 secondary_action = 1
 block_reduction = 0.72
-block_angle = 120.0
-parry_window = 0.2
-bash_damage = 20.4
+bash_damage = 22.2
 bash_poise = 48.0
-bash_stamina_cost = 8.0
 animation_set = &"shield"
 metadata/_custom_type_script = "uid://dd71arb7pvb2r"

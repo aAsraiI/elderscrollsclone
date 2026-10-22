@@ -23,6 +23,7 @@ var _new_panel: PanelContainer
 var _seed_edit: LineEdit
 var _buttons: VBoxContainer
 var _backdrop: Backdrop
+var _loading: ColorRect
 
 
 # Dark sky with a soft glow and slowly rising embers
@@ -227,8 +228,35 @@ func _refresh_continue() -> void:
 
 func _on_continue() -> void:
 	var slot := _saves.latest_slot()
-	if slot != "" and not _saves.load_game(slot):
+	if slot == "":
+		return
+	await show_loading()
+	if not _saves.load_game(slot):
+		hide_loading()
 		_saves.menu.show_toast("Could not load: " + _saves.get_last_error(), true)
+
+
+## A plain screen saying the world is being built (it takes a few seconds), drawn before the
+## game scene starts loading
+func show_loading() -> void:
+	if _loading == null:
+		_loading = ColorRect.new()
+		_loading.color = Color(0.02, 0.02, 0.03)
+		add_child(_loading)
+		_loading.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		var l := UITheme.heading("Building the world...", 18)
+		l.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_loading.add_child(l)
+	_loading.visible = true
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+
+func hide_loading() -> void:
+	if _loading != null:
+		_loading.visible = false
 
 
 func _on_new_game() -> void:
@@ -238,6 +266,7 @@ func _on_new_game() -> void:
 
 
 func _start_new_game() -> void:
+	await show_loading()
 	_saves.new_game(_seed_edit.text)
 
 

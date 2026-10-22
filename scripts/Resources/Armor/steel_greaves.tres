@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_ruxca"]
+
+[resource]
+script = ExtResource("1_ruxca")
+id = &"steel_greaves"
+display_name = "Steel Greaves"
+description = "Well-forged steel with a keen edge. Heavy armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 8.0
+value = 45
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 7.6000000000000005
+}
+tier = 2
+min_level = 8
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"steel_heavy"
+animation_set = &"greaves"

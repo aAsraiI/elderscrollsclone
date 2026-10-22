@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://scripts/Resources/World/Dungeons/sunken_vault.tres" id="1_hjnhi"]
+[ext_resource type="Script" path="res://scripts/World/dungeon_entrance_poi_data.gd" id="2_j27vr"]
+
+[resource]
+script = ExtResource("2_j27vr")
+dungeon = ExtResource("1_hjnhi")
+shape = 1
+color = Color(0.55, 0.5, 0.35, 1)
+enter_name = "Sunken Vault"
+id = &"sunken_vault_entrance"
+display_name = "Vault Door"
+map_color = Color(1, 0.85, 0.3, 1)
+footprint_radius = 16.0
+flatten_radius = 8.0

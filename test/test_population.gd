@@ -166,26 +166,28 @@ func t_items() -> void:
 		if e.item.tier > 2:
 			low_only = false
 	check("level 1-5 chests hold iron and maybe steel gear only", not loot.is_empty() and low_only)
-	loot = ItemCatalog.curve_loot(30, 40)
+	loot = ItemCatalog.curve_loot(45, 55)
 	var high := false
 	var any_iron := false
 	for e in loot:
-		high = high or e.item.tier >= 5
+		if e.item.armor_set == &"" and e.item.item_type == ItemData.ItemType.ARMOR and e.item.equip_slot != ItemData.EquipSlot.OFF_HAND:
+			continue  # jewelry has its own grades
+		high = high or e.item.tier >= 6
 		any_iron = any_iron or e.item.tier == 1
-	check("level 30-40 chests hold ebon and better, no iron", high and not any_iron)
+	check("level 45-55 chests hold the first dragonbone, no iron", high and not any_iron)
 	check("a quality of 0 gives no enemy drops", ItemCatalog.enemy_loot(10, 0.0).is_empty())
 
 
 func t_curve() -> void:
 	print("-- level curve")
-	check("level 1 is tier 0, level 5 still 0, level 6 is steel", LevelCurve.tier_for_level(1) == 0 and LevelCurve.tier_for_level(5) == 0 and LevelCurve.tier_for_level(6) == 1)
-	check("level 41 is dragonbone, 42 starforged, 100 stays starforged", LevelCurve.tier_for_level(41) == 5 and LevelCurve.tier_for_level(42) == 6 and LevelCurve.tier_for_level(100) == 6)
-	check("enemy health grows with level", LevelCurve.enemy_health(1) < LevelCurve.enemy_health(20) and LevelCurve.enemy_health(40) > 400.0)
+	check("level 1 is tier 0, level 7 still 0, level 8 is steel", LevelCurve.tier_for_level(1) == 0 and LevelCurve.tier_for_level(7) == 0 and LevelCurve.tier_for_level(8) == 1)
+	check("level 73 is dragonbone, 74 starforged, 100 stays starforged", LevelCurve.tier_for_level(73) == 5 and LevelCurve.tier_for_level(74) == 6 and LevelCurve.tier_for_level(100) == 6)
+	check("enemy health grows with level", LevelCurve.enemy_health(1) < LevelCurve.enemy_health(20) and LevelCurve.enemy_health(60) > 400.0)
 	check("scaling a level keeps it inside the zone", LevelCurve.scale_level(1, 6, 18) == 6 and LevelCurve.scale_level(40, 6, 18) == 18 and LevelCurve.scale_level(10, 6, 18) == 10)
 	# a fair fight: hits an enemy of the right level takes with the matching tier of sword
 	var fair := true
 	var note := ""
-	for level in [1, 6, 12, 18, 25, 33, 42]:
+	for level in LevelCurve.TIER_MIN_LEVEL:
 		var tier := LevelCurve.tier_for_level(level)
 		var sword := ItemCatalog.get_weapon(ItemCatalog.Weapon.SWORD, tier)
 		var hits := LevelCurve.enemy_health(level) / (5.0 + sword.weapon_damage)
@@ -216,7 +218,7 @@ func t_enemy_data() -> void:
 	check("poise follows the curve", high.max_poise > low.max_poise)
 	check("a level 1 bandit wields iron", low.starting_weapon != null and low.starting_weapon.tier == 1, str(low.starting_weapon))
 	check("a level 30 bandit wields ebon or the tier below", high.starting_weapon != null and high.starting_weapon.tier >= 4, str(high.starting_weapon.tier))
-	check("a level 30 bandit wears armor, a level 1 bandit wears none", high.starting_armor.size() == 1 and low.starting_armor.is_empty())
+	check("a level 30 bandit wears armor (cuirass, helmet, greaves), a level 1 bandit wears none", high.starting_armor.size() == 3 and low.starting_armor.is_empty())
 	var pair := Enemy.new()
 	cutthroat.apply(pair, 8, rng)
 	check("cutthroats carry two daggers", pair.starting_weapon != null and pair.starting_weapon == pair.starting_off_hand and pair.starting_weapon.can_dual_wield)

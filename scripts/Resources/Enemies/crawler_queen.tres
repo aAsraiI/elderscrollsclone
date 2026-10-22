@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/loot_entry.gd" id="1_iyhol"]
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="2_eg6wi"]
+
+[resource]
+script = ExtResource("2_eg6wi")
+id = &"crawler_queen"
+display_name = "Crawler Queen"
+color = Color(0.3, 0.4, 0.25, 1)
+body_scale = 1.6
+health_mult = 6.0
+damage_mult = 1.5
+poise_mult = 3.0
+loot_quality = 0.0
+armor_tier_offset = -9
+kit = 0
+move_speed = 3.4
+telegraph_time = 0.5
+heavy_chance = 0.4
+knockback_resistance = 0.7
+talk_name = "Crawler Queen"
+talk_lines = PackedStringArray()

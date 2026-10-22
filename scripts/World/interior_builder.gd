@@ -18,7 +18,7 @@ const STONE := Color(0.40, 0.39, 0.37)
 
 
 ## Returns {"root": Node3D, "start": Vector3, "start_yaw": float, "ambient": Color, "chests": int}
-static func build(b: BuildingPlot, interior_seed: int) -> Dictionary:
+static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: int = 1) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = interior_seed
 	var w := maxf(b.size.x + 1.5, 7.0)
@@ -137,6 +137,12 @@ static func build(b: BuildingPlot, interior_seed: int) -> Dictionary:
 				"fighters":
 					for i in 2:
 						POIBuilder.add_box(root, Vector3(0.35, 1.7, 0.35), Vector3(w * 0.5 - 1.2, 0.85, -d * 0.2 + float(i) * 2.0), Color(0.6, 0.5, 0.3))
+				"antiquarians":
+					var case := MuseumCase.new()
+					case.name = "MuseumCase"
+					root.add_child(case)
+					case.position = Vector3(w * 0.5 - 1.0, 0.0, -d * 0.1)
+					case.rotation.y = PI * 0.5
 				"mages":
 					for side in [-1.0, 1.0]:
 						POIBuilder.add_box(root, Vector3(0.5, 2.6, d * 0.5), Vector3(side * (w * 0.5 - 0.3), 1.3, 0.0), DARK_WOOD)
@@ -150,15 +156,47 @@ static func build(b: BuildingPlot, interior_seed: int) -> Dictionary:
 				seats.append(Vector3(1.6 * (1.0 if i % 2 == 0 else -1.0), 0.0, d * 0.05 + (float(i / 2) - 0.5) * 2.0))
 			chests += _chest(root, b, 0, "Guild Chest", Vector3(-w * 0.5 + 0.8, 0.35, d * 0.5 - 1.0), _shop_loot(), interior_seed)
 
+	# Furnish the rest of the room and put things on every surface (owned: taking them is theft;
+	# guild halls belong to the guild, so members may help themselves)
+	var owner := b.id if b.kind != BuildingPlot.Kind.GUILD_HALL else "guild:" + b.guild
+	var decor := RoomDecorator.decorate(root, Rect2(-w * 0.5, -d * 0.5, w, d), theme_for(b, rng), level, interior_seed ^ 0x5eed,
+		owner, "building/%s" % b.id, _keep_clear(door_z, work, seats, beds), 3, today, h)
+
 	return {
 		"root": root,
 		"start": Vector3(0.0, 0.1, door_z + 2.2),
 		"start_yaw": PI,  # facing into the room
 		"ambient": AMBIENT,
 		"chests": chests,
+		"decor": decor,
 		# where the people who live or work here go (local positions, on the floor)
 		"spots": {"exit": Vector3(0.0, 0.1, door_z + 1.4), "beds": beds, "work": work, "seats": seats},
 	}
+
+
+## Which RoomDecorator theme a building gets
+static func theme_for(b: BuildingPlot, rng: RandomNumberGenerator) -> String:
+	match b.kind:
+		BuildingPlot.Kind.HOUSE:
+			return "rich_home" if rng.randf() < 0.2 else "home"
+		BuildingPlot.Kind.FARM:
+			return "farm"
+		BuildingPlot.Kind.INN:
+			return "tavern"
+		BuildingPlot.Kind.SMITHY:
+			return "smithy"
+		BuildingPlot.Kind.TEMPLE:
+			return "temple"
+		BuildingPlot.Kind.GUILD_HALL:
+			var g := "guild_" + b.guild
+			return g if RoomDecorator.THEMES.has(g) else "guild"
+		BuildingPlot.Kind.SHOP:
+			match b.trade:
+				"alchemy":
+					return "alchemist"
+				"jeweler", "pawnbroker":
+					return "rich_home"
+	return "shop"
 
 
 # ---------------------------------------------------------------- furniture
@@ -224,3 +262,11 @@ static func _shop_loot() -> Array[LootEntry]:
 
 static func _offering_loot() -> Array[LootEntry]:
 	return [_entry(C + "gold.tres", 0.9, 5, 30), _entry(C + "minor_health_potion.tres", 0.4, 1, 2)]
+
+
+# The door and every spot people walk to: the decorator keeps a path from each to the middle
+static func _keep_clear(door_z: float, work: Vector3, seats: Array[Vector3], beds: Array[Vector3]) -> Array[Vector3]:
+	var out: Array[Vector3] = [Vector3(0.0, 0.0, door_z), work]
+	out.append_array(seats)
+	out.append_array(beds)
+	return out

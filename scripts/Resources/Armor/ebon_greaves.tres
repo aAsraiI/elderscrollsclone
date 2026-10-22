@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_s0ehn"]
+
+[resource]
+script = ExtResource("1_s0ehn")
+id = &"ebon_greaves"
+display_name = "Ebon Greaves"
+description = "Blackened ebon steel, cold to the touch. Heavy armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 9.200000000000001
+value = 576
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 12.4
+}
+tier = 5
+min_level = 41
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"ebon_heavy"
+animation_set = &"greaves"

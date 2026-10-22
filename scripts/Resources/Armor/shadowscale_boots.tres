@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_dpma4"]
+
+[resource]
+script = ExtResource("1_dpma4")
+id = &"shadowscale_boots"
+display_name = "Shadowscale Boots"
+description = "Overlapping scales of dark volcanic glass. Light armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 1.8
+value = 101
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 3.5
+}
+tier = 4
+min_level = 28
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"obsidian_light"
+animation_set = &"boots"

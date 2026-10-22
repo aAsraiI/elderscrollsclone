@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_pxqh6"]
+
+[resource]
+script = ExtResource("1_pxqh6")
+id = &"steel_waraxe"
+display_name = "Steel War Axe"
+description = "Well-forged steel with a keen edge. A one-handed axe. A little quicker than a sword and bites deeper, with a shorter arc."
+item_type = 1
+equip_slot = 6
+weight = 7.0
+value = 75
+governing_skill = "one_handed"
+tier = 2
+min_level = 8
+loot_tags = PackedStringArray("weapon", "smithy")
+weapon_damage = 16.5
+attack_style = 1
+arc_degrees = 80.0
+attack_cooldown = 0.62
+attack_windup = 0.11
+attack_active = 0.13
+stamina_cost = 6.83
+knockback = 2.1
+poise_damage = 19.8
+animation_set = &"axe"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_vmr25"]
+
+[resource]
+script = ExtResource("1_vmr25")
+id = &"smoked_fish"
+display_name = "Smoked Fish"
+item_type = 3
+weight = 0.3
+value = 5
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "coast")
+use_verb = "Eat"
+heal_amount = 20.0
+effect_duration = 60.0

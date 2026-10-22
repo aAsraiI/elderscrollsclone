@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_huocf"]
+
+[resource]
+script = ExtResource("1_huocf")
+id = &"oracle_tablet"
+display_name = "Clay Oracle Tablet"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 4.0
+value = 300
+min_level = 20
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("ruin")

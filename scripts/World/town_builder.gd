@@ -15,6 +15,9 @@ const GUILD_COLORS := {
 	"mages": Color(0.18, 0.25, 0.70),
 	"knights": Color(0.80, 0.78, 0.70),
 	"thieves": Color(0.15, 0.15, 0.15),
+	"antiquarians": Color(0.75, 0.60, 0.25),
+	"hunters": Color(0.25, 0.42, 0.20),
+	"merchants": Color(0.55, 0.18, 0.45),
 }
 const SIGN_COLORS := {
 	BuildingPlot.Kind.SHOP: Color(0.70, 0.55, 0.20),

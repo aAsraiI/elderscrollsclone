@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_j8a3f"]
+
+[resource]
+script = ExtResource("1_j8a3f")
+id = &"wool_hood"
+display_name = "Wool Hood"
+description = "Everyday clothes. No protection, but they look the part."
+item_type = 2
+equip_slot = 1
+weight = 0.5
+value = 4
+loot_tags = PackedStringArray("home", "camp", "clothes")

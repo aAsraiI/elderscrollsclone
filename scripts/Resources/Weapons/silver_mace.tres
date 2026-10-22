@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_h1f5g"]
+
+[resource]
+script = ExtResource("1_h1f5g")
+id = &"silver_mace"
+display_name = "Silver Mace"
+description = "Silvered steel that gleams even in the dark. A one-handed club of metal. Slow, but it crushes through armor and staggers hard."
+item_type = 1
+equip_slot = 6
+weight = 10.5
+value = 210
+governing_skill = "one_handed"
+tier = 3
+min_level = 17
+loot_tags = PackedStringArray("weapon", "smithy")
+weapon_damage = 25.2
+attack_cooldown = 0.85
+attack_windup = 0.18
+stamina_cost = 8.8
+knockback = 3.85
+armor_pierce = 0.25
+poise_damage = 33.6
+combo_length = 2
+heavy_charge_time = 0.5
+heavy_windup = 0.2
+heavy_damage_mult = 1.8
+heavy_reach_bonus = 0.2
+animation_set = &"mace"

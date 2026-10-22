@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_6ot0i"]
+
+[resource]
+script = ExtResource("1_6ot0i")
+id = &"torn_journal"
+display_name = "Torn Journal"
+description = "Worth a few coins to the right buyer."
+weight = 0.5
+value = 4
+stackable = true
+max_stack = 99
+junk = true
+loot_tags = PackedStringArray("library", "camp")

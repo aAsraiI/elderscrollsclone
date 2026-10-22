@@ -43,6 +43,28 @@ extends Resource
 ## How dark the dungeon is without lights
 @export var ambient_color := Color(0.03, 0.03, 0.04)
 
+@export_group("Size and features")
+## How rooms are furnished (a RoomDecorator theme: cave, crypt, barrow, mine, fort, ruin, vault,
+## ice, ashen, sewer, camp)
+@export var theme := "cave"
+## Floors: 0 = by level (one floor below level 22, then one more every 22 levels, at most 4)
+@export_range(0, 6) var floors := 0
+## Extra rooms per floor for every 10 levels of the dungeon, on top of min/max rooms
+@export_range(0.0, 10.0, 0.1) var rooms_per_10_levels := 2.2
+## From this level on: pressure-plate traps (Security disarms them). 0 = never.
+@export var traps_from_level := 15
+## Chance of a hidden room behind a loose stone on each floor
+@export_range(0.0, 1.0, 0.01) var secret_chance := 0.6
+## From this level on, a gate on each floor blocks the way to its last room until you find the lever
+@export var gate_from_level := 10
+
+
+## Floors this dungeon has at this level
+func floors_for(level: int) -> int:
+	if floors > 0:
+		return floors
+	return clampi(1 + level / 22, 1, 4)
+
 
 func get_key() -> String:
 	if id != &"":

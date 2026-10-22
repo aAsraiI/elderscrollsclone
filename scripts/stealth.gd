@@ -122,6 +122,8 @@ func awareness_of(e: Node) -> float:
 
 
 func is_detected_by(e: Node) -> bool:
+	if _player != null and _player.has_meta("invisible"):
+		return false  # Invisibility: nobody sees you (until you attack or cast)
 	return awareness_of(e) >= SEEN
 
 
@@ -161,6 +163,15 @@ func visibility() -> float:
 
 ## How far away the player can be heard right now (meters, through walls)
 func noise_radius() -> float:
+	return _noise_radius_raw() * _noise_mult()
+
+
+func _noise_mult() -> float:
+	var st := _player.get_node_or_null("Stats") as Stats if _player != null else null
+	return clampf(st.get_stat("noise_mult"), 0.0, 2.0) if st != null else 1.0
+
+
+func _noise_radius_raw() -> float:
 	if _time < _noise_until:
 		return 6.0 if sneaking else 12.0
 	if sneaking or _player == null:

@@ -101,9 +101,12 @@ func t_main_menu() -> void:
 		await frames(2)
 		check("closing the slots shows the buttons again", menu._buttons.visible and not paused)
 	menu._on_new_game()
-	check("New Game shows the seed box", menu._new_panel.visible)
-	menu._seed_edit.text = ""
-	menu._start_new_game()
+	var wiz: NewGameWizard = null
+	for c in menu.get_children():
+		if c is NewGameWizard:
+			wiz = c
+	check("New Game opens World and Character Creation", wiz != null)  # stage 11 (was a seed box)
+	wiz.begin.emit("", {}, {})
 	await frames(40)
 	check("Start switches to the game scene", current_scene != null and current_scene.scene_file_path == SaveManager.GAME_SCENE, str(current_scene.scene_file_path if current_scene else ""))
 

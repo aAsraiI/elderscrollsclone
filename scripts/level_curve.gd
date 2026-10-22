@@ -86,13 +86,18 @@ static func enemy_health(level: int) -> float:
 
 ## How much a hit chips at the enemy's poise before it staggers
 static func enemy_poise(level: int) -> float:
-	return 40.0 + 0.8 * float(level)
+	return 48.0 + 1.0 * float(level)
 
 
 ## Multiplier on the damage of an enemy's weapon. Gently below 1 at high level, because weapon
 ## damage itself grows steeply with the tier.
 static func enemy_damage_mult(level: int) -> float:
-	return maxf(1.0 - 0.005 * float(level), 0.6)
+	return maxf(1.15 - 0.005 * float(level), 0.7)
+
+
+## Damage of an enemy mage's bolt (one hit), by level
+static func enemy_spell_damage(level: int) -> float:
+	return 9.0 + 1.5 * float(level)
 
 
 ## Damage of an unarmed creature (wolves, bears, trolls): it has no weapon to add damage

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_gjfxg"]
+
+[resource]
+script = ExtResource("1_gjfxg")
+id = &"sellsword_contract"
+display_name = "Sellsword Contract"
+description = "Use it to hire a sellsword who follows and fights for you."
+weight = 0.5
+value = 500
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

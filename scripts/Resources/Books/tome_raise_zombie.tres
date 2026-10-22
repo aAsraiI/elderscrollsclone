@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_te3ry"]
+
+[resource]
+script = ExtResource("1_te3ry")
+id = &"tome_raise_zombie"
+display_name = "Spell Tome: Raise Zombie"
+description = "Apprentice Conjuration spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 90
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "raise_zombie"

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_vx5ah"]
+
+[resource]
+script = ExtResource("1_vx5ah")
+id = &"vegetable_soup"
+display_name = "Vegetable Soup"
+description = "Warm and filling."
+item_type = 3
+weight = 0.5
+value = 12
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "tavern")
+use_verb = "Eat"
+magic_effects = Array[Dictionary]([{
+"dur": 0.0,
+"id": &"restore_stamina",
+"mag": 30.0
+}, {
+"dur": 300.0,
+"id": &"regenerate_stamina",
+"mag": 25.0
+}])
+ingredient_effects = PackedStringArray()

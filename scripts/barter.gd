@@ -86,6 +86,9 @@ static func merchant_for(b: BuildingPlot) -> MerchantData:
 			key = "smith"
 		BuildingPlot.Kind.TEMPLE:
 			key = "temple"
+		BuildingPlot.Kind.GUILD_HALL:
+			if b.guild == "mages":
+				key = "mages"
 	if key == "":
 		return null
 	if not _merchants.has(key):
@@ -152,6 +155,7 @@ static func _restock(s: Shop, day: int, level_min: int, level_max: int, gold_sca
 		entries.append_array(ItemCatalog.curve_loot(maxi(level_min, level_max - 3), level_max, s.data.curve_quality))
 	if s.data.treasure_stock:
 		entries.append_array(ItemCatalog.treasure_loot(level_min, level_max, 2.5))
+	entries.append_array(CraftStock.extra_for(String(s.data.id), level_min, level_max))
 	for e in entries:
 		if e == null or e.item == null or rng.randf() > e.chance:
 			continue

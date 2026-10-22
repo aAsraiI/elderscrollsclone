@@ -23,6 +23,13 @@ var _tabs: TabBar
 var _pages: Array[Control] = []
 var _controls := {}  # option key -> the control showing it
 var _open := false
+var _rebinding := ""
+var _rebind_button: Button
+const KEYS_FIXED := [
+	["Left mouse / right trigger", "Attack (hold: heavy, or draw a bow)"], ["Right mouse / left trigger", "Block, slam, cast, or aim a bow"],
+	["Tab / controller Y", "Menu"], ["I M C J P, 1-5", "Menu pages"], ["F (Shift+F)", "Feed / devour / fill a bottle"],
+	["F10", "Save and load slots"], ["Esc / Start", "Pause, close a menu"],
+]
 
 
 func _ready() -> void:
@@ -54,6 +61,15 @@ func close() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _rebinding != "" and event is InputEventKey and event.pressed and not event.echo:
+		var k := (event as InputEventKey).physical_keycode
+		if k != KEY_ESCAPE:
+			Bindings.set_key(_rebinding, k)
+		if _rebind_button != null:
+			_rebind_button.text = Bindings.key_name(_rebinding)
+		_rebinding = ""
+		get_viewport().set_input_as_handled()
+		return
 	if _open and event.is_action_pressed("ui_cancel"):
 		close()
 		get_viewport().set_input_as_handled()
@@ -106,15 +122,28 @@ func _build_ui() -> void:
 		scroll.add_child(grid)
 		_pages.append(scroll)
 		if tab_name == "Controls":
-			for k: Array in KEYS:
+			for r: Array in Bindings.REBINDABLE:
+				var what := Label.new()
+				what.text = r[1]
+				what.custom_minimum_size = Vector2(260, 0)
+				grid.add_child(what)
+				var b := Button.new()
+				b.text = Bindings.key_name(r[0])
+				b.custom_minimum_size = Vector2(160, 0)
+				var action: String = r[0]
+				b.pressed.connect(func() -> void:
+					_rebinding = action
+					_rebind_button = b
+					b.text = "Press a key...")
+				grid.add_child(b)
+			for k: Array in KEYS_FIXED:
+				var what2 := Label.new()
+				what2.text = k[1]
+				grid.add_child(what2)
 				var key := Label.new()
 				key.text = k[0]
 				key.add_theme_color_override("font_color", UITheme.GOLD)
-				key.custom_minimum_size = Vector2(150, 0)
 				grid.add_child(key)
-				var what := Label.new()
-				what.text = k[1]
-				grid.add_child(what)
 			continue
 		for o: Dictionary in GameSettings.OPTIONS:
 			if o["tab"] == tab_name:
@@ -130,6 +159,7 @@ func _build_ui() -> void:
 	reset.text = "Reset to defaults"
 	reset.pressed.connect(func() -> void:
 		GameSettings.reset_to_defaults(get_tree())
+		Bindings.reset()
 		_sync_controls())
 	buttons.add_child(reset)
 	var spacer := Control.new()

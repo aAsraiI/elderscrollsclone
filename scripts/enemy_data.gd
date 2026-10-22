@@ -142,4 +142,94 @@ func apply(e: Enemy, level: int, rng: RandomNumberGenerator) -> void:
 
 	var drops: Array[LootEntry] = extra_loot.duplicate()
 	drops.append_array(ItemCatalog.enemy_loot(level, loot_quality))
+	drops.append_array(CraftStock.creature_drops(get_key(), level))
 	e.loot = drops
+	_apply_stage10(e, level, rng)
+
+
+## Stage 10: the body, the fighting style, spells and resistances of this kind of enemy
+func _apply_stage10(e: Enemy, level: int, rng: RandomNumberGenerator) -> void:
+	var key := get_key()
+	e.enemy_id = key
+	var tough := float(GameRules.get_rule("enemy_toughness"))
+	e.max_health *= tough
+	e.damage_mult *= tough
+	e.body_kind = CreatureBody.kind_for(key)
+	# Sharper with level: dodges, blocks, parries and feints more often
+	e.cunning = clampf(0.12 + float(level) * 0.012, 0.12, 0.85)
+	# The tell before a swing gets shorter as enemies get better
+	e.telegraph_time = telegraph_time * clampf(1.0 - float(level) * 0.006, 0.6, 1.0)
+	e.max_attackers = 3 if level >= 15 else 2
+	match e.body_kind:
+		CreatureBody.Kind.BEAST, CreatureBody.Kind.CRAWLER:
+			e.style = Enemy.Style.BEAST
+		CreatureBody.Kind.SPIRIT:
+			e.style = Enemy.Style.SPIRIT
+		_:
+			e.style = Enemy.Style.BRUTE if (e.starting_weapon != null and e.starting_weapon.two_handed) or body_scale >= 1.3 else Enemy.Style.DUELIST
+	if e.body_kind == CreatureBody.Kind.HUMANOID and disposition == Enemy.Disposition.HOSTILE and not key.contains("skeleton") and not key.contains("wight"):
+		e.potions = 1 if rng.randf() < 0.5 else 0
+	var res := {}
+	var spell_ids: Array = []
+	match key:
+		"fire_spirit":
+			res = {"resist_fire": 1.0, "resist_frost": -0.5}
+			spell_ids = ["e_firebolt"]
+		"ice_wraith":
+			res = {"resist_frost": 1.0, "resist_fire": -0.5}
+			spell_ids = ["e_icebolt"]
+		"ash_cultist":
+			res = {"resist_fire": 0.5}
+			spell_ids = ["e_firebolt", "e_ward"]
+			e.style = Enemy.Style.MAGE
+		"ashen_priest":
+			res = {"resist_fire": 0.5}
+			spell_ids = ["e_firebolt", "e_heal", "e_ward"]
+			e.style = Enemy.Style.MAGE
+		"skeleton", "skeleton_knight":
+			res = {"resist_frost": 0.5, "resist_poison": 1.0, "resist_fire": -0.25}
+		"barrow_wight", "wight_lord", "crypt_warden":
+			res = {"resist_frost": 0.5, "resist_poison": 1.0}
+			spell_ids = ["e_drain", "e_icebolt"] if key != "crypt_warden" else ["e_drain"]
+		"vault_sentinel", "vault_guardian":
+			res = {"resist_shock": 0.5, "resist_magic": 0.25}
+			spell_ids = ["e_shock"]
+		"frost_bear", "frost_giant", "frost_raider", "reaver":
+			res = {"resist_frost": 0.4}
+		"cave_troll":
+			res = {"resist_fire": -0.3}
+		"vampire":
+			res = {"resist_frost": 0.5, "resist_fire": -0.5, "resist_poison": 1.0}
+			spell_ids = ["e_drain"]
+		"werewolf":
+			res = {"resist_frost": 0.3, "resist_poison": 0.5}
+			e.style = Enemy.Style.BEAST
+		"deep_crawler", "crawler_queen", "dune_stalker":
+			res = {"resist_poison": 0.6}
+		"bandit", "raider", "cutthroat", "smuggler", "deserter":
+			# now and then a bandit has picked up a little magic
+			if rng.randf() < 0.15:
+				spell_ids = ["e_firebolt"] if rng.randf() < 0.5 else ["e_shock"]
+				e.style = Enemy.Style.MAGE
+	# Archers: hunters mostly, bandits and raiders now and then
+	var archer_chance: float = {"hunter": 0.7, "trapper": 0.6, "bandit": 0.25, "raider": 0.25, "smuggler": 0.2,
+		"deserter": 0.25, "frost_raider": 0.25, "reaver": 0.2, "wanderer": 0.15}.get(key, 0.0)
+	if spell_ids.is_empty() and rng.randf() < float(archer_chance):
+		var bow := ItemCatalog.get_bow(LevelCurve.tier_for_level(level))
+		if bow != null:
+			e.starting_weapon = bow
+			e.starting_off_hand = null
+	if not res.is_empty():
+		e.set_meta("resists", res)
+	for id in spell_ids:
+		var s := SpellCatalog.get_spell(String(id))
+		if s == null:
+			continue
+		# Enemy spells are made for their level: damage like a weapon hit of that level
+		for fx in s.effects:
+			var kind := int(MagicEffects.get_def(StringName(fx["id"])).get("kind", 0))
+			if kind == MagicEffects.Kind.INSTANT:
+				fx["mag"] = LevelCurve.enemy_spell_damage(level) * (1.6 if fx["id"] == &"restore_health" else 1.0)
+			elif kind == MagicEffects.Kind.BUFF:
+				fx["mag"] = 10.0 + float(level) * 0.8
+		e.spells.append(s)

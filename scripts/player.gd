@@ -47,6 +47,13 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var _skills: Skills = get_node_or_null("Skills") as Skills
 @onready var _combat: MeleeCombat = get_node_or_null("MeleeCombat") as MeleeCombat
 
+## For the body you see in third person (CreatureBody reads the same fields an Enemy has)
+var state := 0
+var combat: MeleeCombat
+var equipment: Equipment
+var display_name := "You"
+var body_scale := 1.0
+var placeholder_color := Color(0.35, 0.3, 0.42)
 var _sprint_timer := 0.0
 var _dead := false
 ## Set from Settings (GameSettings): mouse_sensitivity, invert_y and the camera's field of view
@@ -63,8 +70,11 @@ func apply_settings() -> void:
 
 func _ready() -> void:
 	add_to_group("player")  # enemies look for this group
+	combat = _combat
+	equipment = get_node_or_null("Equipment") as Equipment
 	collision_mask |= ENEMY_LAYER  # so you can't walk through enemies
 	# Registered first so the physics loop never asks for an action that doesn't exist yet
+	Bindings.apply()  # your keys (Settings > Controls) and the controller layout
 	_register_input_actions()
 	_ensure_helpers()
 	add_to_group("settings_listener")
@@ -72,10 +82,17 @@ func _ready() -> void:
 
 	var sword: ItemData = load("res://scripts/Resources/iron_sword.tres")
 	var armor: ItemData = load("res://scripts/Resources/iron_chestplate.tres")
-
-	$Inventory.add_item(sword)
-	$Inventory.add_item(armor)
-	$Equipment.equip(sword)
+	# A character made on the Character Creation screen starts with its own class gear instead of
+	# the test loadout (and without the test enemy and sword)
+	var created := CharacterSetup.has_pending()
+	if created:
+		give_test_loadout = false
+		spawn_test_enemy = false
+		CharacterSetup.apply(self, CharacterSetup.pending, not SaveSession.has_pending())
+	else:
+		$Inventory.add_item(sword)
+		$Inventory.add_item(armor)
+		$Equipment.equip(sword)
 
 	if give_test_loadout:
 		for entry in TEST_ITEMS:
@@ -90,9 +107,9 @@ func _ready() -> void:
 
 	await get_tree().process_frame
 
-	var spawn_pos := global_position - global_transform.basis.z * 2.0 + Vector3.UP
-	var w := WorldItem.spawn(sword, 1, get_tree().current_scene, spawn_pos)
-	print("spawned at: ", w.global_position)
+	if not created:
+		var spawn_pos := global_position - global_transform.basis.z * 2.0 + Vector3.UP
+		WorldItem.spawn(sword, 1, get_tree().current_scene, spawn_pos)
 
 	if spawn_test_enemy:
 		var enemy_pos := global_position - global_transform.basis.z * 7.0 + Vector3.UP * 0.5
@@ -121,6 +138,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if combat != null:
+		state = Enemy.State.ATTACK if (combat.is_busy() or combat.is_blocking() or (equipment != null and equipment.get_main_hand() != null)) else Enemy.State.IDLE
 	if _dead:
 		velocity.x = 0.0
 		velocity.z = 0.0
@@ -128,16 +147,35 @@ func _physics_process(delta: float) -> void:
 			velocity.y -= gravity * delta
 		move_and_slide()
 		return
+	# Controller: the right stick looks around
+	var look := Vector2(Input.get_joy_axis(0, JOY_AXIS_RIGHT_X), Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y))
+	if look.length() > 0.15 and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		var sp := float(GameSettings.get_value("controller_look")) * delta
+		rotate_y(-look.x * sp)
+		head.rotate_x(-look.y * sp * (-1.0 if invert_y else 1.0))
+		head.rotation.x = clampf(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
 	# Gravity and jumping
 	if not is_on_floor():
-		velocity.y -= gravity * delta
-	elif Input.is_action_just_pressed("jump"):
-		velocity.y = jump_velocity
+		var fall := clampf(_stats.get_stat("fall_mult"), 0.1, 1.0) if _stats != null and velocity.y < 0.0 else 1.0
+		velocity.y -= gravity * delta * fall
+	elif Input.is_action_just_pressed("jump") and not _is_paralyzed():
+		velocity.y = jump_velocity * sqrt(maxf(_stats.get_stat("jump_mult"), 0.2) if _stats != null else 1.0)
 		if _skills != null:
 			_skills.add_xp(&"athletics", jump_xp)
 
 	# Horizontal movement relative to where the player is facing
 	var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	if _is_paralyzed():
+		input_dir = Vector2.ZERO
+	# In deep water you swim; on a horse the horse moves (see Swimming, Rider)
+	var swim := get_node_or_null("Swimming") as Swimming
+	if swim != null and swim.is_swimming():
+		swim.swim_move(delta, input_dir, Input.is_action_pressed("sprint"))
+		return
+	var rider := get_node_or_null("Rider") as Rider
+	if rider != null and rider.is_riding():
+		rider.ride(delta, input_dir, Input.is_action_pressed("sprint"))
+		return
 	var direction: Vector3 = (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 
 	var sprinting: bool = Input.is_action_pressed("sprint")
@@ -155,6 +193,11 @@ func _physics_process(delta: float) -> void:
 		if _sprint_timer >= 1.0:
 			_sprint_timer -= 1.0
 			_skills.add_xp(&"athletics", sprint_xp_per_second)
+
+
+## Paralyze (a spell, a poison): you can't move for a moment
+func _is_paralyzed() -> bool:
+	return has_meta("paralyzed_until") and Time.get_ticks_msec() < int(get_meta("paralyzed_until"))
 
 
 # Agility raises this above 1.0 (see Stats.ATTRIBUTE_EFFECTS); blocking and heavy loads slow you down
@@ -205,6 +248,38 @@ func _ensure_helpers() -> void:
 		var journal := JournalUI.new()
 		journal.name = "JournalUI"
 		add_child(journal)
+	# Stage 10: magic on you, your spells, the casting hand, the Magic page, waiting, favorites
+	if get_node_or_null("ActiveMagic") == null:
+		ActiveMagic.attach(self)
+	if get_node_or_null("Spellbook") == null:
+		var book := Spellbook.new()
+		book.name = "Spellbook"
+		add_child(book)
+	if get_node_or_null("SpellCaster") == null:
+		var caster := SpellCaster.new()
+		caster.name = "SpellCaster"
+		add_child(caster)
+	for extra in [["Afflictions", Afflictions], ["Survival", Survival], ["Powers", Powers], ["NightVision", NightVision], ["ThirdPerson", ThirdPerson], ["Swimming", Swimming], ["Rider", Rider], ["SoundFX", SoundFX], ["Tutorial", Tutorial], ["Followers", Followers], ["RangedCombat", RangedCombat]]:
+		if get_node_or_null(extra[0]) == null:
+			var n: Node = extra[1].new()
+			n.name = extra[0]
+			add_child(n)
+	if get_node_or_null("MagicUI") == null:
+		var mui := MagicUI.new()
+		mui.name = "MagicUI"
+		add_child(mui)
+	if get_node_or_null("CraftingUI") == null:
+		var cui := CraftingUI.new()
+		cui.name = "CraftingUI"
+		add_child(cui)
+	if get_node_or_null("WaitMenu") == null:
+		var wm := WaitMenu.new()
+		wm.name = "WaitMenu"
+		add_child(wm)
+	if get_node_or_null("FavoritesMenu") == null:
+		var fav := FavoritesMenu.new()
+		fav.name = "FavoritesMenu"
+		add_child(fav)
 	if get_node_or_null("MenuHub") == null:
 		var hub := MenuHub.new()
 		hub.name = "MenuHub"
@@ -228,6 +303,13 @@ func _on_died() -> void:
 	# With a save to go back to: Load Last Save / Main Menu buttons. Without one: start over.
 	var sm := get_tree().get_first_node_in_group("save_manager") as SaveManager
 	var last := sm.latest_slot() if sm != null else ""
+	if GameRules.ironman():
+		# Ironman: one life. The save is gone; only the main menu is left.
+		if sm != null and SaveSession.current_slot != "":
+			sm.delete_slot(SaveSession.current_slot)
+		last = ""
+		reload_on_death = false
+		label.text = "YOUR STORY ENDS HERE"
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons.add_theme_constant_override("separation", 10)

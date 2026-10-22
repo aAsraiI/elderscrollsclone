@@ -4,7 +4,7 @@ extends Node
 ## Everything that depends on the hour asks this node: NPC schedules, shop hours, door locks.
 ## It also moves the sun, and dims the sky and ambient light at night (not inside a dungeon,
 ## which has its own lighting). Time stands still while a menu pauses the game.
-## Debug builds: F8 = +1 hour, Shift+F8 = +6 hours.
+## Debug builds: F8 = +1 hour, Shift+F8 = +6 hours, Ctrl+F8 = +30 days (a month, to see the seasons).
 
 signal hour_changed(hour: int)
 signal day_changed(day: int)
@@ -34,11 +34,26 @@ const NIGHT_FOG := Color(0.02, 0.03, 0.06)
 var hour := 8.0
 var day := 1
 
+## The calendar: 12 months of 30 days, a 7-day week. Day 1 of a new game is the 1st of Seedfall
+## (early spring) in the year 412. Seasons change the length of the day, the weather and the land.
+const MONTHS: Array[String] = ["Frostwane", "Thawmoon", "Seedfall", "Rainhand", "Bloomtide", "Midyear",
+	"Sunheight", "Harvestmoon", "Hearthfire", "Leaffall", "Duskmoon", "Deepwinter"]
+const WEEKDAYS: Array[String] = ["Moonsday", "Toilsday", "Wellsday", "Thornsday", "Fairday", "Starday", "Sunsday"]
+const SEASONS: Array[String] = ["Winter", "Spring", "Summer", "Autumn"]
+const DAYS_PER_MONTH := 30
+const DAYS_PER_YEAR := 360
+const START_MONTH := 2
+const START_YEAR := 412
+## Sunsday is a day of rest (most people don't work); Fairday is market day
+const REST_DAY := 6
+const MARKET_DAY := 4
+
 var _was_night := false
 var _last_hour_int := 8
 var _sun: DirectionalLight3D
 var _env: Environment
 var _apply_timer := 0.0
+var _base_fog := -1.0
 
 
 func _ready() -> void:
@@ -65,7 +80,7 @@ func _process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if debug_keys and OS.is_debug_build() and InputMap.has_action(ACTION) and event.is_action_pressed(ACTION):
-		advance_hours(6.0 if Input.is_key_pressed(KEY_SHIFT) else 1.0)
+		advance_hours((6.0 if Input.is_key_pressed(KEY_SHIFT) else 1.0) if not Input.is_key_pressed(KEY_CTRL) else 24.0 * 30.0)
 		apply_now()
 
 
@@ -142,22 +157,135 @@ func apply_now() -> void:
 	_find_nodes()
 	var elevation := _sun_elevation_deg()
 	var day_factor := get_daylight()
+	# The weather dims the sun and the sky and thickens the fog (see Weather)
+	var w := Weather.factors(get_tree())
 	if _sun != null:
 		# The sun travels east to west; below the horizon its light is switched off
 		var el := deg_to_rad(clampf(elevation, -60.0, 70.0))
-		var t := clampf(inverse_lerp(sunrise_hour, sunset_hour, hour), 0.0, 1.0)
+		var t := clampf(inverse_lerp(_sunrise(), _sunset(), hour), 0.0, 1.0)
 		var az := lerpf(0.0, PI, t)
 		var to_sun := Vector3(cos(az) * cos(el), sin(el), sin(az) * cos(el) * 0.35).normalized()
 		_sun.global_transform = Transform3D(Basis.looking_at(-to_sun, Vector3.UP), _sun.global_position)
-		_sun.light_energy = day_factor
+		_sun.light_energy = day_factor * w.get("sun", 1.0)
 		# Warm light when the sun is low
 		_sun.light_color = Color(1.0, 0.62, 0.38).lerp(Color(1.0, 0.97, 0.9), clampf(elevation / 35.0, 0.0, 1.0))
-		_sun.shadow_enabled = day_factor > 0.05
+		_sun.shadow_enabled = day_factor * float(w.get("sun", 1.0)) > 0.08
 	if _env != null and not _in_dungeon():
-		_env.background_energy_multiplier = lerpf(NIGHT_SKY, 1.0, day_factor)
-		_env.ambient_light_energy = lerpf(NIGHT_AMBIENT, 1.0, day_factor)
+		_env.background_energy_multiplier = lerpf(NIGHT_SKY, 1.0, day_factor) * float(w.get("sky", 1.0))
+		_env.ambient_light_energy = lerpf(NIGHT_AMBIENT, 1.0, day_factor) * float(w.get("ambient", 1.0)) + float(w.get("flash", 0.0))
+		if _base_fog < 0.0:
+			_base_fog = _env.fog_density
 		if _env.fog_enabled:
-			_env.fog_light_color = NIGHT_FOG.lerp(DAY_FOG, day_factor)
+			var fog: Color = NIGHT_FOG.lerp(DAY_FOG, day_factor)
+			_env.fog_light_color = fog.lerp(Color(w.get("fog_color", fog)) * maxf(day_factor, 0.08), float(w.get("fog_tint", 0.0)))
+			_env.fog_density = _base_fog * float(w.get("fog", 1.0))
+
+
+# ---------------------------------------------------------------- the calendar
+
+## 0..359
+func get_day_of_year() -> int:
+	return (day - 1 + START_MONTH * DAYS_PER_MONTH) % DAYS_PER_YEAR
+
+
+## 0 = Frostwane .. 11 = Deepwinter
+func get_month() -> int:
+	return get_day_of_year() / DAYS_PER_MONTH
+
+
+func get_day_of_month() -> int:
+	return get_day_of_year() % DAYS_PER_MONTH + 1
+
+
+func get_year() -> int:
+	return START_YEAR + (day - 1 + START_MONTH * DAYS_PER_MONTH) / DAYS_PER_YEAR
+
+
+## 0 = Moonsday .. 6 = Sunsday
+func get_weekday() -> int:
+	return (day - 1) % 7
+
+
+func is_rest_day() -> bool:
+	return get_weekday() == REST_DAY
+
+
+## 0 winter, 1 spring, 2 summer, 3 autumn
+func get_season() -> int:
+	var m := get_month()
+	if m == 11 or m <= 1:
+		return 0
+	return 1 + (m - 2) / 3
+
+
+func get_season_name() -> String:
+	return SEASONS[get_season()]
+
+
+## 1 in midsummer, -1 in midwinter (smooth through the year)
+func get_summerness() -> float:
+	return cos(float(get_day_of_year() - 165) / float(DAYS_PER_YEAR) * TAU)
+
+
+## "Starday, 14th of Seedfall, 412"
+func get_date_text() -> String:
+	return "%s, %s of %s, %d" % [WEEKDAYS[get_weekday()], ordinal(get_day_of_month()), MONTHS[get_month()], get_year()]
+
+
+## "14 Seedfall"
+func get_short_date() -> String:
+	return "%d %s" % [get_day_of_month(), MONTHS[get_month()]]
+
+
+static func ordinal(n: int) -> String:
+	var suffix := "th"
+	if n % 100 < 11 or n % 100 > 13:
+		match n % 10:
+			1:
+				suffix = "st"
+			2:
+				suffix = "nd"
+			3:
+				suffix = "rd"
+	return "%d%s" % [n, suffix]
+
+
+## The moon is full on the night of the 15th of every month (werewolves change, see Afflictions)
+func get_moon_phase() -> float:
+	return fposmod(float(_night_day_of_month() - 15) / float(DAYS_PER_MONTH) + 0.5, 1.0)
+
+
+func is_full_moon_night() -> bool:
+	return _night_day_of_month() == 15 and (hour >= 18.0 or hour < 6.0)
+
+
+## "Full Moon", "Waxing Moon"...
+func get_moon_name() -> String:
+	var p := get_moon_phase()
+	if absf(p - 0.5) < 0.04:
+		return "Full Moon"
+	if p < 0.04 or p > 0.96:
+		return "New Moon"
+	return "Waxing Moon" if p < 0.5 else "Waning Moon"
+
+
+## Which day a night belongs to: the small hours count as the night before
+func get_night_index() -> int:
+	return day if hour >= 12.0 else day - 1
+
+
+func _night_day_of_month() -> int:
+	var d := get_night_index()
+	return (d - 1 + START_MONTH * DAYS_PER_MONTH) % DAYS_PER_YEAR % DAYS_PER_MONTH + 1
+
+
+# Long summer days, short winter ones
+func _sunrise() -> float:
+	return sunrise_hour - get_summerness() * 0.8
+
+
+func _sunset() -> float:
+	return sunset_hour + get_summerness() * 0.8
 
 
 # ---------------------------------------------------------------- internals
@@ -165,11 +293,13 @@ func apply_now() -> void:
 # Degrees above the horizon (negative = night). Day arc between sunrise and sunset, a shallow
 # dip below the horizon for the rest.
 func _sun_elevation_deg() -> float:
-	var span := maxf(sunset_hour - sunrise_hour, 1.0)
-	if hour >= sunrise_hour and hour <= sunset_hour:
-		return sin((hour - sunrise_hour) / span * PI) * 62.0
+	var rise := _sunrise()
+	var sets := _sunset()
+	var span := maxf(sets - rise, 1.0)
+	if hour >= rise and hour <= sets:
+		return sin((hour - rise) / span * PI) * (52.0 + 12.0 * get_summerness())
 	var night_len := 24.0 - span
-	var since := fposmod(hour - sunset_hour, 24.0)
+	var since := fposmod(hour - sets, 24.0)
 	return -sin(clampf(since / night_len, 0.0, 1.0) * PI) * 30.0
 
 

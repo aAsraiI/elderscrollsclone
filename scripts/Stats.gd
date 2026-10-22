@@ -45,6 +45,21 @@ const DEFAULT_BASE_STATS := {
 	"alchemy_potency": 0.0,
 	"enchanting_potency": 0.0,
 	"tinkering_potency": 0.0,
+	"cooking_potency": 0.0,
+	# Magic (stage 10). Resistances: 0.25 = 25% less damage of that kind; negative = a weakness.
+	"magicka_regen": 1.5,
+	"magicka_regen_pct": 0.0,
+	"resist_fire": 0.0,
+	"resist_frost": 0.0,
+	"resist_shock": 0.0,
+	"resist_poison": 0.0,
+	"resist_magic": 0.0,
+	"spell_power": 0.0,
+	"spell_absorb": 0.0,
+	"reflect": 0.0,
+	"jump_mult": 1.0,
+	"fall_mult": 1.0,
+	"noise_mult": 1.0,
 }
 
 ## Every attribute point ABOVE its base value adds this much to another stat.
@@ -53,6 +68,7 @@ const DEFAULT_BASE_STATS := {
 const ATTRIBUTE_EFFECTS := {
 	"strength": {"carry_capacity": 3.0},
 	"agility": {"move_speed_mult": 0.005},
+	"wisdom": {"magicka_regen": 0.05},
 }
 
 @export var base_stats: Dictionary = DEFAULT_BASE_STATS.duplicate()
@@ -68,6 +84,7 @@ var is_dead := false
 # source_id -> { stat_name: amount }
 var _modifiers: Dictionary = {}
 var _stamina_idle := 0.0
+var _magicka_idle := 0.0
 
 
 func _ready() -> void:
@@ -86,6 +103,9 @@ func _process(delta: float) -> void:
 	var heal := get_stat("health_regen")
 	if heal > 0.0 and health < get_stat("max_health"):
 		modify_vital("health", heal * delta)
+	_magicka_idle += delta
+	if _magicka_idle >= 1.0 and magicka < get_stat("max_magicka"):
+		modify_vital("magicka", get_stat("magicka_regen") * (1.0 + get_stat("magicka_regen_pct")) * delta, false)
 	if stamina_regen <= 0.0:
 		return
 	_stamina_idle += delta
@@ -139,7 +159,7 @@ func remove_modifiers(source: String) -> void:
 
 
 ## vital is "health", "magicka" or "stamina"; amount can be negative
-func modify_vital(vital: String, amount: float) -> void:
+func modify_vital(vital: String, amount: float, spent: bool = true) -> void:
 	match vital:
 		"health":
 			if is_dead and amount > 0.0:
@@ -150,6 +170,8 @@ func modify_vital(vital: String, amount: float) -> void:
 				is_dead = true
 				died.emit()
 		"magicka":
+			if amount < 0.0 and spent:
+				_magicka_idle = 0.0
 			magicka = clampf(magicka + amount, 0.0, get_stat("max_magicka"))
 			vital_changed.emit(vital, magicka, get_stat("max_magicka"))
 		"stamina":

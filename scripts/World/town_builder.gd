@@ -40,6 +40,17 @@ static func build(data: TownData, placed: PlacedPOI, map: WorldMap) -> Node3D:
 		_walls(root, layout, placed, map)
 	_gate_signs(root, layout, placed, map)
 	_pier(root, layout, placed, map)
+	if data.kind == TownData.Kind.CITY and not layout.gates.is_empty():
+		# The carriage to the other cities, just outside the first gate (see Carriage)
+		var gate := layout.gates[0]
+		var out := gate.normalized()
+		var at := gate + out * 10.0 + Vector3(-out.z, 0.0, out.x) * 4.0
+		var cart := Carriage.new()
+		cart.name = "Carriage"
+		cart.town_id = placed.id
+		root.add_child(cart)
+		cart.position = Vector3(at.x, POIBuilder.ground_y(placed, map, at.x, at.z), at.z)
+		cart.rotation.y = atan2(out.x, out.z)
 	return root
 
 

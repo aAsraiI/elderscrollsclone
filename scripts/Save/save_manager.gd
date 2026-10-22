@@ -185,6 +185,8 @@ func get_last_error() -> String:
 
 
 func save_game(slot: String) -> bool:
+	if GameRules.ironman() and SaveSession.current_slot.begins_with("ironman_"):
+		slot = SaveSession.current_slot  # ironman: always the one save of this character
 	var problem := can_save()
 	if problem != "":
 		return _save_fail(slot, problem)
@@ -239,6 +241,10 @@ func quick_save() -> void:
 
 
 func quick_load() -> void:
+	if GameRules.ironman():
+		if menu != null:
+			menu.show_toast("Ironman: there is no going back", true)
+		return
 	if not slot_exists(QUICKSAVE):
 		if menu != null:
 			menu.show_toast("No quicksave yet", true)
@@ -257,12 +263,19 @@ func delete_slot(slot: String) -> void:
 
 
 ## Starts a fresh game. Blank text = the default world from WorldSettings.
-func new_game(seed_text: String) -> void:
+func new_game(seed_text: String, rules: Dictionary = {}, character: Dictionary = {}) -> void:
 	if _loading:
 		return
 	_loading = true
 	var blank := seed_text.strip_edges() == ""
 	SaveSession.begin_new_game(0 if blank else SaveSession.seed_from_text(seed_text), blank)
+	# The World Creation and Character Creation screens
+	GameRules.from_dict(rules)
+	GameSettings.get_value("difficulty")
+	GameSettings._values["difficulty"] = int(GameRules.get_rule("difficulty"))
+	CharacterSetup.pending = character.duplicate(true)
+	if GameRules.ironman() and not character.is_empty():
+		SaveSession.current_slot = "ironman_" + String(character.get("name", "hero")).to_lower().validate_filename().replace(" ", "_").replace("-", "_")
 	get_tree().paused = false
 	_start_scene()
 
@@ -291,6 +304,10 @@ func build_save_data() -> Dictionary:
 	var clock := _get_clock()
 	if clock != null:
 		data["clock"] = clock.to_dict()
+	var weather := Weather.get_instance(get_tree())
+	if weather != null:
+		data["weather"] = weather.to_dict()
+	data["rules"] = GameRules.to_dict()
 	data["playtime"] = SaveSession.playtime
 	return data
 
@@ -350,6 +367,18 @@ func _gather_player(player: Node3D) -> Dictionary:
 	var effects := player.get_node_or_null("StatusEffects") as StatusEffects
 	if effects != null:
 		p["effects"] = effects.to_dict()
+	var book := player.get_node_or_null("Spellbook") as Spellbook
+	if book != null:
+		p["spellbook"] = book.to_dict()
+	for n in ["Afflictions", "Survival", "Powers", "Followers"]:
+		var node := player.get_node_or_null(n)
+		if node != null:
+			p[n.to_lower()] = node.to_dict()
+	if player.has_meta("character"):
+		p["character"] = player.get_meta("character")
+	var magic := player.get_node_or_null("ActiveMagic") as ActiveMagic
+	if magic != null:
+		p["magic"] = magic.to_dict()
 	return p
 
 
@@ -401,6 +430,9 @@ func _apply_pending() -> void:
 	var clock := _get_clock()
 	if clock != null and data.has("clock"):
 		clock.from_dict(data["clock"])
+	var weather := Weather.get_instance(get_tree())
+	if weather != null and data.has("weather"):
+		weather.from_dict(data["weather"])
 
 	var scene := get_tree().current_scene
 	for d in data.get("entities", []):
@@ -440,6 +472,18 @@ func _restore_player(player: Node3D, p: Dictionary) -> void:
 	var effects := player.get_node_or_null("StatusEffects") as StatusEffects
 	if effects != null:
 		effects.from_dict(p.get("effects", {}))
+	var book := player.get_node_or_null("Spellbook") as Spellbook
+	if book != null and p.has("spellbook"):
+		book.from_dict(p["spellbook"])
+	var magic := player.get_node_or_null("ActiveMagic") as ActiveMagic
+	if magic != null:
+		magic.from_dict(p.get("magic", {}))
+	if p.has("character"):
+		CharacterSetup.apply(player, p["character"], false)
+	for n in ["Afflictions", "Survival", "Powers", "Followers"]:
+		var node := player.get_node_or_null(n)
+		if node != null and p.has(n.to_lower()):
+			node.from_dict(p[n.to_lower()])
 
 	player.global_position = SaveUtil.array_to_vec3(p.get("pos"), player.global_position)
 	player.rotation.y = float(p.get("yaw", player.rotation.y))

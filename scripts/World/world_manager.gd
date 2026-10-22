@@ -62,6 +62,8 @@ var quests: QuestManager
 var road_life: RoadLife
 ## Found places and fast travel
 var discovery: Discovery
+## Rain, snow, storms (follows the season and the land you are in)
+var weather: Weather
 
 var _chunks := {}      # Vector2i -> TerrainChunk
 var _inflight := {}    # Vector2i -> worker task id
@@ -69,7 +71,7 @@ var _finished: Array[Dictionary] = []
 var _mutex := Mutex.new()
 var _pending: Array[Vector2i] = []
 var _wanted := {}
-var _material: StandardMaterial3D
+var _material: Material
 var _chunk_min := Vector2i.ZERO
 var _chunk_max := Vector2i.ZERO
 var _quads := 32
@@ -119,7 +121,12 @@ func _ready() -> void:
 	clock = WorldClock.new()
 	clock.name = "WorldClock"
 	clock.control_environment = day_night_enabled
+	clock.day_length_minutes = float(GameRules.get_rule("day_minutes"))
 	add_child(clock)
+	weather = Weather.new()
+	weather.name = "Weather"
+	weather.enabled = day_night_enabled
+	add_child(weather)
 	if town_life_enabled:
 		life = TownLife.new()
 		life.name = "TownLife"
@@ -134,6 +141,9 @@ func _ready() -> void:
 	crime = CrimeManager.new()
 	crime.name = "CrimeManager"
 	add_child(crime)
+	var story := Story.new()
+	story.name = "Story"
+	add_child(story)
 	discovery = Discovery.new()
 	discovery.name = "Discovery"
 	add_child(discovery)
@@ -262,10 +272,8 @@ func rebuild(new_seed: int) -> void:
 # ---------------------------------------------------------------- setup
 
 func _make_material() -> void:
-	_material = StandardMaterial3D.new()
-	_material.vertex_color_use_as_albedo = true
-	_material.roughness = 0.95
-	_material.metallic = 0.0
+	# Vertex colors plus seasons (autumn tints, winter snow) and wet ground in the rain
+	_material = NatureMeshes.terrain_material()
 
 
 func _rebuild_map() -> void:
@@ -565,7 +573,7 @@ func _ensure_chunk(c: Vector2i) -> void:
 		_inflight.erase(c)
 		_take_finished_for(c)
 	else:
-		_add_chunk(TerrainChunk.build_data(map, c, settings.chunk_size, _quads))
+		_add_chunk(TerrainChunk.build_data(map, c, settings.chunk_size, _quads, int(GameSettings.get_value("grass"))))
 
 
 # A finished chunk may already be waiting in the queue; add it now
@@ -591,12 +599,12 @@ func _dispatch_builds() -> void:
 		if _chunks.has(c) or _inflight.has(c) or not _wanted.has(c):
 			continue
 		_inflight[c] = WorkerThreadPool.add_task(
-			_build_task.bind(c, map, settings.chunk_size, _quads), false, "terrain chunk")
+			_build_task.bind(c, map, settings.chunk_size, _quads, int(GameSettings.get_value("grass"))), false, "terrain chunk")
 
 
 # Runs on a worker thread
-func _build_task(c: Vector2i, m: WorldMap, chunk_size: float, quads: int) -> void:
-	var data := TerrainChunk.build_data(m, c, chunk_size, quads)
+func _build_task(c: Vector2i, m: WorldMap, chunk_size: float, quads: int, detail: int = 2) -> void:
+	var data := TerrainChunk.build_data(m, c, chunk_size, quads, detail)
 	_mutex.lock()
 	_finished.append(data)
 	_mutex.unlock()
@@ -656,7 +664,7 @@ func _load_initial() -> void:
 		for dx in range(-r, r + 1):
 			var c := Vector2i(center.x + dx, center.y + dz)
 			if _in_range(c) and not _chunks.has(c):
-				_add_chunk(TerrainChunk.build_data(map, c, settings.chunk_size, _quads))
+				_add_chunk(TerrainChunk.build_data(map, c, settings.chunk_size, _quads, int(GameSettings.get_value("grass"))))
 	_last_center = Vector2i(1 << 30, 1 << 30)  # makes the next frame queue the rest
 
 

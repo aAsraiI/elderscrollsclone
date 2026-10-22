@@ -83,7 +83,8 @@ func t_plan() -> void:
 			city = t
 	var people := Residents.generate(city, map)
 	var buildings := city.town.buildings
-	check("one owner per building plus guards", people.size() == buildings.size() + Residents.GUARDS[2], "%d people, %d buildings" % [people.size(), buildings.size()])
+	var for_sale := 1 if Homes.for_sale_id(city.town, TownData.Kind.CITY) != "" else 0  # stage 11: one empty house is for sale
+	check("one owner per building plus guards", people.size() == buildings.size() - for_sale + Residents.GUARDS[2], "%d people, %d buildings" % [people.size(), buildings.size()])
 	var ids := {}
 	var owners_ok := true
 	var work_ok := true
@@ -92,6 +93,8 @@ func t_plan() -> void:
 		for n in people:
 			if n.home_id == b.id:
 				found = n
+		if b.id == Homes.for_sale_id(city.town, TownData.Kind.CITY):
+			continue
 		if found == null or found.display_name != b.owner_name or found.role != NpcData.role_for_plot(b):  # a house can hold a tradesman
 			owners_ok = false
 		elif (found.work_id == b.id) != b.is_public():
@@ -220,6 +223,8 @@ func t_world() -> void:
 	var total := 0
 	for t in wm.towns:
 		total += t.town.buildings.size() + Residents.GUARDS[int((t.poi as TownData).kind)]
+		if Homes.for_sale_id(t.town, int((t.poi as TownData).kind)) != "":
+			total -= 1
 	check("everyone in every town exists (as data)", life.residents.size() == total, "%d vs %d" % [life.residents.size(), total])
 
 	var town := wm.get_nearest_town(player.global_position)

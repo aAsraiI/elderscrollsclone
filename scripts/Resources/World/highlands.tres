@@ -1,6 +1,8 @@
 [gd_resource type="Resource" script_class="BiomeData" format=3]
 
 [ext_resource type="Script" path="res://scripts/World/biome_data.gd" id="1_biome"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/night_werewolf.tres" id="6_rwip1"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/night_vampire.tres" id="7_u8k0c"]
 [ext_resource type="Resource" path="res://scripts/Resources/World/POIs/abandoned_mine_entrance.tres" id="11_yw0kk"]
 [ext_resource type="Resource" path="res://scripts/Resources/World/POIs/barrow_entrance.tres" id="12_ox1p8"]
 [ext_resource type="Resource" path="res://scripts/Resources/World/POIs/fort_ruin_entrance.tres" id="13_imqa2"]
@@ -86,4 +88,4 @@ tree_color = Color(0.16, 0.32, 0.18, 1)
 poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_ox1p8"), SubResource("Resource_imqa2"), SubResource("Resource_rwip1")])
 level_min = 10
 level_max = 24
-encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3")])
+encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("6_rwip1"), ExtResource("7_u8k0c")])

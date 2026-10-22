@@ -27,6 +27,10 @@ var combo_step := 0
 var parryable := true
 ## A sneak attack (the victim didn't know the attacker was there); amount is already multiplied
 var sneak := false
+## Magic: &"fire", &"frost", &"shock", &"poison" or &"magic" (resistances instead of armor). Empty = a weapon.
+var element: StringName = &""
+## One tick of damage over time (burning, poison): no stagger, no flinch
+var dot := false
 
 # ---- filled in by the victim's take_damage()
 

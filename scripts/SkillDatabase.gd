@@ -101,22 +101,21 @@ static func _ensure_built() -> void:
 		.effect("block_strength", 0.03, "block strength")
 		.attribute("endurance", 0.10))
 
-	# ---- Magic: all three raise max magicka
-	_add(SkillData.new(&"offensive_magic", "Offensive Magic", "Magic",
-			"Damaging spells, plus curses and debuffs.",
-			"Spending magicka on offensive spells (coming with spells)")
-		.effect("max_magicka", 8.0, "max magicka")
-		.attribute("wisdom", 0.15))
-	_add(SkillData.new(&"healing_magic", "Healing Magic", "Magic",
-			"Healing spells, plus buffs and wards.",
-			"Spending magicka on healing spells (coming with spells)")
-		.effect("max_magicka", 8.0, "max magicka")
-		.attribute("wisdom", 0.15))
-	_add(SkillData.new(&"utility_magic", "Utility Magic", "Magic",
-			"Everything else: light, detection, telekinesis, summons.",
-			"Spending magicka on utility spells (coming with spells)")
-		.effect("max_magicka", 8.0, "max magicka")
-		.attribute("wisdom", 0.15))
+	# ---- Magic: the six schools. Each raises max magicka and makes its spells stronger; spells of a
+	# school also get cheaper with its level (SpellData.skill_discount). Casting trains them.
+	var schools := [
+		[&"destruction", "Destruction", "Fire, frost and lightning; weaknesses and withering.", 0.15, "strength"],
+		[&"restoration", "Restoration", "Healing, fortifying and resisting; curing poison.", 0.15, "endurance"],
+		[&"alteration", "Alteration", "Shields of magic, feather, haste, light, opening locks, paralysis.", 0.15, "agility"],
+		[&"conjuration", "Conjuration", "Summoned creatures, bound weapons, raising the dead.", 0.15, "wisdom"],
+		[&"illusion", "Illusion", "Calm, fear and frenzy; invisibility, muffle, night eye, charm.", 0.15, "charisma"],
+		[&"mysticism", "Mysticism", "Soul trap, telekinesis, detect life, dispel, absorb, reflect, mark and recall.", 0.15, "wisdom"],
+	]
+	for s in schools:
+		_add(SkillData.new(s[0], s[1], "Magic", s[2], "Casting %s spells (magicka spent)" % String(s[1]).to_lower())
+			.effect("max_magicka", 5.0, "max magicka")
+			.effect("power_" + String(s[0]), 0.03, "%s spell strength" % String(s[1]).to_lower())
+			.attribute("wisdom", s[3]).attribute(s[4], 0.05))
 
 	# ---- Utility
 	_add(SkillData.new(&"sneak", "Sneak", "Utility",
@@ -143,25 +142,30 @@ static func _ensure_built() -> void:
 
 	# ---- Crafting
 	_add(SkillData.new(&"smithing", "Smithing", "Crafting",
-			"Forging and improving weapons and armor.",
-			"Crafting weapons and armor (coming with crafting)")
+			"Forging and improving weapons and armor, smelting ore, tanning hides.",
+			"Forging, smelting, tanning, improving gear, mining")
 		.effect("smithing_potency", 0.03, "smithing potency")
 		.attribute("strength", 0.05).attribute("wisdom", 0.05))
 	_add(SkillData.new(&"alchemy", "Alchemy", "Crafting",
 			"Brewing potions and poisons from ingredients.",
-			"Brewing potions and poisons (coming with crafting)")
+			"Brewing potions and poisons at an alchemy lab, eating ingredients")
 		.effect("alchemy_potency", 0.03, "alchemy potency")
 		.attribute("wisdom", 0.10))
 	_add(SkillData.new(&"enchanting", "Enchanting", "Crafting",
 			"Binding magical effects into gear.",
-			"Enchanting items (coming with crafting)")
+			"Enchanting and disenchanting at an arcane enchanter")
 		.effect("enchanting_potency", 0.03, "enchanting potency")
 		.attribute("wisdom", 0.10))
 	_add(SkillData.new(&"tinkering", "Tinkering", "Crafting",
-			"Miscellaneous crafting: tools, lockpicks, arrows and trinkets.",
-			"Crafting miscellaneous items (coming with crafting)")
+			"Miscellaneous crafting: tools, lockpicks, rings and amulets.",
+			"Making things at a workbench")
 		.effect("tinkering_potency", 0.03, "tinkering potency")
 		.attribute("agility", 0.05).attribute("wisdom", 0.05))
+	_add(SkillData.new(&"cooking", "Cooking", "Crafting",
+			"Turning raw food into hearty meals.",
+			"Cooking at a cooking pot")
+		.effect("cooking_potency", 0.03, "meal strength")
+		.attribute("endurance", 0.05).attribute("charisma", 0.05))
 
 
 static func _add(def: SkillData) -> void:

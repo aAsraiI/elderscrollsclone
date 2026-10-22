@@ -178,6 +178,50 @@ var _chase_path := PackedVector3Array()
 var _chase_check_pos := Vector3.ZERO
 var _chase_check_time := 0.0
 
+## Fighting style, decides which tricks it uses (EnemyData sets it):
+##   DUELIST  blocks, parries, sidesteps and feints (anyone with a shield or a one-hander)
+##   BRUTE    heavy two-handers: guard-breaking kicks, wide sweeps, rarely backs off
+##   MAGE     keeps its distance and casts; draws a weapon when you get close
+##   BEAST    pounces from range, circles fast, snaps; big beasts roar to knock you back
+##   SPIRIT   floats at range and casts its element
+##   ARCHER   keeps its distance and shoots; backs off when you close in
+enum Style { DUELIST, BRUTE, MAGE, BEAST, SPIRIT, ARCHER }
+
+@export_group("Body and tricks")
+@export var body_kind: CreatureBody.Kind = CreatureBody.Kind.HUMANOID
+@export var style: Style = Style.DUELIST
+## Which EnemyData made it ("wolf", "bandit"...)
+@export var enemy_id := ""
+## 0..1 how sharp it is: chance to dodge, block, parry and feint (EnemyData sets it from the level)
+@export_range(0.0, 1.0, 0.05) var cunning := 0.3
+## Healing potions it can drink when hurt (humanoids)
+@export var potions := 0
+## Spells it casts (MAGE and SPIRIT styles, some others). Magnitudes already fit its level.
+var spells: Array[SpellData] = []
+var body: CreatureBody
+var magic: ActiveMagic
+var caster: SpellCaster
+var ranged: RangedCombat
+var _draw_left := 0.0
+var _shot_cd := 1.0
+var _dodge_cd := 0.0
+var _block_until := 0.0
+var _lunge_cd := 3.0
+var _kick_cd := 4.0
+var _roar_cd := 6.0
+var _cast_cd := 1.5
+var _casting: SpellData
+var _cast_left := 0.0
+var _drinking := 0.0
+var _feinted := false
+var _flank_angle := 0.0
+var _calm_until := -1.0
+var _fear_until := -1.0
+var _frenzy_until := -1.0
+var _far_accum := 0.0
+var _lying_restore := false
+var _killing_push := Vector3.ZERO
+
 
 static func spawn(parent: Node, pos: Vector3, weapon: ItemData = null, off_hand: ItemData = null) -> Enemy:
 	var e := Enemy.new()
@@ -207,6 +251,8 @@ func _ready() -> void:
 	equipment.equipped.connect(func(_slot, _item): _refresh_weapon_visual())
 	equipment.unequipped.connect(func(_slot, _item): _refresh_weapon_visual())
 	_refresh_weapon_visual()
+	_flank_angle = randf_range(-1.0, 1.0)
+	magic.notice.connect(func(text: String, color: Color) -> void: _popup(text, global_position + Vector3.UP * 2.2, color, 36))
 	_next_wander_at = randf_range(0.5, 4.0)
 	if disposition != Disposition.HOSTILE and not talk_lines.is_empty():
 		_talk = NpcTalk.attach(self, talk_name if talk_name != "" else display_name, talk_lines)
@@ -269,6 +315,12 @@ func _build_body() -> void:
 		shape.position = Vector3(0, 0.9 * body_scale, 0)
 		add_child(shape)
 
+	if find_children("*", "MeshInstance3D", true, false).is_empty() and body == null:
+		# A jointed, animated body (people, beasts, crawlers, spirits), see CreatureBody
+		var seed_value := (spawn_key if spawn_key != "" else display_name + str(get_instance_id())).hash()
+		body = CreatureBody.build_for(self, body_kind, seed_value)
+		add_child(body)
+		return
 	if find_children("*", "MeshInstance3D", true, false).is_empty():
 		_material = StandardMaterial3D.new()
 		_material.albedo_color = placeholder_color
@@ -305,9 +357,14 @@ func _build_systems() -> void:
 		stats.base_stats = Stats.DEFAULT_BASE_STATS.duplicate()
 		stats.base_stats["max_health"] = max_health
 		stats.base_stats["damage"] = base_damage
+		if not spells.is_empty():
+			stats.base_stats["max_magicka"] = 80.0 + float(level) * 4.0
+			stats.base_stats["magicka_regen"] = 3.0 + float(level) * 0.1
 		add_child(stats)
 		if not is_equal_approx(damage_mult, 1.0):
 			stats.add_modifiers("level", {"damage_pct": damage_mult - 1.0})
+		if has_meta("resists"):
+			stats.add_modifiers("innate", get_meta("resists"))
 
 	inventory = get_node_or_null("Inventory") as Inventory
 	if inventory == null:
@@ -339,6 +396,19 @@ func _build_systems() -> void:
 		add_child(combat)
 	combat.hit_mask = WORLD_LAYER  # enemies hit the world and the player (layer 1), never each other
 	animation = combat.animation
+	magic = ActiveMagic.attach(self)
+	if starting_weapon != null and starting_weapon.is_bow:
+		ranged = RangedCombat.new()
+		ranged.name = "RangedCombat"
+		ranged.aim_origin = head
+		ranged.npc_arrow = ItemCatalog.get_arrow(maxi(starting_weapon.tier - 1, 0))
+		add_child(ranged)
+		style = Style.ARCHER
+	if not spells.is_empty():
+		caster = SpellCaster.new()
+		caster.name = "SpellCaster"
+		caster.aim_origin = head
+		add_child(caster)
 
 
 func _equip_starting_gear() -> void:
@@ -358,6 +428,11 @@ func _equip_starting_gear() -> void:
 
 # The placeholder weapon follows whatever is in the main hand
 func _refresh_weapon_visual() -> void:
+	if body != null and equipment != null:
+		var main := equipment.get_main_hand()
+		var off: ItemData = equipment.get_equipped(ItemData.EquipSlot.OFF_HAND)
+		body.set_weapons(main, off)
+		body.dress(equipment)
 	if _weapon_pivot == null:
 		return
 	for c in _weapon_pivot.get_children():
@@ -390,15 +465,51 @@ func _refresh_weapon_visual() -> void:
 func _physics_process(delta: float) -> void:
 	if state == State.DEAD:
 		return
+	# Far from the player and calm: think a few times a second instead of every frame
+	if (state == State.IDLE or state == State.WANDER or state == State.PATROL) and not has_meta("player_ally"):
+		var p := get_tree().get_first_node_in_group("player") as Node3D
+		if p != null and p.global_position.distance_squared_to(global_position) > 70.0 * 70.0:
+			_far_accum += delta
+			if _far_accum < 0.2:
+				return
+			delta = _far_accum
+		_far_accum = 0.0
 	_clock += delta
 	_state_time += delta
+	_dodge_cd -= delta
+	_lunge_cd -= delta
+	_kick_cd -= delta
+	_roar_cd -= delta
+	_cast_cd -= delta
 	if not _home_set:
 		_home = global_position  # where it was put: wandering stays around here
 		_home_set = true
 	if not is_on_floor():
 		velocity.y -= _gravity * delta
-	if _target == null or not is_instance_valid(_target):
+	if _frenzy_until > _clock:
+		_tick_frenzy()
+	elif _target == null or not is_instance_valid(_target):
 		_target = get_tree().get_first_node_in_group("player") as Node3D
+	# Calmed: no fighting while it lasts
+	if _calm_until > _clock and (state == State.CHASE or state == State.ATTACK):
+		_alerted = false
+		_enter_state(State.IDLE)
+	if _fear_until > _clock and state != State.STAGGER and state != State.FLEE:
+		_flee_until = _fear_until
+		_enter_state(State.FLEE)
+	_tick_special(delta)
+	if _casting != null:
+		_tick_cast(delta)
+	if _drinking > 0.0:
+		_drinking -= delta
+		_slow_down(delta, acceleration)
+		if body != null:
+			body.pose = &"drink" if _drinking > 0.0 else &""
+		if _drinking <= 0.0:
+			stats.modify_vital("health", stats.get_stat("max_health") * 0.4)
+			_popup("+%d" % roundi(stats.get_stat("max_health") * 0.4), global_position + Vector3.UP * 2.0, Color(0.4, 1.0, 0.4), 40)
+		move_and_slide()
+		return
 
 	match state:
 		State.IDLE:
@@ -583,8 +694,29 @@ func _tick_chase(delta: float) -> void:
 		_lose_target()
 		return
 	_face(to_target, delta)
-	if to_target.length() <= _attack_start_distance():
+	if _casting != null:
+		_slow_down(delta, acceleration)
+		return
+	var dist := to_target.length()
+	if style == Style.ARCHER and ranged != null and ranged.has_bow():
+		_tick_archer(delta, to_target, dist)
+		return
+	if _try_cast(dist):
+		return
+	# Mages and spirits hold their distance while they can still cast
+	if (style == Style.MAGE or style == Style.SPIRIT) and not spells.is_empty() and dist < 16.0 and dist > 5.0 \
+			and stats.magicka > 15.0 and _can_see_target_simple():
+		_slow_down(delta, acceleration)
+		var side := Vector3(-to_target.z, 0.0, to_target.x).normalized() * _circle_dir * circle_speed
+		velocity.x = move_toward(velocity.x, side.x, acceleration * delta)
+		velocity.z = move_toward(velocity.z, side.z, acceleration * delta)
+		return
+	if dist <= _attack_start_distance():
 		_enter_state(State.ATTACK)
+		return
+	if _lunge_cd <= 0.0 and dist > 3.2 and dist < 7.5 and (style == Style.BEAST or (style == Style.DUELIST and cunning >= 0.45)) \
+			and is_on_floor() and _facing_error(to_target) < 0.3:
+		_lunge(to_target)
 		return
 	var goal := to_target.normalized()
 	# Stuck behind a house for a second: take the streets (when there is a route to follow)
@@ -646,13 +778,28 @@ func _tick_attack(delta: float) -> void:
 			_slow_down(delta, acceleration)  # committed: no turning, no walking
 		_:
 			_face(to_target, delta)
+			if _casting != null:
+				_slow_down(delta, acceleration)
+				return
+			if combat.is_blocking():
+				_slow_down(delta, acceleration)
+				if _clock >= _block_until:
+					combat.secondary_release()
+				return
 			if dist > _attack_start_distance() + 0.8:
 				_enter_state(State.CHASE)
+				return
+			if _react_to_target(dist, to_target):
 				return
 			_circle(to_target, dist, delta)
 			if _clock >= _next_attack_at and dist <= _attack_start_distance() \
 					and _facing_error(to_target) <= deg_to_rad(attack_aim_tolerance) and _attack_slot_free():
 				_start_swing()
+	if phase == MeleeCombat.Phase.WINDUP and _feint_at > 0.0 and _clock >= _feint_at:
+		# A feint: the swing stops short, then the real one comes a moment later
+		_feint_at = -1.0
+		combat.interrupt()
+		_next_attack_at = _clock + randf_range(0.1, 0.25)
 
 
 # Stunned: can't do anything. The MeleeCombat is what decides when it is over.
@@ -706,9 +853,377 @@ func _lose_target() -> void:
 func _start_swing() -> void:
 	var heavy := _chain_count == 0 and randf() < heavy_chance
 	_last_swing_heavy = heavy
+	# The tell is never quite the same length twice, so a parry has to be read, not counted
+	combat.windup_add = telegraph_time * randf_range(0.75, 1.45)
 	var ok := combat.heavy_attack(true) if heavy else combat.light_attack(true)
 	if not ok:
 		_next_attack_at = _clock + 0.3
+		return
+	_feint_at = -1.0
+	if not heavy and _chain_count == 0 and cunning >= 0.35 and randf() < cunning * 0.3:
+		_feint_at = _clock + combat.windup_add * 0.55
+
+
+var _feint_at := -1.0
+
+
+# ---------------------------------------------------------------- tricks
+
+# Reads what the player is doing: blocks or sidesteps a coming swing, kicks through a guard that
+# stays up, roars, drinks a potion when badly hurt. Returns true if it did something this frame.
+func _react_to_target(dist: float, to_target: Vector3) -> bool:
+	var pc: Variant = _target.get_meta("damageable", null) if _target != null else null
+	var target_combat := pc as MeleeCombat
+	# Badly hurt: step back and drink
+	if potions > 0 and stats.health < stats.get_stat("max_health") * 0.33 and _dodge_cd <= 0.0 and randf() < 0.5:
+		potions -= 1
+		_dodge_cd = 3.0
+		velocity += -to_target.normalized() * 6.0
+		_drinking = 1.3
+		return true
+	if target_combat == null:
+		return false
+	var swinging := target_combat.get_phase() == MeleeCombat.Phase.WINDUP or target_combat.is_charging()
+	if swinging and _dodge_cd <= 0.0 and dist < 4.0:
+		_dodge_cd = 1.8 - cunning * 0.8
+		var shield: ItemData = equipment.get_equipped(ItemData.EquipSlot.OFF_HAND)
+		var can_block := shield != null and shield.secondary_action == ItemData.SecondaryAction.BLOCK
+		if can_block and randf() < 0.25 + cunning * 0.55:
+			if combat.secondary_press(true):
+				_block_until = _clock + randf_range(0.6, 1.1)
+				return true
+		if randf() < cunning * 0.6 and style != Style.BRUTE:
+			_dodge(to_target, target_combat.is_heavy_action() or target_combat.is_charging())
+			return true
+	# A guard held up too long gets kicked open
+	if target_combat.is_blocking() and target_combat.get_block_age() > 0.7 and _kick_cd <= 0.0 and dist < 2.4 \
+			and (style == Style.BRUTE or (style == Style.DUELIST and cunning >= 0.3)):
+		_kick_cd = 5.0 - cunning * 2.0
+		_start_special(&"kick", 0.35)
+		return true
+	# Big beasts and brutes roar or stomp: everything close is thrown back
+	if _roar_cd <= 0.0 and dist < 3.5 and (body_scale >= 1.3 or (style == Style.BEAST and body_scale >= 1.1)) and randf() < 0.02:
+		_roar_cd = 9.0
+		_start_special(&"roar", 0.6)
+		return true
+	return false
+
+
+func _dodge(to_target: Vector3, back: bool) -> void:
+	var fwd := to_target.normalized()
+	var side := Vector3(-fwd.z, 0.0, fwd.x) * (1.0 if randf() < 0.5 else -1.0)
+	var push := (-fwd * 7.0) if back else (side * 7.5 - fwd * 1.5)
+	velocity.x = push.x
+	velocity.z = push.z
+	_next_attack_at = maxf(_next_attack_at, _clock + 0.35)  # and swings back right after
+	if randf() < cunning:
+		_next_attack_at = _clock + 0.3
+
+
+func _lunge(to_target: Vector3) -> void:
+	_lunge_cd = randf_range(4.0, 7.0)
+	var dir := to_target.normalized()
+	var speed := 10.0 if style == Style.BEAST else 7.5
+	velocity.x = dir.x * speed
+	velocity.z = dir.z * speed
+	if style == Style.BEAST:
+		velocity.y = 3.0  # a pounce
+	_enter_state(State.ATTACK)
+	combat.windup_add = 0.05
+	combat.light_attack(true)
+
+
+var _special: StringName = &""
+var _special_left := 0.0
+
+
+func _start_special(what: StringName, windup: float) -> void:
+	_special = what
+	_special_left = windup
+
+
+# Kick / roar: a short tell (yellow glow), then it lands if the target is still close
+func _tick_special(delta: float) -> void:
+	if _special == &"":
+		return
+	_special_left -= delta
+	if body != null:
+		body.set_glow(1.0, Color(1.0, 0.85, 0.2))
+	if _special_left > 0.0:
+		return
+	var what := _special
+	_special = &""
+	if not _target_usable():
+		return
+	var to := _flat_to_target()
+	var reach := 2.6 if what == &"kick" else 4.5
+	if to.length() > reach:
+		return
+	var pc: Variant = _target.get_meta("damageable", null)
+	var tc := pc as MeleeCombat
+	if tc == null:
+		return
+	var info := DamageInfo.new(stats.get_stat("damage") * (0.5 if what == &"kick" else 0.8), self, what)
+	info.ignores_block = true
+	info.parryable = false
+	info.poise_damage = 80.0
+	info.knockback = 7.0 if what == &"kick" else 9.0
+	info.direction = to.normalized()
+	info.hit_position = _target.global_position + Vector3.UP
+	if tc.is_blocking():
+		tc.stop_block()
+	tc.take_damage(info)
+	tc.stun(0.55 if what == &"kick" else 0.8)
+	_popup("GUARD BREAK" if what == &"kick" else "ROAR", global_position + Vector3.UP * 2.3, Color(1.0, 0.8, 0.2), 40)
+
+
+# ---------------------------------------------------------------- spells
+
+# Archers: keep 8-22 m away, draw (a visible tell), shoot, step back when you come close
+func _tick_archer(delta: float, to_target: Vector3, dist: float) -> void:
+	_shot_cd -= delta
+	var fwd := to_target.normalized()
+	if ranged.is_drawing():
+		_slow_down(delta, acceleration)
+		_draw_left -= delta
+		if body != null:
+			body.bow_draw = ranged.get_draw_ratio()
+		if _draw_left <= 0.0:
+			ranged.aim_target = _target
+			ranged.release()
+			if body != null:
+				body.bow_draw = 0.0
+			_shot_cd = randf_range(1.2, 2.4) - cunning * 0.6
+		return
+	if dist > 24.0 or not _can_see_target_simple():
+		var dir := _around_walls(fwd)
+		velocity.x = move_toward(velocity.x, dir.x * move_speed, acceleration * delta)
+		velocity.z = move_toward(velocity.z, dir.z * move_speed, acceleration * delta)
+		return
+	if dist < 6.0:
+		velocity.x = move_toward(velocity.x, -fwd.x * move_speed, acceleration * delta)
+		velocity.z = move_toward(velocity.z, -fwd.z * move_speed, acceleration * delta)
+		if dist < 2.0:
+			_enter_state(State.ATTACK)
+		return
+	_slow_down(delta, acceleration)
+	if _shot_cd <= 0.0 and ranged.begin_draw():
+		_draw_left = ranged.get_bow().draw_time * randf_range(0.9, 1.4)
+
+
+func _try_cast(dist: float) -> bool:
+	if spells.is_empty() or caster == null or _casting != null or _cast_cd > 0.0 or dist > 24.0:
+		return false
+	if _calm_until > _clock:
+		return false
+	var pick: SpellData = null
+	var hurt := stats.health < stats.get_stat("max_health") * 0.4
+	for s in spells:
+		var harmful := s.is_harmful()
+		if s.form == SpellData.Form.SELF:
+			if hurt and s.effects[0]["id"] == &"restore_health":
+				pick = s
+				break
+			if not harmful and not magic.has_effect(StringName(s.effects[0]["id"])) and randf() < 0.25:
+				pick = s
+				break
+	if pick == null:
+		var attacks := spells.filter(func(s: SpellData) -> bool: return s.is_harmful())
+		if attacks.is_empty() or (dist < 3.0 and style != Style.SPIRIT and equipment.get_main_hand() != null):
+			return false
+		if not _can_see_target_simple():
+			return false
+		pick = attacks[randi() % attacks.size()]
+	if stats.magicka < caster.get_cost(pick):
+		_cast_cd = 2.0
+		return false
+	_casting = pick
+	_cast_left = maxf(0.75 - cunning * 0.3, 0.35)
+	if body != null:
+		body.cast_color = pick.get_color()
+	return true
+
+
+func _tick_cast(delta: float) -> void:
+	_cast_left -= delta
+	var total := maxf(0.75 - cunning * 0.3, 0.35)
+	if body != null:
+		body.cast_charge = clampf(1.0 - _cast_left / total, 0.05, 1.0)
+	if _cast_left > 0.0:
+		return
+	var s := _casting
+	_casting = null
+	if body != null:
+		body.cast_charge = 0.0
+	if state == State.DEAD or combat.is_stunned() or not _target_usable():
+		return
+	caster.aim_target = _target if s.form != SpellData.Form.SELF else null
+	caster.cast_now(s)
+	_cast_cd = (1.4 if style == Style.MAGE or style == Style.SPIRIT else 4.5) * randf_range(0.8, 1.4)
+
+
+func _cancel_cast() -> void:
+	_casting = null
+	if body != null:
+		body.cast_charge = 0.0
+
+
+func _can_see_target_simple() -> bool:
+	if not _target_usable():
+		return false
+	var query := PhysicsRayQueryParameters3D.create(head.global_position, _target.global_position + Vector3.UP * 1.2, WORLD_LAYER, [get_rid()])
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	return hit.is_empty() or not (hit["collider"] is StaticBody3D)
+
+
+# ---------------------------------------------------------------- magic on it
+
+func paralyze(seconds: float) -> void:
+	if state == State.DEAD:
+		return
+	_cancel_cast()
+	combat.stun(seconds)
+	if body != null:
+		body.pose = &"paralyzed"
+		get_tree().create_timer(seconds, false).timeout.connect(func() -> void:
+			if is_instance_valid(body) and body.pose == &"paralyzed":
+				body.pose = &"")
+	if state != State.STAGGER:
+		_enter_state(State.STAGGER)
+
+
+func calm(seconds: float) -> void:
+	_calm_until = _clock + seconds
+	_cancel_cast()
+	if state == State.CHASE or state == State.ATTACK:
+		_alerted = false
+		_enter_state(State.IDLE)
+
+
+func frighten(source: Node3D, seconds: float) -> void:
+	if state == State.DEAD:
+		return
+	_fear_until = _clock + seconds
+	if source != null:
+		_target = source
+	_flee_until = _fear_until
+	_cancel_cast()
+	if state != State.STAGGER:
+		_enter_state(State.FLEE)
+
+
+func frenzy(seconds: float) -> void:
+	_frenzy_until = _clock + seconds
+	_tick_frenzy()
+
+
+# Frenzied: attacks the nearest creature, friend or foe
+func _tick_frenzy() -> void:
+	var best: Node3D = null
+	var best_d := 18.0
+	for n in get_tree().get_nodes_in_group("enemies"):
+		var e := n as Enemy
+		if e == null or e == self or e.is_dead():
+			continue
+		var d := e.global_position.distance_to(global_position)
+		if d < best_d:
+			best_d = d
+			best = e
+	var p := get_tree().get_first_node_in_group("player") as Node3D
+	if p != null and p.global_position.distance_to(global_position) < best_d:
+		best = p
+	if best != null and best != _target:
+		if best is Enemy:
+			fight(best)
+		else:
+			_target = best
+			_alerted = true
+			if state == State.IDLE or state == State.WANDER or state == State.PATROL:
+				_enter_state(State.CHASE)
+
+
+## A harmful spell from someone: like being hit (it notices, gets angry or runs)
+func on_hostile_magic(source: Node3D) -> void:
+	if state == State.DEAD or source == null or source == self:
+		return
+	_calm_until = -1.0
+	_alerted = true
+	if source is Enemy and disposition == Disposition.HOSTILE:
+		fight(source as Enemy)
+		return
+	if source is Enemy and has_meta("player_ally"):
+		fight(source as Enemy)
+		return
+	match disposition:
+		Disposition.NEUTRAL:
+			if source.is_in_group("player") and not has_meta("player_ally"):
+				disposition = Disposition.HOSTILE
+				_drop_talk()
+		Disposition.FRIENDLY:
+			if has_meta("player_ally"):
+				return
+			_target = source
+			_flee_until = _clock + flee_time
+			_drop_talk()
+			if state != State.STAGGER:
+				_enter_state(State.FLEE)
+			return
+	if source.is_in_group("player"):
+		_target = source
+	if state == State.IDLE or state == State.WANDER or state == State.PATROL:
+		_enter_state(State.CHASE)
+
+
+## Who it is fighting (null for none)
+func get_fight_target() -> Node3D:
+	return _target if (state == State.CHASE or state == State.ATTACK) else null
+
+
+func stop_fighting() -> void:
+	if state == State.CHASE or state == State.ATTACK:
+		_lose_target()
+
+
+## Reanimate Corpse: gets back up and fights for `leader` for a while, then crumbles again
+func reanimate(leader: Node3D, seconds: float) -> void:
+	if state != State.DEAD:
+		return
+	var rag := get_node_or_null("Ragdoll") as Ragdoll
+	var at := global_position
+	if rag != null:
+		rag.dismantle()
+	if body != null:
+		body.queue_free()
+		body = null
+	for c in get_children():
+		if c is ContainerComponent:
+			c.queue_free()
+		if c is CollisionShape3D:
+			(c as CollisionShape3D).disabled = false
+	if has_meta("interactable"):
+		remove_meta("interactable")
+	rotation = Vector3(0.0, rotation.y, 0.0)
+	global_position = at + Vector3.UP * 0.4
+	stats.revive()
+	stats.modify_vital("health", -stats.health * 0.4)
+	collision_layer = ENEMY_LAYER
+	collision_mask = WORLD_LAYER | ENEMY_LAYER
+	disposition = Disposition.FRIENDLY
+	display_name = "Risen " + display_name.trim_prefix("Risen ")
+	placeholder_color = placeholder_color.lerp(Color(0.4, 0.45, 0.4), 0.5)
+	add_to_group("enemies")
+	remove_from_group("persistent")
+	persist_mode = PersistMode.NEVER
+	set_physics_process(true)
+	set_process(true)
+	_build_body()
+	_refresh_weapon_visual()
+	_enter_state(State.IDLE)
+	AllyBrain.attach(self, leader)
+	SpellFX.burst(self, global_position + Vector3.UP, 1.5, MagicEffects.SCHOOL_COLORS[&"conjuration"])
+	get_tree().create_timer(seconds, false).timeout.connect(func() -> void:
+		if is_instance_valid(self) and state != State.DEAD:
+			stats.modify_vital("health", -stats.health - 1.0))
 
 
 func _on_swing_finished() -> void:
@@ -765,6 +1280,8 @@ func _target_usable() -> bool:
 
 func _can_see_target() -> bool:
 	if not _target_usable():
+		return false
+	if _calm_until > _clock:
 		return false
 	# The player's Stealth decides when an unalerted creature has really seen them (darkness,
 	# sneaking, Sneak skill). Once alerted it keeps track the simple way below.
@@ -846,6 +1363,8 @@ func _process(delta: float) -> void:
 	if _material != null:
 		_material.emission = Color(1.0, 0.15, 0.1) if combat.is_heavy_action() else Color(1.0, 0.5, 0.1)
 		_material.emission_energy_multiplier = _tint * 1.6
+	if body != null and _special == &"":
+		body.set_glow(_tint, Color(1.0, 0.15, 0.1) if combat.is_heavy_action() else Color(1.0, 0.5, 0.1))
 
 
 # ---------------------------------------------------------------- getting hurt and dying
@@ -860,6 +1379,17 @@ func _on_damaged(info: DamageInfo, amount: float) -> void:
 	if info.punish:
 		color = Color(1.0, 0.3, 0.25)
 	_popup(str(roundi(amount)) + ("!" if info.punish else ""), info.hit_position, color, size)
+	if state != State.DEAD and info.kind != &"magic" or (info.kind == &"magic" and not info.dot):
+		if _casting != null and randf() > cunning * 0.6:
+			_cancel_cast()
+		if _drinking > 0.0 and randf() < 0.6:
+			_drinking = 0.0
+		_calm_until = -1.0
+	if info.killed or stats.is_dead:
+		_killing_push = info.direction * (2.5 + info.knockback)
+		var rag_now := get_node_or_null("Ragdoll") as Ragdoll
+		if rag_now != null:
+			rag_now._push(_killing_push)
 	if state == State.DEAD:
 		return
 	_alerted = true
@@ -936,11 +1466,26 @@ func _on_died() -> void:
 	# Out of the enemy layer: no more hits land on the body, and the player walks through it
 	collision_layer = 0
 	collision_mask = 0
+	_cancel_cast()
+	_drinking = 0.0
 	var animated := animation.trigger(AnimationHooks.DEATH, animation_set)
-	if not animated and death_fall_placeholder:
+	var rag: Ragdoll = null
+	if body != null:
+		body.set_glow(0.0, Color.BLACK)
+		body.pose = &""
+		if death_fall_placeholder or _lying_restore:
+			rag = Ragdoll.create(self, body, _killing_push, _lying_restore)
+	elif not animated and death_fall_placeholder:
 		_fall_over()
 	# Becomes a container (layer 3) holding this enemy's own inventory
-	ContainerComponent.attach(self, "%s's Body" % display_name, "Search", inventory, loot)
+	var container := ContainerComponent.attach(self, "%s's Body" % display_name, "Search", inventory, loot)
+	if rag != null:
+		# Only the limbs can be aimed at: the standing capsule is switched off
+		collision_layer = 0
+		for c in get_children():
+			if c is CollisionShape3D:
+				(c as CollisionShape3D).disabled = true
+		rag.set_interactable(container)
 	died.emit(self)
 
 
@@ -951,6 +1496,8 @@ func _fall_over() -> void:
 
 
 func _flash() -> void:
+	if body != null:
+		body.flash()
 	if _material == null:
 		return
 	_material.albedo_color = Color.WHITE
@@ -995,6 +1542,8 @@ func get_persist_data() -> Dictionary:
 	return {
 		"type": "enemy",
 		"name": display_name,
+		"body_kind": int(body_kind),
+		"enemy_id": enemy_id,
 		"level": level,
 		"body_scale": body_scale,
 		"color": placeholder_color.to_html(),
@@ -1016,6 +1565,8 @@ static func restore(data: Dictionary, parent: Node) -> Enemy:
 	e.display_name = String(data.get("name", "Bandit"))
 	e.level = int(data.get("level", 1))
 	e.body_scale = float(data.get("body_scale", 1.0))
+	e.body_kind = clampi(int(data.get("body_kind", CreatureBody.kind_for(String(data.get("enemy_id", ""))))), 0, 3) as CreatureBody.Kind
+	e.enemy_id = String(data.get("enemy_id", ""))
 	e.placeholder_color = Color.html(String(data.get("color", "b33333ff")))
 	e.max_health = float(data.get("max_health", 60.0))
 	e.base_damage = float(data.get("base_damage", 3.0))
@@ -1042,7 +1593,9 @@ static func restore(data: Dictionary, parent: Node) -> Enemy:
 	if bool(data.get("dead", false)):
 		# Die without the fall-over animation: the saved pose already IS the fallen pose
 		e.death_fall_placeholder = false
+		e._lying_restore = true
 		e.stats.modify_vital("health", -e.stats.health)
+		e._lying_restore = false
 		e.death_fall_placeholder = true
 		e.global_position = pos
 		e.rotation = rot

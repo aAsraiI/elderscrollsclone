@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_8dpd3"]
+
+[resource]
+script = ExtResource("1_8dpd3")
+id = &"petty_soul_gem"
+display_name = "Petty Soul Gem"
+description = "An empty soul gem. Cast Soul Trap on a creature and kill it to fill this."
+item_type = 8
+weight = 0.5
+value = 20
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("mage", "crypt")
+ingredient_effects = PackedStringArray()
+soul_gem_size = 1

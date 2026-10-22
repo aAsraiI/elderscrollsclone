@@ -25,6 +25,8 @@ signal grab_failed(reason: StringName)
 
 const MODE_CARRY := &"carry"
 const MODE_DRAG := &"drag"
+## A ragdoll corpse: the limb you grabbed is pulled up in front of you and the rest hangs from it
+const MODE_RAGDOLL := &"ragdoll"
 
 ## Optional. Found on the Player automatically.
 @export var stats: Stats
@@ -59,6 +61,18 @@ const MODE_DRAG := &"drag"
 ## Physics layers that count as ground and walls for a dragged body
 @export_flags_3d_physics var world_mask: int = 1
 
+@export_group("Ragdoll (corpses)")
+## Meters in front of the camera where the grabbed limb is held
+@export var ragdoll_distance := 1.5
+## How far below the camera it hangs (a body is held low, its feet dragging)
+@export var ragdoll_height_offset := -0.45
+@export var ragdoll_gain := 12.0
+@export var ragdoll_max_speed := 7.0
+@export var ragdoll_slowdown := 1.6
+@export var ragdoll_break_distance := 2.6
+## Stamina per second per kilogram while the body is moving
+@export var ragdoll_stamina_per_kg := 0.04
+
 @export_group("General")
 ## You can never be slowed below this multiplier, however heavy the load
 @export var min_move_mult := 0.3
@@ -79,6 +93,10 @@ var _saved_can_sleep := true
 var _local_grab := Vector3.ZERO
 var _ground_offset := 0.0
 var _has_ground := false
+# ragdoll
+var _ragdoll: Ragdoll
+var _ragdoll_parts: Array[RigidBody3D] = []
+var _saved_mass := 0.0
 
 
 func _ready() -> void:
@@ -125,13 +143,19 @@ func grab(target: Object, hit_point: Vector3 = Vector3.INF) -> bool:
 	var mode: StringName = MODE_DRAG
 	if target.has_method("get_grab_mode"):
 		mode = target.get_grab_mode()
+	if mode == MODE_RAGDOLL:
+		var rag: Ragdoll = target.get_ragdoll() if target.has_method("get_ragdoll") else null
+		if rag == null or rag.parts.is_empty():
+			return false
+		_ragdoll = rag
+		node = rag.nearest_part(hit_point if hit_point.is_finite() else rag.root_part.global_position)
 	if mode == MODE_CARRY and not node is RigidBody3D:
 		mode = MODE_DRAG  # only physics bodies can be lifted
 	var weight := 10.0
 	if target.has_method("get_grab_weight"):
 		weight = maxf(float(target.get_grab_weight()), 0.0)
 
-	if mode == MODE_DRAG and stats != null and stats.stamina <= 0.0:
+	if mode != MODE_CARRY and stats != null and stats.stamina <= 0.0:
 		grab_failed.emit(&"exhausted")
 		return false
 
@@ -142,6 +166,8 @@ func grab(target: Object, hit_point: Vector3 = Vector3.INF) -> bool:
 	_strain = 0.0
 	if _mode == MODE_CARRY:
 		_begin_carry()
+	elif _mode == MODE_RAGDOLL:
+		_begin_ragdoll(hit_point)
 	else:
 		_begin_drag(hit_point)
 	grabbed.emit(target)
@@ -154,6 +180,8 @@ func release(reason: StringName = &"released") -> void:
 	var held := _target
 	if _mode == MODE_CARRY:
 		_end_carry()
+	elif _mode == MODE_RAGDOLL:
+		_end_ragdoll()
 	_target = null
 	_node = null
 	_strain = 0.0
@@ -174,6 +202,8 @@ func _physics_process(delta: float) -> void:
 		return
 	if _mode == MODE_CARRY:
 		_tick_carry(delta)
+	elif _mode == MODE_RAGDOLL:
+		_tick_ragdoll(delta)
 	else:
 		_tick_drag(delta)
 
@@ -182,7 +212,7 @@ func _physics_process(delta: float) -> void:
 func _effort() -> float:
 	var capacity := stats.get_stat("carry_capacity") if stats != null else 200.0
 	var load_ratio := _weight / maxf(capacity, 1.0)
-	var slowdown := carry_slowdown if _mode == MODE_CARRY else drag_slowdown
+	var slowdown := carry_slowdown if _mode == MODE_CARRY else (ragdoll_slowdown if _mode == MODE_RAGDOLL else drag_slowdown)
 	return 1.0 / (1.0 + load_ratio * slowdown)
 
 
@@ -235,6 +265,72 @@ func _hold_point() -> Vector3:
 	if cam == null:
 		return _player.global_position + Vector3.UP if _player != null else _node.global_position
 	return cam.global_position - cam.global_transform.basis.z * carry_distance + Vector3.UP * carry_height_offset
+
+
+# ---------------------------------------------------------------- ragdoll
+
+func _begin_ragdoll(hit_point: Vector3) -> void:
+	var rb := _node as RigidBody3D
+	_local_grab = Vector3.ZERO
+	if hit_point.is_finite():
+		_local_grab = rb.global_transform.affine_inverse() * hit_point
+	# The hand holds this limb firmly: it is made heavy while held, so the joints drag the rest of
+	# the body after it instead of the other way round
+	_saved_mass = rb.mass
+	rb.mass = maxf(rb.mass, _ragdoll.total_mass() * 0.8)
+	_ragdoll_parts.clear()
+	for p in _ragdoll.parts.values():
+		var part := p as RigidBody3D
+		_ragdoll_parts.append(part)
+		part.sleeping = false
+		part.can_sleep = false
+		if _player != null:
+			part.add_collision_exception_with(_player)  # the body must never shove you around
+
+
+func _end_ragdoll() -> void:
+	var held := _node as RigidBody3D
+	if held != null and is_instance_valid(held) and _saved_mass > 0.0:
+		held.mass = _saved_mass
+	_saved_mass = 0.0
+	for part in _ragdoll_parts:
+		if not is_instance_valid(part):
+			continue
+		part.can_sleep = true
+		if _player != null:
+			part.remove_collision_exception_with(_player)
+		part.linear_velocity = part.linear_velocity.limit_length(4.0)
+	_ragdoll_parts.clear()
+	_ragdoll = null
+
+
+func _tick_ragdoll(delta: float) -> void:
+	var rb := _node as RigidBody3D
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or _player == null:
+		release(&"lost")
+		return
+	var fwd := -cam.global_transform.basis.z
+	var hold := cam.global_position + fwd * ragdoll_distance + Vector3.UP * ragdoll_height_offset
+	var grip := rb.global_transform * _local_grab
+	var error := hold - grip
+	if _strained(error.length(), ragdoll_break_distance, delta):
+		release(&"too_far")
+		return
+	var effort := _effort()
+	var desired := (error * ragdoll_gain * effort).limit_length(ragdoll_max_speed * effort)
+	# A firm hand: push the held limb toward the hold point hard enough to lift what hangs from it
+	rb.apply_central_impulse((desired - rb.linear_velocity) * _ragdoll.total_mass() * clampf(8.0 * delta, 0.0, 0.6))
+	rb.angular_velocity = rb.angular_velocity.lerp(Vector3.ZERO, clampf(4.0 * delta, 0.0, 1.0))
+	# The rest of the body follows along the ground
+	var pull := Vector3(desired.x, minf(desired.y, 0.0), desired.z) * 0.5
+	for part in _ragdoll_parts:
+		if part != rb and is_instance_valid(part):
+			part.linear_velocity = part.linear_velocity.lerp(Vector3(pull.x, part.linear_velocity.y, pull.z), clampf(3.0 * delta, 0.0, 1.0))
+	if stats != null and ragdoll_stamina_per_kg > 0.0 and rb.linear_velocity.length() > 0.6:
+		stats.modify_vital("stamina", -_weight * ragdoll_stamina_per_kg * delta)
+		if stats.stamina <= 0.0:
+			release(&"exhausted")
 
 
 # ---------------------------------------------------------------- drag

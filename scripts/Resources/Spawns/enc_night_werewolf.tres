@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/spawn_entry.gd" id="1_wplap"]
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="2_623mh"]
+[ext_resource type="Resource" path="res://scripts/Resources/Enemies/werewolf.tres" id="3_ytqk4"]
+[ext_resource type="Script" path="res://scripts/spawn_table.gd" id="4_58rds"]
+
+[sub_resource type="Resource" id="Resource_wplap"]
+script = ExtResource("1_wplap")
+members = Array[ExtResource("2_623mh")]([ExtResource("3_ytqk4")])
+
+[resource]
+script = ExtResource("4_58rds")
+entries = Array[ExtResource("1_wplap")]([SubResource("Resource_wplap")])

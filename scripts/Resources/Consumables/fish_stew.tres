@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_u7pih"]
+
+[resource]
+script = ExtResource("1_u7pih")
+id = &"fish_stew"
+display_name = "Fish Stew"
+description = "A sailor's supper."
+item_type = 3
+weight = 0.5
+value = 16
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "tavern")
+use_verb = "Eat"
+magic_effects = Array[Dictionary]([{
+"dur": 600.0,
+"id": &"regenerate_magicka",
+"mag": 30.0
+}])
+ingredient_effects = PackedStringArray()

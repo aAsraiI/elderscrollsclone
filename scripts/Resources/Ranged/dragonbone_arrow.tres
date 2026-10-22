@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_sdy1n"]
+
+[resource]
+script = ExtResource("1_sdy1n")
+id = &"dragonbone_arrow"
+display_name = "Dragonbone Arrow"
+description = "Shot from a bow. Better arrows hit harder."
+value = 75
+stackable = true
+max_stack = 999
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_arrow = true
+arrow_damage = 31.0
+ingredient_effects = PackedStringArray()

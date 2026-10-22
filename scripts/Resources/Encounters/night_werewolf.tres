@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/World/encounter_data.gd" id="1_f3fxf"]
+[ext_resource type="Resource" path="res://scripts/Resources/Spawns/enc_night_werewolf.tres" id="2_dm5ab"]
+
+[resource]
+script = ExtResource("1_f3fxf")
+id = &"night_werewolf"
+display_name = "Werewolf"
+table = ExtResource("2_dm5ab")
+weight = 0.7
+aggro = true
+min_player_level = 10
+cooldown = 600.0
+night_only = true
+message = "A howl rises from the dark..."

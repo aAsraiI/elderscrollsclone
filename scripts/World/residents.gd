@@ -21,8 +21,11 @@ static func generate(town: PlacedPOI, map: WorldMap) -> Array[NpcData]:
 		return out
 	var townsfolk := load(TOWNSFOLK_PATH) as EnemyData
 	var guard_body := load(GUARD_PATH) as EnemyData
+	var for_sale := Homes.for_sale_id(layout, int((town.poi as TownData).kind)) if town.poi is TownData else ""
 	var zone := LevelCurve.zone_range(map, town.position) if map != null else Vector2i(1, 5)
 	for b in layout.buildings:
+		if b.id == for_sale:
+			continue  # the empty house for sale (see Homes)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = ("%s|npc" % b.id).hash()
 		var n := NpcData.new()

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_el13f"]
+
+[resource]
+script = ExtResource("1_el13f")
+id = &"tome_open_easy_lock"
+display_name = "Spell Tome: Open Easy Lock"
+description = "Apprentice Alteration spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 90
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "open_easy_lock"

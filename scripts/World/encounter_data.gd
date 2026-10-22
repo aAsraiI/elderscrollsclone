@@ -26,6 +26,8 @@ extends Resource
 @export var max_player_level := 0
 ## Seconds before this same encounter can happen again
 @export var cooldown := 120.0
+## Only after dark (werewolves, vampires)
+@export var night_only := false
 ## Short message shown when it starts ("" = none)
 @export var message := ""
 

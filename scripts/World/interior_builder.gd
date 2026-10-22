@@ -71,6 +71,7 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 
 	var chests := 0
 	var beds: Array[Vector3] = []
+	var stations: Array[Vector3] = []
 	var seats: Array[Vector3] = []
 	var work := Vector3(0.0, 0.0, 0.0)
 	match b.kind:
@@ -81,6 +82,7 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			seats.append_array(_table(root, Vector3(w * 0.12, 0.0, 0.2), 2))
 			work = Vector3(w * 0.5 - 1.6, 0.0, -0.8)
 			_hearth(root, Vector3(w * 0.5 - 0.5, 0.0, 0.0))
+			stations.append(_station(root, "cooking_pot", Vector3(w * 0.5 - 1.4, 0.0, 1.4)))
 			POIBuilder.add_box(root, Vector3(1.6, 1.8, 0.45), Vector3(w * 0.5 - 1.3, 0.9, d * 0.5 - 0.3), WOOD)
 			if b.kind == BuildingPlot.Kind.FARM:
 				for i in 3:
@@ -94,20 +96,29 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			work = Vector3(0.0, 0.0, d * 0.1 + 1.0)
 			beds.append(_bed(root, Vector3(w * 0.5 - 0.8, 0.0, -d * 0.5 + 1.6)))
 			chests += _chest(root, b, 0, "Merchant Chest", Vector3(w * 0.25, 0.35, d * 0.5 - 1.1), _shop_loot(), interior_seed)
+			if b.trade == "alchemy":
+				stations.append(_station(root, "alchemy_lab", Vector3(-w * 0.5 + 0.5, 0.0, d * 0.3), PI * 0.5))
+			elif b.trade == "jeweler":
+				stations.append(_station(root, "workbench", Vector3(-w * 0.5 + 0.5, 0.0, d * 0.3), PI * 0.5))
 		BuildingPlot.Kind.INN:
 			POIBuilder.add_box(root, Vector3(0.7, 1.1, d * 0.45), Vector3(-w * 0.5 + 1.8, 0.55, d * 0.05), WOOD)
 			POIBuilder.add_box(root, Vector3(0.5, 2.0, d * 0.45), Vector3(-w * 0.5 + 0.3, 1.0, d * 0.05), DARK_WOOD)
 			for i in 3:
 				seats.append_array(_table(root, Vector3(w * 0.05 + float(i % 2) * w * 0.25, 0.0, -d * 0.2 + float(i) * d * 0.15), 4))
 			_hearth(root, Vector3(w * 0.5 - 0.5, 0.0, -d * 0.15))
+			stations.append(_station(root, "cooking_pot", Vector3(w * 0.5 - 1.3, 0.0, -d * 0.15 + 1.5)))
 			POIBuilder.add_box(root, Vector3(0.2, h, 2.8), Vector3(w * 0.12, h * 0.5, d * 0.5 - 1.4), wall_color.darkened(0.1))
 			beds.append(_bed(root, Vector3(w * 0.12 + 0.8, 0.0, d * 0.5 - 1.2)))
 			beds.append(_bed(root, Vector3(w * 0.12 + 2.2, 0.0, d * 0.5 - 1.2)))
 			work = Vector3(-w * 0.5 + 1.05, 0.0, d * 0.05)
 			chests += _chest(root, b, 0, "Innkeeper's Chest", Vector3(-w * 0.5 + 0.9, 0.35, -d * 0.3), _shop_loot(), interior_seed)
 		BuildingPlot.Kind.SMITHY:
-			POIBuilder.add_box(root, Vector3(1.8, 1.0, 1.8), Vector3(w * 0.5 - 1.2, 0.5, d * 0.5 - 1.2), STONE.darkened(0.2))
-			POIBuilder.add_box(root, Vector3(1.0, 0.25, 1.0), Vector3(w * 0.5 - 1.2, 1.1, d * 0.5 - 1.2), Color(1.0, 0.45, 0.1), 0.0, Vector3.ZERO, false, true)
+			# The smith's workstations: forge, smelter, tanning rack, grindstone, workbench
+			stations.append(_station(root, "forge", Vector3(w * 0.5 - 1.2, 0.0, d * 0.5 - 1.2)))
+			stations.append(_station(root, "smelter", Vector3(w * 0.5 - 0.8, 0.0, d * 0.5 - 3.0)))
+			stations.append(_station(root, "tanning_rack", Vector3(-w * 0.5 + 0.3, 0.0, -d * 0.5 + 2.0), PI * 0.5))
+			stations.append(_station(root, "grindstone", Vector3(-w * 0.25, 0.0, -d * 0.5 + 0.8)))
+			stations.append(_station(root, "workbench", Vector3(w * 0.2, 0.0, -d * 0.5 + 0.6)))
 			POIBuilder.add_box(root, Vector3(0.5, 0.6, 0.4), Vector3(0.0, 0.3, 0.6), STONE.darkened(0.4))
 			POIBuilder.add_box(root, Vector3(1.0, 0.15, 0.4), Vector3(0.0, 0.68, 0.6), Color(0.22, 0.22, 0.25))
 			POIBuilder.add_box(root, Vector3(2.4, 1.8, 0.3), Vector3(-w * 0.5 + 1.5, 0.9, d * 0.5 - 0.2), DARK_WOOD)
@@ -126,6 +137,7 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			for i in rows:
 				seats.append(Vector3(-w * 0.24, 0.0, -d * 0.5 + 2.4 + float(i) * 1.6))
 			chests += _chest(root, b, 0, "Offering Box", Vector3(w * 0.5 - 0.8, 0.35, d * 0.5 - 1.0), _offering_loot(), interior_seed)
+			stations.append(_station(root, "alchemy_lab", Vector3(w * 0.5 - 0.45, 0.0, -d * 0.5 + 2.0), PI * 0.5))
 		BuildingPlot.Kind.GUILD_HALL:
 			POIBuilder.add_box(root, Vector3(1.2, 0.8, d * 0.45), Vector3(0.0, 0.4, d * 0.05), WOOD)
 			for side in [-1.0, 1.0]:
@@ -138,6 +150,8 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 					for i in 2:
 						POIBuilder.add_box(root, Vector3(0.35, 1.7, 0.35), Vector3(w * 0.5 - 1.2, 0.85, -d * 0.2 + float(i) * 2.0), Color(0.6, 0.5, 0.3))
 				"antiquarians":
+					stations.append(_station(root, "grindstone", Vector3(-w * 0.3, 0.0, -d * 0.5 + 0.8)))
+					stations.append(_station(root, "workbench", Vector3(w * 0.25, 0.0, -d * 0.5 + 0.6)))
 					var case := MuseumCase.new()
 					case.name = "MuseumCase"
 					root.add_child(case)
@@ -147,6 +161,9 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 					for side in [-1.0, 1.0]:
 						POIBuilder.add_box(root, Vector3(0.5, 2.6, d * 0.5), Vector3(side * (w * 0.5 - 0.3), 1.3, 0.0), DARK_WOOD)
 					POIBuilder.add_box(root, Vector3(0.4, 0.4, 0.4), Vector3(0.0, 1.2, d * 0.35), Color(0.4, 0.6, 1.0), 0.5, Vector3(0.4, 0.0, 0.4), false, true)
+					stations.append(_station(root, "spell_altar", Vector3(w * 0.25, 0.0, -d * 0.5 + 1.2)))
+					stations.append(_station(root, "enchanter", Vector3(-w * 0.25, 0.0, -d * 0.5 + 1.2)))
+					stations.append(_station(root, "alchemy_lab", Vector3(w * 0.2, 0.0, d * 0.5 - 0.6)))
 				_:
 					for i in 2:
 						POIBuilder.add_box(root, Vector3(0.7, 1.9, 0.5), Vector3(w * 0.5 - 0.8, 0.95, -d * 0.2 + float(i) * 2.0), Color(0.62, 0.62, 0.66))
@@ -158,9 +175,30 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 
 	# Furnish the rest of the room and put things on every surface (owned: taking them is theft;
 	# guild halls belong to the guild, so members may help themselves)
+	var clear_spots: Array[Vector3] = beds.duplicate()
+	clear_spots.append_array(stations)
 	var owner := b.id if b.kind != BuildingPlot.Kind.GUILD_HALL else "guild:" + b.guild
+	var home := Homes.owns(b.id)
+	if home:
+		owner = ""  # your own home: nothing here is stolen
+		stations.append(_station(root, "alchemy_lab", Vector3(-w * 0.5 + 0.45, 0.0, -d * 0.1), PI * 0.5))
+		stations.append(_station(root, "workbench", Vector3(w * 0.25, 0.0, -d * 0.5 + 0.6)))
+		for i in 2:
+			var at := Vector3(-w * 0.2 + float(i) * 1.8, 0.0, -d * 0.5 + 1.4)
+			Planter.place(root, at, "planter/%s/%d" % [b.id, i])
+			stations.append(at)
+		for c in root.get_children():
+			var cc := c.get_node_or_null("ContainerComponent") as ContainerComponent
+			if cc != null:
+				cc.owner_id = ""
+				cc.display_name = "Your Chest"
+	# Beds you can sleep in, and the temple's shrine
+	for bed in beds:
+		RestSpot.make_bed(root, bed, b)
+	if b.kind == BuildingPlot.Kind.TEMPLE:
+		RestSpot.make_shrine(root, Vector3(0.0, 0.0, d * 0.5 - 1.3))
 	var decor := RoomDecorator.decorate(root, Rect2(-w * 0.5, -d * 0.5, w, d), theme_for(b, rng), level, interior_seed ^ 0x5eed,
-		owner, "building/%s" % b.id, _keep_clear(door_z, work, seats, beds), 3, today, h)
+		owner, "building/%s" % b.id, _keep_clear(door_z, work, seats, clear_spots), 3, today, h)
 
 	return {
 		"root": root,
@@ -200,6 +238,12 @@ static func theme_for(b: BuildingPlot, rng: RandomNumberGenerator) -> String:
 
 
 # ---------------------------------------------------------------- furniture
+
+## A workstation (see CraftingStation); returns where it stands so the decorator keeps it clear
+static func _station(root: Node3D, kind: String, at: Vector3, yaw: float = 0.0) -> Vector3:
+	CraftingStation.place(root, kind, at, yaw)
+	return at
+
 
 static func _bed(root: Node3D, at: Vector3) -> Vector3:
 	POIBuilder.add_box(root, Vector3(1.0, 0.5, 2.0), at + Vector3(0.0, 0.25, 0.0), DARK_WOOD)

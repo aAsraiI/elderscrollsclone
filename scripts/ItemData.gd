@@ -3,7 +3,9 @@ extends Resource
 ## One of these per item type. Create in the editor: FileSystem > right-click >
 ## New Resource > ItemData, then save as e.g. res://items/iron_sword.tres
 
-enum ItemType { MISC, WEAPON, ARMOR, CONSUMABLE, INGREDIENT, KEY }
+## BOOK = spell tomes, MATERIAL = ore, ingots, leather, raw food, SOUL_GEM, TOOL = pickaxe (added at
+## the end so old item files keep their numbers)
+enum ItemType { MISC, WEAPON, ARMOR, CONSUMABLE, INGREDIENT, KEY, BOOK, MATERIAL, SOUL_GEM, TOOL }
 enum EquipSlot { NONE, HEAD, CHEST, HANDS, LEGS, FEET, MAIN_HAND, OFF_HAND, RING, AMULET }
 ## SINGLE = one target (a few rays close together, nearest target wins).
 ## ARC = the swing sweeps a fan of rays across arc_degrees and hits everything it touches.
@@ -65,6 +67,38 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 ## Stamina / magicka given back at once when drunk
 @export var restore_stamina: float = 0.0
 @export var restore_magicka: float = 0.0
+
+@export_group("Bows and arrows")
+## A bow: hold left click to draw, let go to shoot (see RangedCombat). Uses the best arrows you carry.
+@export var is_bow := false
+## Seconds to a full draw (a quick release flies slower and hits softer)
+@export var draw_time := 0.9
+## Meters per second of an arrow at full draw
+@export var arrow_speed := 48.0
+## An arrow: added to the bow's damage
+@export var is_arrow := false
+@export var arrow_damage := 0.0
+
+@export_group("Magic and crafting")
+## Magic effects when eaten or drunk (alchemy potions, cooked food), or on a poison:
+## [{"id": "restore_health", "mag": 40, "dur": 0}, ...]  see MagicEffects
+@export var magic_effects: Array[Dictionary] = []
+## A poison: not drunk, but put on your weapon (the next few hits carry it)
+@export var is_poison := false
+## Alchemy: the four effects hidden in this ingredient (MagicEffects ids). Eating it shows the first.
+@export var ingredient_effects: PackedStringArray = []
+## A spell tome: reading it teaches this spell (SpellCatalog id)
+@export var teaches_spell := ""
+## Soul gem size: 0 = not a soul gem, 1 = Petty .. 5 = Grand
+@export_range(0, 5) var soul_gem_size := 0
+@export var soul_filled := false
+## Enchantment on a weapon (hits) or worn gear (always on): [{"id", "mag", "dur"}]. Worn gear
+## enchantments are also folded into stat_modifiers. Made by CraftedItems.
+@export var enchant_effects: Array[Dictionary] = []
+## Charge a weapon enchantment starts with (worn gear needs none)
+@export var enchant_charge := 0.0
+## Smithing quality: 0 = as made, 1 = Fine .. 6 = Legendary (CraftedItems.improved)
+@export_range(0, 6) var quality := 0
 
 @export_group("Weapon")
 ## Added to the wielder's base damage stat. Each hand hits with its own weapon's damage.
@@ -153,6 +187,8 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 
 ## true for food and potions the player can eat or drink
 func is_consumable() -> bool:
+	if item_type == ItemType.CONSUMABLE and not magic_effects.is_empty() and not is_poison:
+		return true
 	return item_type == ItemType.CONSUMABLE and effect_duration > 0.0 and (heal_amount > 0.0 or stamina_regen_bonus > 0.0 or restore_stamina > 0.0 or restore_magicka > 0.0)
 
 
@@ -170,6 +206,31 @@ func get_effect_mods() -> Dictionary:
 ## Also describes what food and potions do.
 func get_combat_description() -> String:
 	var t := ""
+	for e in magic_effects:
+		t += MagicEffects.describe(e) + "
+"
+	if is_poison:
+		t += "Poison: apply it to your weapon from the inventory
+"
+	if teaches_spell != "":
+		var sp := SpellCatalog.get_spell(teaches_spell)
+		if sp != null:
+			t += "Teaches the spell %s (%s)
+%s
+" % [sp.display_name, MagicEffects.SCHOOL_NAMES.get(sp.get_school(), ""), sp.describe()]
+	if soul_gem_size > 0:
+		t += ("Holds a %s soul
+" % SoulGems.NAMES[soul_gem_size - 1]) if soul_filled else "Empty. Soul Trap a creature to fill it.
+"
+	if not enchant_effects.is_empty():
+		t += "[color=#9fb4ff]Enchanted%s:[/color]
+" % (" (on hit)" if item_type == ItemType.WEAPON else "")
+		for e in enchant_effects:
+			t += "  " + MagicEffects.describe(e) + "
+"
+	if quality > 0:
+		t += "%s quality
+" % CraftedItems.QUALITY_NAMES[quality]
 	if is_consumable():
 		if heal_amount > 0.0:
 			t += "Restores %s health over %s s\n" % [String.num(heal_amount).trim_suffix(".0"), String.num(effect_duration).trim_suffix(".0")]

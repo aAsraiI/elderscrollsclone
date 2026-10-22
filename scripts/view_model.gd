@@ -133,6 +133,11 @@ func _process(delta: float) -> void:
 
 # The pose a hand wants to be in right now
 func _target_pose(slot: int, item: ItemData) -> Array:
+	if slot == MAIN and item != null and item.is_bow:
+		# A bow: held upright to the left, drawn toward the middle of the view
+		var ranged := get_tree().get_first_node_in_group("player").get_node_or_null("RangedCombat") as RangedCombat
+		var d := ranged.get_draw_ratio() if ranged != null else 0.0
+		return _mix([Vector3(0.12, -0.28, -0.55), Vector3(0.0, 0.0, 10.0)], [Vector3(0.02, -0.12, -0.5), Vector3(0.0, 0.0, -4.0)], d)
 	var rest := _rest_pose(slot, item)
 	var phase := combat.get_phase()
 	if phase != MeleeCombat.Phase.IDLE and combat.get_action_hand() == slot:

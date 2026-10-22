@@ -32,6 +32,17 @@ func _ready() -> void:
 	add_child(shape)
 
 
+## "House for sale: 2500 gold" while this is the town's empty house and you don't own it yet
+func _sale_text() -> String:
+	if Homes.owns(building_id) or not is_inside_tree():
+		return ""
+	var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	var b := world.get_building(building_id) if world != null else null
+	if b == null or not Homes.is_for_sale(b, world):
+		return ""
+	return "Buy this house  (%d gold)" % Homes.price(b, world)
+
+
 func is_locked() -> bool:
 	return Locks.is_locked(building_id, default_locked)
 
@@ -41,6 +52,9 @@ func set_locked(locked: bool) -> void:
 
 
 func get_prompt() -> String:
+	var sale := _sale_text()
+	if sale != "":
+		return sale
 	if is_locked():
 		return "Enter %s  (Locked: %s)" % [building_name, Locks.tier_name(lock_level)]
 	return "Enter %s" % building_name
@@ -51,6 +65,11 @@ func get_key() -> ItemData:
 
 
 func interact(actor: Inventory) -> void:
+	if _sale_text() != "":
+		var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+		var why := Homes.buy(world.get_building(building_id), actor, world)
+		Locks.toast(get_tree(), why if why != "" else "You bought %s. It is your home now." % building_name, why != "")
+		return
 	var manager := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
 	if manager == null:
 		push_error("BuildingDoor: no DungeonManager found. The World node creates one.")
@@ -87,3 +106,16 @@ func try_unlock(actor: Inventory) -> bool:
 		Locks.PickResult.KEY_ONLY:
 			Locks.toast(get_tree(), "This lock can only be opened with its key.", true)
 	return false
+
+
+## The Open spell (see SpellCaster): unlocks a lock up to this level. A crime if someone sees it.
+func magic_unlock(level: int) -> bool:
+	if not is_locked():
+		return true
+	if lock_level > level or _sale_text() != "":
+		return false
+	set_locked(false)
+	var crime := get_tree().get_first_node_in_group("crime") as CrimeManager
+	if crime != null:
+		crime.on_lock_attempt(building_id)
+	return true

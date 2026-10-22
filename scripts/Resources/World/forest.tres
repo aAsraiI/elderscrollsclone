@@ -1,6 +1,8 @@
 [gd_resource type="Resource" script_class="BiomeData" format=3]
 
 [ext_resource type="Script" path="res://scripts/World/biome_data.gd" id="1_biome"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/night_werewolf.tres" id="6_sy423"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/night_vampire.tres" id="7_i207p"]
 [ext_resource type="Resource" path="res://scripts/Resources/World/POIs/fort_ruin_entrance.tres" id="12_lrxw4"]
 [ext_resource type="Resource" path="res://scripts/Resources/Encounters/plains_wolves.tres" id="enc_0"]
 [ext_resource type="Resource" path="res://scripts/Resources/Encounters/plains_ambush.tres" id="enc_1"]
@@ -70,4 +72,4 @@ tree_color = Color(0.18, 0.36, 0.14, 1)
 poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("Resource_sy423")])
 level_min = 3
 level_max = 14
-encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3")])
+encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("6_sy423"), ExtResource("7_i207p")])

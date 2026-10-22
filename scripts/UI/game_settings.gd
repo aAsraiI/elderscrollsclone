@@ -27,6 +27,14 @@ const DEFAULTS := {
 	"hud_values": true,
 	"hud_always": false,
 	"show_compass": true,
+	"difficulty": 2,  # 0 Novice .. 4 Master
+	"grass": 2,  # 0 off, 1 low, 2 medium, 3 high
+	"weather_effects": true,
+	"show_date": true,
+	"music_volume": 0.5,
+	"sfx_volume": 0.8,
+	"tutorial": true,
+	"controller_look": 3.0,
 }
 
 ## How the Settings screen shows each option. kind: slider / check / choice.
@@ -37,16 +45,24 @@ const OPTIONS := [
 	{"tab": "Gameplay", "key": "fov", "label": "Field of view", "kind": "slider", "min": 55.0, "max": 110.0, "step": 1.0, "fmt": "%d°"},
 	{"tab": "Gameplay", "key": "head_bob", "label": "Weapon sway while walking", "kind": "check"},
 	{"tab": "Gameplay", "key": "autosave_minutes", "label": "Autosave every", "kind": "slider", "min": 0.0, "max": 30.0, "step": 1.0, "fmt": "%d min", "zero": "Off"},
+	{"tab": "Gameplay", "key": "difficulty", "label": "Difficulty", "kind": "choice", "choices": ["Novice", "Apprentice", "Adept", "Expert", "Master"]},
 	{"tab": "Interface", "key": "ui_scale", "label": "Interface size", "kind": "slider", "min": 0.75, "max": 1.5, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
 	{"tab": "Interface", "key": "hud_values", "label": "Numbers on health / magicka / stamina", "kind": "check"},
 	{"tab": "Interface", "key": "hud_always", "label": "Always show the bars (no fading)", "kind": "check"},
 	{"tab": "Interface", "key": "show_compass", "label": "Compass", "kind": "check"},
+	{"tab": "Interface", "key": "show_date", "label": "Date and weather in the corner", "kind": "check"},
+	{"tab": "Interface", "key": "tutorial", "label": "Tutorial hints", "kind": "check"},
+	{"tab": "Gameplay", "key": "controller_look", "label": "Controller look speed", "kind": "slider", "min": 1.0, "max": 6.0, "step": 0.25, "fmt": "%.2f"},
 	{"tab": "Interface", "key": "show_fps", "label": "FPS counter", "kind": "check"},
 	{"tab": "Video", "key": "window_mode", "label": "Window", "kind": "choice", "choices": ["Windowed", "Borderless fullscreen", "Fullscreen"]},
 	{"tab": "Video", "key": "vsync", "label": "V-Sync", "kind": "check"},
 	{"tab": "Video", "key": "max_fps", "label": "Frame limit", "kind": "choice", "choices": ["Unlimited", "30", "60", "120", "144"], "values": [0, 30, 60, 120, 144]},
 	{"tab": "Video", "key": "render_scale", "label": "Render scale", "kind": "slider", "min": 0.5, "max": 1.0, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
+	{"tab": "Video", "key": "grass", "label": "Grass and flowers", "kind": "choice", "choices": ["Off", "Low", "Medium", "High"]},
+	{"tab": "Video", "key": "weather_effects", "label": "Rain and snow", "kind": "check"},
 	{"tab": "Audio", "key": "master_volume", "label": "Master volume", "kind": "slider", "min": 0.0, "max": 1.0, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
+	{"tab": "Audio", "key": "music_volume", "label": "Music", "kind": "slider", "min": 0.0, "max": 1.0, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
+	{"tab": "Audio", "key": "sfx_volume", "label": "Sound effects", "kind": "slider", "min": 0.0, "max": 1.0, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
 ]
 
 static var _values := {}
@@ -60,6 +76,8 @@ static func get_value(key: String) -> Variant:
 
 static func set_value(key: String, value: Variant, tree: SceneTree = null) -> void:
 	_ensure_loaded()
+	if key == "difficulty":
+		GameRules.set_rule("difficulty", int(value))  # the game being played changes with it
 	_values[key] = value
 	save()
 	if tree == null:

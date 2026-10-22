@@ -11,7 +11,8 @@ var coord := Vector2i.ZERO
 
 
 ## Heavy part. Returns {"coord", "arrays", "faces"}. Thread-safe.
-static func build_data(map: WorldMap, coord: Vector2i, chunk_size: float, quads: int) -> Dictionary:
+## detail: ground cover amount (GameSettings "grass": 0 off .. 3 high)
+static func build_data(map: WorldMap, coord: Vector2i, chunk_size: float, quads: int, detail: int = 2) -> Dictionary:
 	var spacing := chunk_size / float(quads)
 	var vps := quads + 1          # vertices per side
 	var g := quads + 3            # sampled grid per side (one extra ring all around)
@@ -25,6 +26,8 @@ static func build_data(map: WorldMap, coord: Vector2i, chunk_size: float, quads:
 	steep_start.resize(vps * vps)
 	var steep_full := PackedFloat32Array()
 	steep_full.resize(vps * vps)
+	var biomes := PackedInt32Array()
+	biomes.resize(vps * vps)
 
 	var origin_x := coord.x * chunk_size
 	var origin_z := coord.y * chunk_size
@@ -41,6 +44,7 @@ static func build_data(map: WorldMap, coord: Vector2i, chunk_size: float, quads:
 				steep_colors[k] = s.steep_color
 				steep_start[k] = s.steep_start
 				steep_full[k] = s.steep_full
+				biomes[k] = s.biome_index if s.edge <= 0.05 else -1
 
 	var verts := PackedVector3Array()
 	verts.resize(vps * vps)
@@ -96,7 +100,8 @@ static func build_data(map: WorldMap, coord: Vector2i, chunk_size: float, quads:
 	arrays[Mesh.ARRAY_NORMAL] = normals
 	arrays[Mesh.ARRAY_COLOR] = colors
 	arrays[Mesh.ARRAY_INDEX] = indices
-	return {"coord": coord, "arrays": arrays, "faces": faces, "trees": _scatter_trees(map, coord, chunk_size)}
+	return {"coord": coord, "arrays": arrays, "faces": faces, "trees": _scatter_trees(map, coord, chunk_size),
+		"details": GroundCover.scatter(map, coord, chunk_size, quads, verts, normals, colors, biomes, detail)}
 
 
 ## Where trees grow in this chunk: style -> {"pos": PackedVector3Array, "scale": PackedFloat32Array,
@@ -159,6 +164,7 @@ func apply(data: Dictionary, material: Material) -> void:
 	collider.shape = shape
 	add_child(collider)
 	_add_trees(data.get("trees", {}))
+	GroundCover.apply(self, data.get("details", {}))
 
 
 # ---------------------------------------------------------------- trees

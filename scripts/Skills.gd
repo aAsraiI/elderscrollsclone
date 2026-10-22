@@ -29,8 +29,14 @@ var _applied: Dictionary = {}  # StringName -> Dictionary, last modifiers pushed
 var _player_level := 1
 ## Player XP from deeds, see add_deed_xp()
 var deed_xp := 0
+## Multiplier on all skill XP (World Creation's skill speed x the character's advantages)
+var xp_rate := 1.0
+## Player XP the character started with (class and race skill levels): it doesn't count toward the
+## player level, so every new character starts at level 1
+var start_offset := 0
 
 const DEED_KEY := "_deeds"
+const OLD_SKILLS := {"offensive_magic": "destruction", "healing_magic": "restoration", "utility_magic": "alteration"}
 
 
 func _ready() -> void:
@@ -62,7 +68,21 @@ func add_xp(skill_id: StringName, amount: float) -> void:
 	var def := SkillDatabase.get_skill(skill_id)
 	if def == null or not levels.has(skill_id) or amount <= 0.0:
 		return
-	_grant(def, amount * def.xp_mult)
+	_grant(def, amount * def.xp_mult * xp_rate * (1.0 + (stats.get_stat("skill_xp_pct") if stats != null else 0.0)))
+
+
+## A new character's class and race: these skills start this many levels higher. The player level
+## stays 1 (the extra player XP is remembered in start_offset).
+func set_starting_levels(bonus: Dictionary) -> void:
+	for id in bonus:
+		var sid := StringName(id)
+		if levels.has(sid):
+			levels[sid] = clampi(SkillDatabase.START_LEVEL + int(bonus[id]), SkillDatabase.START_LEVEL, SkillDatabase.MAX_LEVEL)
+			xp[sid] = 0.0
+	start_offset = 0
+	start_offset = get_player_xp() - deed_xp
+	_player_level = get_player_level()
+	_apply_all()
 
 
 ## Debug helper: gives exactly the XP needed for the next level.
@@ -146,7 +166,7 @@ func add_deed_xp(amount: int) -> void:
 
 
 func get_player_xp() -> int:
-	var total := deed_xp
+	var total := deed_xp - start_offset
 	for id in levels:
 		total += SkillDatabase.skill_player_xp(levels[id])
 	return total
@@ -178,15 +198,22 @@ func to_dict() -> Dictionary:
 	for id in levels:
 		out[String(id)] = {"level": levels[id], "xp": xp[id]}
 	out[DEED_KEY] = deed_xp
+	out["_start_offset"] = start_offset
 	return out
 
 
 func from_dict(data: Dictionary) -> void:
+	# Saves from before stage 10 had three magic skills: they become Destruction, Restoration, Alteration
+	data = data.duplicate()
+	for old in OLD_SKILLS:
+		if data.has(old) and not data.has(OLD_SKILLS[old]):
+			data[OLD_SKILLS[old]] = data[old]
 	for id in levels:
 		var entry: Dictionary = data.get(String(id), {})
 		levels[id] = clampi(int(entry.get("level", SkillDatabase.START_LEVEL)), SkillDatabase.START_LEVEL, SkillDatabase.MAX_LEVEL)
 		xp[id] = float(entry.get("xp", 0.0))
 	deed_xp = int(data.get(DEED_KEY, 0))
+	start_offset = int(data.get("_start_offset", 0))
 	_player_level = get_player_level()
 	_apply_all()
 

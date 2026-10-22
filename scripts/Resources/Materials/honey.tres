@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_l11v6"]
+
+[resource]
+script = ExtResource("1_l11v6")
+id = &"honey"
+display_name = "Honey Jar"
+description = "Something to cook with at a cooking pot."
+item_type = 7
+weight = 0.3
+value = 4
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("kitchen")
+ingredient_effects = PackedStringArray()

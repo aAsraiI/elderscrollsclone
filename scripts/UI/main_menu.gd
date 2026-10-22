@@ -260,9 +260,19 @@ func hide_loading() -> void:
 
 
 func _on_new_game() -> void:
-	_new_panel.visible = not _new_panel.visible
-	if _new_panel.visible:
-		_seed_edit.grab_focus()
+	# World Creation, then Character Creation (NewGameWizard)
+	_new_panel.visible = false
+	_buttons.visible = false
+	var wiz := NewGameWizard.new()
+	wiz.saves = _saves
+	add_child(wiz)
+	wiz.cancelled.connect(func() -> void:
+		wiz.queue_free()
+		_on_sub_closed())
+	wiz.begin.connect(func(seed_text: String, rules: Dictionary, character: Dictionary) -> void:
+		wiz.visible = false
+		await show_loading()
+		_saves.new_game(seed_text, rules, character))
 
 
 func _start_new_game() -> void:

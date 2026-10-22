@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_nici4"]
+
+[resource]
+script = ExtResource("1_nici4")
+id = &"ebony_ore"
+display_name = "Ebony Ore"
+description = "Raw ore. Smelt it into ingots at a smelter."
+item_type = 7
+weight = 1.0
+value = 35
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("smithy", "mine")
+ingredient_effects = PackedStringArray()

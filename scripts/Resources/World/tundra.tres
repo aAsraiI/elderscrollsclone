@@ -5,6 +5,8 @@
 [ext_resource type="Resource" path="res://scripts/Resources/Encounters/snow_beasts.tres" id="3_167v0"]
 [ext_resource type="Resource" path="res://scripts/Resources/Encounters/snow_trapper.tres" id="4_smixw"]
 [ext_resource type="Script" path="res://scripts/World/poi_rule.gd" id="5_k6xp8"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/night_werewolf.tres" id="5_smixw"]
+[ext_resource type="Resource" path="res://scripts/Resources/Encounters/night_vampire.tres" id="6_k6xp8"]
 [ext_resource type="Resource" path="res://scripts/Resources/World/POIs/cave_entrance.tres" id="6_sx8yx"]
 [ext_resource type="Resource" path="res://scripts/Resources/World/POIs/watchtower.tres" id="7_ah8mw"]
 [ext_resource type="Resource" path="res://scripts/Resources/World/POIs/bandit_camp.tres" id="8_7owl3"]
@@ -82,4 +84,4 @@ tree_color = Color(0.16, 0.3, 0.2, 1)
 poi_rules = Array[ExtResource("5_k6xp8")]([SubResource("Resource_cqhew"), SubResource("Resource_fubvx"), SubResource("Resource_36kvh"), SubResource("Resource_k346d"), SubResource("Resource_167v0"), SubResource("Resource_smixw")])
 level_min = 57
 level_max = 80
-encounters = Array[ExtResource("1_2gv2s")]([ExtResource("2_fhdby"), ExtResource("3_167v0"), ExtResource("4_smixw")])
+encounters = Array[ExtResource("1_2gv2s")]([ExtResource("2_fhdby"), ExtResource("3_167v0"), ExtResource("4_smixw"), ExtResource("5_smixw"), ExtResource("6_k6xp8")])

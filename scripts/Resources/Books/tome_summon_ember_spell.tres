@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_fb8n5"]
+
+[resource]
+script = ExtResource("1_fb8n5")
+id = &"tome_summon_ember_spell"
+display_name = "Spell Tome: Conjure Ember Spirit"
+description = "Adept Conjuration spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 240
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "summon_ember_spell"

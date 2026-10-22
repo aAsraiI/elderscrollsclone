@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_b4mef"]
+
+[resource]
+script = ExtResource("1_b4mef")
+id = &"mushroom_soup"
+display_name = "Mushroom Soup"
+description = "Glowcaps in milk. Sharpens the mind."
+item_type = 3
+weight = 0.5
+value = 18
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "tavern")
+use_verb = "Eat"
+magic_effects = Array[Dictionary]([{
+"dur": 600.0,
+"id": &"fortify_wisdom",
+"mag": 5.0
+}, {
+"dur": 0.0,
+"id": &"restore_magicka",
+"mag": 30.0
+}])
+ingredient_effects = PackedStringArray()

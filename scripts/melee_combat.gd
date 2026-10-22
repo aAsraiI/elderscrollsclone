@@ -564,11 +564,22 @@ func take_damage(info: DamageInfo) -> float:
 			stop_block()
 			block_broken.emit()
 
-	# 4. Armor, then health
-	var armor := stats.get_stat("armor")
-	if info.weapon != null:
-		armor *= 1.0 - info.weapon.armor_pierce  # maces crush through part of it
-	amount *= 1.0 - clampf(armor * ARMOR_REDUCTION_PER_POINT, 0.0, MAX_ARMOR_REDUCTION)
+	# 4. Armor (weapons) or resistance (elements), then health
+	if info.element != &"":
+		var resist := stats.get_stat("resist_" + String(info.element))
+		if info.element != &"magic":
+			resist = resist if resist >= 1.0 else clampf(resist, -1.0, MagicEffects.MAX_RESIST)
+		else:
+			resist = clampf(resist, -1.0, MagicEffects.MAX_RESIST)
+		amount *= 1.0 - minf(resist, 1.0)
+		if Weather.is_wet_at(body):
+			amount *= Weather.WET_MULT.get(info.element, 1.0)
+	else:
+		var armor := stats.get_stat("armor")
+		if info.weapon != null:
+			armor *= 1.0 - info.weapon.armor_pierce  # maces crush through part of it
+		amount *= 1.0 - clampf(armor * ARMOR_REDUCTION_PER_POINT, 0.0, MAX_ARMOR_REDUCTION)
+	amount *= Difficulty.damage_mult(info.source, body)
 	var final := maxf(amount, 0.0)
 	if final > 0.0:
 		_train_armor(final)
@@ -577,7 +588,7 @@ func take_damage(info: DamageInfo) -> float:
 		info.killed = true
 	else:
 		_shove(info)
-		if info.result != &"blocked":
+		if info.result != &"blocked" and not info.dot:
 			_apply_poise(info)
 	damaged.emit(info, final)
 	return final
@@ -1039,6 +1050,9 @@ func _resolve_slam(act: Dictionary) -> void:
 
 
 func _deal(act: Dictionary, target: Node, pos: Vector3, from: Vector3, dmg: float, kind_name: StringName) -> void:
+	var target_body := victim_body_of(target)
+	if target_body != null and target_body != body and (body.has_meta("player_ally") or target_body.has_meta("player_ally")) and MagicHit.friendly(body, target_body):
+		return  # summons and their master never hurt each other
 	var weapon: ItemData = act["weapon"]
 	var kind := int(act["kind"])
 	var info := DamageInfo.new(dmg, body, kind_name)
@@ -1061,10 +1075,13 @@ func _deal(act: Dictionary, target: Node, pos: Vector3, from: Vector3, dmg: floa
 				info.amount *= mult
 				info.sneak = true
 				stealth.sneak_attack.emit(victim, mult)
-		wronged = victim.disposition != Enemy.Disposition.HOSTILE or victim.get_meta("wronged_by_player", false)
+		wronged = (victim.disposition != Enemy.Disposition.HOSTILE or victim.get_meta("wronged_by_player", false)) and not victim.has_meta("player_ally")
 		if wronged:
 			victim.set_meta("wronged_by_player", true)
+	info.amount *= _bane_mult(target, weapon)
 	var final: float = target.take_damage(info)
+	if final > 0.0 or info.result == &"blocked":
+		WeaponMagic.on_hit(body, victim_body_of(target), weapon, info)
 	if wronged:
 		var crime := body.get_tree().get_first_node_in_group("crime")
 		if crime != null:
@@ -1072,6 +1089,32 @@ func _deal(act: Dictionary, target: Node, pos: Vector3, from: Vector3, dmg: floa
 	hit_dealt.emit(target, info, final)
 	if skills != null and weapon != null and weapon.governing_skill != "none" and final > 0.0:
 		skills.add_xp(StringName(weapon.governing_skill), final * WEAPON_XP_PER_DAMAGE)
+
+
+# Advantages against kinds of foes, and silver against werewolves
+func _bane_mult(target: Node, weapon: ItemData) -> float:
+	var v := victim_body_of(target)
+	var m := 1.0
+	var e := v as Enemy
+	if e != null:
+		var id := e.enemy_id
+		if id.contains("skeleton") or id.contains("wight") or id.contains("warden") or id == "vampire":
+			m += stats.get_stat("bane_undead")
+		if e.body_kind == CreatureBody.Kind.BEAST or e.body_kind == CreatureBody.Kind.CRAWLER or id == "werewolf":
+			m += stats.get_stat("bane_beast")
+	var wolf := (e != null and e.enemy_id == "werewolf") or (v != null and v.has_meta("beast_form"))
+	if wolf and weapon != null and weapon.tier == 3:
+		m *= 1.4  # silver
+	return maxf(m, 0.1)
+
+
+## The body (Player or Enemy) behind a damageable (its MeleeCombat), or null
+func victim_body_of(target: Node) -> Node3D:
+	if target == null or not is_instance_valid(target):
+		return null
+	if "body" in target:
+		return target.get("body") as Node3D
+	return target as Node3D
 
 
 # damage = (base damage stat + this weapon's damage) * (1 + skill bonuses) * the swing's multipliers
@@ -1087,7 +1130,7 @@ func _act_damage(act: Dictionary) -> float:
 			return _damage_for(w.bash_damage if w != null else 0.0, BASH_DAMAGE_MULT * mult)
 		Kind.SLAM:
 			return _damage_for(w.weapon_damage, w.secondary_damage_mult * mult)
-	return _damage_for(w.weapon_damage if w != null else UNARMED_DAMAGE, mult)
+	return _damage_for(w.weapon_damage if w != null else UNARMED_DAMAGE + stats.get_stat("unarmed_damage"), mult)
 
 
 func _act_poise(act: Dictionary) -> float:

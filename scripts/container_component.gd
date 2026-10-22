@@ -123,9 +123,10 @@ func roll_contents() -> void:
 	for entry in contents:
 		if entry == null or entry.item == null:
 			continue
-		if rng.randf() > entry.chance:
+		if rng.randf() > minf(entry.chance * float(GameRules.get_rule("loot_rate")), 1.0):
 			continue
-		inventory.add_item(entry.item, rng.randi_range(entry.min_count, maxi(entry.min_count, entry.max_count)))
+		var item := LootMagic.maybe_enchant(entry.item, rng)
+		inventory.add_item(item, rng.randi_range(entry.min_count, maxi(entry.min_count, entry.max_count)) if item == entry.item else 1)
 	_store_state()
 
 
@@ -150,6 +151,8 @@ func _store_state() -> void:
 # ---- Grabbing (hold interact). The Interactor / Grabber call these.
 
 func can_grab() -> bool:
+	if get_ragdoll() != null:
+		return true
 	if draggable == 1:
 		return true
 	if draggable == 2:
@@ -165,9 +168,20 @@ func get_grab_body() -> Node3D:
 	return get_parent() as Node3D
 
 
+## The physics body of a corpse (see Ragdoll), or null
+func get_ragdoll() -> Ragdoll:
+	var r := get_parent().get_node_or_null("Ragdoll") as Ragdoll
+	return r if r != null and not r.parts.is_empty() else null
+
+
 func get_grab_mode() -> StringName:
+	if get_ragdoll() != null:
+		return &"ragdoll"
 	return &"carry" if get_parent() is RigidBody3D else &"drag"
 
 
 func get_grab_weight() -> float:
+	var rag := get_ragdoll()
+	if rag != null:
+		return rag.total_mass() * 0.6 + (inventory.get_total_weight() if inventory != null else 0.0) * 0.5
 	return body_weight + (inventory.get_total_weight() if inventory != null else 0.0)

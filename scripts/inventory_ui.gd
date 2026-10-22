@@ -20,6 +20,8 @@ const CATEGORIES := [
 	{"name": "Apparel", "types": [ItemData.ItemType.ARMOR]},
 	{"name": "Food & Drink", "types": [ItemData.ItemType.CONSUMABLE]},
 	{"name": "Ingredients", "types": [ItemData.ItemType.INGREDIENT]},
+	{"name": "Books", "types": [ItemData.ItemType.BOOK]},
+	{"name": "Materials", "types": [ItemData.ItemType.MATERIAL, ItemData.ItemType.SOUL_GEM, ItemData.ItemType.TOOL]},
 	{"name": "Misc", "types": [ItemData.ItemType.MISC, ItemData.ItemType.KEY]},
 ]
 const COLUMN_TITLES := ["", "Name", "Wt", "Value"]
@@ -108,6 +110,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		_drop_selected((event as InputEventKey).shift_pressed)
 	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F and event.ctrl_pressed:
 		_search.grab_focus()
+	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F:
+		var item := _selected_item()
+		var book := get_parent().get_node_or_null("Spellbook") as Spellbook
+		if item != null and book != null and SaveUtil.item_to_path(item) != "":
+			book.toggle_favorite(SaveUtil.item_to_path(item))
+			_update_details()
 	else:
 		return
 	get_viewport().set_input_as_handled()
@@ -243,7 +251,7 @@ func _build_ui() -> void:
 	_stats_label = Label.new()
 	footer.add_child(_stats_label)
 
-	vbox.add_child(UITheme.hint("[E / Enter] Equip, eat, drink    [Q] Drop one    [Shift+Q] Drop all    [Ctrl+F] Search    click a column to sort    [Tab / I / Esc] Close"))
+	vbox.add_child(UITheme.hint("[E / Enter] Equip, eat, drink, read    [F] Favorite    [Q] Drop one    [Shift+Q] Drop all    [Ctrl+F] Search    click a column to sort    [Tab / I / Esc] Close"))
 
 
 # A small 3D stage of its own (own World3D) with a camera and two lights
@@ -431,11 +439,23 @@ func _update_details() -> void:
 	for stat in item.stat_modifiers:
 		var v: float = item.stat_modifiers[stat]
 		t += "%s %s%s\n" % [String(stat).capitalize(), "+" if v >= 0.0 else "", String.num(v)]
+	var book := get_parent().get_node_or_null("Spellbook") as Spellbook
+	if book != null and item.item_type == ItemData.ItemType.INGREDIENT and not item.ingredient_effects.is_empty():
+		t += "\n[color=gray]Alchemy effects:[/color]\n"
+		var known := book.known_ingredient_effects(item)
+		for i in item.ingredient_effects.size():
+			t += "  %s\n" % (MagicEffects.display_name(StringName(item.ingredient_effects[i])) if known.has(i) else "?")
+	if book != null and book.is_favorite(SaveUtil.item_to_path(item)):
+		t += "\n[color=#e8c66a]★ Favorite[/color]  (F to remove)\n"
 	_details.text = t
 
+	var verb := ItemUse.verb(get_parent(), item)
 	if item.is_consumable():
 		_equip_button.disabled = _get_effects() == null
 		_equip_button.text = "%s (E)" % item.use_verb
+	elif verb != "":
+		_equip_button.disabled = false
+		_equip_button.text = "%s (E)" % verb
 	else:
 		var equippable := item.equip_slot != ItemData.EquipSlot.NONE
 		_equip_button.disabled = not equippable
@@ -502,6 +522,10 @@ func _activate_selected() -> void:
 		var fx := _get_effects()
 		if fx != null:
 			fx.use_item(item)
+		return
+	if item != null and ItemUse.verb(get_parent(), item) != "":
+		ItemUse.use(get_parent(), item)
+		_refresh()
 		return
 	_toggle_equip_selected()
 

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_avfxy"]
+
+[resource]
+script = ExtResource("1_avfxy")
+id = &"iron_ingot"
+display_name = "Iron Ingot"
+description = "Forge weapons and armor from it, or improve gear of its kind at a grindstone or workbench."
+item_type = 7
+weight = 1.0
+value = 8
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("smithy")
+ingredient_effects = PackedStringArray()

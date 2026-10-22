@@ -228,7 +228,7 @@ func t_enemy_data() -> void:
 	var beast := Enemy.new()
 	wolf.apply(beast, 10, rng)
 	check("a wolf is unarmed and bites for the beast damage", beast.starting_weapon == null and absf(beast.base_damage - LevelCurve.beast_damage(10)) < 0.01 and beast.body_scale < 1.0)
-	check("a wolf drops nothing extra", beast.loot.is_empty())
+	check("a wolf drops only its pelt and meat (stage 10)", beast.loot.all(func(l: LootEntry) -> bool: return l.item.item_type == ItemData.ItemType.MATERIAL))
 	var big := Enemy.new()
 	brute.apply(big, 10, rng)
 	check("a brute is bigger, slower, tougher", big.body_scale > 1.0 and big.move_speed < 3.2 and big.max_health > low.max_health * 2.0)

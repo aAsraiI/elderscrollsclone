@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_ip4xt"]
+
+[resource]
+script = ExtResource("1_ip4xt")
+id = &"tome_bound_dagger_spell"
+display_name = "Spell Tome: Bound Dagger"
+description = "Novice Conjuration spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 30
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "bound_dagger_spell"

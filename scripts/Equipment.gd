@@ -57,6 +57,13 @@ func _update_set_bonus() -> void:
 func equip(item: ItemData) -> bool:
 	if item == null or item.equip_slot == ItemData.EquipSlot.NONE:
 		return false
+	var owner_node := get_parent()
+	if owner_node != null and owner_node.is_in_group("player"):
+		if owner_node.has_meta("beast_form"):
+			return false
+		if CharacterSetup.forbidden(owner_node, item):
+			Locks.toast(get_tree(), "You are forbidden to use %s" % item.display_name, true)
+			return false
 	if not inventory.has_item(item):
 		return false
 	# Every copy you own is already worn

@@ -40,6 +40,8 @@ class Resident:
 	var node_inside := false
 	var walking := false
 	var dead := false
+	## Which stretch of free time it is (see _leisure_slot): a new one sends them somewhere else
+	var slot := -1
 
 var world: WorldManager
 var clock: WorldClock
@@ -145,8 +147,10 @@ func _process(delta: float) -> void:
 	for r in residents:
 		if r.dead:
 			continue
-		var act := r.data.activity_at(h)
-		if act != r.activity:
+		var act := _activity(r, h)
+		var slot := _leisure_slot(r, h) if act == NpcData.Activity.LEISURE else -1
+		if act != r.activity or slot != r.slot:
+			r.slot = slot
 			_change(r, act)
 		else:
 			_keep_going(r)
@@ -179,7 +183,9 @@ func _save_loading() -> bool:
 func _settle(r: Resident, hour: float) -> void:
 	if r.dead:
 		return
-	_set_activity(r, r.data.activity_at(hour))
+	var act := _activity(r, hour)
+	r.slot = _leisure_slot(r, hour) if act == NpcData.Activity.LEISURE else -1
+	_set_activity(r, act)
 	r.goal = _goal_for(r, r.activity)
 	r.inside = String(r.goal.get("inside", ""))
 	r.walking = false
@@ -234,19 +240,117 @@ func _goal_for(r: Resident, act: int) -> Dictionary:
 				if home != null:
 					return {"outside": layout.get_trade_spot(home)}  # the woodpile, the drying rack, the shore
 			return {"outside": layout.get_plaza_spot(pick)}
-	# free time
+	return _leisure_goal(r, layout)
+
+
+## Free time changes every hour and a half or so (each person on their own clock). Who goes where
+## depends on the hour, the weather (rain sends people indoors), the day (Sunsday is a day of rest
+## and temple, Fairday is market day) and their personality.
+func _leisure_slot(r: Resident, hour: float) -> int:
+	var offset := float(r.data.id.hash() & 0xFF) / 255.0 * 1.5
+	return int(floor((hour + offset) / 1.5))
+
+
+func _leisure_goal(r: Resident, layout: TownLayout) -> Dictionary:
+	var d := r.data
+	var day := clock.day if clock != null else 1
+	var rng := RandomNumberGenerator.new()
+	rng.seed = ("%s|%d|%d" % [d.id, day, r.slot]).hash()
+	var h := _hour()
+	var raining := false
+	var weather := Weather.get_instance(get_tree())
+	if weather != null and weather.enabled:
+		raining = weather.is_precipitating()
+	var rest_day := clock != null and clock.get_weekday() == WorldClock.REST_DAY
+	var market := clock != null and clock.get_weekday() == WorldClock.MARKET_DAY
+	var evening := h >= 18.0 or h < 4.0
 	var inn := ""
+	var temple := ""
+	var shops: Array[String] = []
 	for b in layout.buildings:
-		if b.kind == BuildingPlot.Kind.INN:
-			inn = b.id
+		match b.kind:
+			BuildingPlot.Kind.INN:
+				inn = b.id
+			BuildingPlot.Kind.TEMPLE:
+				temple = b.id
+			BuildingPlot.Kind.SHOP, BuildingPlot.Kind.SMITHY:
+				if b.id != d.home_id:
+					shops.append(b.id)
+	# Weights for each kind of outing
+	var w := {
+		"plaza": 3.0 + (3.0 if market else 0.0), "chat": 3.0, "stroll": 2.5, "doorstep": 1.5,
+		"inn": (3.5 if evening else 0.8), "temple": (4.0 if rest_day and h < 13.0 else 0.6), "errand": (2.0 if h >= 8.0 and h < 17.0 else 0.0),
+		"home": 1.0,
+	}
+	if d.personality == NpcData.Personality.PIOUS:
+		w["temple"] *= 3.0
+	elif d.personality == NpcData.Personality.CHEERFUL or d.personality == NpcData.Personality.FRIENDLY:
+		w["chat"] *= 1.6
+		w["inn"] *= 1.4
+	elif d.personality == NpcData.Personality.GRUMPY:
+		w["chat"] *= 0.4
+		w["home"] *= 2.5
+	elif d.personality == NpcData.Personality.NERVOUS:
+		w["home"] *= 2.0
+		w["stroll"] *= 0.5
+	if raining:
+		for k in ["plaza", "chat", "stroll", "doorstep"]:
+			w[k] *= 0.15
+		w["inn"] *= 2.0
+		w["home"] *= 3.0
+	if inn == "" or inn == d.home_id:
+		w["inn"] = 0.0
+	if temple == "":
+		w["temple"] = 0.0
+	if shops.is_empty():
+		w["errand"] = 0.0
+	var total := 0.0
+	for k in w:
+		total += float(w[k])
+	var roll := rng.randf() * total
+	var choice := "plaza"
+	for k in w:
+		roll -= float(w[k])
+		if roll <= 0.0:
+			choice = k
 			break
-	if inn != "" and inn != d.home_id and pick % 5 < 2:
-		return {"inside": inn}
 	var home := world.get_building(d.home_id)
-	if home != null and pick % 5 == 2:
-		var door := home.get_door_local()
-		return {"outside": door + (door - home.local_pos).normalized() * 1.5}
-	return {"outside": layout.get_plaza_spot(pick / 5)}
+	match choice:
+		"inn":
+			return {"inside": inn, "pose": &"drink" if rng.randf() < 0.5 else &"sit"}
+		"temple":
+			return {"inside": temple, "pose": &"pray"}
+		"errand":
+			return {"inside": shops[rng.randi() % shops.size()], "pose": &""}
+		"home":
+			if home != null:
+				return {"inside": home.id, "pose": &"sit"}
+		"doorstep":
+			if home != null:
+				var door := home.get_door_local()
+				return {"outside": door + (door - home.local_pos).normalized() * 1.5, "pose": &"sweep" if rng.randf() < 0.4 else &""}
+		"chat":
+			# A few gathering spots on the square: whoever picks the same one ends up talking
+			var spot := layout.get_plaza_spot(((day * 7 + r.slot) * 13 + rng.randi_range(0, 3) * 211) & 0x7FFFFFFF)
+			var jitter := Vector3(rng.randf_range(-1.2, 1.2), 0.0, rng.randf_range(-1.2, 1.2))
+			return {"outside": spot + jitter, "pose": &"talk"}
+		"stroll":
+			if not layout.streets.is_empty():
+				var s := layout.streets[rng.randi() % layout.streets.size()]
+				var p := s.a.lerp(s.b, rng.randf_range(0.15, 0.85))
+				var side := (s.b - s.a).normalized().cross(Vector3.UP) * s.half_width * 0.8 * (1.0 if rng.randf() < 0.5 else -1.0)
+				return {"outside": p + side, "pose": &""}
+	return {"outside": layout.get_plaza_spot(rng.randi() & 0xFFFF), "pose": &"talk" if rng.randf() < 0.4 else &""}
+
+
+## What someone does now, with days of rest: on Sunsday farmers, smiths and tradesmen stay off work
+func _activity(r: Resident, hour: float) -> int:
+	var act := r.data.activity_at(hour)
+	if act == NpcData.Activity.WORK and clock != null and clock.get_weekday() == WorldClock.REST_DAY:
+		var role := r.data.role
+		if role == NpcData.Role.FARMER or role == NpcData.Role.SMITH or NpcData.is_tradesman(role):
+			return NpcData.Activity.LEISURE
+	return act
 
 
 # ---------------------------------------------------------------- changes during the day
@@ -311,6 +415,8 @@ func _walk(r: Resident) -> void:
 		pts = layout.find_route(here, r.goal["outside"])
 	r.walking = not loop
 	r.node.wander_radius = 0.0
+	if r.node.body != null:
+		r.node.body.pose = &""
 	r.node.follow_route(_to_world(layout, pts), loop, 0.38 if loop else WALK)
 
 
@@ -327,6 +433,7 @@ func _on_arrived(r: Resident) -> void:
 			_place_inside(r, true)  # you are in there: they come in through the door
 	else:
 		r.node.wander_radius = 2.5 if r.goal.has("field") else 3.0
+		_pose_outside(r)
 
 
 # ---------------------------------------------------------------- bodies outside
@@ -360,6 +467,7 @@ func _show_outside(r: Resident) -> void:
 		_walk(r)
 	elif r.goal.has("field") or r.goal.has("outside"):
 		r.node.wander_radius = 3.0
+		_pose_outside(r)
 
 
 # Where someone stands outside right now (their goal; a guard starts somewhere on their rounds)
@@ -523,12 +631,73 @@ func _place_inside(r: Resident, walk_in: bool) -> void:
 	var e := _make_body(r, root, root.to_global(start + Vector3.UP * 0.2))
 	r.node = e
 	r.node_inside = true
+	var pose := _inside_pose(r, bed)
 	if walk_in:
 		e.follow_route(PackedVector3Array([root.to_global(spot)]), false, WALK)
 		if bed:
 			e.route_finished.connect(func() -> void: _lie_down(e, root.to_global(spot)), CONNECT_ONE_SHOT)
+		elif e.body != null:
+			e.route_finished.connect(func() -> void:
+				if is_instance_valid(e) and e.body != null:
+					e.body.pose = pose, CONNECT_ONE_SHOT)
 	elif bed:
 		_lie_down(e, root.to_global(spot))
+	elif e.body != null:
+		e.body.pose = pose
+
+
+# What someone does at their spot indoors: the smith hammers, the priest kneels, guests sit or drink
+func _inside_pose(r: Resident, bed: bool) -> StringName:
+	if bed:
+		return &"sleep"
+	if r.activity == NpcData.Activity.WORK and r.data.work_id == r.inside:
+		match r.data.role:
+			NpcData.Role.SMITH:
+				return &"work"
+			NpcData.Role.PRIEST:
+				return &"pray"
+			NpcData.Role.INNKEEPER:
+				return &"sweep" if (r.data.id.hash() & 1) == 0 else &""
+		return &""
+	var p: StringName = r.goal.get("pose", &"sit")
+	return p if p != &"" else &"talk"
+
+
+# Standing about outside: what they do there (and chatting people turn to each other)
+func _pose_outside(r: Resident) -> void:
+	if not _alive(r.node) or r.node.body == null:
+		return
+	var p: StringName = r.goal.get("pose", &"")
+	if r.goal.has("field"):
+		p = &"farm"
+	elif r.activity == NpcData.Activity.WORK and NpcData.is_tradesman(r.data.role):
+		match r.data.role:
+			NpcData.Role.WOODCUTTER:
+				p = &"chop"
+			NpcData.Role.MINER:
+				p = &"work"
+			NpcData.Role.HERBALIST:
+				p = &"farm"
+	r.node.body.pose = p
+	if p != &"":
+		r.node.wander_radius = 0.0
+	if p == &"talk":
+		_face_nearest(r)
+
+
+func _face_nearest(r: Resident) -> void:
+	var best: Enemy = null
+	var best_d := 3.5
+	for o: Resident in _by_town.get(r.town.id, []):
+		if o == r or not _alive(o.node) or o.node_inside:
+			continue
+		var dd := o.node.global_position.distance_to(r.node.global_position)
+		if dd < best_d:
+			best_d = dd
+			best = o.node
+	if best != null:
+		var to := best.global_position - r.node.global_position
+		r.node.rotation.y = atan2(-to.x, -to.z)
 
 
 # Someone in the interior you are in leaves: they walk to the door and are gone
@@ -557,6 +726,8 @@ func _lie_down(e: Enemy, bed: Vector3) -> void:
 	e.global_position = bed + Vector3(0.0, 1.0, -0.9)
 	e.rotation = Vector3(PI * 0.5, 0.0, 0.0)  # head on the pillow (+Z)
 	e.set_meta("asleep", true)
+	if e.body != null:
+		e.body.pose = &"sleep"
 	var zzz := Label3D.new()
 	zzz.name = "Zzz"
 	zzz.text = "Zzz"
@@ -577,6 +748,8 @@ func _wake(e: Enemy) -> void:
 	if e == null or not is_instance_valid(e) or not e.get_meta("asleep", false):
 		return
 	e.set_meta("asleep", false)
+	if e.body != null:
+		e.body.pose = &""
 	e.rotation = Vector3.ZERO
 	e.global_position += Vector3(0.0, 0.2, -1.0)
 	e.set_physics_process(true)

@@ -100,7 +100,7 @@ func try_encounter(force: bool = false, only: EncounterData = null) -> Array[Nod
 	if biome == null:
 		return out
 	if not force:
-		if _rng.randf() > chance or get_alive_count() >= max_alive:
+		if _rng.randf() > chance * float(GameRules.get_rule("encounter_rate")) or get_alive_count() >= max_alive:
 			return out
 		if world.get_town_at(pos, TOWN_MARGIN) != null:
 			return out  # towns are safe
@@ -208,6 +208,10 @@ func _pick(biome: BiomeData, player_level: int, zone_level: int, ignore_cooldown
 	for enc in biome.encounters:
 		if enc == null or enc.table == null or enc.weight <= 0.0:
 			continue
+		if enc.night_only:
+			var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
+			if clock == null or not clock.is_night():
+				continue
 		if enc.min_player_level > 0 and player_level < enc.min_player_level:
 			continue
 		if enc.max_player_level > 0 and player_level > enc.max_player_level:

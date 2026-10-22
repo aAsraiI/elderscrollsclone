@@ -55,6 +55,12 @@ var _detail_rect := Rect2()
 var _generation := 0
 var _jobs: Array[Dictionary] = []  # pictures being drawn: {"id" (group task), "rows", "size", "done"}
 
+var _redraw_timer := 0.0
+# Roads as world-space lines, made once (full detail, and every 4th point for zoomed-out views)
+var _road_lines: Array[PackedVector2Array] = []
+var _road_lines_low: Array[PackedVector2Array] = []
+var _road_boxes: Array[Rect2] = []
+var _road_src: WorldMap
 var _base_pending := false
 var _detail_wanted_at := -1.0
 var _detail_pending_rect := Rect2()
@@ -209,6 +215,7 @@ func map_input(event: InputEvent) -> void:
 			_drag_moved += mm.relative.length()
 			_clamp_view()
 			_request_detail()
+		_update_text()
 		_view.queue_redraw()
 
 
@@ -247,8 +254,12 @@ func _process(delta: float) -> void:
 	if _detail_wanted_at >= 0.0 and _time >= _detail_wanted_at:
 		_detail_wanted_at = -1.0
 		_start_detail()
-	_update_text()
-	_view.queue_redraw()
+	# Redraw only when the view moves, plus a few times a second for the moving arrow and markers
+	_redraw_timer -= delta
+	if pan != Vector2.ZERO or _redraw_timer <= 0.0:
+		_redraw_timer = 0.1
+		_update_text()
+		_view.queue_redraw()
 
 
 # ---------------------------------------------------------------- view math
@@ -292,11 +303,21 @@ func _start_base() -> void:
 	var gen := _generation
 	var rect := _bounds()
 	var res := maxi(BASE_RESOLUTION, _manager.settings.debug_map_resolution)
+	# The whole-world picture only depends on the world: drawn once per seed, then kept on disk
+	var cache := "user://mapcache/%d_%d.png" % [_manager.world_seed, res]
+	if FileAccess.file_exists(cache):
+		var img := Image.load_from_file(cache)
+		if img != null and not img.is_empty():
+			_base_pending = false
+			_base_tex = ImageTexture.create_from_image(img)
+			return
 	_start_render(rect, res, func(img: Image) -> void:
 		if gen != _generation:
 			return
 		_base_pending = false
-		_base_tex = ImageTexture.create_from_image(img))
+		_base_tex = ImageTexture.create_from_image(img)
+		DirAccess.make_dir_recursive_absolute("user://mapcache")
+		img.save_png(cache))
 
 
 func _request_detail() -> void:
@@ -329,7 +350,7 @@ func _start_render(rect: Rect2, resolution: int, done: Callable) -> void:
 	rows.resize(size.y)
 	var map := _manager.map
 	var id := WorkerThreadPool.add_group_task(func(j: int) -> void:
-		rows[j] = render_row(map, rect, size.x, size.y, j), size.y, -1, false, "world map")
+		rows[j] = render_row(map, rect, size.x, size.y, j), size.y, -1, true, "world map")
 	_jobs.append({"id": id, "rows": rows, "size": size, "done": done})
 
 
@@ -404,13 +425,16 @@ func draw_map(canvas: Control) -> void:
 	var scale := _scale()
 	var font := ThemeDB.fallback_font
 	# roads
-	var roads := _manager.map.roads
-	if roads != null:
-		for road in roads.get_roads():
-			var line := PackedVector2Array()
-			for p: Vector3 in road["points"]:
-				line.append(world_to_screen(Vector2(p.x, p.z)))
-			canvas.draw_polyline(line, Color(0.28, 0.18, 0.09, 0.95), clampf(5.0 * scale, 1.5, 6.0))
+	_cache_roads()
+	var visible := Rect2(screen_to_world(Vector2.ZERO), canvas.size / scale).grow(50.0)
+	var lines := _road_lines if _zoom >= 3.0 else _road_lines_low
+	# Drawn in world space with one transform: no per-point math on the CPU
+	canvas.draw_set_transform(canvas.size / 2.0 - _center * scale, 0.0, Vector2(scale, scale))
+	var width := clampf(5.0 * scale, 1.5, 6.0) / scale
+	for i in lines.size():
+		if _road_boxes[i].intersects(visible):
+			canvas.draw_polyline(lines[i], Color(0.28, 0.18, 0.09, 0.95), width)
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	# places you have found (a cleared dungeon gets a tick)
 	for poi in _manager.pois:
 		if poi.poi is TownData or not Discovery.is_found(poi.id):
@@ -464,6 +488,33 @@ func draw_map(canvas: Control) -> void:
 		var tail_b := at - f * 6.0 - side * 6.0
 		canvas.draw_colored_polygon(PackedVector2Array([tip, tail_a, tail_b]), Color(1.0, 0.85, 0.2))
 		canvas.draw_polyline(PackedVector2Array([tip, tail_a, tail_b, tip]), Color.BLACK, 1.5)
+
+
+func _cache_roads() -> void:
+	if _road_src != _manager.map:
+		_road_src = _manager.map
+		_road_lines.clear()
+		_road_lines_low.clear()
+		_road_boxes.clear()
+	if not _road_lines.is_empty() or _manager.map.roads == null:
+		return
+	for road in _manager.map.roads.get_roads():
+		var line := PackedVector2Array()
+		var low := PackedVector2Array()
+		var pts: PackedVector3Array = road["points"]
+		for k in pts.size():
+			var p: Vector3 = pts[k]
+			line.append(Vector2(p.x, p.z))
+			if k % 4 == 0 or k == pts.size() - 1:
+				low.append(Vector2(p.x, p.z))
+		if line.size() < 2:
+			continue
+		var box := Rect2(line[0], Vector2.ZERO)
+		for v in line:
+			box = box.expand(v)
+		_road_lines.append(line)
+		_road_lines_low.append(low)
+		_road_boxes.append(box)
 
 
 # What is under the mouse: a town, a place or a quest target ("" = nothing)

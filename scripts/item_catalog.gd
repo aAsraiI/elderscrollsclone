@@ -28,7 +28,8 @@ const ITEM_DIRS: Array[String] = [
 	"res://scripts/Resources/", "res://scripts/Resources/Weapons/", "res://scripts/Resources/Armor/",
 	"res://scripts/Resources/Jewelry/", "res://scripts/Resources/Clothing/", "res://scripts/Resources/Clutter/",
 	"res://scripts/Resources/Ingredients/", "res://scripts/Resources/Artifacts/", "res://scripts/Resources/Consumables/",
-	"res://scripts/Resources/Treasure/", "res://scripts/Resources/Misc/",
+	"res://scripts/Resources/Treasure/", "res://scripts/Resources/Misc/", "res://scripts/Resources/Materials/",
+	"res://scripts/Resources/Books/", "res://scripts/Resources/SoulGems/", "res://scripts/Resources/Ranged/",
 ]
 
 static var _cache := {}
@@ -257,3 +258,18 @@ static func _add(list: Array[LootEntry], item: ItemData, chance: float) -> void:
 	e.max_count = 1
 	e.chance = clampf(chance, 0.0, 1.0)
 	list.append(e)
+
+
+const RANGED_DIR := "res://scripts/Resources/Ranged/"
+
+
+## A bow of this tier (0 = the hunting bow). Null if the file is missing.
+static func get_bow(tier: int) -> ItemData:
+	tier = clampi(tier, 0, LevelCurve.MAX_TIER)
+	return _load(RANGED_DIR + ("hunting_bow" if tier == 0 else LevelCurve.TIER_KEYS[tier] + "_bow") + ".tres")
+
+
+## Arrows of this tier (0 = iron)
+static func get_arrow(tier: int) -> ItemData:
+	tier = clampi(tier, 0, LevelCurve.MAX_TIER)
+	return _load(RANGED_DIR + LevelCurve.TIER_KEYS[tier] + "_arrow.tres")

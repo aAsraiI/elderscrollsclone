@@ -90,9 +90,14 @@ static func active_for(faction: String) -> Dictionary:
 ## Active jobs' targets for the map: [{"pos": Vector2 (x, z), "name"}]
 static func active_targets() -> Array:
 	var out: Array = []
+	if not bool(GameRules.get_rule("quest_markers")):
+		return out
 	for q: Dictionary in all_quests():
 		if q["status"] == "active":
 			out.append({"pos": Vector2(float(q["pos"][0]), float(q["pos"][1])), "name": String(q["name"])})
+	var st := Story.target()
+	if not st.is_empty():
+		out.append(st)
 	return out
 
 
@@ -432,6 +437,9 @@ func extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 			out.append("clear bounty")
 	if not _delivery_for(s).is_empty():
 		out.append("a delivery")
+	var story := get_tree().get_first_node_in_group("story") as Story
+	if story != null:
+		out.append_array(story.topics_for(s))
 	return out
 
 
@@ -448,6 +456,11 @@ func _delivery_for(s: DialogueEngine.Speaker) -> Dictionary:
 
 ## The answer for a job topic, or {} when it isn't one (DialogueEngine asks first)
 func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
+	var story := get_tree().get_first_node_in_group("story") as Story
+	if story != null:
+		var told := story.respond(s, topic)
+		if not told.is_empty():
+			return told
 	var leader := Factions.leader_of(s, world)
 	var p := _player()
 	if topic == "a delivery":

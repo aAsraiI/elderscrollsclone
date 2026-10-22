@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_3wmyh"]
+
+[resource]
+script = ExtResource("1_3wmyh")
+id = &"greater_soul_gem_filled"
+display_name = "Greater Soul Gem (Filled)"
+description = "A crystal that can hold a soul. Filled ones power enchanting and recharge enchanted weapons."
+item_type = 8
+weight = 0.5
+value = 450
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("mage", "crypt")
+ingredient_effects = PackedStringArray()
+soul_gem_size = 4
+soul_filled = true

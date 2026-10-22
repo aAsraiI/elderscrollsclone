@@ -53,6 +53,11 @@ static func begin_load(data: Dictionary, slot: String) -> void:
 	_has_start = player.has("pos")
 	_start = SaveUtil.array_to_vec3(player.get("pos"))
 	WorldState.from_dict(data.get("world_state", {}))
+	GameRules.from_dict(data.get("rules", {}))
+	GameSettings.get_value("difficulty")
+	GameSettings._values["difficulty"] = int(GameRules.get_rule("difficulty"))  # the Settings screen shows this game's
+	CharacterSetup.pending = (data.get("player", {}) as Dictionary).get("character", {})
+	CraftedItems.clear_cache()
 
 
 ## use_default = true plays the default world from WorldSettings
@@ -64,6 +69,9 @@ static func begin_new_game(seed_value: int, use_default: bool) -> void:
 	_seed = seed_value
 	_has_start = false
 	WorldState.clear()
+	GameRules.reset()
+	CharacterSetup.pending = {}
+	CraftedItems.clear_cache()
 
 
 ## "12345" becomes 12345, any other text is turned into a number the same way every time

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_gu0rc"]
+
+[resource]
+script = ExtResource("1_gu0rc")
+id = &"tome_absorb_health_spell"
+display_name = "Spell Tome: Absorb Health"
+description = "Apprentice Mysticism spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 90
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "absorb_health_spell"

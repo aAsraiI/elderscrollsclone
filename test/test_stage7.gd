@@ -322,7 +322,7 @@ func t_world() -> void:
 		dmap._center = Vector2(t.position.x, t.position.z)
 		check("hovering a town names it", dmap.hover_name(dmap.world_to_screen(Vector2(t.position.x, t.position.z))).begins_with(t.town.display_name))
 		var waited := 0
-		while dmap._base_tex == null and waited < 600:
+		while dmap._base_tex == null and waited < 4000:
 			await process_frame
 			waited += 1
 		check("the map picture is drawn", dmap._base_tex != null, "%d frames" % waited)

@@ -100,6 +100,10 @@ func can_travel_to(poi: PlacedPOI) -> String:
 		return "You are dead."
 	if _manager.dungeons != null and _manager.dungeons.is_inside():
 		return "You can't fast travel from inside."
+	if not bool(GameRules.get_rule("fast_travel")):
+		return "Fast travel is off in this world. Take a carriage from a city gate, or ride."
+	if p.has_meta("beast_form"):
+		return "The beast can't travel."
 	for e in get_tree().get_nodes_in_group("enemies"):
 		var en := e as Enemy
 		if en != null and is_instance_valid(en) and not en.is_dead() and en.disposition == Enemy.Disposition.HOSTILE and en.global_position.distance_to(p.global_position) < DANGER_RADIUS:

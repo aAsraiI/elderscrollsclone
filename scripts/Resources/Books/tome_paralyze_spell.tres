@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_7u02d"]
+
+[resource]
+script = ExtResource("1_7u02d")
+id = &"tome_paralyze_spell"
+display_name = "Spell Tome: Paralyze"
+description = "Expert Alteration spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 520
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "paralyze_spell"

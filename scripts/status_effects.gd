@@ -81,12 +81,39 @@ func use_item(item: ItemData) -> bool:
 		return _fail(&"cooldown")
 	if not inventory.has_item(item):
 		return _fail(&"missing")
+	var player := get_parent()
+	if player.has_meta("beast_form"):
+		Locks.toast(get_tree(), "The beast can't use that", true)
+		return _fail(&"not_usable")
+	var aff := player.get_node_or_null("Afflictions") as Afflictions
+	if aff != null and String(item.id) == "bottle_of_blood":
+		if aff.drink_blood():
+			inventory.remove_item(item, 1)
+			item_used.emit(item)
+			return true
+		return _fail(&"not_usable")
+	if aff != null and aff.refuses_food(item):
+		Locks.toast(get_tree(), "Mortal food turns to ash in your mouth", true)
+		return _fail(&"not_usable")
+	var surv := player.get_node_or_null("Survival") as Survival
+	if surv != null:
+		surv.on_eat(item)
 	inventory.remove_item(item, 1)
 	if item.restore_stamina > 0.0:
 		stats.modify_vital("stamina", item.restore_stamina)
 	if item.restore_magicka > 0.0:
 		stats.modify_vital("magicka", item.restore_magicka)
-	apply_effect(item)
+	if item.heal_amount > 0.0 or item.stamina_regen_bonus > 0.0:
+		apply_effect(item)
+	if not item.magic_effects.is_empty():
+		# Alchemy potions and cooked meals: magic effects (a good cook's meals do more)
+		var magic := ActiveMagic.of(get_parent())
+		if magic != null:
+			var power := 1.0
+			var skills := get_parent().get_node_or_null("Skills") as Skills
+			if item.effect_group == "food" and skills != null:
+				power += float(skills.get_level(&"cooking")) * 0.006
+			magic.apply_list(item.magic_effects, null, item.display_name, item.effect_group, power)
 	_cooldown = use_cooldown
 	item_used.emit(item)
 	return true
@@ -100,6 +127,9 @@ func apply_effect(item: ItemData, remaining: float = -1.0) -> void:
 		for i in range(_effects.size() - 1, -1, -1):
 			if _effects[i]["group"] == "food":
 				_end(i)
+		var magic := ActiveMagic.of(get_parent())
+		if magic != null:
+			magic.remove_group("food")
 	var total := item.effect_duration
 	var fx := {
 		"id": _next_id,

@@ -4,8 +4,8 @@ extends CanvasLayer
 ## screens, Skyrim style. Created by player.gd.
 ##
 ##   Tab           open the menu (on the page you used last), or close it
-##   1 2 3 4       switch page (or click the buttons on the bar)
-##   I M C J       open that page directly, or switch to it while the menu is open
+##   1 2 3 4 5     switch page (or click the buttons on the bar)
+##   I M C J P     open that page directly, or switch to it while the menu is open
 ##   Esc           close
 ## Each page is still its own screen (InventoryUI, WorldDebugMap, StatsUI, JournalUI); this only
 ## switches between them and draws the bar. The bar also shows the time, your gold and weight.
@@ -15,6 +15,7 @@ const PAGES := [
 	{"id": "map", "label": "Map", "key": KEY_M},
 	{"id": "character", "label": "Character", "key": KEY_C},
 	{"id": "journal", "label": "Journal", "key": KEY_J},
+	{"id": "magic", "label": "Magic", "key": KEY_P},
 ]
 
 var _bar: PanelContainer
@@ -62,6 +63,14 @@ func open_page(index: int) -> void:
 		get_viewport().warp_mouse(mouse)
 
 
+## The page number of a page id ("magic" -> 4)
+func page_index(id: String) -> int:
+	for i in PAGES.size():
+		if PAGES[i]["id"] == id:
+			return i
+	return 0
+
+
 func close_menu() -> void:
 	var now := current_page()
 	if now >= 0:
@@ -76,6 +85,8 @@ func _page(index: int) -> Node:
 			return _player.get_node_or_null("StatsUI")
 		"journal":
 			return _player.get_node_or_null("JournalUI")
+		"magic":
+			return _player.get_node_or_null("MagicUI")
 		"map":
 			var m := get_tree().get_first_node_in_group("world_map")
 			return m if m != null and (m as WorldDebugMap)._manager != null and (m as WorldDebugMap)._manager.map != null else null
@@ -84,6 +95,15 @@ func _page(index: int) -> Node:
 
 # Runs before the screens and the GUI see the key, so Tab never moves the focus around
 func _input(event: InputEvent) -> void:
+	if event is InputEventJoypadButton and event.pressed and (event as InputEventJoypadButton).button_index == JOY_BUTTON_Y:
+		# Controller: Y opens and closes the menu like Tab
+		if current_page() < 0:
+			if not get_tree().paused and _can_open():
+				open_page(_last)
+		else:
+			close_menu()
+		get_viewport().set_input_as_handled()
+		return
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
 	var key := (event as InputEventKey).physical_keycode
@@ -103,7 +123,7 @@ func _input(event: InputEvent) -> void:
 	if focus is LineEdit or focus is TextEdit:
 		return  # typing in a search box
 	var target := -1
-	if key >= KEY_1 and key <= KEY_4:
+	if key >= KEY_1 and key <= KEY_5:
 		target = key - KEY_1
 	else:
 		for i in PAGES.size():

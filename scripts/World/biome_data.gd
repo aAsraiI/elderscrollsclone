@@ -66,6 +66,15 @@ enum TreeStyle { BROADLEAF, PINE, DEAD, CACTUS }
 @export_range(0.0, 400.0, 1.0) var tree_density := 0.0
 @export var tree_color := Color(0.22, 0.42, 0.18)
 
+@export_group("Ground cover and weather")
+## temperate, cold, arid or wet. Decides the weather, the season's look and which herbs grow.
+## Empty = guessed from the name (snow, desert, swamp...).
+@export_enum("auto:", "temperate", "cold", "arid", "wet") var climate: String = ""
+## Grass per square meter compared to a meadow (1.0). -1 = from the climate.
+@export_range(-1.0, 2.0, 0.05) var grass_density := -1.0
+## Rocks and boulders, 0..2. -1 = from the climate.
+@export_range(-1.0, 2.0, 0.05) var rock_density := -1.0
+
 @export_group("Points of interest")
 ## What gets placed in this biome (camps, ruins, cave entrances...) and how many.
 ## Add an element, choose New POIRule, then drop a POI resource into its Poi field.
@@ -79,6 +88,35 @@ enum TreeStyle { BROADLEAF, PINE, DEAD, CACTUS }
 ## Random events that can happen to the player in this biome (ambushes, wolf packs, wanderers...).
 ## Add an element, choose New EncounterData or load one from scripts/Resources/Encounters.
 @export var encounters: Array[EncounterData] = []
+
+
+## The climate, guessed from the name when not set
+func get_climate() -> String:
+	if climate != "":
+		return climate
+	var n := (String(id) + " " + display_name).to_lower()
+	for w in ["snow", "frost", "tundra", "glacier", "ice", "winter", "frozen"]:
+		if n.contains(w):
+			return "cold"
+	for w in ["desert", "dune", "sand", "waste", "ash", "badland", "barren", "dead"]:
+		if n.contains(w):
+			return "arid"
+	for w in ["swamp", "marsh", "bog", "jungle", "fen", "wetland"]:
+		if n.contains(w):
+			return "wet"
+	return "temperate"
+
+
+func get_grass_density() -> float:
+	if grass_density >= 0.0:
+		return grass_density
+	return {"temperate": 1.0, "wet": 1.0, "cold": 0.15, "arid": 0.06}.get(get_climate(), 1.0)
+
+
+func get_rock_density() -> float:
+	if rock_density >= 0.0:
+		return rock_density
+	return {"temperate": 0.35, "wet": 0.2, "cold": 0.7, "arid": 0.6}.get(get_climate(), 0.4)
 
 
 func get_key() -> String:

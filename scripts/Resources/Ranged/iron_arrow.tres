@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_87v2t"]
+
+[resource]
+script = ExtResource("1_87v2t")
+id = &"iron_arrow"
+display_name = "Iron Arrow"
+description = "Shot from a bow. Better arrows hit harder."
+value = 1
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_arrow = true
+arrow_damage = 6.0
+ingredient_effects = PackedStringArray()

@@ -60,12 +60,29 @@ func _physics_process(delta: float) -> void:
 		var target := _get_target()
 		if target != null and target.has_method("get_prompt"):
 			prompt = target.get_prompt()
+		var aff := Afflictions.of(get_tree()) if target != null else null
+		if aff != null:
+			var extra := aff.feed_prompt(target)
+			if extra != "":
+				prompt = (prompt + "
+" + extra) if prompt != "" else extra
+	# Telekinesis reaches far
+	var reach := 20.0 if owner != null and owner.has_meta("telekinesis") else 3.0
+	if not is_equal_approx(-target_position.z, reach):
+		target_position = Vector3(0, 0, -reach)
 	if prompt != _last_prompt:
 		_last_prompt = prompt
 		prompt_changed.emit(prompt)
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_F and not get_tree().paused:
+		# F: a vampire feeds (Shift+F fills a bottle), a werewolf devours. See Afflictions.
+		var aff := Afflictions.of(get_tree())
+		var t := _get_target()
+		if aff != null and t != null and aff.feed(t, (event as InputEventKey).shift_pressed):
+			get_viewport().set_input_as_handled()
+		return
 	if not event.is_action_pressed("interact"):
 		return
 	if grabber != null and grabber.is_holding():

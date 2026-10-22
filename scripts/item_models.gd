@@ -95,6 +95,18 @@ static func _placeholder(root: Node3D, item: ItemData) -> void:
 				_box(root, Vector3(0.045, 0.95, 0.045), Vector3(0.0, 0.30, 0.0), WOOD)
 				_box(root, Vector3(0.30, 0.20, 0.22), Vector3(0.0, 0.82, 0.0), DARK)
 				_box(root, Vector3(0.05, 0.05, 0.05), Vector3(0.0, -0.20, 0.0), DARK)
+			"bow":
+				_box(root, Vector3(0.035, 0.18, 0.04), Vector3(0.0, 0.0, 0.0), DARK)
+				for s in [-1.0, 1.0]:
+					var limb := MeshInstance3D.new()
+					var bm := BoxMesh.new()
+					bm.size = Vector3(0.03, 0.5, 0.035)
+					limb.mesh = bm
+					limb.material_override = _material(WOOD)
+					limb.position = Vector3(0.0, s * 0.32, 0.06)
+					limb.rotation.x = s * 0.35
+					root.add_child(limb)
+				_box(root, Vector3(0.006, 1.05, 0.006), Vector3(0.0, 0.0, 0.17), Color(0.9, 0.9, 0.85))
 			"shield":
 				_shield(root)
 			"axe":

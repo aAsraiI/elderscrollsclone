@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_a7ynv"]
+
+[resource]
+script = ExtResource("1_a7ynv")
+id = &"tome_incinerate"
+display_name = "Spell Tome: Incinerate"
+description = "Master Destruction spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 1100
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "incinerate"

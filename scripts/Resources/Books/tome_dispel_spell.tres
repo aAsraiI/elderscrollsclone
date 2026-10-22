@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/ItemData.gd" id="1_htvkn"]
+
+[resource]
+script = ExtResource("1_htvkn")
+id = &"tome_dispel_spell"
+display_name = "Spell Tome: Dispel"
+description = "Adept Mysticism spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 240
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "dispel_spell"

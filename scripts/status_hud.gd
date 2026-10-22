@@ -10,6 +10,7 @@ const GOLD := Color(1.0, 0.85, 0.35)
 
 var _root: Control
 var _time_label: Label
+var _date_label: Label
 var _list_label: Label
 var _toast: Label
 var _toast_time := 0.0
@@ -41,6 +42,8 @@ func _build_ui() -> void:
 
 	_time_label = _make_label(18, GOLD)
 	box.add_child(_time_label)
+	_date_label = _make_label(14, Color(0.85, 0.82, 0.7))
+	box.add_child(_date_label)
 	_list_label = _make_label(15, Color(0.85, 1.0, 0.85))
 	box.add_child(_list_label)
 
@@ -75,6 +78,10 @@ func _process(delta: float) -> void:
 		_clock_timer = 0.5
 		_clock = get_tree().get_first_node_in_group("world_clock") as WorldClock
 	_time_label.text = "Day %d   %s" % [_clock.day, _clock.get_time_text()] if _clock != null else ""
+	_date_label.text = ""
+	if _clock != null and bool(GameSettings.get_value("show_date")):
+		var w := Weather.get_instance(get_tree())
+		_date_label.text = "%s, %s, %s%s" % [_clock.get_short_date(), _clock.get_season_name(), _clock.get_moon_name(), ("   " + w.get_name_text()) if w != null and w.enabled else ""]
 
 	var lines := PackedStringArray()
 	if effects != null:
@@ -87,6 +94,22 @@ func _process(delta: float) -> void:
 			if mods.has("stamina_regen_mult"):
 				parts.append("+%d%% stamina regen" % roundi(float(mods["stamina_regen_mult"]) * 100.0))
 			lines.append("%s   %s   %ds" % [item.display_name, ", ".join(parts), ceili(float(fx["remaining"]))])
+	var magic := ActiveMagic.of(get_parent().get_parent()) if effects != null else null
+	if magic != null:
+		for fx in magic.effects:
+			if String(fx["source"]).begins_with("_"):
+				continue
+			var harm := MagicEffects.is_harmful(fx["id"])
+			lines.append("%s%s   %ds" % ["✖ " if harm else "", MagicEffects.display_name(fx["id"]), ceili(float(fx["left"]))])
+	var me := get_parent().get_parent() if effects != null else null
+	if me != null:
+		for n in ["Survival", "Afflictions"]:
+			var node := me.get_node_or_null(n)
+			if node != null:
+				lines.append_array(node.status_lines())
+	var pz: Dictionary = get_parent().get_parent().get_meta("weapon_poison", {}) if effects != null else {}
+	if not pz.is_empty():
+		lines.append("Poisoned blade: %d hits" % int(pz.get("hits", 0)))
 	# Wanted in the town you are in
 	var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
 	var player := get_tree().get_first_node_in_group("player") as Node3D

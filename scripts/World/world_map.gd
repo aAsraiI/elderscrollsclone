@@ -158,6 +158,22 @@ func set_pads(list: Array[PlacedPOI]) -> void:
 				_pad_grid[key] = arr
 
 
+## Is the ground here under the water (when the world has water)?
+func is_under_water(height: float) -> bool:
+	return settings.water_enabled and height < settings.sea_level
+
+
+## Is this spot on the leveled ground of a town or a point of interest? Thread-safe.
+func is_on_pad(x: float, z: float) -> bool:
+	var pads: PackedInt32Array = _pad_grid.get(Vector2i(floori(x / PAD_CELL), floori(z / PAD_CELL)), PackedInt32Array())
+	for pi in pads:
+		var dx := x - _pad_x[pi]
+		var dz := z - _pad_z[pi]
+		if dx * dx + dz * dz < _pad_out[pi] * _pad_out[pi]:
+			return true
+	return false
+
+
 ## Levels and colors the ground under roads. Call once before any terrain is built.
 func set_roads(network: RoadNetwork) -> void:
 	roads = network

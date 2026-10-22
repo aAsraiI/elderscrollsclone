@@ -44,6 +44,8 @@ const TERRAIN_LAYER := 1  # physics layer 1 = world, same as everything else sta
 @export var auto_save_manager := true
 ## The people of the towns and their day (TownLife)
 @export var town_life_enabled := true
+## Travellers, merchants and road wardens on the roads near the player (RoadLife)
+@export var road_life_enabled := true
 
 var map: WorldMap
 var world_seed := 0
@@ -57,6 +59,7 @@ var clock: WorldClock
 var life: TownLife
 var crime: CrimeManager
 var quests: QuestManager
+var road_life: RoadLife
 
 var _chunks := {}      # Vector2i -> TerrainChunk
 var _inflight := {}    # Vector2i -> worker task id
@@ -77,6 +80,7 @@ var _poi_nodes := {}      # String -> Node3D (only while the chunk is loaded)
 var _poi_root: Node3D
 var _garrisons := {}      # String -> Array[Enemy] (only while the POI's chunk is loaded)
 var _garrison_root: Node3D
+var _water: MeshInstance3D
 
 
 func _ready() -> void:
@@ -102,6 +106,7 @@ func _ready() -> void:
 	_load_initial()
 	if auto_environment:
 		_setup_environment()
+	_make_water()
 	dungeons = DungeonManager.new()
 	dungeons.name = "DungeonManager"
 	add_child(dungeons)
@@ -120,6 +125,10 @@ func _ready() -> void:
 	quests = QuestManager.new()
 	quests.name = "QuestManager"
 	add_child(quests)
+	road_life = RoadLife.new()
+	road_life.name = "RoadLife"
+	road_life.enabled = road_life_enabled and settings.road_traffic
+	add_child(road_life)
 	crime = CrimeManager.new()
 	crime.name = "CrimeManager"
 	add_child(crime)
@@ -456,9 +465,36 @@ func _setup_environment() -> void:
 
 # ---------------------------------------------------------------- streaming
 
+## The water surface: one big flat sheet at sea level that follows the player around
+func _make_water() -> void:
+	if _water != null:
+		_water.queue_free()
+		_water = null
+	if not settings.water_enabled:
+		return
+	_water = MeshInstance3D.new()
+	_water.name = "Water"
+	var plane := PlaneMesh.new()
+	var reach := settings.view_distance_chunks * settings.chunk_size * 2.4
+	plane.size = Vector2(reach, reach)
+	_water.mesh = plane
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.16, 0.36, 0.52, 0.78)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.roughness = 0.08
+	mat.metallic = 0.2
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_water.material_override = mat
+	_water.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_water)
+	_water.position = Vector3(0.0, settings.sea_level, 0.0)
+
+
 func _process(_delta: float) -> void:
 	if map == null:
 		return
+	if _water != null and player != null and is_instance_valid(player):
+		_water.position = Vector3(snappedf(player.global_position.x, 32.0), settings.sea_level, snappedf(player.global_position.z, 32.0))
 	if player == null or not is_instance_valid(player):
 		_find_player()
 		if player == null:

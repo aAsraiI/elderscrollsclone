@@ -96,6 +96,10 @@ static func merchant_for(b: BuildingPlot) -> MerchantData:
 
 ## Can this speaker trade right now? {"merchant": MerchantData or null, "open": bool, "why": String}
 static func trade_status(s: DialogueEngine.Speaker, world: WorldManager) -> Dictionary:
+	# A travelling merchant on the road: always open, sells from their pack
+	if s != null and s.enemy != null and is_instance_valid(s.enemy) and s.enemy.has_meta("merchant"):
+		var path := MERCHANT_DIR + String(s.enemy.get_meta("merchant")) + ".tres"
+		return {"merchant": load(path) as MerchantData if ResourceLoader.exists(path) else null, "open": true, "why": ""}
 	if s == null or s.data == null or s.data.work_id == "" or world == null:
 		return {"merchant": null, "open": false, "why": ""}
 	var m := merchant_for(world.get_building(s.data.work_id))

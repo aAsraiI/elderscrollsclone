@@ -51,6 +51,12 @@ extends Resource
 ## Random tries per POI before it is skipped (more = fewer skipped in crowded or steep biomes)
 @export_range(5, 200) var poi_attempts := 40
 
+@export_group("Water")
+## Lakes and coasts: everything below sea_level is under water (a water surface is drawn there,
+## nothing is built there, and roads go around). There is no swimming yet: you walk on the bottom.
+@export var water_enabled := false
+@export var sea_level := 0.0
+
 @export_group("Towns and roads")
 ## Villages, towns and cities, joined by roads
 @export var towns_enabled := true
@@ -70,6 +76,8 @@ extends Resource
 @export_range(2.0, 12.0, 0.5) var road_width := 5.0
 ## Steepest a road may climb (0.2 = 20%). Where the land is steeper the road cuts into it.
 @export_range(0.05, 0.6, 0.01) var road_max_grade := 0.2
+## Travellers, merchants and road wardens on the roads near the player
+@export var road_traffic := true
 ## Start a new game at the gate of the town nearest the spawn point
 @export var start_in_town := true
 

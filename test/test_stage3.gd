@@ -92,7 +92,7 @@ func t_plan() -> void:
 		for n in people:
 			if n.home_id == b.id:
 				found = n
-		if found == null or found.display_name != b.owner_name or found.role != NpcData.role_for(b.kind):
+		if found == null or found.display_name != b.owner_name or found.role != NpcData.role_for_plot(b):  # a house can hold a tradesman
 			owners_ok = false
 		elif (found.work_id == b.id) != b.is_public():
 			work_ok = false

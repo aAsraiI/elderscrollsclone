@@ -28,7 +28,7 @@ static func generate(town: PlacedPOI, map: WorldMap) -> Array[NpcData]:
 		var n := NpcData.new()
 		n.id = "npc/" + b.id
 		n.display_name = b.owner_name
-		n.role = NpcData.role_for(b.kind)
+		n.role = NpcData.role_for_plot(b)
 		n.faction = b.guild if b.guild != "" else town.id
 		n.personality = rng.randi_range(0, NpcData.Personality.size() - 1) as NpcData.Personality
 		n.base_disposition = clampi(50 + rng.randi_range(-15, 15) + (10 if n.personality == NpcData.Personality.FRIENDLY or n.personality == NpcData.Personality.CHEERFUL else 0) - (15 if n.personality == NpcData.Personality.GRUMPY else 0), 0, 100)
@@ -51,7 +51,8 @@ static func generate(town: PlacedPOI, map: WorldMap) -> Array[NpcData]:
 			NpcData.Role.FARMER:
 				n.work_start = snappedf(rng.randf_range(6.5, 7.25), 0.25)
 		out.append(n)
-	var guard_count: int = GUARDS[clampi(int((town.poi as TownData).kind), 0, 2)]
+	# at least one guard for every six buildings, so big towns get more
+	var guard_count: int = maxi(GUARDS[clampi(int((town.poi as TownData).kind), 0, 2)], layout.buildings.size() / 6)
 	for i in guard_count:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = ("%s|guard|%d" % [town.id, i]).hash()

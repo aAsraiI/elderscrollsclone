@@ -45,6 +45,7 @@ func _run() -> void:
 	check("someone is out in town", who != null)
 	(who.node.get_node("NpcTalk") as NpcTalk).interact(player.get_node("Inventory") as Inventory)
 	check("talking opens the window", ui.is_open())
+	DialogueState.change_disposition(who.data.id, who.data.base_disposition, 40)  # someone who dislikes you keeps rumors to themselves
 	ui.ask("background")
 	ui.ask("latest rumors")
 	var entries := DialogueState.journal().size()

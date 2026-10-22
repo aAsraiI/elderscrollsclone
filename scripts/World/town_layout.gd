@@ -19,6 +19,26 @@ class Street:
 		return Rect2(lo, hi - lo)
 
 
+## Part of the ordinary houses that belong to a tradesman (woodcutter, fisherman...)
+const TRADESMEN_SHARE := 0.35
+## What a tradesman's house is called
+const TRADE_HOUSES := {
+	"woodcutter": "Woodcutter Hut",
+	"fisherman": "Fishing Hut",
+	"hunter": "Hunting Lodge",
+	"miner": "Mining Shack",
+	"herbalist": "Herb Cottage",
+}
+## Which trades a biome's towns have (weights). Fishermen also turn up anywhere near water.
+const BIOME_TRADES := {
+	"forest": {"woodcutter": 4, "hunter": 2, "herbalist": 1},
+	"plains": {"woodcutter": 2, "hunter": 1, "herbalist": 1},
+	"lakeland": {"woodcutter": 1, "herbalist": 1, "hunter": 1},
+	"swamp": {"herbalist": 3, "hunter": 2},
+	"highlands": {"miner": 4, "hunter": 2, "woodcutter": 1},
+	"snow_mountains": {"hunter": 3, "miner": 2, "woodcutter": 1},
+	"desert": {"miner": 3, "herbalist": 1},
+}
 const SETBACK := 1.5     # meters between a street's edge and a building's front
 const GAP := 2.5         # meters kept free between two buildings
 const ANCHOR_STEP := 2.5
@@ -39,6 +59,10 @@ var buildings: Array[BuildingPlot] = []
 var streets: Array[Street] = []
 ## Local points at the ends of the main street, where roads join the town
 var gates: Array[Vector3] = []
+## The biome the town stands in (its id), and a spot on the nearest shore (town local; INF = no
+## water nearby). Tradesmen are picked from these: fishermen only where there is water.
+var biome_key := ""
+var shore := Vector3.INF
 
 var _rects: Array[Rect2] = []
 # Street network for walking (built the first time someone asks for a route)
@@ -57,6 +81,7 @@ static func generate(p_data: TownData, placed: PlacedPOI, town_name: String, map
 	var rng := RandomNumberGenerator.new()
 	rng.seed = placed.seed_value ^ 0x70E7
 	t._make_streets()
+	t._survey(map)
 	t._place_buildings(rng)
 	for b in t.buildings:
 		b.town_id = t.town_id
@@ -240,24 +265,102 @@ func _make_streets() -> void:
 	var main_hw := 3.5 if data.kind == TownData.Kind.CITY else 3.0
 	_add_street(Vector3(-r, 0, 0), Vector3(r, 0, 0), main_hw, true)
 	gates = [Vector3(-r, 0, 0), Vector3(r, 0, 0)]
+	# Bigger towns get more streets (about one every 45 m), so there is room along them for houses
 	match data.layout_style:
 		TownData.LayoutStyle.CLUSTER:
 			plaza_radius = 11.0
 			_add_street(Vector3(0, 0, -r * 0.6), Vector3(0, 0, r * 0.6), 2.2)
+			if r > 75.0:
+				for x in [-r * 0.5, r * 0.5]:
+					_add_street(Vector3(x, 0, -r * 0.5), Vector3(x, 0, r * 0.5), 2.2)
 		TownData.LayoutStyle.STREET:
 			plaza_radius = 9.0
-			for x in [-r * 0.45, r * 0.45]:
+			var cross := maxi(2, roundi(r / 35.0))
+			for x in _spread(cross, r * 0.45, r * 0.75):
 				_add_street(Vector3(x, 0, -r * 0.62), Vector3(x, 0, r * 0.62), 2.4)
+			if r > 100.0:
+				for z in [-r * 0.42, r * 0.42]:
+					_add_street(Vector3(-r * 0.75, 0, z), Vector3(r * 0.75, 0, z), 2.4)
 		TownData.LayoutStyle.GRID:
 			plaza_radius = 12.0
 			wall_half = r * 0.9
 			var l := wall_half - 3.0
 			_add_street(Vector3(0, 0, -l), Vector3(0, 0, l), 3.0)
-			for k in [-0.5, 0.5]:
+			for k in _spread(maxi(2, roundi(l / 40.0)), 0.5, 0.8):
 				_add_street(Vector3(l * k, 0, -l), Vector3(l * k, 0, l), 2.5)
 				_add_street(Vector3(-l, 0, l * k), Vector3(l, 0, l * k), 2.5)
 	if data.walls and wall_half <= 0.0:
 		wall_half = r * 0.9
+
+
+# What land the town stands in, and the nearest shore within reach (for fishermen)
+func _survey(map: WorldMap) -> void:
+	if map == null:
+		return
+	var biome := map.get_biome_at(origin.x, origin.z)
+	biome_key = biome.get_key() if biome != null else ""
+	if not map.settings.water_enabled:
+		return
+	var basis := Basis(Vector3.UP, yaw)
+	var best := INF
+	for ring: float in [1.3, 1.7, 2.2, 2.8]:
+		for k in 16:
+			var a := float(k) / 16.0 * TAU
+			var local := Vector3(cos(a), 0.0, sin(a)) * radius * ring
+			var w := origin + basis * local
+			if not map.is_under_water(map.get_height(w.x, w.z)):
+				continue
+			# walk back toward town until the ground is dry: that is the shore
+			var d := local.length()
+			while d > radius:
+				d -= 4.0
+				var p := local.normalized() * d
+				var pw := origin + basis * p
+				if not map.is_under_water(map.get_height(pw.x, pw.z) - 0.6):
+					if d < best:
+						best = d
+						shore = p
+					break
+		if best < INF:
+			return
+
+
+func _pick_trade(rng: RandomNumberGenerator) -> String:
+	var weights: Dictionary = BIOME_TRADES.get(biome_key, {"woodcutter": 1, "hunter": 1}).duplicate()
+	if shore != Vector3.INF:
+		weights["fisherman"] = 4
+	var total := 0
+	for k in weights:
+		total += int(weights[k])
+	var roll := rng.randi_range(1, maxi(total, 1))
+	for k in weights:
+		roll -= int(weights[k])
+		if roll <= 0:
+			return String(k)
+	return ""
+
+
+## Where a tradesman works beside their house (town local): the woodpile, the drying rack...
+func get_trade_spot(b: BuildingPlot) -> Vector3:
+	if b.trade == "fisherman" and shore != Vector3.INF:
+		return shore
+	return b.local_pos + Basis(Vector3.UP, b.local_yaw) * Vector3(b.size.x * 0.5 + 1.6, 0.0, 0.0)
+
+
+# `count` positions spread evenly between -reach and +reach, skipping the middle (the main street
+# runs there). Two positions stay where small towns always had them: at +-two_at.
+static func _spread(count: int, two_at: float, reach: float) -> Array[float]:
+	var out: Array[float] = []
+	if count <= 2:
+		out.append(-two_at)
+		out.append(two_at)
+		return out
+	var half := count / 2
+	for i in half:
+		var t := reach * float(i + 1) / float(half)
+		out.append(-t)
+		out.append(t)
+	return out
 
 
 func _add_street(a: Vector3, b: Vector3, half_width: float, main: bool = false) -> void:
@@ -319,10 +422,14 @@ func _place_buildings(rng: RandomNumberGenerator) -> void:
 		wanted.append({"kind": BuildingPlot.Kind.FARM})
 
 	var anchors := _make_anchors()
+	# The order each kind of building tries the spots in, worked out once for the whole town
+	var orders := {}
+	for kind in ["center", "middle", "edge", "any"]:
+		orders[kind] = _anchor_order(anchors, kind, rng)
 	var used_names := {}
 	for w in wanted:
 		var plot := _make_plot(w, rng, used_names)
-		var order := _anchor_order(anchors, plot.kind, rng)
+		var order: Array[int] = orders[_order_kind(plot.kind)]
 		for ai in order:  # no spot fits: the town simply has one building less
 			var a: Dictionary = anchors[ai]
 			if a["dead"]:
@@ -344,29 +451,36 @@ func _place_buildings(rng: RandomNumberGenerator) -> void:
 				break
 
 
-# Which anchors a kind of building tries first: important buildings near the middle, farms at
-# the edge, houses anywhere
-func _anchor_order(anchors: Array[Dictionary], kind: BuildingPlot.Kind, rng: RandomNumberGenerator) -> Array[int]:
-	var keyed: Array = []
+# Which list of spots a kind of building uses: important buildings near the middle, the smithy
+# halfway out, farms at the edge, houses anywhere
+static func _order_kind(kind: BuildingPlot.Kind) -> String:
+	match kind:
+		BuildingPlot.Kind.TEMPLE, BuildingPlot.Kind.GUILD_HALL, BuildingPlot.Kind.INN, BuildingPlot.Kind.SHOP:
+			return "center"
+		BuildingPlot.Kind.SMITHY:
+			return "middle"
+		BuildingPlot.Kind.FARM:
+			return "edge"
+	return "any"
+
+
+func _anchor_order(anchors: Array[Dictionary], which: String, rng: RandomNumberGenerator) -> Array[int]:
+	var keys := PackedFloat32Array()
+	keys.resize(anchors.size())
 	for i in anchors.size():
-		if anchors[i]["dead"]:
-			continue
 		var dist: float = anchors[i]["dist"]
-		var key := 0.0
-		match kind:
-			BuildingPlot.Kind.TEMPLE, BuildingPlot.Kind.GUILD_HALL, BuildingPlot.Kind.INN, BuildingPlot.Kind.SHOP:
-				key = dist + rng.randf() * 6.0
-			BuildingPlot.Kind.SMITHY:
-				key = absf(dist - radius * 0.5) + rng.randf() * 8.0
-			BuildingPlot.Kind.FARM:
-				key = -dist + rng.randf() * 10.0
+		match which:
+			"center":
+				keys[i] = dist + rng.randf() * 6.0
+			"middle":
+				keys[i] = absf(dist - radius * 0.5) + rng.randf() * 8.0
+			"edge":
+				keys[i] = -dist + rng.randf() * 10.0
 			_:
-				key = rng.randf()
-		keyed.append([key, i])
-	keyed.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
+				keys[i] = rng.randf()
 	var out: Array[int] = []
-	for k in keyed:
-		out.append(k[1])
+	out.assign(range(anchors.size()))
+	out.sort_custom(func(x: int, y: int) -> bool: return keys[x] < keys[y])
 	return out
 
 
@@ -416,6 +530,10 @@ func _make_plot(w: Dictionary, rng: RandomNumberGenerator, used_names: Dictionar
 		BuildingPlot.Kind.HOUSE:
 			p.size = Vector3(rng.randf_range(6.0, 8.0), 6.0 if city else rng.randf_range(3.2, 3.6), rng.randf_range(5.5, 7.0))
 			p.display_name = "%s's House" % first
+			if rng.randf() < TRADESMEN_SHARE:
+				p.trade = _pick_trade(rng)
+				if p.trade != "":
+					p.display_name = "%s's %s" % [first, TRADE_HOUSES[p.trade]]
 		BuildingPlot.Kind.FARM:
 			p.size = Vector3(rng.randf_range(7.0, 8.5), 3.4, rng.randf_range(6.0, 7.0))
 			p.field_size = Vector2(rng.randf_range(16.0, 22.0), rng.randf_range(12.0, 16.0))

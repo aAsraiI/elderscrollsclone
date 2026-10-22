@@ -15,6 +15,8 @@ const ROAD_COLOR := Color(0.43, 0.36, 0.25)
 const LEAD := 14.0
 ## Meters between the points of a finished road
 const SPACING := 6.0
+## Meters a road may sit above the land (it cuts into hills instead of standing on banks)
+const MAX_FILL := 0.3
 
 
 static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
@@ -42,12 +44,27 @@ static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
 	heights.resize(w * h)
 	var outside := PackedByteArray()
 	outside.resize(w * h)
-	var s := WorldMap.Sample.new()
-	for j in h:
+	# Every row on its own worker thread (each fills its own row arrays; joined afterwards)
+	var rows: Array = []
+	rows.resize(h)
+	var task := WorkerThreadPool.add_group_task(func(j: int) -> void:
+		var s := WorldMap.Sample.new()
+		var row_h := PackedFloat32Array()
+		row_h.resize(w)
+		var row_o := PackedByteArray()
+		row_o.resize(w)
 		for i in w:
 			map.sample((float(region.position.x + i) + 0.5) * cell, (float(region.position.y + j) + 0.5) * cell, s)
-			heights[j * w + i] = s.height
-			outside[j * w + i] = 1 if s.edge > 0.02 else 0
+			row_h[i] = s.height
+			row_o[i] = 1 if s.edge > 0.02 or map.is_under_water(s.height - 0.5) else 0  # roads keep out of the water
+		rows[j] = [row_h, row_o], h, -1, true, "road heights")
+	WorkerThreadPool.wait_for_group_task_completion(task)
+	for j in h:
+		var row_h: PackedFloat32Array = rows[j][0]
+		var row_o: PackedByteArray = rows[j][1]
+		for i in w:
+			heights[j * w + i] = row_h[i]
+			outside[j * w + i] = row_o[i]
 	# Steep = expensive
 	var base := PackedFloat32Array()
 	base.resize(w * h)
@@ -83,15 +100,33 @@ static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
 					list.append(c)
 		town_cells[t.id] = list
 
-	for e in _pick_links(towns):
+	# union-find over towns: which are already joined by road
+	var group: Array[int] = []  # an Array (shared), not a Packed array (copied when passed)
+	for i in towns.size():
+		group.append(i)
+	var tried := {}
+	var links := _pick_links(towns)
+	var li := 0
+	while li < links.size():
+		var e: Vector2i = links[li]
+		li += 1
+		tried[e] = true
 		var a: PlacedPOI = towns[e.x]
 		var bt: PlacedPOI = towns[e.y]
 		var route := _route(map, net, astar, region, base, town_cells, towns, a, bt, cell)
 		if route.is_empty() or (route["points"] as PackedVector3Array).size() < 2:
-			push_warning("Roads: no way found from %s to %s" % [a.town.display_name, bt.town.display_name])
+			# blocked (water between them): try the next nearest towns, so nobody is cut off
+			for extra in _detours(towns, e, group, tried):
+				links.append(extra)
 			continue
 		# where it runs on top of an earlier road, that road's surface is used instead of a second one
 		net.add_polyline(route["points"], settings.road_width * 0.5, ROAD_COLOR, false, a.id, bt.id, route["shared"])
+		_join(group, e.x, e.y)
+	var alone := {}
+	for i in towns.size():
+		alone[_root(group, i)] = true
+	if alone.size() > 1:
+		push_warning("Roads: %d groups of towns could not be joined (water between them)" % alone.size())
 	return net
 
 
@@ -269,7 +304,12 @@ static func _route(map: WorldMap, net: RoadNetwork, astar: AStarGrid2D, region: 
 			continue
 		last = i
 		walked = 0.0
-	for pass_i in 4:
+	# The land under each point (the road never ends up above it, see below)
+	var ground := PackedFloat32Array()
+	ground.resize(flat.size())
+	for i in flat.size():
+		ground[i] = map.get_height(flat[i].x, flat[i].y) if pinned[i] == 0 else hs[i]
+	for pass_i in 3:
 		var next := hs.duplicate()
 		for i in hs.size():
 			if pinned[i] == 1:
@@ -281,15 +321,27 @@ static func _route(map: WorldMap, net: RoadNetwork, astar: AStarGrid2D, region: 
 				cnt += 1
 			next[i] = sum / float(cnt)
 		hs = next
-	for pass_i in 4:
+	# Cut, never fill: the road may sink into the land (a cutting, like a shallow ravine) but never
+	# stand above it on a bank. Then it is held to the steepest grade by cutting the high side down
+	# (the lowest profile under the land that obeys the grade).
+	for i in hs.size():
+		if pinned[i] == 0:
+			hs[i] = minf(hs[i], ground[i] + MAX_FILL)
+	for i in range(1, hs.size()):
+		if pinned[i] == 0:
+			hs[i] = minf(hs[i], hs[i - 1] + grade * flat[i].distance_to(flat[i - 1]))
+	for i in range(hs.size() - 2, -1, -1):
+		if pinned[i] == 0:
+			hs[i] = minf(hs[i], hs[i + 1] + grade * flat[i].distance_to(flat[i + 1]))
+	# Where a fixed point (a town gate) is higher than the land beside it, a short ramp leads up to
+	# it (the only place a road is ever raised; everywhere else the grade already holds)
+	for pass_i in 2:
 		for i in range(1, hs.size()):
 			if pinned[i] == 0:
-				var lim := grade * flat[i].distance_to(flat[i - 1])
-				hs[i] = clampf(hs[i], hs[i - 1] - lim, hs[i - 1] + lim)
+				hs[i] = maxf(hs[i], hs[i - 1] - grade * flat[i].distance_to(flat[i - 1]))
 		for i in range(hs.size() - 2, -1, -1):
 			if pinned[i] == 0:
-				var lim := grade * flat[i].distance_to(flat[i + 1])
-				hs[i] = clampf(hs[i], hs[i + 1] - lim, hs[i + 1] + lim)
+				hs[i] = maxf(hs[i], hs[i + 1] - grade * flat[i].distance_to(flat[i + 1]))
 	var out := PackedVector3Array()
 	for i in flat.size():
 		out.append(Vector3(flat[i].x, hs[i], flat[i].y))
@@ -350,4 +402,36 @@ static func _resample(pts: Array[Vector2], spacing: float) -> Array[Vector2]:
 		out.append(pts[pts.size() - 1])
 	else:
 		out[out.size() - 1] = pts[pts.size() - 1]
+	return out
+
+
+static func _root(group: Array[int], i: int) -> int:
+	while group[i] != i:
+		i = group[i]
+	return i
+
+
+static func _join(group: Array[int], a: int, b: int) -> void:
+	group[_root(group, a)] = _root(group, b)
+
+
+# Other pairs to try when a road is blocked: from each end, the nearest towns not yet joined to it
+static func _detours(towns: Array[PlacedPOI], e: Vector2i, group: Array[int], tried: Dictionary) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for from in [e.x, e.y]:
+		var order: Array = range(towns.size())
+		order.sort_custom(func(x: int, y: int) -> bool:
+			return towns[from].position.distance_squared_to(towns[x].position) < towns[from].position.distance_squared_to(towns[y].position))
+		var added := 0
+		for j: int in order:
+			if j == from or _root(group, j) == _root(group, from):
+				continue
+			var pair := Vector2i(mini(from, j), maxi(from, j))
+			if tried.has(pair):
+				continue
+			tried[pair] = true
+			out.append(pair)
+			added += 1
+			if added >= 2:
+				break
 	return out

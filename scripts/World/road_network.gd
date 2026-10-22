@@ -9,6 +9,10 @@ extends RefCounted
 const CELL := 64.0
 ## Meters beside a road over which the ground blends back to the natural terrain
 const SHOULDER := 6.0
+## Beside a deep cutting the bank widens (this many meters per meter of depth, up to SHOULDER_MAX),
+## so the sides slope like a shallow ravine instead of standing as walls
+const SHOULDER_PER_DEPTH := 1.3
+const SHOULDER_MAX := 22.0
 ## Meters over which the road color fades out at its edge
 const EDGE_SOFT := 1.4
 
@@ -108,13 +112,15 @@ func apply(x: float, z: float, out: WorldMap.Sample) -> void:
 		var pz := _az[i] + abz * t - z
 		var d := sqrt(px * px + pz * pz)
 		var hw: float = _hw[i]
-		if d >= hw + SHOULDER:
+		var road_h := lerpf(_ah[i], _bh[i], t)
+		var shoulder := clampf(SHOULDER + absf(out.height - road_h) * SHOULDER_PER_DEPTH, SHOULDER, SHOULDER_MAX)
+		if d >= hw + shoulder:
 			continue
-		var w := 1.0 - smoothstep(hw, hw + SHOULDER, d)
+		var w := 1.0 - smoothstep(hw, hw + shoulder, d)
 		if w > best_w or (w == best_w and d < best_d):  # where roads meet, the nearest one decides
 			best_w = w
 			best_d = d
-			best_h = lerpf(_ah[i], _bh[i], t)
+			best_h = road_h
 		var cw := 1.0 - smoothstep(hw - EDGE_SOFT, hw + EDGE_SOFT, d)
 		if cw > best_cw:
 			best_cw = cw
@@ -139,7 +145,7 @@ func _add_segment(a: Vector3, b: Vector3, half_width: float, color: Color) -> vo
 	_bh.append(b.y)
 	_hw.append(half_width)
 	_col.append(color)
-	var reach := half_width + SHOULDER
+	var reach := half_width + SHOULDER_MAX
 	var c0 := Vector2i(floori((minf(a.x, b.x) - reach) / CELL), floori((minf(a.z, b.z) - reach) / CELL))
 	var c1 := Vector2i(floori((maxf(a.x, b.x) + reach) / CELL), floori((maxf(a.z, b.z) + reach) / CELL))
 	for cz in range(c0.y, c1.y + 1):

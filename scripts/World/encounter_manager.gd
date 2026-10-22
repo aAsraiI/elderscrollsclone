@@ -251,7 +251,7 @@ func _find_spot(data: EncounterData, biome: BiomeData, pos: Vector3) -> Vector3:
 			continue
 		if world.map.get_inside_distance(x, z) < world.settings.edge_width + 40.0:
 			continue
-		if not _gentle(x, z):
+		if not _gentle(x, z) or world.map.is_under_water(world.get_height_at(x, z) - 0.3):
 			continue
 		if not world.get_pois_near(Vector3(x, 0.0, z), 30.0).is_empty():
 			continue

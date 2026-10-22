@@ -229,6 +229,10 @@ func _goal_for(r: Resident, act: int) -> Dictionary:
 				return {"inside": d.work_id}
 			if d.role == NpcData.Role.FARMER:
 				return {"field": pick}
+			if NpcData.is_tradesman(d.role):
+				var home := world.get_building(d.home_id)
+				if home != null:
+					return {"outside": layout.get_trade_spot(home)}  # the woodpile, the drying rack, the shore
 			return {"outside": layout.get_plaza_spot(pick)}
 	# free time
 	var inn := ""

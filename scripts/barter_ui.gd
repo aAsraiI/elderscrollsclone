@@ -52,18 +52,21 @@ func open_for(s: DialogueEngine.Speaker) -> bool:
 	var status := Barter.trade_status(s, world)
 	if status["merchant"] == null or not status["open"]:
 		return false
-	var b := world.get_building(s.data.work_id)
-	var zone := LevelCurve.zone_range(world.map, b.world_pos)
+	# a shop in town, or a travelling merchant's pack (no building)
+	var b: BuildingPlot = world.get_building(s.data.work_id) if s.data != null else null
+	var shop_id := b.id if b != null else String(s.enemy.get_meta("shop_id", "road/" + s.name))
+	var shop_name := b.display_name if b != null else "Travelling Merchant"
+	var zone := LevelCurve.zone_range(world.map, b.world_pos if b != null else s.position)
 	var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
-	var kind := int((s.town.poi as TownData).kind) if s.town != null else 1
+	var kind := int((s.town.poi as TownData).kind) if s.town != null and b != null else 1
 	var merchant: MerchantData = status["merchant"]
 	if Factions.leader_of(s, world) == "thieves" and Factions.is_member("thieves"):
 		merchant = merchant.duplicate() as MerchantData  # for guild members the contact is a fence
 		merchant.buys_stolen = true
-	shop = Barter.open_shop(b.id, merchant, clock.day if clock != null else 1, zone.x, zone.y, Barter.GOLD_SCALE[clampi(kind, 0, 2)])
+	shop = Barter.open_shop(shop_id, merchant, clock.day if clock != null else 1, zone.x, zone.y, Barter.GOLD_SCALE[clampi(kind, 0, 2)])
 	deal = Barter.deal_for(_player, DialogueEngine.get_disposition(s))
 	deal.guild = Factions.discount_for(merchant)
-	_title.text = "%s  ·  %s" % [b.display_name, s.name]
+	_title.text = "%s  ·  %s" % [shop_name, s.name]
 	_message.text = ""
 	_open = true
 	_root.visible = true

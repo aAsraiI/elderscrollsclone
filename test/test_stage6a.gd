@@ -325,6 +325,7 @@ func t_crime() -> void:
 	mc._deal(_act(sword), victim.combat, victim.global_position + Vector3.UP, p.global_position + Vector3.UP, 5.0, &"melee")
 	check("hitting them again right away isn't counted twice", CrimeManager.get_bounty(town.id) == CrimeManager.BOUNTY["assault"])
 	var victim2 := folk[1].node
+	victim2.global_position = victim.global_position + Vector3(4, 0.3, 3)  # towns are big now: bring the witness close
 	st.awareness.clear()
 	st.awareness[victim2.get_instance_id()] = 1.2
 	var before := CrimeManager.get_bounty(town.id)

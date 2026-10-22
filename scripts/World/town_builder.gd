@@ -36,6 +36,7 @@ static func build(data: TownData, placed: PlacedPOI, map: WorldMap) -> Node3D:
 	if layout.wall_half > 0.0:
 		_walls(root, layout, placed, map)
 	_gate_signs(root, layout, placed, map)
+	_pier(root, layout, placed, map)
 	return root
 
 
@@ -98,6 +99,8 @@ static func _building(root: Node3D, b: BuildingPlot, layout: TownLayout, placed:
 
 	if b.kind == BuildingPlot.Kind.FARM:
 		_field(holder, b, rng)
+	if b.kind == BuildingPlot.Kind.HOUSE and b.trade != "":
+		_trade_props(holder, b, rng)
 
 	# Name over the door
 	if b.is_public():
@@ -203,3 +206,53 @@ static func _gate_signs(root: Node3D, layout: TownLayout, placed: PlacedPOI, map
 		POIBuilder.add_box(root, Vector3(0.2, 2.4, 0.2), at + Vector3(0.0, 1.2, 0.0), DOOR_COLOR)
 		POIBuilder.add_box(root, Vector3(0.1, 0.7, 2.4), at + Vector3(0.0, 2.2, 0.0), Color(0.5, 0.38, 0.22), 0.0, Vector3.ZERO, false)
 		_label(root, layout.display_name, at + Vector3(out * 0.07, 2.2, 0.0), out * PI * 0.5, 56).visibility_range_end = 80.0
+
+
+# ---------------------------------------------------------------- tradesmen
+
+# What a tradesman keeps beside their house (on the side where they work)
+static func _trade_props(holder: Node3D, b: BuildingPlot, rng: RandomNumberGenerator) -> void:
+	var x := b.size.x * 0.5 + 1.1
+	var wood := Color(0.42, 0.30, 0.18)
+	match b.trade:
+		"woodcutter":
+			for i in 3:
+				for j in 3 - i:
+					POIBuilder.add_box(holder, Vector3(0.35, 0.35, 1.8), Vector3(x + 0.38 * float(j) + 0.19 * float(i), 0.18 + 0.33 * float(i), -1.2), wood.darkened(rng.randf_range(0.0, 0.2)), 0.0, Vector3.ZERO, false)
+			POIBuilder.add_box(holder, Vector3(0.6, 0.5, 0.6), Vector3(x + 0.4, 0.25, 1.0), wood.darkened(0.25))
+		"fisherman":
+			for z in [-1.0, 1.0]:
+				POIBuilder.add_box(holder, Vector3(0.12, 1.8, 0.12), Vector3(x + 0.4, 0.9, z), DOOR_COLOR, 0.0, Vector3.ZERO, false)
+			POIBuilder.add_box(holder, Vector3(0.08, 0.08, 2.2), Vector3(x + 0.4, 1.75, 0.0), DOOR_COLOR, 0.0, Vector3.ZERO, false)
+			for k in 4:
+				POIBuilder.add_box(holder, Vector3(0.06, 0.45, 0.16), Vector3(x + 0.4, 1.45, -0.75 + 0.5 * float(k)), Color(0.6, 0.62, 0.6), 0.0, Vector3.ZERO, false)
+		"hunter":
+			POIBuilder.add_box(holder, Vector3(0.1, 1.9, 2.2), Vector3(x + 0.4, 0.95, 0.0), DOOR_COLOR, 0.0, Vector3.ZERO, false)
+			for k in 2:
+				POIBuilder.add_box(holder, Vector3(0.05, 1.1, 0.9), Vector3(x + 0.48, 1.15, -0.5 + float(k)), Color(0.5, 0.36, 0.22).darkened(0.1 * k), 0.0, Vector3.ZERO, false)
+		"miner":
+			POIBuilder.add_box(holder, Vector3(0.9, 0.6, 1.4), Vector3(x + 0.3, 0.55, -0.6), Color(0.3, 0.28, 0.27))
+			for k in 4:
+				POIBuilder.add_box(holder, Vector3(0.4, 0.35, 0.4), Vector3(x + 0.3 + rng.randf_range(-0.3, 0.3), 0.18, 1.0 + rng.randf_range(-0.3, 0.3)), Color(0.45, 0.42, 0.4).darkened(rng.randf_range(0.0, 0.3)), rng.randf() * TAU, Vector3.ZERO, false)
+		"herbalist":
+			POIBuilder.add_box(holder, Vector3(1.1, 0.25, 2.4), Vector3(x + 0.4, 0.12, 0.0), Color(0.33, 0.24, 0.15), 0.0, Vector3.ZERO, false)
+			for k in 6:
+				POIBuilder.add_box(holder, Vector3(0.25, 0.35, 0.25), Vector3(x + 0.15 + 0.5 * float(k % 2), 0.4, -0.9 + 0.36 * float(k)), Color(0.3, 0.55, 0.25).lightened(rng.randf_range(0.0, 0.3)), 0.0, Vector3.ZERO, false)
+
+
+# A wooden pier on the shore, when the town has fishermen
+static func _pier(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: WorldMap) -> void:
+	if layout.shore == Vector3.INF:
+		return
+	var fishers := false
+	for b in layout.buildings:
+		fishers = fishers or b.trade == "fisherman"
+	if not fishers:
+		return
+	var out := Vector3(layout.shore.x, 0.0, layout.shore.z).normalized()
+	var yaw := atan2(out.x, out.z)
+	var sea := map.settings.sea_level - placed.position.y
+	for k in 4:
+		var at := layout.shore + out * (1.5 + 2.2 * float(k))
+		POIBuilder.add_box(root, Vector3(2.2, 0.2, 2.2), Vector3(at.x, sea + 0.5, at.z), Color(0.45, 0.33, 0.2), yaw)
+		POIBuilder.add_box(root, Vector3(0.2, 3.0, 0.2), Vector3(at.x, sea - 1.0, at.z) + Basis(Vector3.UP, yaw) * Vector3(1.0, 0, 0), DOOR_COLOR, 0.0, Vector3.ZERO, false)

@@ -7,6 +7,8 @@ extends Resource
 ##
 ## Terrain height = base_height + hills + mountains + detail (all smooth noise, no blocks).
 
+enum TreeStyle { BROADLEAF, PINE, DEAD, CACTUS }
+
 ## Used for save files and noise seeding. Optional: the file path is used when empty.
 @export var id: StringName
 @export var display_name := "Plains"
@@ -56,6 +58,13 @@ extends Resource
 @export var peak_height := 100000.0
 ## Meters over which the peak color fades in
 @export_range(1.0, 500.0, 1.0, "or_greater") var peak_blend := 25.0
+
+@export_group("Trees")
+## The kind of tree that grows here
+@export var tree_style: TreeStyle = TreeStyle.BROADLEAF
+## Trees per hectare (100 x 100 m). 0 = none, 15 = scattered, 150 = forest.
+@export_range(0.0, 400.0, 1.0) var tree_density := 0.0
+@export var tree_color := Color(0.22, 0.42, 0.18)
 
 @export_group("Points of interest")
 ## What gets placed in this biome (camps, ruins, cave entrances...) and how many.

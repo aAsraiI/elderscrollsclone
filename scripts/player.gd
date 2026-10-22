@@ -172,6 +172,10 @@ func _ensure_helpers() -> void:
 		var pm := PauseMenu.new()
 		pm.name = "PauseMenu"
 		add_child(pm)
+	if get_node_or_null("CompassHUD") == null:
+		var compass := CompassHUD.new()
+		compass.name = "CompassHUD"
+		add_child(compass)
 	if get_node_or_null("Stealth") == null:
 		var stealth := Stealth.new()
 		stealth.name = "Stealth"

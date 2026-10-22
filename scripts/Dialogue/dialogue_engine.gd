@@ -412,6 +412,16 @@ static func _generic(s: Speaker, topic: String, world: WorldManager) -> String:
 				NpcData.Role.GUILD_MEMBER:
 					var fname := _faction_name(s.faction)
 					return "I'm with the %s. We keep %s." % [fname, home] if fname != "" else "I keep %s." % home
+				NpcData.Role.WOODCUTTER:
+					return "Wood for every hearth in %s. Somebody has to cut it." % town
+				NpcData.Role.FISHERMAN:
+					return "Out on the water at first light, nets mended by dark. The fish don't wait."
+				NpcData.Role.HUNTER:
+					return "Deer, boar, the odd wolf. I sell the hides and keep the stories."
+				NpcData.Role.MINER:
+					return "Iron and copper, mostly. The hills give up their ore, slowly."
+				NpcData.Role.HERBALIST:
+					return "Roots and leaves. Half the potions in %s start in my garden." % town
 				NpcData.Role.FARMER:
 					return "Crops and animals. Up before dawn, in bed after dark."
 				NpcData.Role.GUARD:
@@ -464,9 +474,12 @@ static func _rumor(s: Speaker, world: WorldManager) -> String:
 	if other != null and other != s.town and other.town != null:
 		return "Merchants say %s is doing well these days. More folk on the road every week." % other.town.display_name
 	if s.town != null and s.town.town != null and not s.town.town.buildings.is_empty():
-		var b := s.town.town.buildings[_pick(s, "gossip", s.town.town.buildings.size())]
-		if b.owner_name != s.name:
-			return "Between us, %s has been keeping odd hours lately." % b.owner_name
+		var list := s.town.town.buildings
+		var first := _pick(s, "gossip", list.size())
+		for step in list.size():  # skip their own house
+			var b := list[(first + step) % list.size()]
+			if b.owner_name != s.name:
+				return "Between us, %s has been keeping odd hours lately." % b.owner_name
 	return "Nothing worth repeating, I'm afraid."
 
 

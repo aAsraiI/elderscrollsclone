@@ -68,8 +68,18 @@ func _run() -> void:
 	Locks.set_locked(house.id, false)
 	inv.add_item(KeyRing.get_key(house.id, house.display_name))
 
-	var door := _door_of(wm, shop)
+	# towns are big now: go to the shop first so its part of town is loaded
+	player.global_position = shop.get_door_position() + Vector3.UP
+	var door: Node = null
+	for i in 300:
+		door = _door_of(wm, shop)
+		if door != null:
+			break
+		await frames(1)
 	check("the shop door is in the scene", door != null)
+	if door == null:
+		_finish()
+		return
 	player.global_position = shop.get_door_position() + Vector3.UP
 	door.interact(inv)
 	await frames(60)

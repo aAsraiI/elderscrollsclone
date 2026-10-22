@@ -135,11 +135,15 @@ static func find_spot(map: WorldMap, rng: RandomNumberGenerator, area: Rect2, re
 		# not too steep across the footprint
 		map.sample(x, z, s)
 		var h0 := s.height
+		if map.is_under_water(h0 - 1.5):
+			continue  # nothing is built at or under the water line
 		var worst := 0.0
 		for q in 8:
 			var a := float(q) * PI * 0.25
 			map.sample(x + cos(a) * ring, z + sin(a) * ring, s)
 			worst = maxf(worst, absf(s.height - h0))
+			if map.is_under_water(s.height - 0.5):
+				worst = INF  # part of it would be in the water
 		if rad_to_deg(atan2(worst, ring)) > poi.max_slope_deg:
 			continue
 		return Vector3(x, h0, z)

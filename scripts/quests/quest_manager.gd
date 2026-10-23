@@ -96,6 +96,9 @@ static func active_targets() -> Array:
 	for q: Dictionary in all_quests():
 		if q["status"] == "active":
 			out.append({"pos": Vector2(float(q["pos"][0]), float(q["pos"][1])), "name": String(q["name"]), "id": String(q["id"])})
+	var raid := TerritoryWar.target()
+	if not raid.is_empty():
+		out.append(raid)
 	var st := Story.target()
 	if not st.is_empty():
 		out.append(st)

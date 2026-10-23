@@ -216,17 +216,19 @@ func _pick(biome: BiomeData, player_level: int, zone_level: int, ignore_cooldown
 			continue
 		if enc.max_player_level > 0 and player_level > enc.max_player_level:
 			continue
+		if Festivals.encounter_factor(get_tree().get_first_node_in_group("world_clock") as WorldClock, enc.get_key()) <= 0.0:
+			continue  # e.g. no vampires on the Day of the Dawn
 		if not ignore_cooldown and _clock < float(_cooldowns.get(enc.get_key(), 0.0)):
 			continue
 		if not enc.table.has_entries_for(zone_level):
 			continue
 		options.append(enc)
-		total += enc.weight
+		total += _weight(enc)
 	if options.is_empty():
 		return null
 	var pick := _rng.randf() * total
 	for enc in options:
-		pick -= enc.weight
+		pick -= _weight(enc)
 		if pick <= 0.0:
 			return enc
 	return options[options.size() - 1]
@@ -311,3 +313,8 @@ func _toast(text: String) -> void:
 	var sm := get_tree().get_first_node_in_group("save_manager") as SaveManager
 	if sm != null and sm.menu != null:
 		sm.menu.show_toast(text)
+
+
+# An encounter's weight today: the festivals change some (the Blood Moon brings the wolves)
+func _weight(enc: EncounterData) -> float:
+	return enc.weight * Festivals.encounter_factor(get_tree().get_first_node_in_group("world_clock") as WorldClock, enc.get_key())

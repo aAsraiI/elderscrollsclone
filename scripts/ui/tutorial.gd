@@ -60,7 +60,7 @@ func _process(delta: float) -> void:
 
 
 func _watch() -> void:
-	hint("welcome", "WASD to move, mouse to look, Space to jump, Shift to sprint, Ctrl to sneak. E uses things. Tab opens the menu (inventory, map, character, journal, magic). V switches to third person.")
+	hint("welcome", "WASD to move, mouse to look, Space to jump, Shift to sprint, Ctrl to sneak. E uses things. Tab opens the menu (inventory, map, character, journal, magic, council). V switches to third person.")
 	var stats := _player.get_node_or_null("Stats") as Stats
 	if stats != null and stats.health < stats.get_stat("max_health") * 0.4:
 		hint("low_health", "You are badly hurt. Press H to drink a health potion, or eat food from the inventory.")

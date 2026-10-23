@@ -1,0 +1,1104 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nxtjq"]
+resource_name = "floor"
+albedo_color = Color(0.33, 0.31, 0.29, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4ph4f"]
+resource_name = "dark_stone"
+albedo_color = Color(0.26, 0.25, 0.24, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dj654"]
+resource_name = "stone"
+albedo_color = Color(0.42, 0.4, 0.37, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xan8l"]
+resource_name = "dark_wood"
+albedo_color = Color(0.22, 0.14, 0.08, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6vjoq"]
+resource_name = "carpet"
+albedo_color = Color(0.45, 0.08, 0.08, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i7xuq"]
+resource_name = "gold"
+albedo_color = Color(0.78, 0.62, 0.25, 1)
+metallic = 0.6
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1q2fh"]
+resource_name = "banner_valcourt"
+albedo_color = Color(0.2, 0.32, 0.65, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_16r46"]
+resource_name = "banner_tidewell"
+albedo_color = Color(0.15, 0.45, 0.32, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cqera"]
+resource_name = "banner_ashgrove"
+albedo_color = Color(0.12, 0.14, 0.12, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frv2n"]
+resource_name = "banner_morvaine"
+albedo_color = Color(0.3, 0.3, 0.34, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yjl0j"]
+resource_name = "banner_brannoch"
+albedo_color = Color(0.62, 0.12, 0.1, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tcuke"]
+resource_name = "banner_sahrim"
+albedo_color = Color(0.75, 0.2, 0.12, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0d16w"]
+resource_name = "banner_kjellvar"
+albedo_color = Color(0.92, 0.92, 0.95, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8bu0v"]
+resource_name = "banner_vyrel"
+albedo_color = Color(0.85, 0.4, 0.08, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0ljdx"]
+resource_name = "wood"
+albedo_color = Color(0.36, 0.24, 0.14, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dveh0"]
+resource_name = "cloth"
+albedo_color = Color(0.55, 0.5, 0.42, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kwx8f"]
+resource_name = "crypt"
+albedo_color = Color(0.3, 0.32, 0.34, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7f6ge"]
+resource_name = "bone"
+albedo_color = Color(0.75, 0.72, 0.62, 1)
+roughness = 0.9
+
+[node name="CastleDawnhold" type="Node3D" unique_id=2054319757]
+
+[node name="GreatHall" type="Node3D" parent="." unique_id=960066848]
+
+[node name="Floor_East" type="CSGBox3D" parent="GreatHall" unique_id=439723972]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.75, -0.25, 0)
+use_collision = true
+size = Vector3(10.5, 0.5, 30)
+material = SubResource("StandardMaterial3D_nxtjq")
+
+[node name="Floor_West_South" type="CSGBox3D" parent="GreatHall" unique_id=838615667]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.25, -0.25, -8.5)
+use_collision = true
+size = Vector3(3.5, 0.5, 13)
+material = SubResource("StandardMaterial3D_nxtjq")
+
+[node name="Floor_West_North" type="CSGBox3D" parent="GreatHall" unique_id=1150430675]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.25, -0.25, 13.5)
+use_collision = true
+size = Vector3(3.5, 0.5, 3)
+material = SubResource("StandardMaterial3D_nxtjq")
+
+[node name="Floor_West_Edge" type="CSGBox3D" parent="GreatHall" unique_id=585650535]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75, -0.25, 5)
+use_collision = true
+size = Vector3(0.5, 0.5, 14)
+material = SubResource("StandardMaterial3D_nxtjq")
+
+[node name="Ceiling" type="CSGBox3D" parent="GreatHall" unique_id=453527423]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.25, 0)
+use_collision = true
+size = Vector3(15, 0.5, 31)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Wall_South_0" type="CSGBox3D" parent="GreatHall" unique_id=1777065371]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 4.5, -15.25)
+use_collision = true
+size = Vector3(6, 9, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_South_1" type="CSGBox3D" parent="GreatHall" unique_id=1792624415]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 4.5, -15.25)
+use_collision = true
+size = Vector3(6, 9, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_South_lintel_2" type="CSGBox3D" parent="GreatHall" unique_id=2143347749]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -15.25)
+use_collision = true
+size = Vector3(3, 6, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_North_0" type="CSGBox3D" parent="GreatHall" unique_id=1566623275]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.1, 4.5, 15.25)
+use_collision = true
+size = Vector3(2.8, 9, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_North_1" type="CSGBox3D" parent="GreatHall" unique_id=1955516451]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 15.25)
+use_collision = true
+size = Vector3(4.6, 9, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_North_2" type="CSGBox3D" parent="GreatHall" unique_id=1594761094]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.1, 4.5, 15.25)
+use_collision = true
+size = Vector3(2.8, 9, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_North_lintel_3" type="CSGBox3D" parent="GreatHall" unique_id=147921178]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 6, 15.25)
+use_collision = true
+size = Vector3(2.4, 6, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_North_lintel_4" type="CSGBox3D" parent="GreatHall" unique_id=943713314]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 6, 15.25)
+use_collision = true
+size = Vector3(2.4, 6, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_East_0" type="CSGBox3D" parent="GreatHall" unique_id=1578365918]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.25, 4.5, -11.1)
+use_collision = true
+size = Vector3(0.5, 9, 7.8)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_East_1" type="CSGBox3D" parent="GreatHall" unique_id=933013946]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.25, 4.5, 1)
+use_collision = true
+size = Vector3(0.5, 9, 11.6)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_East_2" type="CSGBox3D" parent="GreatHall" unique_id=1108481631]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.25, 4.5, 12.1)
+use_collision = true
+size = Vector3(0.5, 9, 5.8)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_East_lintel_3" type="CSGBox3D" parent="GreatHall" unique_id=410863372]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.25, 6, -6)
+use_collision = true
+size = Vector3(0.5, 6, 2.4)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_East_lintel_4" type="CSGBox3D" parent="GreatHall" unique_id=1007932358]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.25, 6, 8)
+use_collision = true
+size = Vector3(0.5, 6, 2.4)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_West_0" type="CSGBox3D" parent="GreatHall" unique_id=753888812]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.25, 4.5, -11.1)
+use_collision = true
+size = Vector3(0.5, 9, 7.8)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_West_1" type="CSGBox3D" parent="GreatHall" unique_id=805603729]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.25, 4.5, 2)
+use_collision = true
+size = Vector3(0.5, 9, 13.6)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_West_2" type="CSGBox3D" parent="GreatHall" unique_id=916535510]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.25, 4.5, 13.1)
+use_collision = true
+size = Vector3(0.5, 9, 3.8)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_West_lintel_3" type="CSGBox3D" parent="GreatHall" unique_id=1747802930]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.25, 6, -6)
+use_collision = true
+size = Vector3(0.5, 6, 2.4)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_West_lintel_4" type="CSGBox3D" parent="GreatHall" unique_id=1009979625]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.25, 6, 10)
+use_collision = true
+size = Vector3(0.5, 6, 2.4)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="GreatDoor" type="CSGBox3D" parent="GreatHall" unique_id=1331008438]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -15.4)
+size = Vector3(3, 3.6, 0.15)
+material = SubResource("StandardMaterial3D_xan8l")
+
+[node name="Carpet" type="CSGBox3D" parent="GreatHall" unique_id=1867772373]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.015, -1.5)
+size = Vector3(2.6, 0.03, 24)
+material = SubResource("StandardMaterial3D_6vjoq")
+
+[node name="Pillar_W_0" type="CSGBox3D" parent="GreatHall" unique_id=1747643241]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 4.5, -11)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Pillar_W_1" type="CSGBox3D" parent="GreatHall" unique_id=1330303274]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 4.5, -6)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Pillar_W_2" type="CSGBox3D" parent="GreatHall" unique_id=353449567]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 4.5, -1)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Pillar_W_3" type="CSGBox3D" parent="GreatHall" unique_id=740452002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 4.5, 4)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Pillar_W_4" type="CSGBox3D" parent="GreatHall" unique_id=154060550]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 4.5, 9)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Pillar_E_0" type="CSGBox3D" parent="GreatHall" unique_id=1512605999]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 4.5, -11)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Pillar_E_1" type="CSGBox3D" parent="GreatHall" unique_id=378737652]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 4.5, -6)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Pillar_E_2" type="CSGBox3D" parent="GreatHall" unique_id=748790615]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 4.5, -1)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Pillar_E_3" type="CSGBox3D" parent="GreatHall" unique_id=2115754704]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 4.5, 4)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Pillar_E_4" type="CSGBox3D" parent="GreatHall" unique_id=20658190]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 4.5, 9)
+use_collision = true
+size = Vector3(1, 9, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Dais" type="CSGBox3D" parent="GreatHall" unique_id=525222615]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.3, 12.5)
+use_collision = true
+size = Vector3(9, 0.6, 4)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Dais_Step" type="CSGBox3D" parent="GreatHall" unique_id=2136260567]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.15, 10)
+use_collision = true
+size = Vector3(5, 0.3, 1)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Throne_Seat" type="CSGBox3D" parent="GreatHall" unique_id=1761557267]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.9, 13.2)
+use_collision = true
+size = Vector3(1.6, 0.6, 1.2)
+material = SubResource("StandardMaterial3D_i7xuq")
+
+[node name="Throne_Back" type="CSGBox3D" parent="GreatHall" unique_id=418330355]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 2.2, 13.9)
+use_collision = true
+size = Vector3(1.6, 2.6, 0.3)
+material = SubResource("StandardMaterial3D_i7xuq")
+
+[node name="Throne_Cushion" type="CSGBox3D" parent="GreatHall" unique_id=1742058725]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 1.26, 13.15)
+size = Vector3(1.3, 0.12, 1)
+material = SubResource("StandardMaterial3D_6vjoq")
+
+[node name="Banner_valcourt" type="CSGBox3D" parent="GreatHall" unique_id=1127375791]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.95, 5.2, -9)
+size = Vector3(0.05, 3.6, 1.6)
+material = SubResource("StandardMaterial3D_1q2fh")
+
+[node name="Banner_tidewell" type="CSGBox3D" parent="GreatHall" unique_id=551917924]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.95, 5.2, -9)
+size = Vector3(0.05, 3.6, 1.6)
+material = SubResource("StandardMaterial3D_16r46")
+
+[node name="Banner_ashgrove" type="CSGBox3D" parent="GreatHall" unique_id=430990922]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.95, 5.2, -3.5)
+size = Vector3(0.05, 3.6, 1.6)
+material = SubResource("StandardMaterial3D_cqera")
+
+[node name="Banner_morvaine" type="CSGBox3D" parent="GreatHall" unique_id=258532993]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.95, 5.2, -3.5)
+size = Vector3(0.05, 3.6, 1.6)
+material = SubResource("StandardMaterial3D_frv2n")
+
+[node name="Banner_brannoch" type="CSGBox3D" parent="GreatHall" unique_id=1176198117]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.95, 5.2, 2)
+size = Vector3(0.05, 3.6, 1.6)
+material = SubResource("StandardMaterial3D_yjl0j")
+
+[node name="Banner_sahrim" type="CSGBox3D" parent="GreatHall" unique_id=1669508764]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.95, 5.2, 2)
+size = Vector3(0.05, 3.6, 1.6)
+material = SubResource("StandardMaterial3D_tcuke")
+
+[node name="Banner_kjellvar" type="CSGBox3D" parent="GreatHall" unique_id=612809762]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.95, 5.2, 7.5)
+size = Vector3(0.05, 3.6, 1.6)
+material = SubResource("StandardMaterial3D_0d16w")
+
+[node name="Banner_vyrel" type="CSGBox3D" parent="GreatHall" unique_id=90427438]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.95, 5.2, 7.5)
+size = Vector3(0.05, 3.6, 1.6)
+material = SubResource("StandardMaterial3D_8bu0v")
+
+[node name="Banner_Aurelane" type="CSGBox3D" parent="GreatHall" unique_id=662714959]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 5.5, 14.95)
+size = Vector3(4, 5, 0.05)
+material = SubResource("StandardMaterial3D_i7xuq")
+
+[node name="Rail_East" type="CSGBox3D" parent="GreatHall" unique_id=1384511935]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 0.5, 5)
+use_collision = true
+size = Vector3(0.2, 1, 14)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Rail_North" type="CSGBox3D" parent="GreatHall" unique_id=684402178]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 12)
+use_collision = true
+size = Vector3(3.5, 1, 0.2)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Sign_Crypt" type="Label3D" parent="GreatHall" unique_id=289536130]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.6, -2.2)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Crypt of Kings"
+font_size = 40
+outline_size = 8
+
+[node name="EastWing" type="Node3D" parent="." unique_id=1786581523]
+
+[node name="Floor" type="CSGBox3D" parent="EastWing" unique_id=1933328670]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, -0.25, 0)
+use_collision = true
+size = Vector3(12.5, 0.5, 30)
+material = SubResource("StandardMaterial3D_nxtjq")
+
+[node name="Ceiling" type="CSGBox3D" parent="EastWing" unique_id=493733868]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 5.25, 0)
+use_collision = true
+size = Vector3(12.5, 0.5, 30)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Wall_East_0" type="CSGBox3D" parent="EastWing" unique_id=1119603930]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.75, 2.5, 0)
+use_collision = true
+size = Vector3(0.5, 5, 30)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_South_0" type="CSGBox3D" parent="EastWing" unique_id=1748829000]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.75, 2.5, -15.25)
+use_collision = true
+size = Vector3(12.5, 5, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_North_0" type="CSGBox3D" parent="EastWing" unique_id=1863327662]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.75, 2.5, 15.25)
+use_collision = true
+size = Vector3(12.5, 5, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_Between_0" type="CSGBox3D" parent="EastWing" unique_id=1459115585]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.5, 1)
+use_collision = true
+size = Vector3(1, 5, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_Between_1" type="CSGBox3D" parent="EastWing" unique_id=12304345]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 2.5, 1)
+use_collision = true
+size = Vector3(9, 5, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_Between_lintel_2" type="CSGBox3D" parent="EastWing" unique_id=858228779]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 4, 1)
+use_collision = true
+size = Vector3(2, 2, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="RoyalSolar" type="Node3D" parent="EastWing" unique_id=821564693]
+
+[node name="Bed" type="CSGBox3D" parent="EastWing/RoyalSolar" unique_id=1910626391]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 0.3, -12)
+use_collision = true
+size = Vector3(2.2, 0.6, 3)
+material = SubResource("StandardMaterial3D_6vjoq")
+
+[node name="Bed_Head" type="CSGBox3D" parent="EastWing/RoyalSolar" unique_id=102283751]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 0.9, -13.6)
+use_collision = true
+size = Vector3(2.4, 1.8, 0.2)
+material = SubResource("StandardMaterial3D_xan8l")
+
+[node name="Hearth" type="CSGBox3D" parent="EastWing/RoyalSolar" unique_id=1704644756]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19, 1, -6)
+use_collision = true
+size = Vector3(2.6, 2, 0.8)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Desk" type="CSGBox3D" parent="EastWing/RoyalSolar" unique_id=576750786]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 0.4, -12.5)
+use_collision = true
+size = Vector3(1.8, 0.8, 0.9)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Sign" type="Label3D" parent="EastWing/RoyalSolar" unique_id=469163717]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.6, 3.2, -6)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Royal Solar"
+font_size = 40
+outline_size = 8
+
+[node name="CouncilChamber" type="Node3D" parent="EastWing" unique_id=1613015707]
+
+[node name="Table" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=1183839834]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 0.45, 8)
+use_collision = true
+size = Vector3(2.4, 0.9, 9)
+material = SubResource("StandardMaterial3D_xan8l")
+
+[node name="Chair_0" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=2019458426]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.7, 4.4)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Chair_1" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=586213222]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.7, 4.4)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Chair_2" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=306567530]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.7, 6.2)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Chair_3" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=1585305551]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.7, 6.2)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Chair_4" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=1891368143]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.7, 8)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Chair_5" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=2044520640]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.7, 8)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Chair_6" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=938720706]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.7, 9.8)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Chair_7" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=1293653735]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.7, 9.8)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Chair_8" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=1476178030]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.7, 11.6)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Chair_9" type="CSGBox3D" parent="EastWing/CouncilChamber" unique_id=1087362031]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.7, 11.6)
+use_collision = true
+size = Vector3(0.7, 1.4, 0.7)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Sign" type="Label3D" parent="EastWing/CouncilChamber" unique_id=1307396638]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.6, 3.2, 8)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Council Chamber"
+font_size = 40
+outline_size = 8
+
+[node name="WestWing" type="Node3D" parent="." unique_id=1826036491]
+
+[node name="Floor" type="CSGBox3D" parent="WestWing" unique_id=1953797117]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, -0.25, 0)
+use_collision = true
+size = Vector3(12.5, 0.5, 30)
+material = SubResource("StandardMaterial3D_nxtjq")
+
+[node name="Ceiling" type="CSGBox3D" parent="WestWing" unique_id=40699718]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, 5.25, 0)
+use_collision = true
+size = Vector3(12.5, 0.5, 30)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Wall_West_0" type="CSGBox3D" parent="WestWing" unique_id=1673835272]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.75, 2.5, 0)
+use_collision = true
+size = Vector3(0.5, 5, 30)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_South_0" type="CSGBox3D" parent="WestWing" unique_id=308896542]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.75, 2.5, -15.25)
+use_collision = true
+size = Vector3(12.5, 5, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_North_0" type="CSGBox3D" parent="WestWing" unique_id=1008652538]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.75, 2.5, 15.25)
+use_collision = true
+size = Vector3(12.5, 5, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_Between_0" type="CSGBox3D" parent="WestWing" unique_id=1669662977]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.25, 2.5, 4)
+use_collision = true
+size = Vector3(8.5, 5, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_Between_1" type="CSGBox3D" parent="WestWing" unique_id=970065246]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.25, 2.5, 4)
+use_collision = true
+size = Vector3(1.5, 5, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_Between_lintel_2" type="CSGBox3D" parent="WestWing" unique_id=1132608816]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4, 4)
+use_collision = true
+size = Vector3(2, 2, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Barracks" type="Node3D" parent="WestWing" unique_id=403709143]
+
+[node name="Bunk_0" type="CSGBox3D" parent="WestWing/Barracks" unique_id=1380337309]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.6, 0.25, -12.5)
+use_collision = true
+size = Vector3(1, 0.5, 2.2)
+material = SubResource("StandardMaterial3D_dveh0")
+
+[node name="Bunk_1" type="CSGBox3D" parent="WestWing/Barracks" unique_id=1771858136]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.6, 0.25, -9.1)
+use_collision = true
+size = Vector3(1, 0.5, 2.2)
+material = SubResource("StandardMaterial3D_dveh0")
+
+[node name="Bunk_2" type="CSGBox3D" parent="WestWing/Barracks" unique_id=923624756]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.6, 0.25, -5.7)
+use_collision = true
+size = Vector3(1, 0.5, 2.2)
+material = SubResource("StandardMaterial3D_dveh0")
+
+[node name="Bunk_3" type="CSGBox3D" parent="WestWing/Barracks" unique_id=869878982]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.6, 0.25, -2.3)
+use_collision = true
+size = Vector3(1, 0.5, 2.2)
+material = SubResource("StandardMaterial3D_dveh0")
+
+[node name="WeaponRack" type="CSGBox3D" parent="WestWing/Barracks" unique_id=394267035]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.2, 1, -9)
+use_collision = true
+size = Vector3(0.4, 2, 3)
+material = SubResource("StandardMaterial3D_xan8l")
+
+[node name="Sign" type="Label3D" parent="WestWing/Barracks" unique_id=897204241]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.6, 3.2, -6)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Barracks"
+font_size = 40
+outline_size = 8
+
+[node name="ChancellorsOffice" type="Node3D" parent="WestWing" unique_id=1043030358]
+
+[node name="Desk" type="CSGBox3D" parent="WestWing/ChancellorsOffice" unique_id=420865556]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0.42, 10)
+use_collision = true
+size = Vector3(2.4, 0.85, 1.1)
+material = SubResource("StandardMaterial3D_xan8l")
+
+[node name="Shelves" type="CSGBox3D" parent="WestWing/ChancellorsOffice" unique_id=128983913]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 1.5, 14.6)
+use_collision = true
+size = Vector3(4, 3, 0.5)
+material = SubResource("StandardMaterial3D_0ljdx")
+
+[node name="Sign" type="Label3D" parent="WestWing/ChancellorsOffice" unique_id=1474215410]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.6, 3.2, 10)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Chancellor's Office"
+font_size = 40
+outline_size = 8
+
+[node name="NorthRooms" type="Node3D" parent="." unique_id=1313809478]
+
+[node name="Floor" type="CSGBox3D" parent="NorthRooms" unique_id=228703357]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 19.75)
+use_collision = true
+size = Vector3(15, 0.5, 8.5)
+material = SubResource("StandardMaterial3D_nxtjq")
+
+[node name="Ceiling" type="CSGBox3D" parent="NorthRooms" unique_id=408402654]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.25, 19.75)
+use_collision = true
+size = Vector3(15, 0.5, 8.5)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Wall_North_0" type="CSGBox3D" parent="NorthRooms" unique_id=1915154714]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 24.25)
+use_collision = true
+size = Vector3(15, 5, 0.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_West_0" type="CSGBox3D" parent="NorthRooms" unique_id=1882125660]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.25, 2.5, 19.75)
+use_collision = true
+size = Vector3(0.5, 5, 8.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_East_0" type="CSGBox3D" parent="NorthRooms" unique_id=212106427]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.25, 2.5, 19.75)
+use_collision = true
+size = Vector3(0.5, 5, 8.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Wall_Between_0" type="CSGBox3D" parent="NorthRooms" unique_id=481695621]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 19.75)
+use_collision = true
+size = Vector3(0.5, 5, 8.5)
+material = SubResource("StandardMaterial3D_dj654")
+
+[node name="Treasury" type="Node3D" parent="NorthRooms" unique_id=1060411005]
+
+[node name="GoldPile_0" type="CSGBox3D" parent="NorthRooms/Treasury" unique_id=979137920]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 0.25, 22.8)
+size = Vector3(1.2, 0.5, 1)
+material = SubResource("StandardMaterial3D_i7xuq")
+
+[node name="GoldPile_1" type="CSGBox3D" parent="NorthRooms/Treasury" unique_id=1542344601]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7, 0.25, 22.8)
+size = Vector3(1.2, 0.5, 1)
+material = SubResource("StandardMaterial3D_i7xuq")
+
+[node name="GoldPile_2" type="CSGBox3D" parent="NorthRooms/Treasury" unique_id=1024528978]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9, 0.25, 22.8)
+size = Vector3(1.2, 0.5, 1)
+material = SubResource("StandardMaterial3D_i7xuq")
+
+[node name="Sign" type="Label3D" parent="NorthRooms/Treasury" unique_id=2042132964]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3.5, 3.2, 15)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Treasury"
+font_size = 40
+outline_size = 8
+
+[node name="PrincessTower" type="Node3D" parent="NorthRooms" unique_id=2039254951]
+
+[node name="Bed" type="CSGBox3D" parent="NorthRooms/PrincessTower" unique_id=1881079111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0.25, 21.8)
+use_collision = true
+size = Vector3(1.6, 0.5, 2.4)
+material = SubResource("StandardMaterial3D_dveh0")
+
+[node name="Window" type="CSGBox3D" parent="NorthRooms/PrincessTower" unique_id=869154157]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 2.6, 24)
+size = Vector3(1.4, 1.6, 0.05)
+material = SubResource("StandardMaterial3D_i7xuq")
+
+[node name="Sign" type="Label3D" parent="NorthRooms/PrincessTower" unique_id=178041388]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.5, 3.2, 15)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Princess's Tower"
+font_size = 40
+outline_size = 8
+
+[node name="CryptOfKings" type="Node3D" parent="." unique_id=738732399]
+
+[node name="Stair" type="CSGBox3D" parent="CryptOfKings" unique_id=1821373285]
+transform = Transform3D(1, 0, 0, 0, 0.86824316, -0.4961389, 0, 0.4961389, 0.86824316, -5, -4.2, 5)
+use_collision = true
+size = Vector3(3, 0.4, 16.124516)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Shaft_West_0" type="CSGBox3D" parent="CryptOfKings" unique_id=1918912316]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75, -4, 1)
+use_collision = true
+size = Vector3(0.5, 8, 6)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Shaft_East_0" type="CSGBox3D" parent="CryptOfKings" unique_id=1731677386]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.25, -4, 1)
+use_collision = true
+size = Vector3(0.5, 8, 6)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Shaft_South" type="CSGBox3D" parent="CryptOfKings" unique_id=1215647878]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -4, -2.25)
+use_collision = true
+size = Vector3(3.5, 8, 0.5)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="Floor" type="CSGBox3D" parent="CryptOfKings" unique_id=632514804]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -8.25, 15)
+use_collision = true
+size = Vector3(18, 0.5, 22)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Ceiling_East" type="CSGBox3D" parent="CryptOfKings" unique_id=403382517]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, -2.75, 15)
+use_collision = true
+size = Vector3(11, 0.5, 22)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Ceiling_West" type="CSGBox3D" parent="CryptOfKings" unique_id=1385593145]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -2.75, 15)
+use_collision = true
+size = Vector3(4, 0.5, 22)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Ceiling_Stair" type="CSGBox3D" parent="CryptOfKings" unique_id=1527628387]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -2.75, 18.5)
+use_collision = true
+size = Vector3(3.5, 0.5, 15)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Wall_West_0" type="CSGBox3D" parent="CryptOfKings" unique_id=980933062]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.25, -5.5, 15)
+use_collision = true
+size = Vector3(0.5, 5, 22)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Wall_East_0" type="CSGBox3D" parent="CryptOfKings" unique_id=924894801]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.25, -5.5, 15)
+use_collision = true
+size = Vector3(0.5, 5, 22)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Wall_South_0" type="CSGBox3D" parent="CryptOfKings" unique_id=475224433]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.375, -5.5, 3.75)
+use_collision = true
+size = Vector3(7.25, 5, 0.5)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Wall_South_1" type="CSGBox3D" parent="CryptOfKings" unique_id=287453596]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.375, -5.5, 3.75)
+use_collision = true
+size = Vector3(7.25, 5, 0.5)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Wall_South_lintel_2" type="CSGBox3D" parent="CryptOfKings" unique_id=1995587182]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -4, 3.75)
+use_collision = true
+size = Vector3(3.5, 2, 0.5)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Wall_North_0" type="CSGBox3D" parent="CryptOfKings" unique_id=250221536]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.1, -5.5, 26.25)
+use_collision = true
+size = Vector3(7.8, 5, 0.5)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Wall_North_1" type="CSGBox3D" parent="CryptOfKings" unique_id=903128847]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, -5.5, 26.25)
+use_collision = true
+size = Vector3(7.8, 5, 0.5)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Wall_North_lintel_2" type="CSGBox3D" parent="CryptOfKings" unique_id=794223279]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -4, 26.25)
+use_collision = true
+size = Vector3(2.4, 2, 0.5)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Tomb_0" type="CSGBox3D" parent="CryptOfKings" unique_id=1409146117]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, -7.5, 9)
+use_collision = true
+size = Vector3(1.6, 1, 2.8)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Effigy_0" type="CSGBox3D" parent="CryptOfKings" unique_id=53238208]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, -6.85, 9)
+size = Vector3(0.7, 0.3, 2)
+material = SubResource("StandardMaterial3D_7f6ge")
+
+[node name="Name_0" type="Label3D" parent="CryptOfKings" unique_id=540649078]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0.5, -6.4, 9)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Caedmon I"
+outline_size = 8
+
+[node name="Tomb_1" type="CSGBox3D" parent="CryptOfKings" unique_id=949298672]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, -7.5, 9)
+use_collision = true
+size = Vector3(1.6, 1, 2.8)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Effigy_1" type="CSGBox3D" parent="CryptOfKings" unique_id=520881305]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, -6.85, 9)
+size = Vector3(0.7, 0.3, 2)
+material = SubResource("StandardMaterial3D_7f6ge")
+
+[node name="Name_1" type="Label3D" parent="CryptOfKings" unique_id=1675231784]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10.5, -6.4, 9)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Aldric I"
+outline_size = 8
+
+[node name="Tomb_2" type="CSGBox3D" parent="CryptOfKings" unique_id=142160633]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, -7.5, 14)
+use_collision = true
+size = Vector3(1.6, 1, 2.8)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Effigy_2" type="CSGBox3D" parent="CryptOfKings" unique_id=280969558]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, -6.85, 14)
+size = Vector3(0.7, 0.3, 2)
+material = SubResource("StandardMaterial3D_7f6ge")
+
+[node name="Name_2" type="Label3D" parent="CryptOfKings" unique_id=443128936]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0.5, -6.4, 14)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Caedmon II"
+outline_size = 8
+
+[node name="Tomb_3" type="CSGBox3D" parent="CryptOfKings" unique_id=842145742]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, -7.5, 14)
+use_collision = true
+size = Vector3(1.6, 1, 2.8)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Effigy_3" type="CSGBox3D" parent="CryptOfKings" unique_id=989904238]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, -6.85, 14)
+size = Vector3(0.7, 0.3, 2)
+material = SubResource("StandardMaterial3D_7f6ge")
+
+[node name="Name_3" type="Label3D" parent="CryptOfKings" unique_id=1486712591]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10.5, -6.4, 14)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Rosamund"
+outline_size = 8
+
+[node name="Tomb_4" type="CSGBox3D" parent="CryptOfKings" unique_id=1900275777]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, -7.5, 19)
+use_collision = true
+size = Vector3(1.6, 1, 2.8)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Effigy_4" type="CSGBox3D" parent="CryptOfKings" unique_id=2084185912]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, -6.85, 19)
+size = Vector3(0.7, 0.3, 2)
+material = SubResource("StandardMaterial3D_7f6ge")
+
+[node name="Name_4" type="Label3D" parent="CryptOfKings" unique_id=1928161065]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0.5, -6.4, 19)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Aldren III"
+outline_size = 8
+
+[node name="Tomb_5" type="CSGBox3D" parent="CryptOfKings" unique_id=444781145]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, -7.5, 19)
+use_collision = true
+size = Vector3(1.6, 1, 2.8)
+material = SubResource("StandardMaterial3D_kwx8f")
+
+[node name="Effigy_5" type="CSGBox3D" parent="CryptOfKings" unique_id=403279792]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, -6.85, 19)
+size = Vector3(0.7, 0.3, 2)
+material = SubResource("StandardMaterial3D_7f6ge")
+
+[node name="Name_5" type="Label3D" parent="CryptOfKings" unique_id=2111901460]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10.5, -6.4, 19)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "Prince Caedric"
+outline_size = 8
+
+[node name="OldKeep_SealedDoor" type="CSGBox3D" parent="CryptOfKings" unique_id=1827474976]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -6.5, 26.1)
+use_collision = true
+size = Vector3(2.4, 3, 0.3)
+material = SubResource("StandardMaterial3D_4ph4f")
+
+[node name="OldKeep_Seal" type="CSGBox3D" parent="CryptOfKings" unique_id=1950506921]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -6.3, 25.92)
+size = Vector3(0.9, 0.9, 0.05)
+material = SubResource("StandardMaterial3D_i7xuq")
+
+[node name="Sign_OldKeep" type="Label3D" parent="CryptOfKings" unique_id=1906732080]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -5, -4.6, 25.8)
+modulate = Color(0.95, 0.85, 0.6, 1)
+text = "The Old Keep  (sealed)"
+font_size = 36
+outline_size = 8
+
+[node name="Lights" type="Node3D" parent="." unique_id=1666353593]
+
+[node name="Lamp_0" type="OmniLight3D" parent="Lights" unique_id=621414463]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 7, -10)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 2.2
+omni_range = 16.0
+
+[node name="Lamp_1" type="OmniLight3D" parent="Lights" unique_id=1545997488]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 7, 0)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 2.2
+omni_range = 16.0
+
+[node name="Lamp_2" type="OmniLight3D" parent="Lights" unique_id=1555225693]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 7, 10)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 2.4
+omni_range = 16.0
+
+[node name="Lamp_3" type="OmniLight3D" parent="Lights" unique_id=1842873130]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 4, -7)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.6
+omni_range = 11.0
+
+[node name="Lamp_4" type="OmniLight3D" parent="Lights" unique_id=645315026]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 4, 8)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.8
+omni_range = 11.0
+
+[node name="Lamp_5" type="OmniLight3D" parent="Lights" unique_id=591367402]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, 4, -7)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.4
+omni_range = 11.0
+
+[node name="Lamp_6" type="OmniLight3D" parent="Lights" unique_id=1414133109]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, 4, 10)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.5
+omni_range = 9.0
+
+[node name="Lamp_7" type="OmniLight3D" parent="Lights" unique_id=1682116384]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 4, 19.5)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.2
+omni_range = 7.0
+
+[node name="Lamp_8" type="OmniLight3D" parent="Lights" unique_id=1013505331]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 4, 19.5)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.3
+omni_range = 7.0
+
+[node name="CryptLamp_0" type="OmniLight3D" parent="Lights" unique_id=1068062854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -4.2, 8)
+light_color = Color(0.55, 0.65, 0.9, 1)
+light_energy = 1.1
+omni_range = 9.0
+
+[node name="CryptLamp_1" type="OmniLight3D" parent="Lights" unique_id=802862196]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -4.2, 15)
+light_color = Color(0.55, 0.65, 0.9, 1)
+light_energy = 1.1
+omni_range = 9.0
+
+[node name="CryptLamp_2" type="OmniLight3D" parent="Lights" unique_id=1515815991]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -4.2, 22)
+light_color = Color(0.55, 0.65, 0.9, 1)
+light_energy = 1.1
+omni_range = 9.0
+
+[node name="Markers" type="Node3D" parent="." unique_id=50286535]
+
+[node name="Start" type="Marker3D" parent="Markers" unique_id=1041033260]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.1, -12.6)
+
+[node name="Exit" type="Marker3D" parent="Markers" unique_id=140113716]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, -14.3)
+
+[node name="Throne" type="Marker3D" parent="Markers" unique_id=495715727]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.7, 11.5)
+
+[node name="Seat_0" type="Marker3D" parent="Markers" unique_id=727894422]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.1, 4.4)
+
+[node name="Seat_1" type="Marker3D" parent="Markers" unique_id=676440776]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.1, 4.4)
+
+[node name="Seat_2" type="Marker3D" parent="Markers" unique_id=1773464149]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.1, 6.2)
+
+[node name="Seat_3" type="Marker3D" parent="Markers" unique_id=1760960976]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.1, 6.2)
+
+[node name="Seat_4" type="Marker3D" parent="Markers" unique_id=556909654]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.1, 8)
+
+[node name="Seat_5" type="Marker3D" parent="Markers" unique_id=108829902]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.1, 8)
+
+[node name="Seat_6" type="Marker3D" parent="Markers" unique_id=1245741926]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.1, 9.8)
+
+[node name="Seat_7" type="Marker3D" parent="Markers" unique_id=686222197]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.1, 9.8)
+
+[node name="Seat_8" type="Marker3D" parent="Markers" unique_id=1660510806]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.3, 0.1, 11.6)
+
+[node name="Seat_9" type="Marker3D" parent="Markers" unique_id=1743444842]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7, 0.1, 11.6)
+
+[node name="Bed_Solar" type="Marker3D" parent="Markers" unique_id=137641704]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 0.1, -10)
+
+[node name="Bed_Tower" type="Marker3D" parent="Markers" unique_id=105488400]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0.1, 20)
+
+[node name="Bed_Barracks_0" type="Marker3D" parent="Markers" unique_id=556516626]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.4, 0.1, -12.5)
+
+[node name="Bed_Barracks_1" type="Marker3D" parent="Markers" unique_id=1209174052]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.4, 0.1, -9.1)
+
+[node name="Bed_Barracks_2" type="Marker3D" parent="Markers" unique_id=1454440938]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.4, 0.1, -5.7)
+
+[node name="Bed_Barracks_3" type="Marker3D" parent="Markers" unique_id=46649879]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.4, 0.1, -2.3)
+
+[node name="Chest_Treasury" type="Marker3D" parent="Markers" unique_id=1025838700]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 22.6)
+
+[node name="Chest_Solar" type="Marker3D" parent="Markers" unique_id=1968409989]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.6, 0, -13.6)

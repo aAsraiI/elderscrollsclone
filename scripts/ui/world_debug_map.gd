@@ -48,6 +48,7 @@ var _title: Label
 var _status: Label
 var _tooltip: Label
 var _naming: LineEdit  # the name box of a marker just placed
+var _night_layer := false  # N: the clans' territory (vampires only)
 var _open := false
 var _was_paused := false
 var _was_mouse := Input.MOUSE_MODE_CAPTURED
@@ -192,6 +193,10 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event is InputEventKey and event.pressed and not event.echo:
 		match (event as InputEventKey).physical_keycode:
+			KEY_N:
+				if ClanTerritory.can_see_night(get_tree()):
+					_night_layer = not _night_layer
+					_view.queue_redraw()
 			KEY_C:
 				center_on_player()
 			KEY_EQUAL, KEY_KP_ADD:
@@ -437,6 +442,8 @@ func draw_map(canvas: Control) -> void:
 		canvas.draw_texture_rect(_detail_tex, Rect2(dtl, dbr - dtl), false)
 	var px_scale := _scale()
 	var font := ThemeDB.fallback_font
+	if _night_layer and ClanTerritory.can_see_night(get_tree()):
+		_draw_night_layer(canvas, font)
 	# roads
 	_cache_roads()
 	var view_rect := Rect2(screen_to_world(Vector2.ZERO), canvas.size / px_scale).grow(50.0)
@@ -584,6 +591,29 @@ func place_at(at: Vector2) -> PlacedPOI:
 
 
 ## Clicking a found place asks first; clicking it again travels there
+# ---------------------------------------------------------------- the Night layer
+# Vampires only (N): every land tinted by the clan that rules its nights, with the clans' scores
+
+func _draw_night_layer(canvas: Control, font: Font) -> void:
+	var map := _manager.map
+	for i in map.placements.size():
+		var key := map.placements[i].biome.get_key()
+		if not ClanTerritory.START.has(key):
+			continue
+		var rect := map.get_placement_rect(i)
+		var tl := world_to_screen(rect.position)
+		var br := world_to_screen(rect.end)
+		var ruler := ClanTerritory.ruler(key)
+		var col: Color = ClanTerritory.COLORS[ruler]
+		canvas.draw_rect(Rect2(tl, br - tl), Color(col, 0.32))
+		canvas.draw_rect(Rect2(tl, br - tl), Color(col, 0.8), false, 1.5)
+		if (br - tl).x > 120.0:
+			var s := ClanTerritory.scores(key)
+			var text := "%s  %d / %d / %d" % [Factions.display_name(ruler), s[ClanTerritory.CLANS[0]], s[ClanTerritory.CLANS[1]], s[ClanTerritory.CLANS[2]]]
+			canvas.draw_string_outline(font, tl + Vector2(8, 18), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 4, Color.BLACK)
+			canvas.draw_string(font, tl + Vector2(8, 18), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, col.lightened(0.5))
+
+
 # ---------------------------------------------------------------- your markers
 
 # Right click: on a marker removes it, anywhere else puts a new one there and asks for its name
@@ -670,7 +700,7 @@ func _update_text() -> void:
 		_status.text = _notice
 		return
 	_pending_travel = ""
-	_status.text = "[Click a found place] Fast travel   [Right click] Marker   [Wheel / + -] Zoom   [Drag / WASD] Move   [C] Center on me   [M / Esc] Close" + ("   [Ctrl + right click] Teleport (debug)" if can_teleport() else "")
+	_status.text = "[Click a found place] Fast travel   [Right click] Marker   [Wheel / + -] Zoom   [Drag / WASD] Move   [C] Center on me   [M / Esc] Close" + ("   [Ctrl + right click] Teleport (debug)" if can_teleport() else "") + ("   [N] Night: the clans' lands" if ClanTerritory.can_see_night(get_tree()) else "")
 
 
 # ---------------------------------------------------------------- building

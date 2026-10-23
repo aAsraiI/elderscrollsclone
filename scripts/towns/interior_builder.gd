@@ -17,8 +17,16 @@ const CLOTH := Color(0.55, 0.20, 0.18)
 const STONE := Color(0.40, 0.39, 0.37)
 
 
+## Castle Dawnhold in Kingsreach is the one hand-built interior (made by tools/build_dawnhold.gd,
+## then yours to edit in the editor)
+const DAWNHOLD := "Castle Dawnhold"
+const DAWNHOLD_SCENE := "res://scenes/world/castle_dawnhold.tscn"
+
+
 ## Returns {"root": Node3D, "start": Vector3, "start_yaw": float, "ambient": Color, "chests": int}
 static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: int = 1) -> Dictionary:
+	if b.kind == BuildingPlot.Kind.SEAT and b.display_name == DAWNHOLD and ResourceLoader.exists(DAWNHOLD_SCENE):
+		return _dawnhold(b, interior_seed, level)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = interior_seed
 	var w := maxf(b.size.x + 1.5, 7.0)
@@ -249,6 +257,63 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 		"decor": decor,
 		# where the people who live or work here go (local positions, on the floor)
 		"spots": {"exit": Vector3(0.0, 0.1, door_z + 1.4), "beds": beds, "work": work, "seats": seats},
+	}
+
+
+# Castle Dawnhold from its hand-built scene: the way out, the chests and the lore shelf go where the
+# scene's markers say; the King and his court use the throne, the council seats and the beds
+static func _dawnhold(b: BuildingPlot, interior_seed: int, level: int) -> Dictionary:
+	var root := (load(DAWNHOLD_SCENE) as PackedScene).instantiate() as Node3D
+	root.name = "Interior"
+	root.set_meta("building_id", b.id)
+	var marks := root.get_node("Markers")
+	var at := func(n: String) -> Vector3: return (marks.get_node(n) as Node3D).position
+	var exit := DungeonDoor.new()
+	exit.name = "Exit"
+	exit.entrance_id = b.id
+	exit.label = "Leave %s" % b.display_name
+	exit.is_exit = true
+	root.add_child(exit)
+	exit.position = at.call("Exit")
+	var chests := 0
+	for c in marks.get_children():
+		if not String(c.name).begins_with("Chest_"):
+			continue
+		var treasury := String(c.name) == "Chest_Treasury"
+		var loot: Array[LootEntry] = ItemCatalog.treasure_loot(level, level + 6, 2.0) if treasury else ItemCatalog.curve_loot(level, level + 3)
+		loot.append(ItemCatalog.gold_loot(level + (10 if treasury else 0)))
+		var chest := POIBuilder.make_chest("Royal Treasury" if treasury else "The King's Chest", loot, "building/%s/%s" % [b.id, c.name], (interior_seed + chests * 104729) | 1)
+		chest.set_meta("owner_building", b.id)
+		(chest.get_node("ContainerComponent") as ContainerComponent).owner_id = b.id  # the Crown's: taking is stealing
+		root.add_child(chest)
+		chest.position = (c as Node3D).position + Vector3(0, 0.35, 0)
+		chests += 1
+	var books := LoreBooks.for_town(b.town_name)
+	if not books.is_empty():
+		var shelf_loot: Array[LootEntry] = []
+		for id in books:
+			var le := LootEntry.new()
+			le.item = LoreBooks.get_item(id)
+			shelf_loot.append(le)
+		var shelf := POIBuilder.make_chest("Bookshelf", shelf_loot, "building/%s/lore" % b.id, interior_seed | 1)
+		root.add_child(shelf)
+		shelf.position = Vector3(-14.0, 0.35, 13.8)  # the Chancellor's shelves
+	var beds: Array[Vector3] = []
+	var seats: Array[Vector3] = []
+	for c in marks.get_children():
+		if String(c.name).begins_with("Bed_"):
+			beds.append((c as Node3D).position)
+		elif String(c.name).begins_with("Seat_"):
+			seats.append((c as Node3D).position)
+	var start: Vector3 = at.call("Start")
+	return {
+		"root": root,
+		"start": start,
+		"start_yaw": PI,
+		"ambient": Color(0.14, 0.12, 0.1),
+		"chests": chests,
+		"decor": {"pieces": 0, "items": 0},
+		"spots": {"exit": start, "beds": beds, "work": at.call("Throne"), "seats": seats},
 	}
 
 

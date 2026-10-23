@@ -82,6 +82,9 @@ func _process(delta: float) -> void:
 	if _clock != null and bool(GameSettings.get_value("show_date")):
 		var w := Weather.get_instance(get_tree())
 		_date_label.text = "%s, %s, %s%s" % [_clock.get_short_date(), _clock.get_season_name(), _clock.get_moon_name(), ("   " + w.get_name_text()) if w != null and w.enabled else ""]
+		var fest := Festivals.current(_clock)
+		if not fest.is_empty():
+			_date_label.text += "   ·   " + String(fest["name"])
 
 	var lines := PackedStringArray()
 	if effects != null:

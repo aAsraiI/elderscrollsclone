@@ -52,6 +52,11 @@ func _process(delta: float) -> void:
 	if _timer > 0.0:
 		return
 	_timer = 2.0
+	# The story is over: its epilogue plays once, after the last conversation has closed
+	if stage() >= 6 and not WorldState.has_record("epilogue/story"):
+		WorldState.set_record("epilogue/story", {"seen": true})
+		Epilogue.play(get_tree(), NAME)
+		return
 	var p := get_tree().get_first_node_in_group("player") as Node3D
 	if p == null or world == null or world.map == null:
 		return

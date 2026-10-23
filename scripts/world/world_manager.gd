@@ -156,6 +156,15 @@ func _ready() -> void:
 	crime = CrimeManager.new()
 	crime.name = "CrimeManager"
 	add_child(crime)
+	var fest := Festivals.new()
+	fest.name = "Festivals"
+	add_child(fest)
+	var council := Regency.new()
+	council.name = "Regency"
+	add_child(council)
+	var war := TerritoryWar.new()
+	war.name = "TerritoryWar"
+	add_child(war)
 	var story := Story.new()
 	story.name = "Story"
 	add_child(story)

@@ -16,6 +16,7 @@ const PAGES := [
 	{"id": "character", "label": "Character", "key": KEY_C},
 	{"id": "journal", "label": "Journal", "key": KEY_J},
 	{"id": "magic", "label": "Magic", "key": KEY_P},
+	{"id": "council", "label": "Council", "key": KEY_K},
 ]
 
 var _bar: PanelContainer
@@ -85,6 +86,8 @@ func _page(index: int) -> Node:
 			return _player.get_node_or_null("StatsUI")
 		"journal":
 			return _player.get_node_or_null("JournalUI")
+		"council":
+			return _player.get_node_or_null("CouncilUI")
 		"magic":
 			return _player.get_node_or_null("MagicUI")
 		"map":
@@ -123,7 +126,7 @@ func _input(event: InputEvent) -> void:
 	if focus is LineEdit or focus is TextEdit:
 		return  # typing in a search box
 	var target := -1
-	if key >= KEY_1 and key <= KEY_5:
+	if key >= KEY_1 and key < KEY_1 + PAGES.size():
 		target = key - KEY_1
 	else:
 		for i in PAGES.size():

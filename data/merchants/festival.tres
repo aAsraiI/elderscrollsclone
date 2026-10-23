@@ -1,0 +1,96 @@
+[gd_resource type="Resource" script_class="MerchantData" format=3]
+
+[ext_resource type="Script" path="res://scripts/trade/merchant_data.gd" id="1_m"]
+[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/items/loot_entry.gd" id="2_l"]
+[ext_resource type="Resource" path="res://data/consumables/ale.tres" id="i_ale"]
+[ext_resource type="Resource" path="res://data/consumables/wine.tres" id="i_wine"]
+[ext_resource type="Resource" path="res://data/consumables/spiced_wine.tres" id="i_spiced_wine"]
+[ext_resource type="Resource" path="res://data/consumables/honey_cake.tres" id="i_honey_cake"]
+[ext_resource type="Resource" path="res://data/consumables/apple_pie.tres" id="i_apple_pie"]
+[ext_resource type="Resource" path="res://data/consumables/meat_pie.tres" id="i_meat_pie"]
+[ext_resource type="Resource" path="res://data/consumables/venison_feast.tres" id="i_venison_feast"]
+[ext_resource type="Resource" path="res://data/consumables/cheese_wedge.tres" id="i_cheese_wedge"]
+[ext_resource type="Resource" path="res://data/consumables/smoked_fish.tres" id="i_smoked_fish"]
+[ext_resource type="Resource" path="res://data/consumables/garlic_bread.tres" id="i_garlic_bread"]
+
+[sub_resource type="Resource" id="s0"]
+script = ExtResource("2_l")
+item = ExtResource("i_ale")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[sub_resource type="Resource" id="s1"]
+script = ExtResource("2_l")
+item = ExtResource("i_wine")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[sub_resource type="Resource" id="s2"]
+script = ExtResource("2_l")
+item = ExtResource("i_spiced_wine")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[sub_resource type="Resource" id="s3"]
+script = ExtResource("2_l")
+item = ExtResource("i_honey_cake")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[sub_resource type="Resource" id="s4"]
+script = ExtResource("2_l")
+item = ExtResource("i_apple_pie")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[sub_resource type="Resource" id="s5"]
+script = ExtResource("2_l")
+item = ExtResource("i_meat_pie")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[sub_resource type="Resource" id="s6"]
+script = ExtResource("2_l")
+item = ExtResource("i_venison_feast")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[sub_resource type="Resource" id="s7"]
+script = ExtResource("2_l")
+item = ExtResource("i_cheese_wedge")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[sub_resource type="Resource" id="s8"]
+script = ExtResource("2_l")
+item = ExtResource("i_smoked_fish")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[sub_resource type="Resource" id="s9"]
+script = ExtResource("2_l")
+item = ExtResource("i_garlic_bread")
+min_count = 2
+max_count = 6
+chance = 0.85
+
+[resource]
+script = ExtResource("1_m")
+id = &"festival"
+display_name = "Festival Stall"
+stock = Array[ExtResource("2_l")]([SubResource("s0"), SubResource("s1"), SubResource("s2"), SubResource("s3"), SubResource("s4"), SubResource("s5"), SubResource("s6"), SubResource("s7"), SubResource("s8"), SubResource("s9")])
+restock_days = 1
+gold_min = 200
+gold_max = 400
+buys = PackedStringArray("consumable")
+sell_rate = 0.4
+markup = 1.1

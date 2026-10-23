@@ -103,7 +103,11 @@ func _check_town() -> void:
 	if town != null and town.town != null:
 		var biome := world.get_biome_at(town.position.x, town.position.z)
 		var kind := (town.poi as TownData).display_name.to_lower()
-		show_banner(town.town.display_name, "%s · %s" % [kind.capitalize(), biome.display_name if biome != null else ""])
+		var fest := Festivals.current(world.clock)
+		var sub := "%s · %s" % [kind.capitalize(), biome.display_name if biome != null else ""]
+		if Festivals.keeps(fest, world, town):
+			sub = "%s  ·  %s" % [fest["name"], sub]
+		show_banner(town.town.display_name, sub)
 	elif _last_town != "":
 		var left := world.get_poi(_last_town)
 		if left != null and left.town != null:

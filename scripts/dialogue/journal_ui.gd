@@ -23,6 +23,7 @@ var _search: LineEdit
 var _filters: ItemList
 var _text: RichTextLabel
 var _count: Label
+var _track: Button
 ## "all", "quest" or "topic", and which one
 var _filter_kind := "all"
 var _filter_value := ""
@@ -153,7 +154,8 @@ func _refresh() -> void:
 		return String(quests[a]) < String(quests[b]))
 	for q in qkeys:
 		var done: bool = jobs.has(q) and jobs[q]["status"] == "done"
-		_add_row("   " + String(quests[q]) + ("  (done)" if done else ""), "quest", q)
+		var pin := "  (tracked)" if QuestManager.tracked_id() == q else ""
+		_add_row("   " + String(quests[q]) + ("  (done)" if done else "") + pin, "quest", q)
 	_add_header("Topics")
 	var tkeys := topics.keys()
 	tkeys.sort_custom(func(a: String, b: String) -> bool: return a.to_lower() < b.to_lower())
@@ -163,6 +165,9 @@ func _refresh() -> void:
 		var row: Array = _filter_rows[i]
 		if row[0] == _filter_kind and row[1] == _filter_value:
 			_filters.select(i)
+
+	_track.visible = _filter_kind == "quest"
+	_track.text = "Stop tracking" if _filter_kind == "quest" and QuestManager.tracked_id() == _filter_value else "Track on compass"
 
 	var shown := filter(entries, _search.text, _filter_kind, _filter_value)
 	var job: Dictionary = jobs.get(_filter_value, {}) if _filter_kind == "quest" else {}
@@ -281,6 +286,13 @@ func _build_ui() -> void:
 	_count = Label.new()
 	_count.add_theme_color_override("font_color", GOLD)
 	top.add_child(_count)
+	# Shown when a quest is picked on the left: pin it so the compass points only at it
+	_track = Button.new()
+	_track.focus_mode = Control.FOCUS_NONE
+	_track.pressed.connect(func() -> void:
+		QuestManager.toggle_tracked(_filter_value)
+		_refresh())
+	top.add_child(_track)
 
 	var split := HBoxContainer.new()
 	split.size_flags_vertical = Control.SIZE_EXPAND_FILL

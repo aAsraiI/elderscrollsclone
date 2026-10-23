@@ -169,7 +169,7 @@ func draw_strip(c: Control) -> void:
 				c.draw_string_outline(font, Vector2(mid + x - tw * 0.5, HEIGHT + 12), t.town.display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color.BLACK)
 				c.draw_string(font, Vector2(mid + x - tw * 0.5, HEIGHT + 12), t.town.display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1, 0.92, 0.7))
 		# quest targets
-		for target in QuestManager.active_targets():
+		for target in QuestManager.compass_targets():
 			var pos: Vector2 = target["pos"]
 			var to := Vector3(pos.x - here.x, 0.0, pos.y - here.z)
 			var x := _strip_x(heading, to)
@@ -183,5 +183,20 @@ func draw_strip(c: Control) -> void:
 			var dw := font.get_string_size(dist, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 			c.draw_string_outline(font, Vector2(at.x - dw * 0.5, HEIGHT + 12), dist, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color.BLACK)
 			c.draw_string(font, Vector2(at.x - dw * 0.5, HEIGHT + 12), dist, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.9, 0.4))
+		# your map markers (blue), only when they are ahead; the name shows when you face one
+		for m in MapMarkers.all():
+			var mpos: Vector2 = m["pos"]
+			var mto := Vector3(mpos.x - here.x, 0.0, mpos.y - here.z)
+			var mx := _strip_x(heading, mto)
+			if mx == INF or mto.length() < 5.0:
+				continue
+			var mat := Vector2(mid + mx, HEIGHT * 0.5)
+			c.draw_circle(mat, 5.5, Color.BLACK)
+			c.draw_circle(mat, 4.5, WorldDebugMap.MARKER_COLOR)
+			if absf(mx) < 40.0:
+				var mtext := "%s  %s" % [m["name"], "%dm" % roundi(mto.length()) if mto.length() < 1000.0 else "%.1fkm" % (mto.length() / 1000.0)]
+				var mw := font.get_string_size(mtext, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+				c.draw_string_outline(font, Vector2(mat.x - mw * 0.5, HEIGHT + 24), mtext, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color.BLACK)
+				c.draw_string(font, Vector2(mat.x - mw * 0.5, HEIGHT + 24), mtext, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, WorldDebugMap.MARKER_COLOR.lightened(0.4))
 	# the middle mark
 	c.draw_line(Vector2(mid, 0), Vector2(mid, 6), Color(1.0, 0.85, 0.35), 2.0)

@@ -81,10 +81,25 @@ func _process(delta: float) -> void:
 	if autosave_minutes > 0.0:
 		_autosave_clock += delta
 		if _autosave_clock >= autosave_minutes * 60.0:
-			_autosave_clock = 0.0
-			if can_save() == "":
-				if save_game(AUTOSAVE) and menu != null:
-					menu.show_toast("Autosaved")
+			autosave()
+
+
+## Saves to the autosave slot if saving is possible right now (also called after going through a
+## door and after sleeping). Resets the timer, so a door autosave also counts as the timed one.
+## Off when "Autosave every" is set to Off.
+func autosave() -> void:
+	# Headless runs are the automated tests: never overwrite the player's real autosave
+	if autosave_minutes <= 0.0 or _loading or game_scene != "" or DisplayServer.get_name() == "headless":
+		return
+	_autosave_clock = 0.0
+	if can_save() == "":
+		if save_game(AUTOSAVE) and menu != null:
+			menu.show_toast("Autosaved")
+
+
+## The SaveManager of the running game, or null (tests and the main menu may have none)
+static func of(tree: SceneTree) -> SaveManager:
+	return tree.get_first_node_in_group("save_manager") as SaveManager
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -281,10 +296,23 @@ func new_game(seed_text: String, rules: Dictionary = {}, character: Dictionary =
 
 
 # Reloads the game scene, or switches to it from the main menu
+# The loading screen is drawn first: building the world stops the game for several seconds
 func _start_scene() -> Error:
-	if game_scene != "":
-		return get_tree().change_scene_to_file(game_scene)
-	return get_tree().reload_current_scene()
+	if game_scene != "" and not ResourceLoader.exists(game_scene):
+		return ERR_FILE_NOT_FOUND
+	LoadingScreen.open(get_tree())
+	_switch_scene.call_deferred(get_tree(), game_scene)
+	return OK
+
+
+# Static: this SaveManager is freed by the scene change it starts
+static func _switch_scene(tree: SceneTree, scene: String) -> void:
+	await tree.process_frame
+	await tree.process_frame
+	if scene != "":
+		tree.change_scene_to_file(scene)
+	else:
+		tree.reload_current_scene()
 
 
 ## Everything that goes into a save file

@@ -46,6 +46,8 @@ const TERRAIN_LAYER := 1  # physics layer 1 = world, same as everything else sta
 @export var town_life_enabled := true
 ## Travellers, merchants and road wardens on the roads near the player (RoadLife)
 @export var road_life_enabled := true
+## View distance and shadows follow Settings > Video (on in the real game; tests keep their own world's numbers)
+@export var follow_video_settings := false
 
 var map: WorldMap
 var world_seed := 0
@@ -98,6 +100,10 @@ func _ready() -> void:
 		add_child(sm)
 	if settings == null:
 		settings = WorldSettings.create_default()
+	if follow_video_settings:
+		settings = settings.duplicate() as WorldSettings  # changed below; the .tres stays as it is
+		settings.view_distance_chunks = int(GameSettings.get_value("view_distance"))
+		add_to_group("settings_listener")
 	# A loaded save (or a new game with a chosen seed) decides the seed, see SaveSession
 	world_seed = SaveSession.get_seed(settings.world_seed)
 	_make_material()
@@ -160,6 +166,9 @@ func _ready() -> void:
 		_debug_map = WorldDebugMap.new()
 		_debug_map.name = "WorldDebugMap"
 		add_child(_debug_map)
+	if follow_video_settings:
+		apply_settings()
+	LoadingScreen.close(get_tree())
 	world_ready.emit()
 
 
@@ -533,6 +542,21 @@ func _process(_delta: float) -> void:
 	_dispatch_builds()
 	_finalize_chunks()
 	_rescue_player(pos, center)
+
+
+## Settings > Video changed (only with follow_video_settings): view distance and shadows
+func apply_settings() -> void:
+	var view := int(GameSettings.get_value("view_distance"))
+	if view != settings.view_distance_chunks:
+		settings.view_distance_chunks = view
+		_last_center = Vector2i(1 << 30, 1 << 30)  # the next frame works out which chunks to keep
+	# Fog thick enough at the edge of the view distance to hide chunks appearing
+	if clock != null:
+		clock.set_base_fog(2.5 / (view * settings.chunk_size))
+	var shadows := int(GameSettings.get_value("shadows"))
+	var host: Node = get_parent() if get_parent() != null else self
+	for sun: DirectionalLight3D in host.find_children("*", "DirectionalLight3D", true, false):
+		sun.directional_shadow_max_distance = 200.0 if shadows >= 2 else 60.0
 
 
 func _chunk_of(pos: Vector3) -> Vector2i:

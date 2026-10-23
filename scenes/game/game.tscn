@@ -26,6 +26,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8165417, 0)
 [node name="World" type="Node3D" parent="." unique_id=1672149302]
 script = ExtResource("2_1c2mv")
 settings = ExtResource("3_f7g2b")
+follow_video_settings = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1900001001]
 environment = SubResource("Environment_world")

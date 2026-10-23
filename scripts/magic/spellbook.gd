@@ -19,6 +19,8 @@ var enchantments: Dictionary = {}    # effect id (String) -> true
 var alchemy_known: Dictionary = {}
 ## Favorites: item paths and "spell:<id>"
 var favorites: Array[String] = []
+## Number keys 1-8: slot number (as text, "1".."8") -> a favorite key, set from the Q list
+var quick_slots := {}
 ## Mark spell: [x, y, z] or empty
 var mark: Array = []
 
@@ -170,10 +172,35 @@ func is_favorite(key: String) -> bool:
 func toggle_favorite(key: String) -> void:
 	if favorites.has(key):
 		favorites.erase(key)
+		clear_quick_slot_of(key)
 	else:
 		favorites.append(key)
 	changed.emit()
 
+
+## Puts a favorite on a number key (1-8); the same key twice takes it off again.
+## A favorite sits on one key at a time.
+func set_quick_slot(slot: int, key: String) -> void:
+	var s := str(slot)
+	var was := String(quick_slots.get(s, ""))
+	clear_quick_slot_of(key)
+	if was != key:
+		quick_slots[s] = key
+	changed.emit()
+
+
+func clear_quick_slot_of(key: String) -> void:
+	for s in quick_slots.keys():
+		if quick_slots[s] == key:
+			quick_slots.erase(s)
+
+
+## The number key a favorite sits on, or 0
+func quick_slot_of(key: String) -> int:
+	for s in quick_slots:
+		if quick_slots[s] == key:
+			return int(s)
+	return 0
 
 # ---------------------------------------------------------------- saving
 
@@ -182,7 +209,7 @@ func to_dict() -> Dictionary:
 	for id in spells:
 		list.append((spells[id] as SpellData).to_dict())
 	return {"spells": list, "equipped": equipped_id, "enchantments": enchantments.keys(),
-		"alchemy": alchemy_known.duplicate(true), "favorites": favorites.duplicate(), "mark": mark.duplicate()}
+		"alchemy": alchemy_known.duplicate(true), "favorites": favorites.duplicate(), "quick_slots": quick_slots.duplicate(), "mark": mark.duplicate()}
 
 
 func from_dict(data: Dictionary) -> void:
@@ -201,6 +228,7 @@ func from_dict(data: Dictionary) -> void:
 	favorites.clear()
 	for f in data.get("favorites", []):
 		favorites.append(String(f))
+	quick_slots = (data.get("quick_slots", {}) as Dictionary).duplicate()
 	mark = data.get("mark", [])
 	equipped_id = ""
 	var eq := String(data.get("equipped", ""))

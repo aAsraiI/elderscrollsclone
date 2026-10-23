@@ -35,7 +35,19 @@ const DEFAULTS := {
 	"sfx_volume": 0.8,
 	"tutorial": true,
 	"controller_look": 3.0,
+	"graphics_preset": 3,  # 0 custom, 1 low, 2 medium, 3 high, 4 ultra (see PRESETS)
+	"view_distance": 10,  # terrain chunks drawn around you (64 m each)
+	"shadows": 2,  # 0 off, 1 near only, 2 full
 }
+
+## Graphics quality presets (Settings > Video): what each one sets. High is the default look.
+const PRESETS := {
+	1: {"render_scale": 0.75, "grass": 0, "view_distance": 6, "shadows": 0},
+	2: {"render_scale": 1.0, "grass": 1, "view_distance": 8, "shadows": 1},
+	3: {"render_scale": 1.0, "grass": 2, "view_distance": 10, "shadows": 2},
+	4: {"render_scale": 1.0, "grass": 3, "view_distance": 14, "shadows": 2},
+}
+const PRESET_KEYS := ["render_scale", "grass", "view_distance", "shadows"]
 
 ## How the Settings screen shows each option. kind: slider / check / choice.
 ## For sliders: min, max, step, and fmt (how the value is printed).
@@ -54,11 +66,14 @@ const OPTIONS := [
 	{"tab": "Interface", "key": "tutorial", "label": "Tutorial hints", "kind": "check"},
 	{"tab": "Gameplay", "key": "controller_look", "label": "Controller look speed", "kind": "slider", "min": 1.0, "max": 6.0, "step": 0.25, "fmt": "%.2f"},
 	{"tab": "Interface", "key": "show_fps", "label": "FPS counter", "kind": "check"},
+	{"tab": "Video", "key": "graphics_preset", "label": "Graphics quality", "kind": "choice", "choices": ["Custom", "Low", "Medium", "High", "Ultra"]},
 	{"tab": "Video", "key": "window_mode", "label": "Window", "kind": "choice", "choices": ["Windowed", "Borderless fullscreen", "Fullscreen"]},
 	{"tab": "Video", "key": "vsync", "label": "V-Sync", "kind": "check"},
 	{"tab": "Video", "key": "max_fps", "label": "Frame limit", "kind": "choice", "choices": ["Unlimited", "30", "60", "120", "144"], "values": [0, 30, 60, 120, 144]},
 	{"tab": "Video", "key": "render_scale", "label": "Render scale", "kind": "slider", "min": 0.5, "max": 1.0, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
 	{"tab": "Video", "key": "grass", "label": "Grass and flowers", "kind": "choice", "choices": ["Off", "Low", "Medium", "High"]},
+	{"tab": "Video", "key": "view_distance", "label": "View distance", "kind": "slider", "min": 4.0, "max": 16.0, "step": 1.0, "fmt": "%d m", "scale": 64.0},
+	{"tab": "Video", "key": "shadows", "label": "Shadows", "kind": "choice", "choices": ["Off", "Near only", "Full"]},
 	{"tab": "Video", "key": "weather_effects", "label": "Rain and snow", "kind": "check"},
 	{"tab": "Audio", "key": "master_volume", "label": "Master volume", "kind": "slider", "min": 0.0, "max": 1.0, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
 	{"tab": "Audio", "key": "music_volume", "label": "Music", "kind": "slider", "min": 0.0, "max": 1.0, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
@@ -78,6 +93,10 @@ static func set_value(key: String, value: Variant, tree: SceneTree = null) -> vo
 	_ensure_loaded()
 	if key == "difficulty":
 		GameRules.set_rule("difficulty", int(value))  # the game being played changes with it
+	if key == "graphics_preset" and PRESETS.has(int(value)):
+		_values.merge(PRESETS[int(value)], true)  # a preset fills in the options it covers
+	elif PRESET_KEYS.has(key) and value != get_value(key):
+		_values["graphics_preset"] = 0  # changed one by hand: Custom
 	_values[key] = value
 	save()
 	if tree == null:

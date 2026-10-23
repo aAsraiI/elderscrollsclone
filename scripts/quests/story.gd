@@ -44,7 +44,7 @@ static func target() -> Dictionary:
 	var s := state()
 	if s.is_empty() or int(s.get("stage", 0)) <= 0 or int(s.get("stage", 0)) >= 6 or not s.has("pos"):
 		return {}
-	return {"pos": Vector2(float(s["pos"][0]), float(s["pos"][1])), "name": NAME}
+	return {"pos": Vector2(float(s["pos"][0]), float(s["pos"][1])), "name": NAME, "id": ID}
 
 
 func _process(delta: float) -> void:

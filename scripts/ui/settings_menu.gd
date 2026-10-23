@@ -196,7 +196,8 @@ func _add_option(grid: GridContainer, o: Dictionary) -> void:
 			ob.custom_minimum_size = Vector2(220, 0)
 			ob.item_selected.connect(func(i: int) -> void:
 				var values: Array = o.get("values", [])
-				GameSettings.set_value(key, values[i] if i < values.size() else i, get_tree()))
+				GameSettings.set_value(key, values[i] if i < values.size() else i, get_tree())
+				_sync_if_preset(key))
 			grid.add_child(ob)
 			_controls[key] = ob
 		_:
@@ -215,7 +216,8 @@ func _add_option(grid: GridContainer, o: Dictionary) -> void:
 			slider.value_changed.connect(func(v: float) -> void:
 				value.text = _format(o, v)
 				if _open:
-					GameSettings.set_value(key, v, get_tree()))
+					GameSettings.set_value(key, v, get_tree())
+					_sync_if_preset(key))
 			grid.add_child(row)
 			_controls[key] = slider
 
@@ -224,6 +226,12 @@ func _format(o: Dictionary, v: float) -> String:
 	if v == 0.0 and o.has("zero"):
 		return o["zero"]
 	return String(o["fmt"]) % (v * float(o.get("scale", 1.0)))
+
+
+# A preset changes several rows, and changing one of them by hand sets the preset to Custom
+func _sync_if_preset(key: String) -> void:
+	if key == "graphics_preset" or GameSettings.PRESET_KEYS.has(key):
+		_sync_controls.call_deferred()
 
 
 # Shows the stored values (after opening, or after Reset)

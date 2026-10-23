@@ -24,7 +24,7 @@ const CATEGORIES := [
 	{"name": "Materials", "types": [ItemData.ItemType.MATERIAL, ItemData.ItemType.SOUL_GEM, ItemData.ItemType.TOOL]},
 	{"name": "Misc", "types": [ItemData.ItemType.MISC, ItemData.ItemType.KEY]},
 ]
-const COLUMN_TITLES := ["", "Name", "Wt", "Value"]
+const COLUMN_TITLES := ["", "Name", "Wt", "Value", "Val/Wt"]
 const GOOD := Color(0.5, 0.85, 0.5)
 const BAD := Color(0.9, 0.45, 0.4)
 
@@ -188,7 +188,7 @@ func _build_ui() -> void:
 	_tree = Tree.new()
 	_tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tree.size_flags_stretch_ratio = 1.5
-	_tree.columns = 4
+	_tree.columns = 5
 	_tree.hide_root = true
 	_tree.hide_folding = true
 	_tree.column_titles_visible = true
@@ -200,6 +200,8 @@ func _build_ui() -> void:
 	_tree.set_column_custom_minimum_width(2, 60)
 	_tree.set_column_expand(3, false)
 	_tree.set_column_custom_minimum_width(3, 64)
+	_tree.set_column_expand(4, false)
+	_tree.set_column_custom_minimum_width(4, 70)
 	_tree.item_selected.connect(_update_details)
 	_tree.item_activated.connect(_activate_selected)  # Enter or double-click
 	_tree.column_title_clicked.connect(_on_column_clicked)
@@ -352,9 +354,11 @@ func _refresh() -> void:
 		row.set_custom_color(1, ItemCatalog.rarity_color(item, player_level))
 		row.set_text(2, "%.1f" % item.weight)
 		row.set_text(3, str(item.value))
+		row.set_text(4, _value_per_weight_text(item))
 		row.set_text_alignment(0, HORIZONTAL_ALIGNMENT_CENTER)
 		row.set_text_alignment(2, HORIZONTAL_ALIGNMENT_RIGHT)
 		row.set_text_alignment(3, HORIZONTAL_ALIGNMENT_RIGHT)
+		row.set_text_alignment(4, HORIZONTAL_ALIGNMENT_RIGHT)
 		if first_row == null:
 			first_row = row
 		if item == keep and keep_row == null:
@@ -383,12 +387,25 @@ func _sort_less(a, b) -> bool:
 		3:
 			va = ia.value
 			vb = ib.value
+		4:
+			va = _value_per_weight(ia)
+			vb = _value_per_weight(ib)
 		_:
 			va = ia.display_name.to_lower()
 			vb = ib.display_name.to_lower()
 	if va == vb:
 		return ia.display_name.to_lower() < ib.display_name.to_lower()
 	return (va > vb) if _sort_desc else (va < vb)
+
+
+# Gold per unit of weight: what's worth carrying when you're over-encumbered (weightless = best)
+static func _value_per_weight(item: ItemData) -> float:
+	return float(item.value) / item.weight if item.weight > 0.0 else INF
+
+
+static func _value_per_weight_text(item: ItemData) -> String:
+	var v := _value_per_weight(item)
+	return "-" if is_inf(v) else ("%.1f" % v if v < 10.0 else str(roundi(v)))
 
 
 func _on_column_clicked(column: int, _mouse_button: int) -> void:

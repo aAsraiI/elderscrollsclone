@@ -143,6 +143,8 @@ func enter(entrance_id: String, return_position: Vector3, return_yaw: float) -> 
 	var ok := _open(entrance_id, return_position, return_yaw, true)
 	await _fade_to(0.0)
 	_busy = false
+	if ok:
+		_autosave()
 	return ok
 
 
@@ -175,6 +177,14 @@ func exit() -> void:
 	exited.emit(left)
 	await _fade_to(0.0)
 	_busy = false
+	_autosave()
+
+
+# Going through a door is a safe moment to keep: the autosave slot is updated (Settings can turn it off)
+func _autosave() -> void:
+	var sm := SaveManager.of(get_tree()) if is_inside_tree() else null
+	if sm != null:
+		sm.autosave()
 
 
 # ---------------------------------------------------------------- internals

@@ -88,18 +88,44 @@ static func active_for(faction: String) -> Dictionary:
 
 
 ## Active jobs' targets for the map: [{"pos": Vector2 (x, z), "name"}]
+## Where active quests send you: [{"pos": Vector2, "name", "id"}] (guild jobs, the story, the book)
 static func active_targets() -> Array:
 	var out: Array = []
 	if not bool(GameRules.get_rule("quest_markers")):
 		return out
 	for q: Dictionary in all_quests():
 		if q["status"] == "active":
-			out.append({"pos": Vector2(float(q["pos"][0]), float(q["pos"][1])), "name": String(q["name"])})
+			out.append({"pos": Vector2(float(q["pos"][0]), float(q["pos"][1])), "name": String(q["name"]), "id": String(q["id"])})
 	var st := Story.target()
 	if not st.is_empty():
 		out.append(st)
 	out.append_array(QuestBook.targets())
 	return out
+
+
+# ---------------------------------------------------------------- the tracked quest
+
+const TRACKED := "tracked_quest"
+
+
+## The quest pinned from the journal ("" = none): the compass then shows only its target
+static func tracked_id() -> String:
+	return String(WorldState.get_record(TRACKED).get("id", ""))
+
+
+## Pins a quest to the compass, or unpins it if it is already the pinned one
+static func toggle_tracked(id: String) -> void:
+	WorldState.set_record(TRACKED, {"id": "" if tracked_id() == id else id})
+
+
+## What the compass shows: the tracked quest's targets if it has any right now, else all of them
+static func compass_targets() -> Array:
+	var all := active_targets()
+	var id := tracked_id()
+	if id == "":
+		return all
+	var mine := all.filter(func(t: Dictionary) -> bool: return String(t.get("id", "")) == id)
+	return mine if not mine.is_empty() else all
 
 
 # ---------------------------------------------------------------- making a job

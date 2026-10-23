@@ -151,6 +151,13 @@ func from_dict(data: Dictionary) -> void:
 
 
 ## Puts the sun, sky and ambient light where the current time says
+## The fog thickness on a clear day (weather and night scale it from here); WorldManager sets it
+## from the view distance
+func set_base_fog(density: float) -> void:
+	_base_fog = density
+	apply_now()
+
+
 func apply_now() -> void:
 	if not control_environment or not is_inside_tree():
 		return
@@ -169,7 +176,7 @@ func apply_now() -> void:
 		_sun.light_energy = day_factor * w.get("sun", 1.0)
 		# Warm light when the sun is low
 		_sun.light_color = Color(1.0, 0.62, 0.38).lerp(Color(1.0, 0.97, 0.9), clampf(elevation / 35.0, 0.0, 1.0))
-		_sun.shadow_enabled = day_factor * float(w.get("sun", 1.0)) > 0.08
+		_sun.shadow_enabled = day_factor * float(w.get("sun", 1.0)) > 0.08 and int(GameSettings.get_value("shadows")) > 0
 	if _env != null and not _in_dungeon():
 		_env.background_energy_multiplier = lerpf(NIGHT_SKY, 1.0, day_factor) * float(w.get("sky", 1.0))
 		_env.ambient_light_energy = lerpf(NIGHT_AMBIENT, 1.0, day_factor) * float(w.get("ambient", 1.0)) + float(w.get("flash", 0.0))

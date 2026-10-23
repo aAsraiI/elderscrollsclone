@@ -7,7 +7,8 @@ extends CanvasLayer
 ##   drag / WASD / arrows   move around
 ##   C                      back to where you are
 ##   hover                  names of towns, places and quest targets
-##   right click            (debug builds only) teleport there
+##   right click            put a marker there and name it (on a marker: remove it)
+##   Ctrl + right click     (debug builds only) teleport there
 ## Shows the land (biome colors shaded by height), water, roads, towns, places, active quest
 ## targets (gold diamonds) and you (the yellow arrow).
 
@@ -20,8 +21,10 @@ const BASE_RESOLUTION := 768
 const DETAIL_RESOLUTION := 640
 const MAX_ZOOM := 16.0
 const PAN_SPEED := 600.0  # screen pixels per second
+## Your own map markers (blue on the map and on the compass)
+const MARKER_COLOR := Color(0.35, 0.65, 1.0)
 
-## Right click teleports (debug builds only, e.g. playing from the editor)
+## Ctrl + right click teleports (debug builds only, e.g. playing from the editor)
 @export var teleport_enabled := true
 
 
@@ -44,6 +47,7 @@ var _view: MapView
 var _title: Label
 var _status: Label
 var _tooltip: Label
+var _naming: LineEdit  # the name box of a marker just placed
 var _open := false
 var _was_paused := false
 var _was_mouse := Input.MOUSE_MODE_CAPTURED
@@ -114,6 +118,7 @@ func close() -> void:
 	if not _open:
 		return
 	_open = false
+	_close_naming()
 	_root.visible = false
 	_dragging = false
 	if not _was_paused:
@@ -176,6 +181,12 @@ func _unhandled_input(event: InputEvent) -> void:
 func _input(event: InputEvent) -> void:
 	if not _open:
 		return
+	if _naming != null:
+		# Typing a marker's name: the keys belong to the name box; Esc just closes the box
+		if event.is_action_pressed("ui_cancel"):
+			_close_naming()
+			get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("ui_cancel"):
 		close()
 		get_viewport().set_input_as_handled()
@@ -205,8 +216,10 @@ func map_input(event: InputEvent) -> void:
 				_dragging = mb.pressed
 				_drag_moved = 0.0
 			MOUSE_BUTTON_RIGHT:
-				if mb.pressed and can_teleport():
+				if mb.pressed and mb.ctrl_pressed and can_teleport():
 					teleport_to(screen_to_world(mb.position))
+				elif mb.pressed:
+					_marker_click(mb.position)
 	elif event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
 		_mouse = mm.position
@@ -247,7 +260,7 @@ func _process(delta: float) -> void:
 		pan.y -= 1.0
 	if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN):
 		pan.y += 1.0
-	if pan != Vector2.ZERO:
+	if pan != Vector2.ZERO and _naming == null:  # not while typing a marker name
 		_center += pan * PAN_SPEED * delta / _scale()
 		_clamp_view()
 		_request_detail()
@@ -476,6 +489,13 @@ func draw_map(canvas: Control) -> void:
 		canvas.draw_polyline(PackedVector2Array([diamond[0], diamond[1], diamond[2], diamond[3], diamond[0]]), Color.BLACK, 1.5)
 		canvas.draw_string_outline(font, qat + Vector2(11, -6), String(target["name"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4, Color.BLACK)
 		canvas.draw_string(font, qat + Vector2(11, -6), String(target["name"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1.0, 0.9, 0.4))
+	# your own markers: blue pins
+	for m in MapMarkers.all():
+		var mat := world_to_screen(m["pos"] as Vector2)
+		canvas.draw_circle(mat, 6.5, Color.BLACK)
+		canvas.draw_circle(mat, 5.0, MARKER_COLOR)
+		canvas.draw_string_outline(font, mat + Vector2(10, -6), String(m["name"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4, Color.BLACK)
+		canvas.draw_string(font, mat + Vector2(10, -6), String(m["name"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, MARKER_COLOR.lightened(0.4))
 	# you
 	var p := _manager.player
 	if p != null and is_instance_valid(p):
@@ -521,6 +541,11 @@ func _cache_roads() -> void:
 func hover_name(at: Vector2) -> String:
 	var best := ""
 	var best_d := 14.0
+	for m in MapMarkers.all():
+		var md := world_to_screen(m["pos"] as Vector2).distance_to(at)
+		if md < best_d:
+			best_d = md
+			best = "%s\nright click to remove" % m["name"]
 	for target in QuestManager.active_targets():
 		var d := world_to_screen(target["pos"] as Vector2).distance_to(at)
 		if d < best_d:
@@ -559,6 +584,53 @@ func place_at(at: Vector2) -> PlacedPOI:
 
 
 ## Clicking a found place asks first; clicking it again travels there
+# ---------------------------------------------------------------- your markers
+
+# Right click: on a marker removes it, anywhere else puts a new one there and asks for its name
+func _marker_click(at: Vector2) -> void:
+	var hit := _marker_at(at)
+	if hit >= 0:
+		MapMarkers.remove(hit)
+		_close_naming()
+		_view.queue_redraw()
+		return
+	var i := MapMarkers.add(screen_to_world(at), "Marker %d" % (MapMarkers.all().size() + 1))
+	_open_naming(i, at)
+	_view.queue_redraw()
+
+
+# Index of the marker under `at` (view pixels), or -1
+func _marker_at(at: Vector2) -> int:
+	var markers := MapMarkers.all()
+	for i in markers.size():
+		if world_to_screen(markers[i]["pos"] as Vector2).distance_to(at) < 12.0:
+			return i
+	return -1
+
+
+# A small text box by the new marker: type a name, Enter keeps it (Esc keeps "Marker N")
+func _open_naming(index: int, at: Vector2) -> void:
+	_close_naming()
+	_naming = LineEdit.new()
+	_naming.placeholder_text = "Name this marker"
+	_naming.text = String(MapMarkers.all()[index]["name"])
+	_naming.select_all_on_focus = true
+	_naming.custom_minimum_size = Vector2(180, 0)
+	_naming.position = _view.position + at + Vector2(14, -12)
+	_naming.text_submitted.connect(func(t: String) -> void:
+		MapMarkers.rename(index, t)
+		_close_naming()
+		_view.queue_redraw())
+	_root.add_child(_naming)
+	_naming.grab_focus()
+
+
+func _close_naming() -> void:
+	if _naming != null and is_instance_valid(_naming):
+		_naming.queue_free()
+	_naming = null
+
+
 func click_place(at: Vector2) -> void:
 	var poi := place_at(at)
 	var disc := _manager.discovery
@@ -598,7 +670,7 @@ func _update_text() -> void:
 		_status.text = _notice
 		return
 	_pending_travel = ""
-	_status.text = "[Click a found place] Fast travel   [Wheel / + -] Zoom   [Drag / WASD] Move   [C] Center on me   [M / Esc] Close" + ("   [Right click] Teleport (debug)" if can_teleport() else "")
+	_status.text = "[Click a found place] Fast travel   [Right click] Marker   [Wheel / + -] Zoom   [Drag / WASD] Move   [C] Center on me   [M / Esc] Close" + ("   [Ctrl + right click] Teleport (debug)" if can_teleport() else "")
 
 
 # ---------------------------------------------------------------- building

@@ -825,7 +825,7 @@ static func targets() -> Array:
 	for id in ids():
 		var st := state(id)
 		if String(st.get("status", "")) == "active" and st.has("pos"):
-			out.append({"pos": Vector2(float(st["pos"][0]), float(st["pos"][1])), "name": String(_defs[id]["name"])})
+			out.append({"pos": Vector2(float(st["pos"][0]), float(st["pos"][1])), "name": String(_defs[id]["name"]), "id": id})
 	return out
 
 

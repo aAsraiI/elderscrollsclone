@@ -332,6 +332,17 @@ func _on_died() -> void:
 		load_b.text = "Load Last Save"
 		load_b.pressed.connect(func() -> void: sm.load_game(last))
 		buttons.add_child(load_b)
+		# Any other save: the death screen steps aside for the save list, and comes back if it's closed
+		if sm.menu != null:
+			var pick_b := Button.new()
+			pick_b.text = "Load Game..."
+			pick_b.pressed.connect(func() -> void:
+				layer.visible = false
+				sm.menu.closed.connect(func() -> void: layer.visible = true, CONNECT_ONE_SHOT)
+				sm.menu.open_menu("", true))
+			buttons.add_child(pick_b)
+			buttons.offset_left = -280
+			buttons.offset_right = 280
 	var menu_b := Button.new()
 	menu_b.text = "Main Menu"
 	menu_b.pressed.connect(func() -> void: SaveManager.go_to_main_menu(get_tree()))

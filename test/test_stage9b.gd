@@ -73,7 +73,8 @@ func t_world() -> void:
 	await frames(40)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var player := get_first_node_in_group("player") as CharacterBody3D
-	check("the game builds the realm", wm != null and wm.settings.resource_path.ends_with("realm_world.tres") and player != null)
+	# The game works on a copy of realm_world.tres (Settings > Video changes its view distance), so check what makes it the realm
+	check("the game builds the realm", wm != null and wm.settings.named_settlements and is_equal_approx(wm.settings.cell_size, 1000.0) and player != null)
 	if wm == null or player == null:
 		return
 	check("the realm has dozens of towns", wm.towns.size() >= 25, str(wm.towns.size()))

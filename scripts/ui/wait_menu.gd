@@ -103,6 +103,15 @@ func _build() -> void:
 	v.add_child(_slider)
 	_label = Label.new()
 	v.add_child(_label)
+	# Pick a time of day instead of counting hours: the slider jumps to the hours until then
+	var times := HBoxContainer.new()
+	v.add_child(times)
+	for t in [["Dawn", 6.0], ["Noon", 12.0], ["Dusk", 19.0], ["Midnight", 0.0]]:
+		var b := Button.new()
+		b.text = t[0]
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.pressed.connect(_until.bind(float(t[1])))
+		times.add_child(b)
 	var row := HBoxContainer.new()
 	v.add_child(row)
 	var go := Button.new()
@@ -127,6 +136,15 @@ func open_sleep(bed: RestSpot) -> void:
 	_bed = bed
 	_slider.value = 8
 	_set_open(true)
+
+
+## Sets the slider to the whole hours until the next `hour` o'clock (a full day if it's that hour now)
+func _until(hour: float) -> void:
+	var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
+	if clock == null:
+		return
+	var h := ceili(fposmod(hour - clock.hour, 24.0))
+	_slider.value = h if h > 0 else 24
 
 
 func _update_label(hours: float) -> void:
@@ -169,5 +187,8 @@ func _wait() -> void:
 			magic.apply_list([{"id": &"well_rested", "mag": 10, "dur": 480.0}], null, "Well Rested", "potion")
 		Locks.toast(get_tree(), "You slept %d hours and feel rested." % int(hours))
 		_bed = null
+		var sm := SaveManager.of(get_tree())
+		if sm != null:
+			sm.autosave()
 		return
 	Locks.toast(get_tree(), "You waited %d hour%s. %s" % [int(hours), "" if hours == 1.0 else "s", clock.get_time_text()])

@@ -17,7 +17,7 @@ func _process(delta: float) -> void:
 	if host == null:
 		return
 	var seen := {}
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(host.global_position, radius):
 		var e := n as Enemy
 		if e == null or e.is_dead() or e.global_position.distance_to(host.global_position) > radius:
 			continue

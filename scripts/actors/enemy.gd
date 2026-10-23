@@ -234,8 +234,19 @@ static func spawn(parent: Node, pos: Vector3, weapon: ItemData = null, off_hand:
 	return e
 
 
+# ActorRegistry holds exactly the living actors that are in the scene (the "enemies" group)
+func _enter_tree() -> void:
+	if is_in_group("enemies"):
+		ActorRegistry.add(self)
+
+
+func _exit_tree() -> void:
+	ActorRegistry.remove(self)
+
+
 func _ready() -> void:
 	add_to_group("enemies")
+	ActorRegistry.add(self)
 	if persist_mode == PersistMode.ALWAYS:
 		add_to_group("persistent")  # SaveManager saves everything in this group (corpses included)
 	collision_layer = ENEMY_LAYER
@@ -1120,7 +1131,7 @@ func frenzy(seconds: float) -> void:
 func _tick_frenzy() -> void:
 	var best: Node3D = null
 	var best_d := 18.0
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(global_position, 18.0):
 		var e := n as Enemy
 		if e == null or e == self or e.is_dead():
 			continue
@@ -1211,6 +1222,7 @@ func reanimate(leader: Node3D, seconds: float) -> void:
 	display_name = "Risen " + display_name.trim_prefix("Risen ")
 	placeholder_color = placeholder_color.lerp(Color(0.4, 0.45, 0.4), 0.5)
 	add_to_group("enemies")
+	ActorRegistry.add(self)
 	remove_from_group("persistent")
 	persist_mode = PersistMode.NEVER
 	set_physics_process(true)
@@ -1260,7 +1272,7 @@ func _circle(to_target: Vector3, dist: float, delta: float) -> void:
 # Only a couple of enemies swing at the same time; the others circle and wait their turn
 func _attack_slot_free() -> bool:
 	var committed := 0
-	for e in get_tree().get_nodes_in_group("enemies"):
+	for e in ActorRegistry.near(global_position, 30.0):
 		var other := e as Enemy
 		if other != null and other != self and other.is_attack_committed():
 			committed += 1
@@ -1450,6 +1462,7 @@ func _on_died() -> void:
 		return
 	_enter_state(State.DEAD)
 	remove_from_group("enemies")
+	ActorRegistry.remove(self)
 	if persist_mode == PersistMode.CORPSE_ONLY:
 		add_to_group("persistent")  # its corpse (and what is still in it) is saved
 	if spawn_key != "":

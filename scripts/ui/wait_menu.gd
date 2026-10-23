@@ -55,7 +55,7 @@ func _cant_wait() -> String:
 	if aff != null and aff.blocks_rest():
 		return "The beast will not rest"
 	var player := get_parent() as Node3D
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(player.global_position, 40.0):
 		var e := n as Enemy
 		if e != null and e.disposition == Enemy.Disposition.HOSTILE and e.is_alerted() \
 				and e.global_position.distance_to(player.global_position) < 40.0:

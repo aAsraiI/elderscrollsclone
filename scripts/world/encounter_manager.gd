@@ -190,7 +190,7 @@ func _player_level() -> int:
 
 
 func _fight_nearby(pos: Vector3) -> bool:
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.all():
 		var e := n as Enemy
 		if e == null or e.is_dead():
 			continue

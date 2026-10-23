@@ -218,7 +218,7 @@ func _tick_ritual(p: Node3D, s: Dictionary) -> void:
 		Locks.toast(get_tree(), "Chanting rises from the ruins...", true)
 	if _spawned:
 		var boss_alive := false
-		for n in get_tree().get_nodes_in_group("enemies"):
+		for n in ActorRegistry.all():
 			if n is Enemy and (n as Enemy).has_meta("hierophant") and not (n as Enemy).is_dead():
 				boss_alive = true
 		if not boss_alive and d < 200.0:

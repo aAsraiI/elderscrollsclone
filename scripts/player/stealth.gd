@@ -203,7 +203,7 @@ func update_awareness(dt: float) -> void:
 	var noise := noise_radius()
 	var seen_ids := {}
 	var watched_unseen := false
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(_player.global_position, RANGE):
 		var e := n as Enemy
 		if e == null or e.is_dead() or not e.is_inside_tree():
 			continue

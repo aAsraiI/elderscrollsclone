@@ -64,7 +64,7 @@ func _watch() -> void:
 	var stats := _player.get_node_or_null("Stats") as Stats
 	if stats != null and stats.health < stats.get_stat("max_health") * 0.4:
 		hint("low_health", "You are badly hurt. Press H to drink a health potion, or eat food from the inventory.")
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(_player.global_position, 20.0):
 		var e := n as Enemy
 		if e != null and e.disposition == Enemy.Disposition.HOSTILE and e.is_alerted() and e.global_position.distance_to(_player.global_position) < 20.0:
 			hint("combat", "Left click attacks (hold for a heavy blow). With a shield, hold right click to block and raise it just before a hit to parry. A glowing enemy is about to strike.")

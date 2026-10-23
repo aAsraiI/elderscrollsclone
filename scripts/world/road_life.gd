@@ -186,7 +186,7 @@ func _defend() -> void:
 			var w := member as Enemy
 			if not is_instance_valid(w) or w.is_dead() or w.state == Enemy.State.CHASE or w.state == Enemy.State.ATTACK:
 				continue
-			for n in get_tree().get_nodes_in_group("enemies"):
+			for n in ActorRegistry.near(w.global_position, 30.0):
 				var foe := n as Enemy
 				if foe != null and not foe.is_dead() and foe.disposition == Enemy.Disposition.HOSTILE and not foe.has_meta("npc_id") \
 						and foe.global_position.distance_to(w.global_position) < 30.0:

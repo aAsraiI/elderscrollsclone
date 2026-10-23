@@ -64,7 +64,7 @@ func _pick_foe() -> Enemy:
 		return current
 	var best: Enemy = null
 	var best_d := SEARCH_RADIUS
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(leader.global_position, SEARCH_RADIUS):
 		var e := n as Enemy
 		if e == null or e == _body or e.is_dead() or e.has_meta("player_ally"):
 			continue

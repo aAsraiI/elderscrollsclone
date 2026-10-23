@@ -38,3 +38,8 @@ static func from_path(path: String) -> ItemData:
 	if cut < 0:
 		return get_item(rest)
 	return get_item(rest.substr(0, cut), rest.substr(cut + 1))
+
+
+## Forgets every quest item made so far (GameState.reset)
+static func clear() -> void:
+	_items.clear()

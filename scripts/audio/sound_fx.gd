@@ -146,7 +146,7 @@ func _update_mood() -> void:
 	var dm := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
 	if dm != null and dm.is_inside() and not dm.is_in_building():
 		mood = "dungeon"
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(_player.global_position, 35.0):
 		var e := n as Enemy
 		if e != null and e.disposition == Enemy.Disposition.HOSTILE and e.is_alerted() and not e.is_dead() \
 				and e.global_position.distance_to(_player.global_position) < 35.0:

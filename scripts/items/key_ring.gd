@@ -40,3 +40,8 @@ static func from_path(path: String) -> ItemData:
 	if cut < 0:
 		return get_key(rest)
 	return get_key(rest.substr(0, cut), rest.substr(cut + 1))
+
+
+## Forgets every key made so far (GameState.reset)
+static func clear() -> void:
+	_keys.clear()

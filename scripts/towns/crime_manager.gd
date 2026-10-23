@@ -161,7 +161,7 @@ func witnesses(exclude: Node = null) -> Array[Enemy]:
 	if p == null:
 		return out
 	var stealth := p.get_node_or_null("Stealth") as Stealth
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(p.global_position, 40.0):
 		var e := n as Enemy
 		if e == null or e == exclude or e.is_dead() or e.disposition == Enemy.Disposition.HOSTILE or e.get_meta("asleep", false):
 			continue
@@ -350,7 +350,7 @@ func _defend_town(p: Node3D) -> void:
 	var guards := _guards(town)
 	if guards.is_empty():
 		return
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.all():
 		var e := n as Enemy
 		if e == null or e.is_dead() or e.disposition != Enemy.Disposition.HOSTILE or e.has_meta("npc_id"):
 			continue

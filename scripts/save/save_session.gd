@@ -43,6 +43,7 @@ static func get_start_position() -> Vector3:
 
 
 static func begin_load(data: Dictionary, slot: String) -> void:
+	GameState.reset()
 	pending = data
 	current_slot = slot
 	playtime = float(data.get("playtime", 0.0))
@@ -57,7 +58,6 @@ static func begin_load(data: Dictionary, slot: String) -> void:
 	GameSettings.get_value("difficulty")
 	GameSettings._values["difficulty"] = int(GameRules.get_rule("difficulty"))  # the Settings screen shows this game's
 	CharacterSetup.pending = (data.get("player", {}) as Dictionary).get("character", {})
-	CraftedItems.clear_cache()
 
 
 ## use_default = true plays the default world from WorldSettings
@@ -68,10 +68,7 @@ static func begin_new_game(seed_value: int, use_default: bool) -> void:
 	_has_seed = not use_default
 	_seed = seed_value
 	_has_start = false
-	WorldState.clear()
-	GameRules.reset()
-	CharacterSetup.pending = {}
-	CraftedItems.clear_cache()
+	GameState.reset()
 
 
 ## "12345" becomes 12345, any other text is turned into a number the same way every time

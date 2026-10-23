@@ -39,6 +39,11 @@ static func learn(topic: String) -> bool:
 
 # ---------------------------------------------------------------- disposition
 
+## Forgets the disposition changes of passing strangers (GameState.reset)
+static func clear_temp() -> void:
+	_temp_disp.clear()
+
+
 static func get_disposition(npc_id: String, base: int) -> int:
 	var delta := 0
 	if npc_id == "":

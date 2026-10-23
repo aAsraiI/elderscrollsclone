@@ -272,7 +272,7 @@ func _in_sunlight() -> bool:
 func _raise_alarm(shout: String) -> void:
 	_alarm_cd = 2.0
 	var any := false
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(_player.global_position, 18.0):
 		var e := n as Enemy
 		if e == null or e.is_dead() or e.has_meta("player_ally") or e.disposition == Enemy.Disposition.HOSTILE:
 			continue
@@ -404,7 +404,7 @@ func feed(target: Object, bottle: bool) -> bool:
 
 # Feeding on a sleeper is an assault if anyone awake sees it
 func _witnessed(victim: Enemy) -> void:
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in ActorRegistry.near(_player.global_position, 12.0):
 		var e := n as Enemy
 		if e == null or e == victim or e.is_dead() or e.has_meta("asleep") or e.disposition == Enemy.Disposition.HOSTILE:
 			continue

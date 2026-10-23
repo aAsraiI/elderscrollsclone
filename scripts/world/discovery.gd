@@ -104,7 +104,7 @@ func can_travel_to(poi: PlacedPOI) -> String:
 		return "Fast travel is off in this world. Take a carriage from a city gate, or ride."
 	if p.has_meta("beast_form"):
 		return "The beast can't travel."
-	for e in get_tree().get_nodes_in_group("enemies"):
+	for e in ActorRegistry.near(p.global_position, DANGER_RADIUS):
 		var en := e as Enemy
 		if en != null and is_instance_valid(en) and not en.is_dead() and en.disposition == Enemy.Disposition.HOSTILE and en.global_position.distance_to(p.global_position) < DANGER_RADIUS:
 			return "You can't fast travel with enemies nearby."

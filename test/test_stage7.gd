@@ -321,11 +321,8 @@ func t_world() -> void:
 		var t := wm.towns[0]
 		dmap._center = Vector2(t.position.x, t.position.z)
 		check("hovering a town names it", dmap.hover_name(dmap.world_to_screen(Vector2(t.position.x, t.position.z))).begins_with(t.town.display_name))
-		var waited := 0
-		while dmap._base_tex == null and waited < 4000:
-			await process_frame
-			waited += 1
-		check("the map picture is drawn", dmap._base_tex != null, "%d frames" % waited)
+		dmap._cache_roads()
+		check("the map has the roads to draw", not dmap._road_lines.is_empty())
 		var target := Vector2(t.position.x + 40.0, t.position.z)
 		check("teleporting is a debug feature", dmap.can_teleport() == OS.is_debug_build())
 		dmap.teleport_to(target)

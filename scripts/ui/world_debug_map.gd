@@ -3,22 +3,20 @@ extends CanvasLayer
 ## The world map. Press M to open and close it (Esc closes it too). Created by WorldManager.
 ## The game is paused while it is open.
 ##
-##   mouse wheel / + -      zoom in and out (toward the mouse); zoomed in, a sharper picture is drawn
+##   mouse wheel / + -      zoom in and out (toward the mouse)
 ##   drag / WASD / arrows   move around
 ##   C                      back to where you are
 ##   hover                  names of towns, places and quest targets
 ##   right click            put a marker there and name it (on a marker: remove it)
 ##   Ctrl + right click     (debug builds only) teleport there
-## Shows the land (biome colors shaded by height), water, roads, towns, places, active quest
-## targets (gold diamonds) and you (the yellow arrow).
+## A plain parchment map: roads, towns, the places you have found, your markers, active quest
+## targets (gold diamonds) and you (the yellow arrow). No terrain is drawn, so it opens instantly
+## and costs nothing in the background.
 
 signal teleported(position: Vector3)
 
 const ACTION := "world_map_debug"
-## Pixels of the whole-world picture along its longer side
-const BASE_RESOLUTION := 768
-## Pixels of the sharper picture of the zoomed-in area
-const DETAIL_RESOLUTION := 640
+const PARCHMENT := Color(0.71, 0.64, 0.5)
 const MAX_ZOOM := 16.0
 const PAN_SPEED := 600.0  # screen pixels per second
 ## Your own map markers (blue on the map and on the compass)
@@ -53,22 +51,12 @@ var _open := false
 var _was_paused := false
 var _was_mouse := Input.MOUSE_MODE_CAPTURED
 
-# The pictures: the whole world, and a sharper one of the area last zoomed into
-var _base_tex: Texture2D
-var _detail_tex: Texture2D
-var _detail_rect := Rect2()
-var _generation := 0
-var _jobs: Array[Dictionary] = []  # pictures being drawn: {"id" (group task), "rows", "size", "done"}
-
 var _redraw_timer := 0.0
 # Roads as world-space lines, made once (full detail, and every 4th point for zoomed-out views)
 var _road_lines: Array[PackedVector2Array] = []
 var _road_lines_low: Array[PackedVector2Array] = []
 var _road_boxes: Array[Rect2] = []
 var _road_src: WorldMap
-var _base_pending := false
-var _detail_wanted_at := -1.0
-var _detail_pending_rect := Rect2()
 
 # View: the world point at the middle of the view, and the zoom (1 = the whole world fits)
 var _center := Vector2.ZERO
@@ -110,9 +98,6 @@ func open() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_root.visible = true
 	center_on_player()
-	if _base_tex == null and not _base_pending:
-		_start_base()
-	_request_detail()
 
 
 func close() -> void:
@@ -127,14 +112,11 @@ func close() -> void:
 	Input.mouse_mode = _was_mouse if _was_mouse != Input.MOUSE_MODE_VISIBLE else Input.MOUSE_MODE_CAPTURED
 
 
-## The world changed (new seed): forget the pictures
+## The world changed (new seed): the roads are made again from the new map
 func invalidate() -> void:
-	_generation += 1
-	_base_tex = null
-	_detail_tex = null
-	_base_pending = false
+	_road_src = null
 	if _open:
-		_start_base()
+		_view.queue_redraw()
 
 
 func center_on_player() -> void:
@@ -144,7 +126,6 @@ func center_on_player() -> void:
 		if _zoom < 3.0:
 			_zoom = 3.0
 	_clamp_view()
-	_request_detail()
 
 
 ## Teleports the player to a world spot (x, z) on solid ground. Debug feature.
@@ -232,7 +213,6 @@ func map_input(event: InputEvent) -> void:
 			_center -= mm.relative / _scale()
 			_drag_moved += mm.relative.length()
 			_clamp_view()
-			_request_detail()
 		_update_text()
 		_view.queue_redraw()
 
@@ -248,12 +228,10 @@ func zoom_at(at: Vector2, factor: float) -> void:
 	var after := screen_to_world(at)
 	_center += before - after
 	_clamp_view()
-	_request_detail()
 
 
 func _process(delta: float) -> void:
 	_time += delta
-	_poll_jobs()
 	if not _open:
 		return
 	var pan := Vector2.ZERO
@@ -268,10 +246,6 @@ func _process(delta: float) -> void:
 	if pan != Vector2.ZERO and _naming == null:  # not while typing a marker name
 		_center += pan * PAN_SPEED * delta / _scale()
 		_clamp_view()
-		_request_detail()
-	if _detail_wanted_at >= 0.0 and _time >= _detail_wanted_at:
-		_detail_wanted_at = -1.0
-		_start_detail()
 	# Redraw only when the view moves, plus a few times a second for the moving arrow and markers
 	_redraw_timer -= delta
 	if pan != Vector2.ZERO or _redraw_timer <= 0.0:
@@ -316,130 +290,18 @@ func _clamp_view() -> void:
 
 # ---------------------------------------------------------------- pictures (worker threads)
 
-func _start_base() -> void:
-	_base_pending = true
-	var gen := _generation
-	var rect := _bounds()
-	var res := maxi(BASE_RESOLUTION, _manager.settings.debug_map_resolution)
-	# The whole-world picture only depends on the world: drawn once per seed, then kept on disk
-	var cache := "user://mapcache/%d_%d.png" % [_manager.world_seed, res]
-	if FileAccess.file_exists(cache):
-		var img := Image.load_from_file(cache)
-		if img != null and not img.is_empty():
-			_base_pending = false
-			_base_tex = ImageTexture.create_from_image(img)
-			return
-	_start_render(rect, res, func(img: Image) -> void:
-		if gen != _generation:
-			return
-		_base_pending = false
-		_base_tex = ImageTexture.create_from_image(img)
-		DirAccess.make_dir_recursive_absolute("user://mapcache")
-		img.save_png(cache))
-
-
-func _request_detail() -> void:
-	if _zoom < 1.8:
-		_detail_tex = null
-		return
-	_detail_wanted_at = _time + 0.25  # wait until the view stops moving
-
-
-func _start_detail() -> void:
-	var vis := _visible_world_rect().grow_individual(0, 0, 0, 0)
-	var rect := vis.grow(maxf(vis.size.x, vis.size.y) * 0.15).intersection(_bounds())
-	if rect.size.x <= 1.0 or rect.size.y <= 1.0:
-		return
-	if _detail_tex != null and _detail_rect.encloses(vis) and _detail_rect.size.x < vis.size.x * 1.6:
-		return  # the sharp picture still covers the view
-	_detail_pending_rect = rect
-	var gen := _generation
-	_start_render(rect, DETAIL_RESOLUTION, func(img: Image) -> void:
-		if gen != _generation or _detail_pending_rect != rect:
-			return
-		_detail_tex = ImageTexture.create_from_image(img)
-		_detail_rect = rect)
-
-
-# A picture is drawn row by row on every CPU core at once; _process puts it together when done
-func _start_render(rect: Rect2, resolution: int, done: Callable) -> void:
-	var size := image_size(rect, resolution)
-	var rows: Array = []
-	rows.resize(size.y)
-	var map := _manager.map
-	var id := WorkerThreadPool.add_group_task(func(j: int) -> void:
-		rows[j] = render_row(map, rect, size.x, size.y, j), size.y, -1, true, "world map")
-	_jobs.append({"id": id, "rows": rows, "size": size, "done": done})
-
-
-func _poll_jobs() -> void:
-	for k in range(_jobs.size() - 1, -1, -1):
-		var job: Dictionary = _jobs[k]
-		if not WorkerThreadPool.is_group_task_completed(job["id"]):
-			continue
-		WorkerThreadPool.wait_for_group_task_completion(job["id"])  # finished; this cleans it up
-		_jobs.remove_at(k)
-		var size: Vector2i = job["size"]
-		var data := PackedByteArray()
-		for row: PackedByteArray in job["rows"]:
-			data.append_array(row)
-		(job["done"] as Callable).call(Image.create_from_data(size.x, size.y, false, Image.FORMAT_RGB8, data))
-
-
-func _exit_tree() -> void:
-	for job in _jobs:
-		WorkerThreadPool.wait_for_group_task_completion(job["id"])
-	_jobs.clear()
-
-
-## Pixel size of a picture of `rect` whose longer side is `resolution`
-static func image_size(rect: Rect2, resolution: int) -> Vector2i:
-	var aspect := rect.size.y / maxf(rect.size.x, 1.0)
-	if aspect > 1.0:
-		return Vector2i(maxi(int(round(resolution / aspect)), 8), resolution)
-	return Vector2i(resolution, maxi(int(round(resolution * aspect)), 8))
-
-
-## One row of a picture of part of the world, as RGB bytes (thread-safe)
-static func render_row(map: WorldMap, rect: Rect2, w: int, h: int, j: int) -> PackedByteArray:
-	var s := WorldMap.Sample.new()
-	var out := PackedByteArray()
-	out.resize(w * 3)
-	var sea := map.settings.sea_level
-	var z := rect.position.y + (float(j) + 0.5) / float(h) * rect.size.y
-	var prev_h := INF
-	for i in w:
-		var x := rect.position.x + (float(i) + 0.5) / float(w) * rect.size.x
-		map.sample(x, z, s)
-		var c := s.map_color.lerp(Color(0.1, 0.1, 0.12), s.edge * 0.7)
-		if map.settings.water_enabled and s.height < sea:
-			c = Color(0.16, 0.34, 0.55).darkened(clampf((sea - s.height) / 25.0, 0.0, 0.5))
-		else:
-			# hill shading: light from the west
-			var shade := clampf(0.5 + (s.height - (prev_h if prev_h != INF else s.height)) * 0.1, 0.25, 0.85)
-			c = c.darkened(0.45 - shade * 0.5)
-		prev_h = s.height
-		out[i * 3] = clampi(roundi(c.r * 255.0), 0, 255)
-		out[i * 3 + 1] = clampi(roundi(c.g * 255.0), 0, 255)
-		out[i * 3 + 2] = clampi(roundi(c.b * 255.0), 0, 255)
-	return out
-
-
 # ---------------------------------------------------------------- drawing
 
 func draw_map(canvas: Control) -> void:
 	if _manager == null or _manager.map == null:
 		return
 	var b := _bounds()
+	# Outside the world dark; the world itself plain parchment with a darker edge
 	canvas.draw_rect(Rect2(Vector2.ZERO, canvas.size), Color(0.06, 0.06, 0.07))
 	var tl := world_to_screen(b.position)
 	var br := world_to_screen(b.end)
-	if _base_tex != null:
-		canvas.draw_texture_rect(_base_tex, Rect2(tl, br - tl), false)
-	if _detail_tex != null and _zoom >= 1.8:
-		var dtl := world_to_screen(_detail_rect.position)
-		var dbr := world_to_screen(_detail_rect.end)
-		canvas.draw_texture_rect(_detail_tex, Rect2(dtl, dbr - dtl), false)
+	canvas.draw_rect(Rect2(tl, br - tl), PARCHMENT)
+	canvas.draw_rect(Rect2(tl, br - tl), PARCHMENT.darkened(0.45), false, 3.0)
 	var px_scale := _scale()
 	var font := ThemeDB.fallback_font
 	if _night_layer and ClanTerritory.can_see_night(get_tree()):
@@ -472,6 +334,8 @@ func draw_map(canvas: Control) -> void:
 	# towns
 	for t in _manager.towns:
 		var at := world_to_screen(Vector2(t.position.x, t.position.z))
+		if not Rect2(Vector2.ZERO, canvas.size).grow(150.0 + t.poi.footprint_radius * px_scale).has_point(at):
+			continue  # off screen
 		var data := t.poi as TownData
 		var half := 4.0 + float(data.kind) * 1.5
 		if _zoom >= 4.0 and t.town != null:

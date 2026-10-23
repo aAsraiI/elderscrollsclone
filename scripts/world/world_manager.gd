@@ -661,7 +661,9 @@ func _dispatch_builds() -> void:
 		if _chunks.has(c) or _inflight.has(c) or not _wanted.has(c):
 			continue
 		_inflight[c] = WorkerThreadPool.add_task(
-			_build_task.bind(c, map, settings.chunk_size, _quads, int(GameSettings.get_value("grass"))), false, "terrain chunk")
+			# high priority: the ground goes ahead of the far land and the music, so a wait for the
+			# chunk under the player (_ensure_chunk) is never stuck behind them
+			_build_task.bind(c, map, settings.chunk_size, _quads, int(GameSettings.get_value("grass"))), true, "terrain chunk")
 
 
 # Runs on a worker thread

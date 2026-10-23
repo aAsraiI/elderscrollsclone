@@ -87,7 +87,7 @@ extends Resource
 
 @export_group("Debug")
 @export var debug_map_enabled := true
-## Pixels along the longer side of the debug map (press M in game)
+## No longer used: the map (M) draws no terrain picture now. Kept so older world files still load.
 @export_range(64, 1024, 16) var debug_map_resolution := 256
 
 

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_0w5rc"]
+
+[resource]
+script = ExtResource("1_0w5rc")
+id = &"silverweave_boots"
+display_name = "Silverweave Boots"
+description = "Cloth woven with silver thread, light as silk. Light armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 1.7000000000000002
+value = 43
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 3.0
+}
+tier = 3
+min_level = 17
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"silver_light"
+animation_set = &"boots"

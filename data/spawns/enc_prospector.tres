@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3 uid="uid://c0p4bna7h3vij"]
+
+[ext_resource type="Script" uid="uid://dg8b8xgiyxnc8" path="res://scripts/actors/enemy_data.gd" id="ed"]
+[ext_resource type="Resource" path="res://data/enemies/prospector.tres" id="e_prospector"]
+[ext_resource type="Script" uid="uid://bq60lvmw1j4xb" path="res://scripts/actors/spawn_entry.gd" id="s"]
+[ext_resource type="Script" uid="uid://cri67k8ygdytl" path="res://scripts/actors/spawn_table.gd" id="t"]
+
+[sub_resource type="Resource" id="entry_0"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("e_prospector")])
+
+[resource]
+script = ExtResource("t")
+entries = Array[ExtResource("s")]([SubResource("entry_0")])

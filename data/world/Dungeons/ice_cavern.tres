@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="DungeonData" format=3]
+
+[ext_resource type="Resource" path="res://data/enemies/frost_giant.tres" id="1_mkfdq"]
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="2_pra7f"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="3_vwvgu"]
+[ext_resource type="Resource" path="res://data/spawns/dungeon_ice.tres" id="4_jhu4c"]
+
+[resource]
+script = ExtResource("3_vwvgu")
+id = &"ice_cavern"
+display_name = "Ice Cavern"
+min_rooms = 7
+max_rooms = 11
+room_size = 15.0
+ceiling_height = 5.5
+spawn_table = ExtResource("4_jhu4c")
+enemies_per_room_max = 1
+boss = ExtResource("1_mkfdq")
+wall_color = Color(0.7, 0.8, 0.9, 1)
+floor_color = Color(0.8, 0.86, 0.92, 1)
+light_color = Color(0.6, 0.8, 1, 1)
+light_energy = 1.0
+theme = "ice"

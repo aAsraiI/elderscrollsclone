@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_vikmq"]
+
+[resource]
+script = ExtResource("1_vikmq")
+id = &"garlic_bread"
+display_name = "Garlic Bread"
+description = "Keeps the sickness away, they say."
+item_type = 3
+weight = 0.5
+value = 10
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "tavern")
+use_verb = "Eat"
+magic_effects = Array[Dictionary]([{
+"dur": 300.0,
+"id": &"resist_poison",
+"mag": 25.0
+}, {
+"dur": 0.0,
+"id": &"restore_health",
+"mag": 15.0
+}])
+ingredient_effects = PackedStringArray()

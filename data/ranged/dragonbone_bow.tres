@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_u5qqr"]
+
+[resource]
+script = ExtResource("1_u5qqr")
+id = &"dragonbone_bow"
+display_name = "Dragonbone Bow"
+description = "Hold left click to draw, let go to shoot. Right click zooms. Uses the best arrows you carry."
+item_type = 1
+equip_slot = 6
+weight = 8.5
+value = 2250
+governing_skill = "archery"
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_bow = true
+draw_time = 0.75
+arrow_speed = 61.0
+ingredient_effects = PackedStringArray()
+weapon_damage = 36.5
+reach = 1.6
+attack_cooldown = 0.8
+poise_damage = 6.0
+two_handed = true
+animation_set = &"bow"

@@ -2,8 +2,8 @@ extends SceneTree
 ## Headless tests for stage 5: treasure, merchants, prices, stock and gold, the trade window. Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage5.gd
 
-const R := "res://scripts/Resources/"
-const M := "res://scripts/Resources/Merchants/"
+const R := "res://data/"
+const M := "res://data/merchants/"
 
 var passes := 0
 var fails := 0
@@ -71,7 +71,7 @@ func t_treasure() -> void:
 	check("low-level chests only hold cheap treasure", low.size() >= 2 and low_max <= 100, str(low_max))
 	check("high-level chests can hold diamonds", has_diamond)
 	check("valuable treasure is rarer", diamond_chance < coin_chance)
-	var dungeon := load(R + "World/Dungeons/crypt.tres") as DungeonData
+	var dungeon := load(R + "world/Dungeons/crypt.tres") as DungeonData
 	var built := DungeonBuilder.build(dungeon, 12345, "test_crypt", 5, 12)
 	var chest_treasure := false
 	for c in (built["root"] as Node3D).find_children("*", "ContainerComponent", true, false):
@@ -98,11 +98,11 @@ func t_prices() -> void:
 	var smith := _merchant("smith")
 	var jeweler := _merchant("jeweler")
 	var temple := _merchant("temple")
-	var sword := load(R + "iron_sword.tres") as ItemData
-	var bread := load(R + "Consumables/bread.tres") as ItemData
-	var ruby := load(R + "Treasure/ruby.tres") as ItemData
+	var sword := load(R + "weapons/iron_sword.tres") as ItemData
+	var bread := load(R + "consumables/bread.tres") as ItemData
+	var ruby := load(R + "treasure/ruby.tres") as ItemData
 	var key := KeyRing.get_key("t/b1", "Test House")
-	var gold := load(R + "Consumables/gold.tres") as ItemData
+	var gold := load(R + "consumables/gold.tres") as ItemData
 	check("every kind of shop exists", general != null and smith != null and jeweler != null and temple != null and _merchant("alchemy") != null and _merchant("pawnbroker") != null and _merchant("provisioner") != null and _merchant("innkeeper") != null)
 	check("a general store buys anything", general.will_buy(sword) and general.will_buy(bread) and general.will_buy(ruby))
 	check("a smith buys weapons, not bread", smith.will_buy(sword) and not smith.will_buy(bread))
@@ -112,7 +112,7 @@ func t_prices() -> void:
 
 	var always_less := true
 	for m in [general, smith, jeweler, _merchant("pawnbroker"), _merchant("innkeeper")]:
-		for item in [sword, bread, ruby, load(R + "Weapons/ebon_greatsword.tres")]:
+		for item in [sword, bread, ruby, load(R + "weapons/ebon_greatsword.tres")]:
 			for speech in [1, 50, 100]:
 				for disp in [0, 50, 100]:
 					var d := _deal(speech, disp)
@@ -196,7 +196,7 @@ func t_shop() -> void:
 	var saved := WorldState.get_record("shop/t/general")
 	check("every trade is saved", int(saved["gold"]) == shop.gold)
 
-	var ruby := load(R + "Treasure/ruby.tres") as ItemData
+	var ruby := load(R + "treasure/ruby.tres") as ItemData
 	inv.add_item(ruby, 3)
 	var gold_before := Currency.get_gold(inv)
 	var unit := Barter.sell_price(ruby, shop.data, d)
@@ -206,7 +206,7 @@ func t_shop() -> void:
 	r = Barter.sell(shop, inv, eq, ruby, 1, d)
 	check("out of gold: they can't buy", r["error"] != "" and inv.get_count(ruby) == 1)
 	shop.gold = 5000
-	var sword := load(R + "iron_sword.tres") as ItemData
+	var sword := load(R + "weapons/iron_sword.tres") as ItemData
 	inv.add_item(sword)
 	eq.equip(sword)
 	r = Barter.sell(shop, inv, eq, sword, 1, d)
@@ -280,7 +280,7 @@ func t_world() -> void:
 	var skills := player.get_node("Skills") as Skills
 	var ui := player.get_node("DialogueUI") as DialogueUI
 	var barter := player.get_node("BarterUI") as BarterUI
-	var s := (load(R + "World/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
+	var s := (load(R + "world/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
 	s.view_distance_chunks = 3
 	s.spawn_radius_chunks = 1
 	s.debug_map_enabled = false
@@ -329,7 +329,7 @@ func t_world() -> void:
 	var res := barter.buy(first)
 	check("buying in the window", res["error"] == "" and inv.has_item(first))
 	check("trading trains Speech", skills.get_xp(&"speech") + skills.get_level(&"speech") * 1000.0 > xp_before)
-	var bread := load(R + "Consumables/bread.tres") as ItemData
+	var bread := load(R + "consumables/bread.tres") as ItemData
 	inv.add_item(bread, 2)
 	check("a smith won't buy bread", barter.sell(bread)["error"] != "" and inv.get_count(bread) == 2)
 	var sold := barter.sell(first)

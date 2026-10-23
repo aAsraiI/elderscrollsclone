@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="MerchantData" format=3]
+
+[ext_resource type="Script" path="res://scripts/trade/merchant_data.gd" id="1_m"]
+[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/items/loot_entry.gd" id="2_l"]
+[ext_resource type="Resource" path="res://data/weapons/iron_dagger.tres" id="i_dagger"]
+[ext_resource type="Resource" path="res://data/weapons/iron_sword.tres" id="i_sword"]
+[ext_resource type="Resource" path="res://data/weapons/iron_shield.tres" id="i_shield"]
+[ext_resource type="Resource" path="res://data/misc/lockpick.tres" id="i_lockpick"]
+
+[sub_resource type="Resource" id="s0"]
+script = ExtResource("2_l")
+item = ExtResource("i_dagger")
+min_count = 1
+max_count = 2
+chance = 0.8
+
+[sub_resource type="Resource" id="s1"]
+script = ExtResource("2_l")
+item = ExtResource("i_sword")
+min_count = 1
+max_count = 2
+chance = 0.8
+
+[sub_resource type="Resource" id="s2"]
+script = ExtResource("2_l")
+item = ExtResource("i_shield")
+min_count = 1
+max_count = 1
+chance = 0.6
+
+[sub_resource type="Resource" id="s3"]
+script = ExtResource("2_l")
+item = ExtResource("i_lockpick")
+min_count = 2
+max_count = 6
+chance = 0.5
+
+[resource]
+script = ExtResource("1_m")
+id = &"smith"
+display_name = "Smith"
+stock = Array[ExtResource("2_l")]([SubResource("s0"), SubResource("s1"), SubResource("s2"), SubResource("s3")])
+curve_stock = true
+curve_quality = 4.0
+gold_min = 800
+gold_max = 1500
+buys = PackedStringArray("weapon", "armor")
+sell_rate = 0.5
+markup = 1.3

@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="1_ed"]
+
+[resource]
+script = ExtResource("1_ed")
+id = &"trapper"
+display_name = "Trapper"
+disposition = 1
+color = Color(0.5, 0.4, 0.3, 1)
+body_scale = 1.0
+health_mult = 1.2
+damage_mult = 1.0
+poise_mult = 1.0
+loot_quality = 1.0
+weapon_tier_offset = 0
+armor_tier_offset = -1
+kit = 1
+move_speed = 3.2
+detection_range = 14.0
+telegraph_time = 0.3
+heavy_chance = 0.2
+chain_chance = 0.3
+attack_pause_min = 0.3
+attack_pause_max = 1.0
+knockback_resistance = 0.0
+wander_radius = 10.0
+talk_name = "Trapper"
+talk_lines = PackedStringArray("Cold enough to freeze your breath mid-air up here.", "Keep clear of the bears if you can. They are bigger than they look.", "Good furs fetch a fair price, if you live to sell them.")

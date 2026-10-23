@@ -17,7 +17,7 @@ extends SceneTree
 ## hand that this tool does not own (a View Scene, a World Scene, an icon) survives a rerun.
 ## Iron gear and the Steel Greatsword keep their old paths in scripts/Resources/ (saves use paths).
 
-const RES := "res://scripts/Resources/"
+const RES := "res://data/"
 const TIER_KEYS := LevelCurve.TIER_KEYS
 const TIER_NAMES := LevelCurve.TIER_NAMES
 const LIGHT_KEYS := LevelCurve.LIGHT_KEYS
@@ -98,8 +98,8 @@ const PIECES := {
 }
 
 const LEGACY := {
-	"iron_sword": "iron_sword.tres", "iron_dagger": "iron_dagger.tres", "iron_warhammer": "iron_warhammer.tres",
-	"iron_shield": "iron_shield.tres", "iron_chestplate": "iron_chestplate.tres", "steel_greatsword": "steel_greatsword.tres",
+	"iron_sword": "weapons/iron_sword.tres", "iron_dagger": "weapons/iron_dagger.tres", "iron_warhammer": "weapons/iron_warhammer.tres",
+	"iron_shield": "weapons/iron_shield.tres", "iron_chestplate": "weapons/iron_chestplate.tres", "steel_greatsword": "weapons/steel_greatsword.tres",
 }
 
 ## grade -> [name, min level, tier, ring value]
@@ -311,7 +311,7 @@ func _gear_path(key: String, folder: String) -> String:
 func _weapon(kind: String, t: int) -> void:
 	var w: Dictionary = WEAPONS[kind]
 	var key := "%s_%s" % [TIER_KEYS[t], kind]
-	var path := _gear_path(key, "Weapons")
+	var path := _gear_path(key, "weapons")
 	var it := _open(path)
 	it.id = StringName(key)
 	it.display_name = "%s %s" % [TIER_NAMES[t], w["name"]]
@@ -359,7 +359,7 @@ func _weapon(kind: String, t: int) -> void:
 
 func _shield(t: int) -> void:
 	var key := "%s_shield" % TIER_KEYS[t]
-	var path := _gear_path(key, "Weapons")
+	var path := _gear_path(key, "weapons")
 	var it := _open(path)
 	it.id = StringName(key)
 	it.display_name = "%s Shield" % TIER_NAMES[t]
@@ -390,10 +390,10 @@ func _armor(piece: String, t: int, heavy: bool) -> void:
 	var material: String = TIER_NAMES[t] if heavy else LIGHT_NAMES[t]
 	var mat_key: String = TIER_KEYS[t] if heavy else LIGHT_KEYS[t]
 	var key := "%s_%s" % [mat_key, piece]
-	var path := RES + "Armor/" + key + ".tres"
+	var path := RES + "armor/" + key + ".tres"
 	if heavy and piece == "cuirass":
 		key = "%s_chestplate" % TIER_KEYS[t]
-		path = _gear_path(key, "Weapons")
+		path = _gear_path(key, "weapons")
 	var it := _open(path)
 	it.id = StringName(key)
 	it.display_name = "%s %s" % [material, p[0] if heavy else p[1]]
@@ -418,7 +418,7 @@ func _jewel(g: int, effect: String, amulet: bool) -> void:
 	var grade: Array = GRADES[g]
 	var e: Array = JEWEL_EFFECTS[effect]
 	var key := "%s_%s_%s" % [String(grade[0]).to_lower(), "amulet" if amulet else "ring", effect]
-	var path := RES + "Jewelry/" + key + ".tres"
+	var path := RES + "jewelry/" + key + ".tres"
 	var it := _open(path)
 	var amount: float = float(e[2][g]) * (1.5 if amulet else 1.0)
 	it.id = StringName(key)
@@ -438,7 +438,7 @@ func _jewel(g: int, effect: String, amulet: bool) -> void:
 
 func _clothing(k: String) -> void:
 	var c: Array = CLOTHING[k]
-	var path := RES + "Clothing/" + k + ".tres"
+	var path := RES + "clothing/" + k + ".tres"
 	var it := _open(path)
 	it.id = StringName(k)
 	it.display_name = c[0]
@@ -454,7 +454,7 @@ func _clothing(k: String) -> void:
 
 func _clutter(k: String) -> void:
 	var c: Array = CLUTTER[k]
-	var path := RES + "Clutter/" + k + ".tres"
+	var path := RES + "clutter/" + k + ".tres"
 	var it := _open(path)
 	it.id = StringName(k)
 	it.display_name = c[0]
@@ -472,7 +472,7 @@ func _clutter(k: String) -> void:
 
 func _ingredient(k: String) -> void:
 	var c: Array = INGREDIENTS[k]
-	var path := RES + "Ingredients/" + k + ".tres"
+	var path := RES + "ingredients/" + k + ".tres"
 	var it := _open(path)
 	it.id = StringName(k)
 	it.display_name = c[0]
@@ -489,7 +489,7 @@ func _ingredient(k: String) -> void:
 
 func _artifact(k: String) -> void:
 	var c: Array = ARTIFACTS[k]
-	var path := RES + "Artifacts/" + k + ".tres"
+	var path := RES + "artifacts/" + k + ".tres"
 	var it := _open(path)
 	it.id = StringName(k)
 	it.display_name = c[0]
@@ -506,15 +506,15 @@ func _artifact(k: String) -> void:
 
 ## Older hand-made items only get loot tags (so furnished rooms can use them); nothing else changes
 const EXISTING_TAGS := {
-	"Consumables/apple.tres": ["kitchen", "home", "farm"],
-	"Consumables/bread.tres": ["kitchen", "home", "tavern"],
-	"Consumables/hearty_stew.tres": ["kitchen", "tavern"],
-	"Consumables/roast_meat.tres": ["kitchen", "tavern", "camp"],
-	"Consumables/venison_feast.tres": ["tavern", "rich_home"],
-	"Consumables/minor_health_potion.tres": ["alchemist", "temple", "camp", "home"],
-	"Consumables/health_potion.tres": ["alchemist", "temple", "camp"],
-	"Consumables/greater_health_potion.tres": ["alchemist", "vault"],
-	"Misc/lockpick.tres": ["shop", "camp", "sewer"],
+	"consumables/apple.tres": ["kitchen", "home", "farm"],
+	"consumables/bread.tres": ["kitchen", "home", "tavern"],
+	"consumables/hearty_stew.tres": ["kitchen", "tavern"],
+	"consumables/roast_meat.tres": ["kitchen", "tavern", "camp"],
+	"consumables/venison_feast.tres": ["tavern", "rich_home"],
+	"consumables/minor_health_potion.tres": ["alchemist", "temple", "camp", "home"],
+	"consumables/health_potion.tres": ["alchemist", "temple", "camp"],
+	"consumables/greater_health_potion.tres": ["alchemist", "vault"],
+	"misc/lockpick.tres": ["shop", "camp", "sewer"],
 }
 
 
@@ -526,10 +526,10 @@ func _tag_existing() -> void:
 		var it := _open(path)
 		it.loot_tags = PackedStringArray(EXISTING_TAGS[rel])
 		_save(it, path)
-	for f in DirAccess.get_files_at(RES + "Treasure/"):
+	for f in DirAccess.get_files_at(RES + "treasure/"):
 		if not f.ends_with(".tres"):
 			continue
-		var it := _open(RES + "Treasure/" + f)
+		var it := _open(RES + "treasure/" + f)
 		var n := it.display_name.to_lower()
 		var tags := ["jeweler", "rich_home"]
 		if n.contains("coin") or n.contains("idol") or n.contains("crown") or n.contains("reliquary"):
@@ -539,12 +539,12 @@ func _tag_existing() -> void:
 		else:
 			tags.append_array(["mine", "cave"])  # gems
 		it.loot_tags = PackedStringArray(tags)
-		_save(it, RES + "Treasure/" + f)
+		_save(it, RES + "treasure/" + f)
 
 
 func _consumable(k: String) -> void:
 	var c: Array = CONSUMABLES[k]
-	var path := RES + "Consumables/" + k + ".tres"
+	var path := RES + "consumables/" + k + ".tres"
 	var it := _open(path)
 	it.id = StringName(k)
 	it.display_name = c[0]

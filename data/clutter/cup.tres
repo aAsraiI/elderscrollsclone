@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_pjsmw"]
+
+[resource]
+script = ExtResource("1_pjsmw")
+id = &"cup"
+display_name = "Clay Cup"
+description = "Worth a few coins to the right buyer."
+weight = 0.2
+value = 1
+stackable = true
+max_stack = 99
+junk = true
+loot_tags = PackedStringArray("kitchen", "tavern")

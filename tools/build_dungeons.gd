@@ -4,7 +4,7 @@ extends SceneTree
 ##   godot --headless --path . -s res://tools/build_dungeons.gd
 ## Running it again overwrites the files it owns and does not add a biome rule twice.
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 const K := EnemyData.Kit
 
 ## key -> settings (anything EnemyData has)
@@ -66,44 +66,44 @@ const DUNGEONS := {
 
 func _initialize() -> void:
 	for key in ENEMIES:
-		var e := _load_or_new(R + "Enemies/%s.tres" % key, EnemyData) as EnemyData
+		var e := _load_or_new(R + "enemies/%s.tres" % key, EnemyData) as EnemyData
 		e.id = StringName(key)
 		var spec: Dictionary = ENEMIES[key]
 		for f in spec:
 			e.set(f, spec[f])
 		e.talk_name = e.display_name
-		ResourceSaver.save(e, R + "Enemies/%s.tres" % key)
+		ResourceSaver.save(e, R + "enemies/%s.tres" % key)
 	for key in TABLES:
 		var t := SpawnTable.new()
 		for row: Array in TABLES[key]:
 			var se := SpawnEntry.new()
 			var members: Array[EnemyData] = []
 			for m: String in row[0]:
-				members.append(load(R + "Enemies/%s.tres" % m) as EnemyData)
+				members.append(load(R + "enemies/%s.tres" % m) as EnemyData)
 			se.members = members
 			se.weight = row[1]
 			se.count_min = row[2]
 			se.count_max = row[3]
 			se.min_level = row[4]
 			t.entries.append(se)
-		ResourceSaver.save(t, R + "Spawns/%s.tres" % key)
+		ResourceSaver.save(t, R + "spawns/%s.tres" % key)
 	for key in DUNGEONS:
 		var spec: Dictionary = DUNGEONS[key]
-		var d := _load_or_new(R + "World/Dungeons/%s.tres" % key, DungeonData) as DungeonData
+		var d := _load_or_new(R + "world/Dungeons/%s.tres" % key, DungeonData) as DungeonData
 		d.id = StringName(key)
 		for f in spec:
 			if f in ["table", "boss", "entrance", "biomes"]:
 				continue
 			d.set(f, spec[f])
-		d.spawn_table = load(R + "Spawns/%s.tres" % spec["table"]) as SpawnTable
-		d.boss = load(R + "Enemies/%s.tres" % spec["boss"]) as EnemyData
+		d.spawn_table = load(R + "spawns/%s.tres" % spec["table"]) as SpawnTable
+		d.boss = load(R + "enemies/%s.tres" % spec["boss"]) as EnemyData
 		d.enemies_per_room_min = 0
 		d.enemies_per_room_max = 1
 		d.chests_min = 1
 		d.chests_max = 3
-		ResourceSaver.save(d, R + "World/Dungeons/%s.tres" % key)
+		ResourceSaver.save(d, R + "world/Dungeons/%s.tres" % key)
 		var ent: Array = spec["entrance"]
-		var poi_path := R + "World/POIs/%s_entrance.tres" % key
+		var poi_path := R + "world/POIs/%s_entrance.tres" % key
 		var p := _load_or_new(poi_path, DungeonEntrancePOIData) as DungeonEntrancePOIData
 		p.id = StringName("%s_entrance" % key)
 		p.display_name = ent[0]
@@ -113,14 +113,14 @@ func _initialize() -> void:
 		p.footprint_radius = ent[4]
 		p.flatten_radius = ent[4] * 0.5
 		p.max_slope_deg = 14.0
-		p.dungeon = load(R + "World/Dungeons/%s.tres" % key) as DungeonData
+		p.dungeon = load(R + "world/Dungeons/%s.tres" % key) as DungeonData
 		p.enter_name = spec["display_name"]
 		ResourceSaver.save(p, poi_path)
 		for biome_key: String in spec["biomes"]:
 			_hook(biome_key, load(poi_path) as POIData, spec["biomes"][biome_key])
 	# the two old dungeon types get their furnishing themes
 	for pair in [["dark_cave", "cave"], ["crypt", "crypt"]]:
-		var d := load(R + "World/Dungeons/%s.tres" % pair[0]) as DungeonData
+		var d := load(R + "world/Dungeons/%s.tres" % pair[0]) as DungeonData
 		d.theme = pair[1]
 		ResourceSaver.save(d)
 	print("build_dungeons: %d enemies, %d tables, %d dungeon types" % [ENEMIES.size(), TABLES.size(), DUNGEONS.size()])
@@ -137,7 +137,7 @@ func _load_or_new(path: String, type: Variant) -> Resource:
 
 # Adds a rule for this entrance to a biome, once
 func _hook(biome_key: String, poi: POIData, counts: Array) -> void:
-	var path := R + "World/%s.tres" % biome_key
+	var path := R + "world/%s.tres" % biome_key
 	var b := load(path) as BiomeData
 	if b == null:
 		return

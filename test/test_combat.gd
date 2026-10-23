@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for the combat overhaul. Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_combat.gd
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 
 var passes := 0
 var fails := 0
@@ -129,11 +129,11 @@ func make_enemy(pos: Vector3, ai: bool, hp := 300.0, facing_player := false) -> 
 func _run() -> void:
 	await process_frame
 	await process_frame
-	sword = load(R + "iron_sword.tres")
-	dagger = load(R + "iron_dagger.tres")
-	shield = load(R + "iron_shield.tres")
-	hammer = load(R + "iron_warhammer.tres")
-	greatsword = load(R + "steel_greatsword.tres")
+	sword = load(R + "weapons/iron_sword.tres")
+	dagger = load(R + "weapons/iron_dagger.tres")
+	shield = load(R + "weapons/iron_shield.tres")
+	hammer = load(R + "weapons/iron_warhammer.tres")
+	greatsword = load(R + "weapons/steel_greatsword.tres")
 	check("items load", sword != null and dagger != null and shield != null and hammer != null and greatsword != null)
 
 	await t_light_hit()
@@ -410,7 +410,7 @@ func t_heavy() -> void:
 	give(p, sword)
 	var pc := p.get_node("MeleeCombat") as MeleeCombat
 	var stats := p.get_node("Stats") as Stats
-	var e := make_enemy(Vector3(0, 0.05, -1.8), false)
+	var _e := make_enemy(Vector3(0, 0.05, -1.8), false)
 	var hits: Array = []
 	pc.hit_dealt.connect(func(_t, info, f): hits.append([info, f]))
 	var ready := [0]
@@ -531,7 +531,7 @@ func t_slam_and_arc() -> void:
 	give(p, hammer)
 	var pc := p.get_node("MeleeCombat") as MeleeCombat
 	var e1 := make_enemy(Vector3(0, 0.05, -2.2), false)
-	var e2 := make_enemy(Vector3(1.8, 0.05, -2.2), false)
+	var _e2 := make_enemy(Vector3(1.8, 0.05, -2.2), false)
 	var hits: Array = []
 	pc.hit_dealt.connect(func(t, info, f): hits.append([t, info, f]))
 	await frames(3)
@@ -546,9 +546,9 @@ func t_slam_and_arc() -> void:
 	p = make_player()
 	give(p, greatsword)
 	pc = p.get_node("MeleeCombat") as MeleeCombat
-	var left := make_enemy(Vector3(-1.4, 0.05, -2.2), false)
+	var _left := make_enemy(Vector3(-1.4, 0.05, -2.2), false)
 	var mid := make_enemy(Vector3(0, 0.05, -2.4), false)
-	var right := make_enemy(Vector3(1.4, 0.05, -2.2), false)
+	var _right := make_enemy(Vector3(1.4, 0.05, -2.2), false)
 	hits = []
 	pc.hit_dealt.connect(func(t, info, f): hits.append([t, info, f]))
 	await frames(3)
@@ -632,8 +632,8 @@ func t_helpers() -> void:
 	await frames(5)
 	check("CombatFeedback was created", p.get_node_or_null("CombatFeedback") != null)
 	check("ViewModel was created under the camera", p.get_node_or_null("Head/Camera3D/ViewModel") != null)
-	var e := make_enemy(Vector3(0, 0.05, -1.8), false, 300.0)
-	var a := make_enemy(Vector3(2.0, 0.05, -2.0), false, 300.0)
+	var _e := make_enemy(Vector3(0, 0.05, -1.8), false, 300.0)
+	var _a := make_enemy(Vector3(2.0, 0.05, -2.0), false, 300.0)
 	var slowed := false
 	for i in 40:
 		await physics_frame

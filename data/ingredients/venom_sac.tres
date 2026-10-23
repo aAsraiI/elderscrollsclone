@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_0pspe"]
+
+[resource]
+script = ExtResource("1_0pspe")
+id = &"venom_sac"
+display_name = "Spider Venom Sac"
+description = "An alchemical ingredient. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 14
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "cave", "mine")
+ingredient_effects = PackedStringArray("poison_damage", "paralyze", "damage_stamina", "weakness_poison")

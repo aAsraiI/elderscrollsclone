@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for stage 12a (the named settlements of Caldreth and their lords' seats).
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage12.gd
 
-const W := "res://scripts/Resources/World/"
+const W := "res://data/world/"
 
 var passes := 0
 var fails := 0
@@ -190,9 +190,9 @@ func t_buildings(towns: Array[PlacedPOI]) -> void:
 		if t == null:
 			continue
 		var seat := t.town.get_seat()
-		var root := TownBuilder.build(t.poi as TownData, t, realm_map)
+		var town_root := TownBuilder.build(t.poi as TownData, t, realm_map)
 		var holder: Node3D = null
-		for c in root.get_children():
+		for c in town_root.get_children():
 			if c.has_meta("building_id") and c.get_meta("building_id") == seat.id:
 				holder = c
 		var door := holder.get_node_or_null("Door") as BuildingDoor if holder != null else null
@@ -207,7 +207,7 @@ func t_buildings(towns: Array[PlacedPOI]) -> void:
 				found = true
 		var spots: Dictionary = inside["spots"]
 		check("inside the %s: a %s, a bed and a place to hold court" % [kind, chest_name], found and (spots["beds"] as Array).size() >= 1 and (spots["work"] as Vector3).z > 0.0)
-		root.free()
+		town_root.free()
 		iroot.free()
 
 
@@ -230,7 +230,7 @@ func t_old_worlds() -> void:
 
 func t_world() -> void:
 	print("-- in the game")
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(40)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var player := get_first_node_in_group("player") as CharacterBody3D

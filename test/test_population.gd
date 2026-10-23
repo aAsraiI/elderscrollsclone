@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for items, creatures, spawn tables, dungeons, garrisons and encounters. Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_population.gd
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 
 var passes := 0
 var fails := 0
@@ -150,9 +150,9 @@ func t_items() -> void:
 		if w.tier != t + 1 or w.min_level != LevelCurve.TIER_MIN_LEVEL[t]:
 			tiers_ok = false
 	check("tier and min_level fields match the curve", tiers_ok)
-	check("iron sword is the old file", ItemCatalog.get_weapon(ItemCatalog.Weapon.SWORD, 0) == load(R + "iron_sword.tres"))
+	check("iron sword is the old file", ItemCatalog.get_weapon(ItemCatalog.Weapon.SWORD, 0) == load(R + "weapons/iron_sword.tres"))
 	check("iron sword keeps its old stats (10 damage)", absf(ItemCatalog.get_weapon(ItemCatalog.Weapon.SWORD, 0).weapon_damage - 10.0) < 0.01)
-	check("steel greatsword file is the steel tier", ItemCatalog.get_weapon(ItemCatalog.Weapon.GREATSWORD, 1) == load(R + "steel_greatsword.tres"))
+	check("steel greatsword file is the steel tier", ItemCatalog.get_weapon(ItemCatalog.Weapon.GREATSWORD, 1) == load(R + "weapons/steel_greatsword.tres"))
 	var dagger := ItemCatalog.get_weapon(ItemCatalog.Weapon.DAGGER, 3)
 	check("high tier daggers can still be dual wielded", dagger.can_dual_wield and dagger.combo_length == 4)
 	check("warhammers keep their slam", ItemCatalog.get_weapon(ItemCatalog.Weapon.WARHAMMER, 6).secondary_action == ItemData.SecondaryAction.SLAM)
@@ -203,11 +203,11 @@ func t_enemy_data() -> void:
 	print("-- EnemyData")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 12345
-	var bandit := load(R + "Enemies/bandit.tres") as EnemyData
-	var wolf := load(R + "Enemies/wolf.tres") as EnemyData
-	var brute := load(R + "Enemies/bandit_brute.tres") as EnemyData
-	var cutthroat := load(R + "Enemies/cutthroat.tres") as EnemyData
-	var knight := load(R + "Enemies/skeleton_knight.tres") as EnemyData
+	var bandit := load(R + "enemies/bandit.tres") as EnemyData
+	var wolf := load(R + "enemies/wolf.tres") as EnemyData
+	var brute := load(R + "enemies/bandit_brute.tres") as EnemyData
+	var cutthroat := load(R + "enemies/cutthroat.tres") as EnemyData
+	var knight := load(R + "enemies/skeleton_knight.tres") as EnemyData
 	check("enemy files load", bandit != null and wolf != null and brute != null and cutthroat != null and knight != null)
 	var low := Enemy.new()
 	bandit.apply(low, 1, rng)
@@ -239,7 +239,7 @@ func t_enemy_data() -> void:
 
 func t_spawn_tables() -> void:
 	print("-- spawn tables")
-	var table := load(R + "Spawns/garrison_camp.tres") as SpawnTable
+	var table := load(R + "spawns/garrison_camp.tres") as SpawnTable
 	check("spawn table loads with entries", table != null and table.entries.size() == 4)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
@@ -257,12 +257,12 @@ func t_spawn_tables() -> void:
 	check("level-gated entries never roll below their level", not brute_at_1)
 	check("and do roll once the level allows them", brute_at_10)
 	check("group sizes vary", sizes.size() >= 2)
-	var caravan := load(R + "Spawns/enc_caravan.tres") as SpawnTable
+	var caravan := load(R + "spawns/enc_caravan.tres") as SpawnTable
 	var group := caravan.roll(rng, 3)
 	check("a caravan is a merchant with two guards", group.size() == 3 and group[0].id == &"merchant" and group[1].id == &"caravan_guard")
 	var empty := SpawnTable.new()
 	check("an empty table rolls nothing", empty.roll(rng, 5).is_empty() and not empty.has_entries_for(5))
-	var crypt := load(R + "Spawns/dungeon_crypt.tres") as SpawnTable
+	var crypt := load(R + "spawns/dungeon_crypt.tres") as SpawnTable
 	var rolled := false
 	for i in 50:
 		for m in crypt.roll(rng, 3):
@@ -271,7 +271,7 @@ func t_spawn_tables() -> void:
 	check("skeleton knights wait for level 5", not rolled)
 	var all_have := true
 	for f in ["garrison_camp", "garrison_tower", "garrison_ruins", "garrison_shrine", "garrison_stones", "garrison_cave_mouth", "garrison_crypt_mouth", "dungeon_cave", "dungeon_crypt"]:
-		var t := load(R + "Spawns/%s.tres" % f) as SpawnTable
+		var t := load(R + "spawns/%s.tres" % f) as SpawnTable
 		for lvl in [1, 5, 10, 20, 30]:
 			if not t.has_entries_for(lvl):
 				all_have = false
@@ -286,9 +286,9 @@ func t_dispositions() -> void:
 	var p := make_player(world)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 99
-	var wanderer := Population.spawn_enemy(load(R + "Enemies/wanderer.tres"), 3, world, Vector3(6, 0.05, 0), rng, {"persist_mode": Enemy.PersistMode.NEVER})
-	var hunter := Population.spawn_enemy(load(R + "Enemies/hunter.tres"), 3, world, Vector3(-6, 0.05, 0), rng, {"persist_mode": Enemy.PersistMode.NEVER})
-	var bandit := Population.spawn_enemy(load(R + "Enemies/bandit.tres"), 3, world, Vector3(0, 0.05, -9), rng, {"persist_mode": Enemy.PersistMode.NEVER})
+	var wanderer := Population.spawn_enemy(load(R + "enemies/wanderer.tres"), 3, world, Vector3(6, 0.05, 0), rng, {"persist_mode": Enemy.PersistMode.NEVER})
+	var hunter := Population.spawn_enemy(load(R + "enemies/hunter.tres"), 3, world, Vector3(-6, 0.05, 0), rng, {"persist_mode": Enemy.PersistMode.NEVER})
+	var bandit := Population.spawn_enemy(load(R + "enemies/bandit.tres"), 3, world, Vector3(0, 0.05, -9), rng, {"persist_mode": Enemy.PersistMode.NEVER})
 	bandit.field_of_view = 360.0
 	await secs(0.5)
 	check("a friendly NPC does not attack on sight", wanderer.state != Enemy.State.CHASE and wanderer.state != Enemy.State.ATTACK)
@@ -336,7 +336,7 @@ func t_dispositions() -> void:
 	# wandering
 	var rng2 := RandomNumberGenerator.new()
 	rng2.seed = 5
-	var stroller := Population.spawn_enemy(load(R + "Enemies/prospector.tres"), 3, world, Vector3(20, 0.05, 20), rng2, {"persist_mode": Enemy.PersistMode.NEVER})
+	var stroller := Population.spawn_enemy(load(R + "enemies/prospector.tres"), 3, world, Vector3(20, 0.05, 20), rng2, {"persist_mode": Enemy.PersistMode.NEVER})
 	var start := stroller.global_position
 	var moved := 0.0
 	var farthest := 0.0
@@ -350,7 +350,7 @@ func t_dispositions() -> void:
 	# dying: the NPC's body becomes a lootable corpse, talking goes away
 	var rng3 := RandomNumberGenerator.new()
 	rng3.seed = 6
-	var victim := Population.spawn_enemy(load(R + "Enemies/merchant.tres"), 3, world, Vector3(0, 0.05, 12), rng3, {"persist_mode": Enemy.PersistMode.NEVER})
+	var victim := Population.spawn_enemy(load(R + "enemies/merchant.tres"), 3, world, Vector3(0, 0.05, 12), rng3, {"persist_mode": Enemy.PersistMode.NEVER})
 	await frames(3)
 	var kill := DamageInfo.new(99999.0, p, &"melee")
 	kill.direction = Vector3(0, 0, -1)
@@ -369,7 +369,7 @@ func t_persistence_modes() -> void:
 	WorldState.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1
-	var bandit := load(R + "Enemies/bandit.tres") as EnemyData
+	var bandit := load(R + "enemies/bandit.tres") as EnemyData
 	var garrison := Population.spawn_enemy(bandit, 2, world, Vector3(0, 0.05, -6), rng, {"key": "test/g0", "persist_mode": Enemy.PersistMode.CORPSE_ONLY})
 	var transient := Population.spawn_enemy(bandit, 2, world, Vector3(4, 0.05, -6), rng, {"persist_mode": Enemy.PersistMode.NEVER})
 	var always := Enemy.new()
@@ -409,8 +409,8 @@ func t_dungeon_builder() -> void:
 	print("-- dungeon enemies")
 	WorldState.clear()
 	await reset_world()
-	var cave := load(R + "World/Dungeons/dark_cave.tres") as DungeonData
-	var crypt := load(R + "World/Dungeons/crypt.tres") as DungeonData
+	var cave := load(R + "world/Dungeons/dark_cave.tres") as DungeonData
+	var crypt := load(R + "world/Dungeons/crypt.tres") as DungeonData
 	check("dungeon files are hooked up to spawn tables and bosses", cave.spawn_table != null and cave.boss != null and crypt.spawn_table != null and crypt.boss != null)
 	var seed_value := 424242
 
@@ -583,7 +583,7 @@ func t_world() -> void:
 		world.queue_free()
 		await process_frame
 	world = null
-	var settings := (load(R + "World/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
+	var settings := (load(R + "world/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
 	settings.view_distance_chunks = 3
 	settings.spawn_radius_chunks = 1
 	settings.debug_map_enabled = false
@@ -698,7 +698,6 @@ func t_world() -> void:
 		if spawned.is_empty():
 			continue
 		did_spawn += 1
-		var members: Array[String] = []
 		for n in spawned:
 			var e := n as Enemy
 			if not plains_names.has(e.display_name):
@@ -725,7 +724,7 @@ func t_world() -> void:
 		r.queue_free()
 	await frames(2)
 	em.cleanup_now()
-	var ambush := load(R + "Encounters/plains_ambush.tres") as EncounterData
+	var ambush := load(R + "encounters/plains_ambush.tres") as EncounterData
 	var group := em.try_encounter(true, ambush)
 	await secs(2.0)
 	var closing := 0

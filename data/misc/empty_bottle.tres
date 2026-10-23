@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_50awj"]
+
+[resource]
+script = ExtResource("1_50awj")
+id = &"empty_bottle"
+display_name = "Empty Bottle"
+description = "A stoppered glass bottle."
+weight = 0.5
+value = 3
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "tavern", "alchemy")
+ingredient_effects = PackedStringArray()

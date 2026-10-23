@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="ep"]
+[ext_resource type="Resource" path="res://data/world/Dungeons/crypt.tres" id="dg"]
+[ext_resource type="Resource" path="res://data/spawns/garrison_crypt_mouth.tres" id="garrison_table"]
+
+[resource]
+script = ExtResource("ep")
+id = &"crypt_entrance"
+display_name = "Crypt Entrance"
+map_color = Color(0.8, 0.4, 1, 1)
+footprint_radius = 16.0
+flatten_radius = 8.0
+max_slope_deg = 12.0
+dungeon = ExtResource("dg")
+shape = 1
+color = Color(0.5, 0.5, 0.54, 1)
+enter_name = "Old Crypt"
+garrison = ExtResource("garrison_table")
+garrison_groups_min = 1
+garrison_groups_max = 1
+garrison_level_offset = 1

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_bmq06"]
+
+[resource]
+script = ExtResource("1_bmq06")
+id = &"grand_soul_gem"
+display_name = "Grand Soul Gem"
+description = "An empty soul gem. Cast Soul Trap on a creature and kill it to fill this."
+item_type = 8
+weight = 0.5
+value = 300
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("mage", "crypt")
+ingredient_effects = PackedStringArray()
+soul_gem_size = 5

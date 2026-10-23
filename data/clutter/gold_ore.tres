@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_5l0bu"]
+
+[resource]
+script = ExtResource("1_5l0bu")
+id = &"gold_ore"
+display_name = "Gold Ore"
+description = "Useful, or worth selling."
+weight = 1.0
+value = 30
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("mine")

@@ -1,0 +1,55 @@
+[gd_resource type="Resource" script_class="MerchantData" format=3]
+
+[ext_resource type="Script" path="res://scripts/trade/merchant_data.gd" id="1_m"]
+[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/items/loot_entry.gd" id="2_l"]
+[ext_resource type="Resource" path="res://data/consumables/bread.tres" id="i_bread"]
+[ext_resource type="Resource" path="res://data/consumables/apple.tres" id="i_apple"]
+[ext_resource type="Resource" path="res://data/consumables/roast_meat.tres" id="i_roast"]
+[ext_resource type="Resource" path="res://data/consumables/hearty_stew.tres" id="i_stew"]
+[ext_resource type="Resource" path="res://data/consumables/venison_feast.tres" id="i_feast"]
+
+[sub_resource type="Resource" id="s0"]
+script = ExtResource("2_l")
+item = ExtResource("i_bread")
+min_count = 4
+max_count = 8
+chance = 1
+
+[sub_resource type="Resource" id="s1"]
+script = ExtResource("2_l")
+item = ExtResource("i_apple")
+min_count = 5
+max_count = 12
+chance = 1
+
+[sub_resource type="Resource" id="s2"]
+script = ExtResource("2_l")
+item = ExtResource("i_roast")
+min_count = 2
+max_count = 5
+chance = 0.8
+
+[sub_resource type="Resource" id="s3"]
+script = ExtResource("2_l")
+item = ExtResource("i_stew")
+min_count = 1
+max_count = 3
+chance = 0.7
+
+[sub_resource type="Resource" id="s4"]
+script = ExtResource("2_l")
+item = ExtResource("i_feast")
+min_count = 1
+max_count = 2
+chance = 0.4
+
+[resource]
+script = ExtResource("1_m")
+id = &"provisioner"
+display_name = "Provisions"
+stock = Array[ExtResource("2_l")]([SubResource("s0"), SubResource("s1"), SubResource("s2"), SubResource("s3"), SubResource("s4")])
+gold_min = 200
+gold_max = 400
+buys = PackedStringArray("consumable")
+sell_rate = 0.45
+markup = 1.15

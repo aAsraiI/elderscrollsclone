@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ge6e0"]
+
+[resource]
+script = ExtResource("1_ge6e0")
+id = &"steel_bow"
+display_name = "Steel Bow"
+description = "Hold left click to draw, let go to shoot. Right click zooms. Uses the best arrows you carry."
+item_type = 1
+equip_slot = 6
+weight = 6.5
+value = 75
+governing_skill = "archery"
+tier = 2
+min_level = 8
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_bow = true
+draw_time = 0.9099999999999999
+arrow_speed = 49.0
+ingredient_effects = PackedStringArray()
+weapon_damage = 10.5
+reach = 1.6
+attack_cooldown = 0.8
+poise_damage = 6.0
+two_handed = true
+animation_set = &"bow"

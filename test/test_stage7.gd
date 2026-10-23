@@ -3,8 +3,8 @@ extends SceneTree
 ## cut instead of fill, large towns with tradesmen, road traffic, the map and the compass. Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage7.gd
 
-const R := "res://scripts/Resources/"
-const GRAND := "res://scripts/Resources/World/grand_world.tres"
+const R := "res://data/"
+const GRAND := "res://data/world/grand_world.tres"
 
 var passes := 0
 var fails := 0
@@ -53,7 +53,7 @@ func t_plan() -> void:
 	check("including forest, lakeland, swamp and highlands", keys.has("forest") and keys.has("lakeland") and keys.has("swamp") and keys.has("highlands"))
 	check("it has water", s.water_enabled)
 	check("and its own large town templates", not s.town_templates.is_empty() and s.town_templates[0].footprint_radius >= 110.0)
-	check("the tests' old world is untouched (no water, no traffic)", not (load(R + "World/multi_biome_world.tres") as WorldSettings).water_enabled and not (load(R + "World/multi_biome_world.tres") as WorldSettings).road_traffic)
+	check("the tests' old world is untouched (no water, no traffic)", not (load(R + "world/multi_biome_world.tres") as WorldSettings).water_enabled and not (load(R + "world/multi_biome_world.tres") as WorldSettings).road_traffic)
 
 	var t0 := Time.get_ticks_msec()
 	var map := WorldMap.new(s, 1337)
@@ -288,7 +288,7 @@ func t_world() -> void:
 		bui.close()
 	if kinds.has("wardens"):
 		var w0: Enemy = kinds["wardens"][0]
-		var wolf := Population.spawn_enemy(load(R + "Enemies/wolf.tres") as EnemyData, 1, wm, w0.global_position + Vector3(6, 0.5, 0), RandomNumberGenerator.new(), {"persist_mode": Enemy.PersistMode.NEVER})
+		var wolf := Population.spawn_enemy(load(R + "enemies/wolf.tres") as EnemyData, 1, wm, w0.global_position + Vector3(6, 0.5, 0), RandomNumberGenerator.new(), {"persist_mode": Enemy.PersistMode.NEVER})
 		rl.tick()
 		await secs(0.2)
 		check("road wardens go for a creature that comes near", w0.state == Enemy.State.CHASE or w0.state == Enemy.State.ATTACK)

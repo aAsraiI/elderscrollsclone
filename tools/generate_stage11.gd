@@ -9,13 +9,13 @@ extends SceneTree
 ##   scripts/Resources/Encounters/  night_werewolf, night_vampire (added to the temperate biomes once)
 ## Like the other generators, an existing file is loaded and only these fields are set.
 
-const RES := "res://scripts/Resources/"
+const RES := "res://data/"
 const DAMAGE_MULT := [1.0, 1.5, 2.1, 2.9, 3.9, 5.2, 7.4]
 const VALUE_MULT := [1.0, 2.5, 6.0, 14.0, 32.0, 75.0, 170.0]
 
 
 func _initialize() -> void:
-	DirAccess.make_dir_recursive_absolute(RES + "Ranged")
+	DirAccess.make_dir_recursive_absolute(RES + "ranged")
 	_bows()
 	_misc()
 	var vamp := _enemy("vampire", "Vampire", Color(0.75, 0.72, 0.78), 1.15, 1.2, EnemyData.Kit.DAGGER, 3.6)
@@ -48,7 +48,7 @@ func _item(path: String) -> ItemData:
 func _bows() -> void:
 	for t in 7:
 		var key: String = "hunting" if t == 0 else LevelCurve.TIER_KEYS[t]
-		var path := RES + "Ranged/%s_bow.tres" % key
+		var path := RES + "ranged/%s_bow.tres" % key
 		var b := _item(path)
 		b.id = StringName(key + "_bow")
 		b.display_name = "Hunting Bow" if t == 0 else "%s Bow" % LevelCurve.TIER_NAMES[t]
@@ -71,7 +71,7 @@ func _bows() -> void:
 		b.animation_set = &"bow"
 		b.loot_tags = PackedStringArray(["smithy", "hunter", "weapons"])
 		ResourceSaver.save(b, path)
-		var apath := RES + "Ranged/%s_arrow.tres" % LevelCurve.TIER_KEYS[t]
+		var apath := RES + "ranged/%s_arrow.tres" % LevelCurve.TIER_KEYS[t]
 		var a := _item(apath)
 		a.id = StringName(LevelCurve.TIER_KEYS[t] + "_arrow")
 		a.display_name = "%s Arrow" % LevelCurve.TIER_NAMES[t]
@@ -90,12 +90,12 @@ func _bows() -> void:
 
 
 func _misc_item(id: String, name: String, desc: String, value: int, type: int = ItemData.ItemType.MISC) -> ItemData:
-	var path := RES + "Misc/%s.tres" % id
+	var path := RES + "misc/%s.tres" % id
 	var it := _item(path)
 	it.id = StringName(id)
 	it.display_name = name
 	it.description = desc
-	it.item_type = type
+	it.item_type = type as ItemData.ItemType
 	it.value = value
 	it.weight = 0.5
 	it.stackable = true
@@ -106,31 +106,31 @@ func _misc_item(id: String, name: String, desc: String, value: int, type: int = 
 func _misc() -> void:
 	var e := _misc_item("empty_bottle", "Empty Bottle", "A stoppered glass bottle.", 3)
 	e.loot_tags = PackedStringArray(["kitchen", "tavern", "alchemy"])
-	ResourceSaver.save(e, e.resource_path if e.resource_path != "" else RES + "Misc/empty_bottle.tres")
+	ResourceSaver.save(e, e.resource_path if e.resource_path != "" else RES + "misc/empty_bottle.tres")
 	var b := _misc_item("bottle_of_blood", "Bottle of Blood", "Fresh blood. Only a vampire would drink it.", 30, ItemData.ItemType.CONSUMABLE)
 	b.use_verb = "Drink"
 	b.effect_group = "potion"
 	b.effect_duration = 1.0
 	var fx: Array[Dictionary] = [{"id": &"restore_health", "mag": 10.0, "dur": 0.0}]
 	b.magic_effects = fx
-	ResourceSaver.save(b, b.resource_path if b.resource_path != "" else RES + "Misc/bottle_of_blood.tres")
+	ResourceSaver.save(b, b.resource_path if b.resource_path != "" else RES + "misc/bottle_of_blood.tres")
 	var h := _misc_item("horse_deed", "Horse Deed", "Proof that a horse is yours. Use it to call your horse to you.", 1500)
 	h.stackable = false
 	h.max_stack = 1
-	ResourceSaver.save(h, h.resource_path if h.resource_path != "" else RES + "Misc/horse_deed.tres")
+	ResourceSaver.save(h, h.resource_path if h.resource_path != "" else RES + "misc/horse_deed.tres")
 	var c := _misc_item("sellsword_contract", "Sellsword Contract", "Use it to hire a sellsword who follows and fights for you.", 500)
-	ResourceSaver.save(c, c.resource_path if c.resource_path != "" else RES + "Misc/sellsword_contract.tres")
+	ResourceSaver.save(c, c.resource_path if c.resource_path != "" else RES + "misc/sellsword_contract.tres")
 
 
 func _enemy(id: String, name: String, color: Color, health: float, damage: float, kit: int, speed: float) -> EnemyData:
-	var path := RES + "Enemies/%s.tres" % id
+	var path := RES + "enemies/%s.tres" % id
 	var d: EnemyData = load(path) as EnemyData if ResourceLoader.exists(path) else EnemyData.new()
 	d.id = StringName(id)
 	d.display_name = name
 	d.color = color
 	d.health_mult = health
 	d.damage_mult = damage
-	d.kit = kit
+	d.kit = kit as EnemyData.Kit
 	d.move_speed = speed
 	d.detection_range = 20.0
 	d.telegraph_time = 0.25
@@ -143,7 +143,7 @@ func _enemy(id: String, name: String, color: Color, health: float, damage: float
 
 
 func _add_to_table(table_id: String, who: EnemyData, min_level: int) -> void:
-	var path := RES + "Spawns/%s.tres" % table_id
+	var path := RES + "spawns/%s.tres" % table_id
 	if not ResourceLoader.exists(path):
 		return
 	var t := load(path) as SpawnTable
@@ -159,7 +159,7 @@ func _add_to_table(table_id: String, who: EnemyData, min_level: int) -> void:
 
 
 func _table(id: String, who: EnemyData) -> SpawnTable:
-	var path := RES + "Spawns/%s.tres" % id
+	var path := RES + "spawns/%s.tres" % id
 	var t: SpawnTable = load(path) as SpawnTable if ResourceLoader.exists(path) else SpawnTable.new()
 	t.entries.clear()
 	var entry := SpawnEntry.new()
@@ -171,7 +171,7 @@ func _table(id: String, who: EnemyData) -> SpawnTable:
 
 
 func _encounter(id: String, name: String, table: SpawnTable, msg: String, min_level: int) -> EncounterData:
-	var path := RES + "Encounters/%s.tres" % id
+	var path := RES + "encounters/%s.tres" % id
 	var e: EncounterData = load(path) as EncounterData if ResourceLoader.exists(path) else EncounterData.new()
 	e.id = StringName(id)
 	e.display_name = name
@@ -188,7 +188,7 @@ func _encounter(id: String, name: String, table: SpawnTable, msg: String, min_le
 
 
 func _add_encounter(biome_id: String, enc: EncounterData) -> void:
-	var path := RES + "World/%s.tres" % biome_id
+	var path := RES + "world/%s.tres" % biome_id
 	if not ResourceLoader.exists(path):
 		return
 	var b := load(path) as BiomeData

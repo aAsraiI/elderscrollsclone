@@ -1,0 +1,123 @@
+[gd_resource type="Resource" script_class="WorldSettings" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/biome_placement.gd" id="1_qgs1d"]
+[ext_resource type="Resource" path="res://data/world/ashlands.tres" id="2_aqfs7"]
+[ext_resource type="Resource" path="res://data/world/frozen_crown.tres" id="3_y1kvr"]
+[ext_resource type="Resource" path="res://data/world/tundra.tres" id="4_upafo"]
+[ext_resource type="Resource" path="res://data/world/snow_mountains.tres" id="5_rm7cf"]
+[ext_resource type="Resource" path="res://data/world/highlands.tres" id="6_6wl4j"]
+[ext_resource type="Resource" path="res://data/world/badlands.tres" id="7_pdoki"]
+[ext_resource type="Resource" path="res://data/world/deadlands.tres" id="8_or8ad"]
+[ext_resource type="Resource" path="res://data/world/desert.tres" id="9_qvp6h"]
+[ext_resource type="Resource" path="res://data/world/forest.tres" id="10_yg2b6"]
+[ext_resource type="Resource" path="res://data/world/swamp.tres" id="11_b7tcg"]
+[ext_resource type="Resource" path="res://data/world/lakeland.tres" id="12_pbrj4"]
+[ext_resource type="Resource" path="res://data/world/plains.tres" id="13_vwna7"]
+[ext_resource type="Resource" path="res://data/world/coast.tres" id="14_gj0dw"]
+[ext_resource type="Script" path="res://scripts/world/world_settings.gd" id="15_thpfd"]
+[ext_resource type="Script" path="res://scripts/towns/town_data.gd" id="16_2hcx2"]
+[ext_resource type="Resource" path="res://data/world/Towns/Large/village.tres" id="17_gojy1"]
+[ext_resource type="Resource" path="res://data/world/Towns/Large/town.tres" id="18_kbqy8"]
+[ext_resource type="Resource" path="res://data/world/Towns/Large/city.tres" id="19_icagr"]
+
+[sub_resource type="Resource" id="Resource_1tnwv"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("2_aqfs7")
+cell = Vector2i(-8, -8)
+size_cells = Vector2i(5, 4)
+
+[sub_resource type="Resource" id="Resource_unh72"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("3_y1kvr")
+cell = Vector2i(-3, -8)
+size_cells = Vector2i(6, 4)
+
+[sub_resource type="Resource" id="Resource_shbf0"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("4_upafo")
+cell = Vector2i(3, -8)
+size_cells = Vector2i(5, 4)
+
+[sub_resource type="Resource" id="Resource_fs7b5"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("5_rm7cf")
+cell = Vector2i(-8, -4)
+level_min = 43
+level_max = 67
+
+[sub_resource type="Resource" id="Resource_6aaqd"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("6_6wl4j")
+cell = Vector2i(-4, -4)
+size_cells = Vector2i(5, 4)
+level_min = 27
+level_max = 50
+
+[sub_resource type="Resource" id="Resource_0h0s2"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("7_pdoki")
+cell = Vector2i(1, -4)
+
+[sub_resource type="Resource" id="Resource_gsqan"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("8_or8ad")
+cell = Vector2i(5, -4)
+size_cells = Vector2i(3, 4)
+
+[sub_resource type="Resource" id="Resource_gdw0a"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("9_qvp6h")
+cell = Vector2i(-8, 0)
+level_min = 20
+level_max = 43
+
+[sub_resource type="Resource" id="Resource_2pfel"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("10_yg2b6")
+cell = Vector2i(-4, 0)
+size_cells = Vector2i(5, 4)
+level_min = 7
+level_max = 23
+
+[sub_resource type="Resource" id="Resource_s1vbp"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("11_b7tcg")
+cell = Vector2i(1, 0)
+size_cells = Vector2i(7, 4)
+level_min = 17
+level_max = 37
+
+[sub_resource type="Resource" id="Resource_8qylb"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("12_pbrj4")
+cell = Vector2i(-8, 4)
+size_cells = Vector2i(5, 4)
+level_min = 3
+level_max = 17
+
+[sub_resource type="Resource" id="Resource_7wgu6"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("13_vwna7")
+cell = Vector2i(-3, 4)
+size_cells = Vector2i(7, 4)
+level_min = 1
+level_max = 13
+
+[sub_resource type="Resource" id="Resource_gt3qx"]
+script = ExtResource("1_qgs1d")
+biome = ExtResource("14_gj0dw")
+cell = Vector2i(4, 4)
+
+[resource]
+script = ExtResource("15_thpfd")
+cell_size = 1000.0
+placements = Array[ExtResource("1_qgs1d")]([SubResource("Resource_1tnwv"), SubResource("Resource_unh72"), SubResource("Resource_shbf0"), SubResource("Resource_fs7b5"), SubResource("Resource_6aaqd"), SubResource("Resource_0h0s2"), SubResource("Resource_gsqan"), SubResource("Resource_gdw0a"), SubResource("Resource_2pfel"), SubResource("Resource_s1vbp"), SubResource("Resource_8qylb"), SubResource("Resource_7wgu6"), SubResource("Resource_gt3qx")])
+spawn_placement = 11
+border_warp_strength = 260.0
+border_warp_scale = 900.0
+water_enabled = true
+town_templates = Array[ExtResource("16_2hcx2")]([ExtResource("17_gojy1"), ExtResource("18_kbqy8"), ExtResource("19_icagr")])
+named_settlements = true
+town_spacing = 450.0
+road_grid = 40.0
+debug_map_resolution = 768

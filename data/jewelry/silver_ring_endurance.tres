@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_raqyy"]
+
+[resource]
+script = ExtResource("1_raqyy")
+id = &"silver_ring_endurance"
+display_name = "Silver Ring of Endurance"
+description = "+20 maximum stamina while worn."
+item_type = 2
+equip_slot = 8
+weight = 0.1
+value = 180
+stat_modifiers = {
+"max_stamina": 20.0
+}
+tier = 3
+min_level = 15
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

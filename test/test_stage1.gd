@@ -2,8 +2,8 @@ extends SceneTree
 ## Headless tests for stage 1 (clock, gold, food and potions, pause screen). Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage1.gd
 
-const R := "res://scripts/Resources/"
-const C := "res://scripts/Resources/Consumables/"
+const R := "res://data/"
+const C := "res://data/consumables/"
 
 var passes := 0
 var fails := 0
@@ -105,7 +105,7 @@ func press_esc() -> void:
 
 func _run() -> void:
 	await frames(2)
-	await t_items()
+	t_items()
 	await t_regen()
 	await t_effects()
 	await t_quick_heal()
@@ -152,8 +152,8 @@ func t_items() -> void:
 	check("stew effect mods are 0.75 HP/s and +0.4 stamina regen", absf(float(mods["health_regen"]) - 0.75) < 0.001 and absf(float(mods["stamina_regen_mult"]) - 0.4) < 0.001, str(mods))
 	var desc: String = all["hearty_stew"].get_combat_description()
 	check("description mentions the effect", "Restores 90" in desc and "+40%" in desc, desc)
-	check("a sword is not consumable", not (load(R + "iron_sword.tres") as ItemData).is_consumable())
-	check("weapon description unchanged for a sword", "Damage" in (load(R + "iron_sword.tres") as ItemData).get_combat_description())
+	check("a sword is not consumable", not (load(R + "weapons/iron_sword.tres") as ItemData).is_consumable())
+	check("weapon description unchanged for a sword", "Damage" in (load(R + "weapons/iron_sword.tres") as ItemData).get_combat_description())
 
 
 func t_regen() -> void:
@@ -236,7 +236,7 @@ func t_effects() -> void:
 	fails_seen.clear()
 	await frames(60)
 	check("an item you don't carry fails with 'missing'", not fx.use_item(make_item("Ghost", 5.0, 5.0, "food")) and fails_seen.back() == &"missing")
-	var sword: ItemData = load(R + "iron_sword.tres")
+	var sword: ItemData = load(R + "weapons/iron_sword.tres")
 	inv.add_item(sword)
 	check("a sword can't be eaten", not fx.use_item(sword) and fails_seen.back() == &"not_usable")
 	var long := make_item("Long Meal", 10.0, 20.0, "food")
@@ -339,7 +339,7 @@ func t_clock() -> void:
 	var nights := [0]
 	var dawns := [0]
 	clock.hour_changed.connect(func(h): hours.append(h))
-	clock.day_changed.connect(func(d): days.append(d))
+	clock.day_changed.connect(func(day): days.append(day))
 	clock.night_started.connect(func(): nights[0] += 1)
 	clock.day_started.connect(func(): dawns[0] += 1)
 	clock.advance_hours(1.2)
@@ -518,7 +518,7 @@ func t_inventory_ui() -> void:
 	var inv := p.get_node("Inventory") as Inventory
 	var eq := p.get_node("Equipment") as Equipment
 	var stew: ItemData = load(C + "hearty_stew.tres")
-	var sword: ItemData = load(R + "iron_sword.tres")
+	var sword: ItemData = load(R + "weapons/iron_sword.tres")
 	inv.add_item(stew, 2)
 	inv.add_item(sword)
 	Currency.add_gold(inv, 150)
@@ -612,7 +612,7 @@ func t_world_manager() -> void:
 func t_player_scene() -> void:
 	print("-- the real player scene")
 	await reset_world()
-	var scene := load("res://player.tscn") as PackedScene
+	var scene := load("res://scenes/player/player.tscn") as PackedScene
 	check("player.tscn loads", scene != null)
 	if scene == null:
 		return

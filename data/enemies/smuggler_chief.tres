@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_27gb6"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_0ad02"]
+
+[resource]
+script = ExtResource("2_0ad02")
+id = &"smuggler_chief"
+display_name = "Smuggler Chief"
+color = Color(0.55, 0.3, 0.2, 1)
+body_scale = 1.2
+health_mult = 4.0
+damage_mult = 1.2
+poise_mult = 2.5
+loot_quality = 2.5
+armor_tier_offset = 0
+kit = 11
+knockback_resistance = 0.5
+talk_name = "Smuggler Chief"
+talk_lines = PackedStringArray()

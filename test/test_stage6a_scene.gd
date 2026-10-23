@@ -37,7 +37,7 @@ func _press(key: Key) -> void:
 
 
 func _run() -> void:
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(40)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var sm := get_first_node_in_group("save_manager") as SaveManager
@@ -56,7 +56,7 @@ func _run() -> void:
 	var town := wm.get_town_at(player.global_position, 10.0)
 	wm.crime.set_bounty(town.id, 35)
 	var inv := player.get_node("Inventory") as Inventory
-	var ruby := load("res://scripts/Resources/Treasure/ruby.tres") as ItemData
+	var ruby := load("res://data/treasure/ruby.tres") as ItemData
 	inv.add_item(ruby, 1)
 	CrimeManager.add_stolen(ruby, 1)
 	var pm := player.get_node("PauseMenu") as PauseMenu

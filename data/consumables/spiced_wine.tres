@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_vsct3"]
+
+[resource]
+script = ExtResource("1_vsct3")
+id = &"spiced_wine"
+display_name = "Spiced Wine"
+description = "Warms you through on a cold night."
+item_type = 3
+weight = 0.5
+value = 24
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "tavern")
+use_verb = "Drink"
+magic_effects = Array[Dictionary]([{
+"dur": 600.0,
+"id": &"resist_frost",
+"mag": 40.0
+}])
+ingredient_effects = PackedStringArray()

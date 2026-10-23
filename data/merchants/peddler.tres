@@ -1,0 +1,79 @@
+[gd_resource type="Resource" script_class="MerchantData" format=3]
+
+[ext_resource type="Script" path="res://scripts/trade/merchant_data.gd" id="1_m"]
+[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/items/loot_entry.gd" id="2_l"]
+[ext_resource type="Resource" path="res://data/consumables/bread.tres" id="i_bread"]
+[ext_resource type="Resource" path="res://data/consumables/apple.tres" id="i_apple"]
+[ext_resource type="Resource" path="res://data/consumables/roast_meat.tres" id="i_roast"]
+[ext_resource type="Resource" path="res://data/consumables/minor_health_potion.tres" id="i_minor"]
+[ext_resource type="Resource" path="res://data/misc/lockpick.tres" id="i_lockpick"]
+[ext_resource type="Resource" path="res://data/weapons/iron_dagger.tres" id="i_dagger"]
+[ext_resource type="Resource" path="res://data/weapons/iron_sword.tres" id="i_sword"]
+[ext_resource type="Resource" path="res://data/treasure/copper_ring.tres" id="i_copper"]
+
+[sub_resource type="Resource" id="s0"]
+script = ExtResource("2_l")
+item = ExtResource("i_bread")
+min_count = 2
+max_count = 5
+chance = 0.9
+
+[sub_resource type="Resource" id="s1"]
+script = ExtResource("2_l")
+item = ExtResource("i_apple")
+min_count = 3
+max_count = 8
+chance = 0.9
+
+[sub_resource type="Resource" id="s2"]
+script = ExtResource("2_l")
+item = ExtResource("i_roast")
+min_count = 1
+max_count = 3
+chance = 0.6
+
+[sub_resource type="Resource" id="s3"]
+script = ExtResource("2_l")
+item = ExtResource("i_minor")
+min_count = 1
+max_count = 3
+chance = 0.7
+
+[sub_resource type="Resource" id="s4"]
+script = ExtResource("2_l")
+item = ExtResource("i_lockpick")
+min_count = 5
+max_count = 15
+chance = 0.9
+
+[sub_resource type="Resource" id="s5"]
+script = ExtResource("2_l")
+item = ExtResource("i_dagger")
+min_count = 1
+max_count = 1
+chance = 0.5
+
+[sub_resource type="Resource" id="s6"]
+script = ExtResource("2_l")
+item = ExtResource("i_sword")
+min_count = 1
+max_count = 1
+chance = 0.4
+
+[sub_resource type="Resource" id="s7"]
+script = ExtResource("2_l")
+item = ExtResource("i_copper")
+min_count = 1
+max_count = 2
+chance = 0.3
+
+[resource]
+script = ExtResource("1_m")
+id = &"peddler"
+display_name = "Travelling Merchant"
+stock = Array[ExtResource("2_l")]([SubResource("s0"), SubResource("s1"), SubResource("s2"), SubResource("s3"), SubResource("s4"), SubResource("s5"), SubResource("s6"), SubResource("s7")])
+gold_min = 300
+gold_max = 600
+sell_rate = 0.4
+treasure_rate = 0.65
+markup = 1.3

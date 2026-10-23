@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_m8hqo"]
+
+[resource]
+script = ExtResource("1_m8hqo")
+id = &"silver_amulet_wind"
+display_name = "Silver Amulet of Second Wind"
+description = "+30% stamina regen while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 252
+stat_modifiers = {
+"stamina_regen_mult": 0.3
+}
+tier = 3
+min_level = 15
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

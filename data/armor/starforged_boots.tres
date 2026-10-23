@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_q5hv4"]
+
+[resource]
+script = ExtResource("1_q5hv4")
+id = &"starforged_boots"
+display_name = "Starforged Boots"
+description = "Forged from fallen star-metal that hums faintly. Heavy armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 5.0
+value = 1530
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 7.800000000000001
+}
+tier = 7
+min_level = 74
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"starforged_heavy"
+animation_set = &"boots"

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_s3vwt"]
+
+[resource]
+script = ExtResource("1_s3vwt")
+id = &"honey_cake"
+display_name = "Honey Cake"
+description = "A treat for a feast day."
+item_type = 3
+weight = 0.5
+value = 26
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "tavern")
+use_verb = "Eat"
+magic_effects = Array[Dictionary]([{
+"dur": 600.0,
+"id": &"fortify_magicka",
+"mag": 30.0
+}])
+ingredient_effects = PackedStringArray()

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_sfdaj"]
+
+[resource]
+script = ExtResource("1_sfdaj")
+id = &"ebonweave_boots"
+display_name = "Ebonweave Boots"
+description = "Ebon rings woven fine as cloth. Light armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 1.8
+value = 230
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 4.0
+}
+tier = 5
+min_level = 41
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"ebon_light"
+animation_set = &"boots"

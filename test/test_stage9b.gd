@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for stage 9b (the 16 x 16 km realm, level bands, discovery, fast travel).
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage9b.gd
 
-const W := "res://scripts/Resources/World/"
+const W := "res://data/world/"
 
 var passes := 0
 var fails := 0
@@ -69,7 +69,7 @@ func t_settings() -> void:
 
 func t_world() -> void:
 	print("-- in the game")
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(40)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var player := get_first_node_in_group("player") as CharacterBody3D

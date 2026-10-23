@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"ebon_chestplate"
+display_name = "Ebon Cuirass"
+description = "Blackened ebon steel, cold to the touch. Heavy armor for the chest."
+item_type = 2
+equip_slot = 2
+weight = 17.3
+value = 1296
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 27.900000000000002
+}
+tier = 5
+min_level = 41
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"ebon_heavy"
+animation_set = &"cuirass"
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

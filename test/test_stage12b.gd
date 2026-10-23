@@ -147,7 +147,7 @@ func _check_place(id: String, place: Dictionary, towns: Dictionary, problems: Ar
 func t_world() -> void:
 	print("-- in the game")
 	WorldState.clear()
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(60)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var p := get_first_node_in_group("player") as CharacterBody3D

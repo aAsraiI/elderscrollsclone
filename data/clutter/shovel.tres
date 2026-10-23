@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_8gtbs"]
+
+[resource]
+script = ExtResource("1_8gtbs")
+id = &"shovel"
+display_name = "Shovel"
+description = "Useful, or worth selling."
+weight = 6.0
+value = 6
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("mine", "home", "tools")

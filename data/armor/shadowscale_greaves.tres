@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_doxnv"]
+
+[resource]
+script = ExtResource("1_doxnv")
+id = &"shadowscale_greaves"
+display_name = "Shadowscale Leggings"
+description = "Overlapping scales of dark volcanic glass. Light armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 3.5
+value = 202
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 7.0
+}
+tier = 4
+min_level = 28
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"obsidian_light"
+animation_set = &"greaves"

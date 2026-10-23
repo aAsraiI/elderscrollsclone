@@ -1,0 +1,86 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="1_biome"]
+[ext_resource type="Resource" path="res://data/world/POIs/abandoned_mine_entrance.tres" id="10_cklic"]
+[ext_resource type="Resource" path="res://data/world/POIs/barrow_entrance.tres" id="11_54qs3"]
+[ext_resource type="Resource" path="res://data/encounters/snow_reavers.tres" id="enc_0"]
+[ext_resource type="Resource" path="res://data/encounters/snow_beasts.tres" id="enc_1"]
+[ext_resource type="Resource" path="res://data/encounters/snow_trapper.tres" id="enc_2"]
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="enc_script"]
+[ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="poi_0"]
+[ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="poi_1"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
+[ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="poi_3"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
+
+[sub_resource type="Resource" id="rule_0"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_0")
+count_min = 2.0
+count_max = 3.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="rule_1"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_1")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 60.0
+
+[sub_resource type="Resource" id="rule_2"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_2")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="rule_3"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_3")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 60.0
+
+[sub_resource type="Resource" id="Resource_54qs3"]
+script = ExtResource("rule_script")
+poi = ExtResource("10_cklic")
+count_min = 0.1
+count_max = 0.2
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_wk4ym"]
+script = ExtResource("rule_script")
+poi = ExtResource("11_54qs3")
+count_min = 0.1
+count_max = 0.2
+extra_spacing = 80.0
+border_margin = 80.0
+
+[resource]
+script = ExtResource("1_biome")
+id = &"snow_mountains"
+display_name = "Snowy Mountains"
+map_color = Color(0.85, 0.9, 0.97, 1)
+blend_distance = 380.0
+base_height = 55.0
+hills_amplitude = 18.0
+hills_scale = 280.0
+mountain_amplitude = 120.0
+mountain_scale = 800.0
+mountain_coverage = 0.65
+ground_color = Color(0.82, 0.86, 0.9, 1)
+ground_color_alt = Color(0.74, 0.8, 0.86, 1)
+steep_color = Color(0.36, 0.36, 0.4, 1)
+steep_slope_start = 32.0
+steep_slope_full = 52.0
+peak_color = Color(0.97, 0.98, 1, 1)
+peak_height = 110.0
+peak_blend = 40.0
+tree_style = 1
+tree_density = 28.0
+tree_color = Color(0.16, 0.3, 0.2, 1)
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_54qs3"), SubResource("Resource_wk4ym")])
+level_min = 12
+level_max = 28
+encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2")])

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3]
+
+[ext_resource type="Script" path="res://scripts/dialogue/dialogue_data.gd" id="1_data"]
+[ext_resource type="Script" path="res://scripts/dialogue/dialogue_topic.gd" id="2_topic"]
+[ext_resource type="Script" path="res://scripts/dialogue/dialogue_response.gd" id="3_resp"]
+
+[sub_resource type="Resource" id="resp_first"]
+script = ExtResource("3_resp")
+text = "Between you and me, I've been hunting a bottle of Sunfire Red for years. If you ever come across one, I'd pay well for it. (This is an example quest topic. Real quests arrive in stage 6.)"
+not_flag = "vintage_asked"
+set_flag = "vintage_asked"
+quest_id = "example_vintage"
+quest_name = "(Example) A Rare Vintage"
+
+[sub_resource type="Resource" id="resp_again"]
+script = ExtResource("3_resp")
+text = "Still no Sunfire Red? Keep your eyes open on the road. Merchants from the desert sometimes carry it."
+need_flag = "vintage_asked"
+quest_id = "example_vintage"
+quest_name = "(Example) A Rare Vintage"
+
+[sub_resource type="Resource" id="topic_vintage"]
+script = ExtResource("2_topic")
+topic = "a rare vintage"
+responses = Array[ExtResource("3_resp")]([SubResource("resp_first"), SubResource("resp_again")])
+learn_on_greeting = true
+
+[resource]
+script = ExtResource("1_data")
+roles = PackedStringArray("innkeeper")
+topics = Array[ExtResource("2_topic")]([SubResource("topic_vintage")])

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_2gjsw"]
+
+[resource]
+script = ExtResource("1_2gjsw")
+id = &"obsidian_boots"
+display_name = "Obsidian Boots"
+description = "Volcanic glass ground to a razor edge, tougher than it looks. Heavy armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 4.4
+value = 126
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 5.4
+}
+tier = 4
+min_level = 28
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"obsidian_heavy"
+animation_set = &"boots"

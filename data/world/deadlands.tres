@@ -1,0 +1,76 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_tdexh"]
+[ext_resource type="Resource" path="res://data/encounters/plains_ambush.tres" id="2_ocdib"]
+[ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="3_4v8qn"]
+[ext_resource type="Resource" path="res://data/encounters/plains_wanderer.tres" id="4_dh2ua"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="5_0r0nr"]
+[ext_resource type="Resource" path="res://data/encounters/night_werewolf.tres" id="5_dh2ua"]
+[ext_resource type="Resource" path="res://data/encounters/night_vampire.tres" id="6_0r0nr"]
+[ext_resource type="Resource" path="res://data/world/POIs/crypt_entrance.tres" id="6_eufsy"]
+[ext_resource type="Resource" path="res://data/world/POIs/ruined_shrine.tres" id="7_3ihvc"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="8_j1jv5"]
+[ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="9_loyen"]
+[ext_resource type="Resource" path="res://data/world/POIs/fort_ruin_entrance.tres" id="10_ocdib"]
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="10_puq31"]
+[ext_resource type="Resource" path="res://data/world/POIs/sunken_vault_entrance.tres" id="11_4v8qn"]
+
+[sub_resource type="Resource" id="Resource_pg31t"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("6_eufsy")
+extra_spacing = 50.0
+
+[sub_resource type="Resource" id="Resource_u7b4k"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("7_3ihvc")
+count_max = 1.5
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_xg30r"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("8_j1jv5")
+count_max = 1.5
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_hv32u"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("9_loyen")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 60.0
+
+[sub_resource type="Resource" id="Resource_4v8qn"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("10_ocdib")
+count_min = 0.12
+count_max = 0.2
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_dh2ua"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("11_4v8qn")
+count_min = 0.1
+count_max = 0.2
+extra_spacing = 80.0
+border_margin = 80.0
+
+[resource]
+script = ExtResource("10_puq31")
+id = &"deadlands"
+display_name = "Deadlands"
+map_color = Color(0.4, 0.39, 0.35, 1)
+blend_distance = 200.0
+base_height = 8.0
+hills_scale = 160.0
+detail_amplitude = 0.6
+ground_color = Color(0.35, 0.34, 0.3, 1)
+ground_color_alt = Color(0.3, 0.3, 0.27, 1)
+steep_color = Color(0.26, 0.25, 0.23, 1)
+tree_style = 2
+tree_density = 10.0
+tree_color = Color(0.3, 0.28, 0.25, 1)
+poi_rules = Array[ExtResource("5_0r0nr")]([SubResource("Resource_pg31t"), SubResource("Resource_u7b4k"), SubResource("Resource_xg30r"), SubResource("Resource_hv32u"), SubResource("Resource_4v8qn"), SubResource("Resource_dh2ua")])
+level_min = 50
+level_max = 73
+encounters = Array[ExtResource("1_tdexh")]([ExtResource("2_ocdib"), ExtResource("3_4v8qn"), ExtResource("4_dh2ua"), ExtResource("5_dh2ua"), ExtResource("6_0r0nr")])

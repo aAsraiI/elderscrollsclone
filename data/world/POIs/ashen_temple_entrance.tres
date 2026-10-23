@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/ashen_temple.tres" id="1_s52ud"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="2_s252i"]
+
+[resource]
+script = ExtResource("2_s252i")
+dungeon = ExtResource("1_s52ud")
+shape = 1
+color = Color(0.22, 0.18, 0.17, 1)
+enter_name = "Ashen Temple"
+id = &"ashen_temple_entrance"
+display_name = "Temple Steps"
+map_color = Color(1, 0.4, 0.2, 1)
+footprint_radius = 18.0
+flatten_radius = 9.0

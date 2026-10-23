@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_8l0vc"]
+
+[resource]
+script = ExtResource("1_8l0vc")
+id = &"obsidian_helmet"
+display_name = "Obsidian Helmet"
+description = "Volcanic glass ground to a razor edge, tougher than it looks. Heavy armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 5.5
+value = 189
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 8.1
+}
+tier = 4
+min_level = 28
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"obsidian_heavy"
+animation_set = &"helmet"

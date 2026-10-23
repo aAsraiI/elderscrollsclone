@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_0kyn6"]
+
+[resource]
+script = ExtResource("1_0kyn6")
+id = &"leather_gauntlets"
+display_name = "Leather Bracers"
+description = "Boiled and hardened leather. Light armor for the hands."
+item_type = 2
+equip_slot = 3
+weight = 1.2000000000000002
+value = 18
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 2.5
+}
+tier = 2
+min_level = 8
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"steel_light"
+animation_set = &"gauntlets"

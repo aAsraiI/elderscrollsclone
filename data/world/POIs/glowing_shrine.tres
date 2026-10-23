@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SimplePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/simple_poi_data.gd" id="sp"]
+[ext_resource type="Script" path="res://scripts/world/poi_container.gd" id="pc"]
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="loot"]
+[ext_resource type="Resource" path="res://data/spawns/garrison_shrine.tres" id="garrison_table"]
+
+[resource]
+script = ExtResource("sp")
+id = &"glowing_shrine"
+display_name = "Glowing Shrine"
+map_color = Color(0.5, 0.8, 1, 1)
+footprint_radius = 14.0
+flatten_radius = 6.0
+max_slope_deg = 10.0
+shape = 5
+shape_scale = 1.0
+color = Color(0.6, 0.6, 0.65, 1)
+garrison = ExtResource("garrison_table")
+garrison_groups_min = 1
+garrison_groups_max = 1

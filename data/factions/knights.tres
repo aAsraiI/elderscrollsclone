@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="FactionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/factions/faction_data.gd" id="1_f"]
+
+[resource]
+script = ExtResource("1_f")
+id = &"knights"
+display_name = "Knightly Order"
+description = "Sworn to protect the roads and the realm. They take no one with blood on their hands."
+ranks = PackedStringArray("Squire", "Knight", "Knight-Errant", "Knight-Captain", "Lord Commander")
+join_requirement = "no_bounty"
+skills = PackedStringArray("block", "heavy_armor", "one_handed")
+perk_stat = "armor"
+perk_per_rank = 3.0
+discount_merchants = PackedStringArray("smith")
+quest_types = PackedStringArray("kill", "deliver")
+reward_base = 70
+gate_mid = "G-KO03"
+gate_final = "G-KO06"

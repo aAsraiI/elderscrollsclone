@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_8rfha"]
+
+[resource]
+script = ExtResource("1_8rfha")
+id = &"tome_calm_spell"
+display_name = "Spell Tome: Calm"
+description = "Apprentice Illusion spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 90
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "calm_spell"

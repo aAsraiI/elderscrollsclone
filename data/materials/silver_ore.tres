@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_dryi8"]
+
+[resource]
+script = ExtResource("1_dryi8")
+id = &"silver_ore"
+display_name = "Silver Ore"
+description = "Raw ore. Smelt it into ingots at a smelter."
+item_type = 7
+weight = 1.0
+value = 12
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("smithy", "mine")
+ingredient_effects = PackedStringArray()

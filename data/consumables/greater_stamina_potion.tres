@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ivldn"]
+
+[resource]
+script = ExtResource("1_ivldn")
+id = &"greater_stamina_potion"
+display_name = "Greater Stamina Potion"
+item_type = 3
+weight = 0.5
+value = 110
+stackable = true
+max_stack = 99
+min_level = 40
+loot_tags = PackedStringArray("alchemist")
+use_verb = "Drink"
+effect_group = "potion"
+restore_stamina = 150.0

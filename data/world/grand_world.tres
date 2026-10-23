@@ -1,0 +1,104 @@
+[gd_resource type="Resource" script_class="WorldSettings" format=3]
+
+[ext_resource type="Script" uid="uid://k5yg4cqcklq7" path="res://scripts/world/world_settings.gd" id="1_ws"]
+[ext_resource type="Script" uid="uid://byq7rdfuh6gn" path="res://scripts/world/biome_placement.gd" id="2_bp"]
+[ext_resource type="Script" path="res://scripts/towns/town_data.gd" id="td"]
+[ext_resource type="Resource" path="res://data/world/Towns/Large/village.tres" id="t_village"]
+[ext_resource type="Resource" path="res://data/world/Towns/Large/town.tres" id="t_town"]
+[ext_resource type="Resource" path="res://data/world/Towns/Large/city.tres" id="t_city"]
+[ext_resource type="Resource" path="res://data/world/plains.tres" id="b_plains"]
+[ext_resource type="Resource" path="res://data/world/desert.tres" id="b_desert"]
+[ext_resource type="Resource" path="res://data/world/snow_mountains.tres" id="b_snow_mountains"]
+[ext_resource type="Resource" path="res://data/world/forest.tres" id="b_forest"]
+[ext_resource type="Resource" path="res://data/world/lakeland.tres" id="b_lakeland"]
+[ext_resource type="Resource" path="res://data/world/swamp.tres" id="b_swamp"]
+[ext_resource type="Resource" path="res://data/world/highlands.tres" id="b_highlands"]
+
+[sub_resource type="Resource" id="p0"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_snow_mountains")
+cell = Vector2i(-7, -6)
+size_cells = Vector2i(6, 2)
+
+[sub_resource type="Resource" id="p1"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_highlands")
+cell = Vector2i(-1, -6)
+size_cells = Vector2i(5, 2)
+
+[sub_resource type="Resource" id="p2"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_snow_mountains")
+cell = Vector2i(4, -6)
+size_cells = Vector2i(3, 2)
+
+[sub_resource type="Resource" id="p3"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_forest")
+cell = Vector2i(-7, -4)
+size_cells = Vector2i(4, 3)
+
+[sub_resource type="Resource" id="p4"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_plains")
+cell = Vector2i(-3, -4)
+size_cells = Vector2i(5, 3)
+
+[sub_resource type="Resource" id="p5"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_highlands")
+cell = Vector2i(2, -4)
+size_cells = Vector2i(5, 3)
+
+[sub_resource type="Resource" id="p6"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_lakeland")
+cell = Vector2i(-7, -1)
+size_cells = Vector2i(5, 3)
+
+[sub_resource type="Resource" id="p7"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_forest")
+cell = Vector2i(-2, -1)
+size_cells = Vector2i(4, 3)
+
+[sub_resource type="Resource" id="p8"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_desert")
+cell = Vector2i(2, -1)
+size_cells = Vector2i(5, 3)
+
+[sub_resource type="Resource" id="p9"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_swamp")
+cell = Vector2i(-7, 2)
+size_cells = Vector2i(4, 4)
+
+[sub_resource type="Resource" id="p10"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_lakeland")
+cell = Vector2i(-3, 2)
+size_cells = Vector2i(4, 4)
+
+[sub_resource type="Resource" id="p11"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_plains")
+cell = Vector2i(1, 2)
+size_cells = Vector2i(3, 4)
+
+[sub_resource type="Resource" id="p12"]
+script = ExtResource("2_bp")
+biome = ExtResource("b_desert")
+cell = Vector2i(4, 2)
+size_cells = Vector2i(3, 4)
+
+[resource]
+script = ExtResource("1_ws")
+placements = Array[ExtResource("2_bp")]([SubResource("p0"), SubResource("p1"), SubResource("p2"), SubResource("p3"), SubResource("p4"), SubResource("p5"), SubResource("p6"), SubResource("p7"), SubResource("p8"), SubResource("p9"), SubResource("p10"), SubResource("p11"), SubResource("p12")])
+spawn_placement = 4
+water_enabled = true
+sea_level = 0.0
+town_spacing = 300.0
+road_grid = 32.0
+debug_map_resolution = 512
+town_templates = Array[ExtResource("td")]([ExtResource("t_village"), ExtResource("t_town"), ExtResource("t_city")])

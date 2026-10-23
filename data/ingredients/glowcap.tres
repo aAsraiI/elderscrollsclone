@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_25l5u"]
+
+[resource]
+script = ExtResource("1_25l5u")
+id = &"glowcap"
+display_name = "Glowcap Mushroom"
+description = "An alchemical ingredient. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 6
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "cave", "mine")
+ingredient_effects = PackedStringArray("night_eye", "restore_magicka", "fortify_magicka", "regenerate_magicka")

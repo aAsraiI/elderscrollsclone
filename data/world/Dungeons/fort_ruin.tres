@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="DungeonData" format=3]
+
+[ext_resource type="Resource" path="res://data/enemies/deserter_captain.tres" id="1_ek72g"]
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="2_yi5hn"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="3_n8u32"]
+[ext_resource type="Resource" path="res://data/spawns/dungeon_fort.tres" id="4_8q88u"]
+
+[resource]
+script = ExtResource("3_n8u32")
+id = &"fort_ruin"
+display_name = "Ruined Fort"
+min_rooms = 7
+max_rooms = 11
+room_size = 16.0
+ceiling_height = 5.0
+spawn_table = ExtResource("4_8q88u")
+enemies_per_room_max = 1
+boss = ExtResource("1_ek72g")
+level_offset = 2
+wall_color = Color(0.45, 0.43, 0.4, 1)
+floor_color = Color(0.3, 0.29, 0.27, 1)
+light_color = Color(1, 0.7, 0.4, 1)
+theme = "fort"

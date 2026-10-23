@@ -10,12 +10,12 @@ extends SceneTree
 ##   scripts/Resources/Merchants/mages.tres   the Mages Guild's shop
 ## Like generate_content.gd, an existing file is loaded and only these fields are set.
 
-const RES := "res://scripts/Resources/"
-const MAT := RES + "Materials/"
+const RES := "res://data/"
+const MAT := RES + "materials/"
 
 
 func _initialize() -> void:
-	for d in ["Materials", "SoulGems", "Books"]:
+	for d in ["materials", "soul_gems", "books"]:
 		DirAccess.make_dir_recursive_absolute(RES + d)
 	_materials()
 	_soul_gems()
@@ -47,7 +47,7 @@ func _mat(id: String, name: String, desc: String, weight: float, value: int, tag
 	it.id = StringName(id)
 	it.display_name = name
 	it.description = desc
-	it.item_type = type
+	it.item_type = type as ItemData.ItemType
 	it.weight = weight
 	it.value = value
 	it.stackable = type != ItemData.ItemType.TOOL
@@ -123,7 +123,7 @@ func _ingredients() -> void:
 		"cactus_flower": "Cactus Flower", "wild_garlic": "Wild Garlic", "spider_egg": "Spider Egg",
 		"river_scale": "River Scale", "hawk_feather": "Hawk Feather", "storm_crystal": "Storm Crystal", "mandrake_root": "Mandrake Root"}
 	for id in Alchemy.INGREDIENTS:
-		var path: String = RES + "Ingredients/" + id + ".tres"
+		var path: String = RES + "ingredients/" + id + ".tres"
 		var it := _item(path)
 		if it.display_name == "":
 			it.display_name = new_ones.get(id, String(id).capitalize())
@@ -140,7 +140,7 @@ func _ingredients() -> void:
 
 
 func _food(id: String, name: String, desc: String, value: int, effects: Array, verb: String = "Eat") -> void:
-	var path := RES + "Consumables/" + id + ".tres"
+	var path := RES + "consumables/" + id + ".tres"
 	var it := _item(path)
 	it.id = StringName(id)
 	it.display_name = name
@@ -174,7 +174,7 @@ func _foods() -> void:
 
 
 func _merchant() -> void:
-	var path := RES + "Merchants/mages.tres"
+	var path := RES + "merchants/mages.tres"
 	var m: MerchantData = load(path) as MerchantData if ResourceLoader.exists(path) else MerchantData.new()
 	m.id = &"mages"
 	m.display_name = "Mages Guild Supplies"

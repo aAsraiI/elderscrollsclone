@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_h2oim"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_8jhxo"]
+
+[resource]
+script = ExtResource("2_8jhxo")
+id = &"giant_rat"
+display_name = "Giant Rat"
+color = Color(0.4, 0.34, 0.3, 1)
+body_scale = 0.5
+health_mult = 0.4
+poise_mult = 0.4
+loot_quality = 0.0
+armor_tier_offset = -9
+kit = 0
+move_speed = 5.0
+telegraph_time = 0.12
+chain_chance = 0.6
+talk_name = "Giant Rat"
+talk_lines = PackedStringArray()

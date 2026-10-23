@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_pdt8n"]
+
+[resource]
+script = ExtResource("1_pdt8n")
+id = &"steel_boots"
+display_name = "Steel Boots"
+description = "Well-forged steel with a keen edge. Heavy armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 4.0
+value = 23
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 3.8000000000000003
+}
+tier = 2
+min_level = 8
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"steel_heavy"
+animation_set = &"boots"

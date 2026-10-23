@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3 uid="uid://ct5gjb15ooppb"]
+
+[ext_resource type="Script" uid="uid://dg8b8xgiyxnc8" path="res://scripts/actors/enemy_data.gd" id="ed"]
+[ext_resource type="Resource" path="res://data/enemies/frost_bear.tres" id="e_frost_bear"]
+[ext_resource type="Resource" path="res://data/enemies/wolf.tres" id="e_wolf"]
+[ext_resource type="Script" uid="uid://bq60lvmw1j4xb" path="res://scripts/actors/spawn_entry.gd" id="s"]
+[ext_resource type="Script" uid="uid://cri67k8ygdytl" path="res://scripts/actors/spawn_table.gd" id="t"]
+
+[sub_resource type="Resource" id="entry_0"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("e_frost_bear")])
+weight = 2.0
+
+[sub_resource type="Resource" id="entry_1"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("e_wolf")])
+weight = 3.0
+count_min = 3
+count_max = 4
+
+[resource]
+script = ExtResource("t")
+entries = Array[ExtResource("s")]([SubResource("entry_0"), SubResource("entry_1")])

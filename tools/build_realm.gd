@@ -5,7 +5,7 @@ extends SceneTree
 ## own name, colors, terrain and levels. Run it again after changing the tables; it overwrites
 ## the files it makes. You can also edit the results by hand in the inspector afterwards.
 
-const W := "res://scripts/Resources/World/"
+const W := "res://data/world/"
 
 ## new biome -> [copied from, settings]
 const NEW_BIOMES := {
@@ -57,8 +57,8 @@ func _initialize() -> void:
 		var fields: Dictionary = spec[1]
 		for f in fields:
 			b.set(f, fields[f])
-		var err := ResourceSaver.save(b, W + key + ".tres")
-		print("%s: %s" % [key, "ok" if err == OK else "error %d" % err])
+		var saved := ResourceSaver.save(b, W + key + ".tres")
+		print("%s: %s" % [key, "ok" if saved == OK else "error %d" % saved])
 
 	var grand := load(W + "grand_world.tres") as WorldSettings
 	var s := grand.duplicate(false) as WorldSettings

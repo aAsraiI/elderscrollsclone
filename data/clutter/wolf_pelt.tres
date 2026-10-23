@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ttep1"]
+
+[resource]
+script = ExtResource("1_ttep1")
+id = &"wolf_pelt"
+display_name = "Wolf Pelt"
+description = "Useful, or worth selling."
+weight = 3.0
+value = 20
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("hunter", "camp")

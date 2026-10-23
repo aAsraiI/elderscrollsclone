@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="FactionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/factions/faction_data.gd" id="1_f"]
+
+[resource]
+script = ExtResource("1_f")
+id = &"tidewell"
+display_name = "House Tidewell"
+description = "The Duchy of Saltmarch. Gold and ships: Duchess Isra means to buy the regency with the Crown's debts."
+ranks = PackedStringArray("Retainer", "Sworn Blade", "Banneret", "Knight of the House", "Hand of the House")
+hidden = false
+exclusive_group = "houses"
+requires_affliction = ""
+join_quest = "H-TW01"
+penance_quest = ""
+leader_name = "Duchess Isra Tidewell"
+leader_town = "Saltmere"
+gate_mid = "H-TW04"
+gate_final = "H-TW07"
+quests_for_rank = PackedInt32Array(0, 1, 3, 5, 7)
+level_for_rank = PackedInt32Array(1, 1, 1, 1, 1)
+perk_stat = "carry_capacity"
+perk_per_rank = 10.0
+quest_types = PackedStringArray("deliver", "retrieve")
+reward_base = 90

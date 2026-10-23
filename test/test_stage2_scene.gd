@@ -37,7 +37,7 @@ func _door_of(wm: WorldManager, b: BuildingPlot) -> BuildingDoor:
 
 
 func _run() -> void:
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(40)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var sm := get_first_node_in_group("save_manager") as SaveManager

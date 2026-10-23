@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="TownData" format=3]
+
+[ext_resource type="Script" path="res://scripts/towns/town_data.gd" id="1_town"]
+
+[resource]
+script = ExtResource("1_town")
+id = &"large_village"
+display_name = "Village"
+map_color = Color(0.95, 0.85, 0.35, 1)
+footprint_radius = 110.0
+flatten_radius = 95.0
+max_slope_deg = 13.0
+random_rotation = false
+kind = 0
+layout_style = 0
+weight = 2.0
+houses_min = 10
+houses_max = 14
+farms_min = 3
+farms_max = 5
+shops_min = 0
+shops_max = 2
+inns_min = 1
+inns_max = 1
+smithies_min = 1
+smithies_max = 1
+house_locked_chance = 0.7
+house_lock_min = 1
+house_lock_max = 20

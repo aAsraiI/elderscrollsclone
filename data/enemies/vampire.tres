@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_844nj"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_hl7io"]
+
+[resource]
+script = ExtResource("2_hl7io")
+id = &"vampire"
+display_name = "Vampire"
+color = Color(0.75, 0.72, 0.78, 1)
+health_mult = 1.15
+damage_mult = 1.2
+loot_quality = 1.5
+kit = 3
+move_speed = 3.6
+detection_range = 20.0
+telegraph_time = 0.25
+heavy_chance = 0.3
+chain_chance = 0.5
+talk_lines = PackedStringArray()

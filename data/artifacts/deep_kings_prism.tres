@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_snpo4"]
+
+[resource]
+script = ExtResource("1_snpo4")
+id = &"deep_kings_prism"
+display_name = "Prism of the Deep Kings"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 1.5
+value = 2200
+min_level = 60
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("vault")

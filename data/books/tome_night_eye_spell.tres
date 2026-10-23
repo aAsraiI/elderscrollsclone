@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_v0x8j"]
+
+[resource]
+script = ExtResource("1_v0x8j")
+id = &"tome_night_eye_spell"
+display_name = "Spell Tome: Night Eye"
+description = "Novice Illusion spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 30
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "night_eye_spell"

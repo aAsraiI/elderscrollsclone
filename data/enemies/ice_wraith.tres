@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_hk055"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_bofr6"]
+
+[resource]
+script = ExtResource("2_bofr6")
+id = &"ice_wraith"
+display_name = "Ice Wraith"
+color = Color(0.78, 0.88, 1, 1)
+body_scale = 0.9
+loot_quality = 0.0
+armor_tier_offset = -9
+kit = 0
+move_speed = 4.2
+telegraph_time = 0.2
+chain_chance = 0.5
+talk_name = "Ice Wraith"
+talk_lines = PackedStringArray()

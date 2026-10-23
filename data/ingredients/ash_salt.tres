@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_f1lu8"]
+
+[resource]
+script = ExtResource("1_f1lu8")
+id = &"ash_salt"
+display_name = "Ash Salt"
+description = "An alchemical ingredient. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 12
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "ashlands")
+ingredient_effects = PackedStringArray("resist_fire", "restore_magicka", "fortify_magic", "weakness_frost")

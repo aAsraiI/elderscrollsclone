@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_sqivd"]
+
+[resource]
+script = ExtResource("1_sqivd")
+id = &"silverweave_cuirass"
+display_name = "Silverweave Armor"
+description = "Cloth woven with silver thread, light as silk. Light armor for the chest."
+item_type = 2
+equip_slot = 2
+weight = 6.300000000000001
+value = 194
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 13.5
+}
+tier = 3
+min_level = 17
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"silver_light"
+animation_set = &"cuirass"

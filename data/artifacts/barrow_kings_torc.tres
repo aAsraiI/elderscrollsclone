@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ig826"]
+
+[resource]
+script = ExtResource("1_ig826")
+id = &"barrow_kings_torc"
+display_name = "Barrow King's Torc"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 1.0
+value = 350
+min_level = 10
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("barrow")

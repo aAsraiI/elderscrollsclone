@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_27hhy"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_x1yfk"]
+
+[resource]
+script = ExtResource("2_x1yfk")
+id = &"deep_crawler"
+display_name = "Deep Crawler"
+color = Color(0.25, 0.32, 0.22, 1)
+body_scale = 0.9
+health_mult = 0.9
+poise_mult = 0.8
+loot_quality = 0.0
+armor_tier_offset = -9
+kit = 0
+move_speed = 4.5
+telegraph_time = 0.18
+chain_chance = 0.5
+talk_name = "Deep Crawler"
+talk_lines = PackedStringArray()

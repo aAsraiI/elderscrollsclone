@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Resource" path="res://data/enemies/vampire.tres" id="5_b1067"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="ed"]
+[ext_resource type="Resource" path="res://data/enemies/skeleton.tres" id="e_skeleton"]
+[ext_resource type="Resource" path="res://data/enemies/skeleton_knight.tres" id="e_skeleton_knight"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="s"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="t"]
+
+[sub_resource type="Resource" id="entry_0"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("e_skeleton")])
+weight = 4.0
+count_min = 2
+count_max = 4
+
+[sub_resource type="Resource" id="entry_1"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("e_skeleton_knight")])
+weight = 2.0
+count_max = 2
+min_level = 5
+
+[sub_resource type="Resource" id="Resource_a5fgc"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("5_b1067")])
+weight = 0.6
+min_level = 8
+
+[resource]
+script = ExtResource("t")
+entries = Array[ExtResource("s")]([SubResource("entry_0"), SubResource("entry_1"), SubResource("Resource_a5fgc")])

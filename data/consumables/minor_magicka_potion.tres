@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_qt7in"]
+
+[resource]
+script = ExtResource("1_qt7in")
+id = &"minor_magicka_potion"
+display_name = "Minor Magicka Potion"
+item_type = 3
+weight = 0.3
+value = 20
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "library")
+use_verb = "Drink"
+effect_group = "potion"
+restore_magicka = 30.0

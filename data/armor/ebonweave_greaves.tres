@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ihj1g"]
+
+[resource]
+script = ExtResource("1_ihj1g")
+id = &"ebonweave_greaves"
+display_name = "Ebonweave Leggings"
+description = "Ebon rings woven fine as cloth. Light armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 3.7
+value = 461
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 8.1
+}
+tier = 5
+min_level = 41
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"ebon_light"
+animation_set = &"greaves"

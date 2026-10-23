@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for stage 9a (items for every slot, new weapons, level cap 100, blended loot).
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage9a.gd
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 
 var passes := 0
 var fails := 0
@@ -96,7 +96,7 @@ func t_files() -> void:
 		if absf(set_total - [30, 38, 46, 54, 62, 70, 78][t]) > 0.5 or light_total >= set_total:
 			slots_ok = false
 	check("a full heavy set gives its tier's armor; light gives less and weighs less", slots_ok)
-	check("the iron cuirass keeps its old file and id", ItemCatalog.get_chest(0) == load(R + "iron_chestplate.tres") and FileAccess.get_file_as_string(R + "iron_chestplate.tres").begins_with('[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://bu7yro4jl28nt"]'))
+	check("the iron cuirass keeps its old file and id", ItemCatalog.get_chest(0) == load(R + "weapons/iron_chestplate.tres") and FileAccess.get_file_as_string(R + "weapons/iron_chestplate.tres").begins_with('[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://bu7yro4jl28nt"]'))
 	var mace := ItemCatalog.get_weapon(ItemCatalog.Weapon.MACE, 2)
 	check("maces ignore a quarter of armor and say so", mace.armor_pierce == 0.25 and mace.get_combat_description().contains("Ignores 25% of armor"))
 	var spear := ItemCatalog.get_weapon(ItemCatalog.Weapon.SPEAR, 0)
@@ -108,8 +108,8 @@ func t_files() -> void:
 	var ingr := ItemCatalog.all_items().filter(func(i: ItemData) -> bool: return i.item_type == ItemData.ItemType.INGREDIENT)
 	check("20 ingredients fill the Ingredients tab", ingr.size() >= 20, str(ingr.size()))
 	check("kitchens and smithies have things to put on their shelves", ItemCatalog.tagged("kitchen").size() >= 6 and ItemCatalog.tagged("smithy").size() >= 10)
-	check("clutter is marked as junk", (load(R + "Clutter/tankard.tres") as ItemData).junk and not (load(R + "Clutter/iron_ingot.tres") as ItemData).junk)
-	check("old items still load", load(R + "Consumables/bread.tres") is ItemData and load(R + "Treasure/ruby.tres") is ItemData)
+	check("clutter is marked as junk", (load(R + "clutter/tankard.tres") as ItemData).junk and not (load(R + "clutter/iron_ingot.tres") as ItemData).junk)
+	check("old items still load", load(R + "consumables/bread.tres") is ItemData and load(R + "treasure/ruby.tres") is ItemData)
 
 
 func t_curve() -> void:
@@ -163,7 +163,7 @@ func t_loot() -> void:
 	check("a deeper crypt can hold artifacts", crypt_high.any(func(e: LootEntry) -> bool: return e.item.artifact))
 	var gold := ItemCatalog.gold_loot(50)
 	check("chest gold follows the level", gold.min_count == LevelCurve.gold_range(50).x and gold.item != null)
-	check("rarity: gear two tiers ahead is purple, artifacts gold", ItemCatalog.rarity_color(ItemCatalog.get_weapon(0, 3), 1).b > 0.9 and ItemCatalog.rarity_color(load(R + "Artifacts/sunfire_idol.tres"), 1).r > 0.9)
+	check("rarity: gear two tiers ahead is purple, artifacts gold", ItemCatalog.rarity_color(ItemCatalog.get_weapon(0, 3), 1).b > 0.9 and ItemCatalog.rarity_color(load(R + "artifacts/sunfire_idol.tres"), 1).r > 0.9)
 
 
 func t_player() -> void:
@@ -198,14 +198,14 @@ func t_player() -> void:
 	check("four pieces: no set bonus", absf(st.get_stat("armor") - 27.0) < 0.2 and not eq.has_full_set(), str(st.get_stat("armor")))
 	# potions
 	var fx := p.get_node("StatusEffects") as StatusEffects
-	var pot: ItemData = load(R + "Consumables/stamina_potion.tres")
+	var pot: ItemData = load(R + "consumables/stamina_potion.tres")
 	inv.add_item(pot)
 	st.modify_vital("stamina", -90.0)
 	var before := st.stamina
 	fx.use_item(pot)
 	check("a stamina potion gives stamina back at once", st.stamina >= before + 79.0, "%f -> %f" % [before, st.stamina])
 	# jewelry
-	var ring: ItemData = load(R + "Jewelry/gold_ring_vigor.tres")
+	var ring: ItemData = load(R + "jewelry/gold_ring_vigor.tres")
 	inv.add_item(ring)
 	var hp := st.get_stat("max_health")
 	eq.equip(ring)
@@ -244,6 +244,6 @@ func t_models() -> void:
 		var m := ItemModels.build_world(ItemCatalog.get_armor(2, piece, false))
 		check("light %s has a model" % piece, m.find_children("*", "MeshInstance3D", true, false).size() >= 1)
 		m.free()
-	var book := ItemModels.build_world(load(R + "Clutter/old_book.tres"))
+	var book := ItemModels.build_world(load(R + "clutter/old_book.tres"))
 	check("a book looks like a book (flat)", ItemModels.get_bounds(book).size.y < 0.1)
 	book.free()

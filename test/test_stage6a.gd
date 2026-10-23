@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for stage 6a: sneaking, detection, sneak attacks, crime, bounty and guards. Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage6a.gd
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 
 var passes := 0
 var fails := 0
@@ -184,8 +184,8 @@ func t_stealth() -> void:
 	check("by day, the same spot is in plain view", st.is_detected_by(watcher))
 
 	# sneak attacks
-	var sword := load(R + "iron_sword.tres") as ItemData
-	var dagger := load(R + "iron_dagger.tres") as ItemData
+	var sword := load(R + "weapons/iron_sword.tres") as ItemData
+	var dagger := load(R + "weapons/iron_dagger.tres") as ItemData
 	st.awareness.clear()
 	check("an unaware target takes double damage", st.sneak_attack_mult(watcher, sword) == 2.0)
 	check("triple with a dagger", st.sneak_attack_mult(watcher, dagger) == 3.0)
@@ -236,7 +236,7 @@ func t_crime() -> void:
 	var p := make_player(holder)
 	var inv := p.get_node("Inventory") as Inventory
 	var st := p.get_node("Stealth") as Stealth
-	var s := (load(R + "World/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
+	var s := (load(R + "world/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
 	s.view_distance_chunks = 3
 	s.spawn_radius_chunks = 1
 	s.debug_map_enabled = false
@@ -268,7 +268,7 @@ func t_crime() -> void:
 	check("its prompt says Steal", chest.get_prompt().begins_with("Steal from"))
 	var cui := p.get_node("ContainerUI") as ContainerUI
 	chest.roll_contents()
-	var ruby := load(R + "Treasure/ruby.tres") as ItemData
+	var ruby := load(R + "treasure/ruby.tres") as ItemData
 	chest.inventory.add_item(ruby, 2)
 	st.awareness.clear()
 	st.awareness[keeper.node.get_instance_id()] = 0.0
@@ -308,7 +308,7 @@ func t_crime() -> void:
 
 	# ---- assault and murder, through a real hit
 	var mc := p.get_node("MeleeCombat") as MeleeCombat
-	var sword := load(R + "iron_sword.tres") as ItemData
+	var sword := load(R + "weapons/iron_sword.tres") as ItemData
 	var folk: Array[TownLife.Resident] = []
 	for r: TownLife.Resident in wm.life.get_town_residents(town.id):
 		if r.node != null and is_instance_valid(r.node) and not r.node_inside and r.data.role != NpcData.Role.GUARD:
@@ -355,7 +355,7 @@ func _new_world() -> Dictionary:
 	holder.name = "WorldHolder"
 	root.add_child(holder)
 	var p := make_player(holder)
-	var s := (load(R + "World/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
+	var s := (load(R + "world/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
 	s.view_distance_chunks = 3
 	s.spawn_radius_chunks = 1
 	s.debug_map_enabled = false
@@ -387,7 +387,7 @@ func t_arrest() -> void:
 	var town := wm.get_nearest_town(p.global_position)
 	var crime := wm.crime
 	var ui := crime._ui
-	var ruby := load(R + "Treasure/ruby.tres") as ItemData
+	var ruby := load(R + "treasure/ruby.tres") as ItemData
 
 	# pay the fine
 	crime.set_bounty(town.id, 60)
@@ -493,7 +493,7 @@ func t_trespass_and_defense() -> void:
 
 	# a wolf walks into town
 	var guard := _guard_of(wm, town)
-	var wolf_data := load(R + "Enemies/wolf.tres") as EnemyData
+	var wolf_data := load(R + "enemies/wolf.tres") as EnemyData
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	p.global_position = guard.global_position + Vector3(0, 0.5, 30)

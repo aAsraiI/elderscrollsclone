@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for stage 2: towns, roads, building interiors, locks and keys. Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage2.gd
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 
 var passes := 0
 var fails := 0
@@ -41,7 +41,7 @@ func _run() -> void:
 
 
 func _settings() -> WorldSettings:
-	var s := (load(R + "World/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
+	var s := (load(R + "world/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
 	s.view_distance_chunks = 3
 	s.spawn_radius_chunks = 1
 	s.debug_map_enabled = false
@@ -87,7 +87,7 @@ func t_locks_and_keys() -> void:
 	check("and loads back as the same key", SaveUtil.path_to_item(path) == k1)
 	var inv := Inventory.new()
 	inv.add_item(k1)
-	inv.add_item(load(R + "Consumables/gold.tres"), 5)
+	inv.add_item(load(R + "consumables/gold.tres"), 5)
 	var saved := inv.to_dict()
 	var inv2 := Inventory.new()
 	inv2.from_dict(saved)

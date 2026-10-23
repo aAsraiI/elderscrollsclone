@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_o4sr0"]
+
+[resource]
+script = ExtResource("1_o4sr0")
+id = &"saints_finger"
+display_name = "Saint's Finger Bone"
+description = "An ancient relic. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 0.1
+value = 220
+min_level = 12
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("crypt", "temple")

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_3bv54"]
+
+[resource]
+script = ExtResource("1_3bv54")
+id = &"troll_fat"
+display_name = "Troll Fat"
+description = "An alchemical ingredient. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 20
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "cave")
+ingredient_effects = PackedStringArray("regenerate_health", "fortify_health", "damage_magicka", "frenzy")

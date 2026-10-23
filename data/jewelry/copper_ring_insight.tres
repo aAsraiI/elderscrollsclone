@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_fdnc4"]
+
+[resource]
+script = ExtResource("1_fdnc4")
+id = &"copper_ring_insight"
+display_name = "Copper Ring of Insight"
+description = "+10 maximum magicka while worn."
+item_type = 2
+equip_slot = 8
+weight = 0.1
+value = 60
+stat_modifiers = {
+"max_magicka": 10.0
+}
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

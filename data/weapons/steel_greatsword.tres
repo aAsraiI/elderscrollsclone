@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"steel_greatsword"
+display_name = "Steel Greatsword"
+description = "Well-forged steel with a keen edge. Two-handed. Slow, with a long reach and a wide swing. One clean hit staggers most foes."
+item_type = 1
+equip_slot = 6
+weight = 14.0
+value = 175
+governing_skill = "two_handed"
+tier = 2
+min_level = 8
+loot_tags = PackedStringArray("weapon", "smithy")
+weapon_damage = 27.0
+reach = 3.2
+attack_style = 1
+arc_degrees = 130.0
+attack_cooldown = 1.4
+attack_windup = 0.35
+attack_active = 0.22
+stamina_cost = 14.700000000000001
+knockback = 4.2
+poise_damage = 44.0
+combo_length = 2
+two_handed = true
+heavy_charge_time = 0.6
+heavy_windup = 0.25
+heavy_poise_mult = 1.6
+heavy_reach_bonus = 0.4
+animation_set = &"greatsword"
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

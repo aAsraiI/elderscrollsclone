@@ -44,14 +44,14 @@ func t_tables() -> void:
 	check("ten races, each with a power", Races.ids().size() == 10 and Races.ids().all(func(id: String) -> bool: return not Races.power_effects(Races.get_race(id)["power"]).is_empty()))
 	var bad := []
 	for id in Classes.LIST:
-		var c := Classes.get_class_data(id)
-		for s in c["major"] + c["minor"]:
+		var cls := Classes.get_class_data(id)
+		for s in cls["major"] + cls["minor"]:
 			if SkillDatabase.get_skill(StringName(s)) == null:
 				bad.append(s)
-		for g in c["gear"]:
+		for g in cls["gear"]:
 			if not ResourceLoader.exists(String(g[0])):
 				bad.append(g[0])
-		for sp in c["spells"]:
+		for sp in cls["spells"]:
 			if SpellCatalog.get_spell(sp) == null:
 				bad.append(sp)
 	check("every class has real skills, gear and spells", bad.is_empty(), str(bad))
@@ -61,7 +61,7 @@ func t_tables() -> void:
 	check("advantages slow leveling, disadvantages speed it", Classes.xp_mult(["iron_skin", "rapid_healing"], []) < 1.0 and Classes.xp_mult([], ["frail", "weak_magic"]) > 1.0)
 	check("bows and arrows for every tier", ItemCatalog.get_bow(0) != null and ItemCatalog.get_bow(6) != null and ItemCatalog.get_arrow(3) != null and ItemCatalog.get_bow(2).is_bow)
 	check("the forge makes bows and arrows", Recipes.for_station("forge").any(func(r: Dictionary) -> bool: return String(r["result"]).ends_with("_bow.tres")))
-	check("vampires and werewolves exist", ResourceLoader.exists("res://scripts/Resources/Enemies/vampire.tres") and ResourceLoader.exists("res://scripts/Resources/Enemies/werewolf.tres"))
+	check("vampires and werewolves exist", ResourceLoader.exists("res://data/enemies/vampire.tres") and ResourceLoader.exists("res://data/enemies/werewolf.tres"))
 	check("sounds are made in code", Synth.get_sound("hit") is AudioStreamWAV and Synth.get_sound("swing") is AudioStreamWAV)
 	Bindings.apply()
 	check("controls: keys and controller", InputMap.has_action("favorites") and InputMap.action_get_events("jump").any(func(e: InputEvent) -> bool: return e is InputEventJoypadButton))
@@ -82,7 +82,7 @@ func t_in_game() -> void:
 	GameRules.from_dict({"survival": true, "afflictions": true})
 	CharacterSetup.pending = {"name": "Testa", "race": "highborn", "sex": 1, "skin": 0, "hair": 1, "height": 1.0, "class": "ranger",
 		"advantages": ["iron_skin"], "disadvantages": ["forbid_heavy"], "sign": "staff", "affliction": ""}
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(60)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var p := get_first_node_in_group("player") as CharacterBody3D
@@ -91,7 +91,7 @@ func t_in_game() -> void:
 	var stats := p.get_node("Stats") as Stats
 	var skills := p.get_node("Skills") as Skills
 	check("the class gear is in the bag (a bow and arrows)", inv.stacks.any(func(s: Inventory.Stack) -> bool: return s.item.is_bow) and inv.stacks.any(func(s: Inventory.Stack) -> bool: return s.item.is_arrow))
-	check("no test sword", not inv.stacks.any(func(s: Inventory.Stack) -> bool: return s.item.resource_path.ends_with("steel_greatsword.tres")))
+	check("no test sword", not inv.stacks.any(func(s: Inventory.Stack) -> bool: return s.item.resource_path.ends_with("weapons/steel_greatsword.tres")))
 	check("class skills start higher, the player level stays 1", skills.get_level(&"archery") == 11 and skills.get_level(&"heavy_armor") == 1 and skills.get_player_level() == 1, "%d %d" % [skills.get_level(&"archery"), skills.get_player_level()])
 	check("race and sign traits apply", stats.get_stat("max_magicka") >= 140.0, str(stats.get_stat("max_magicka")))
 	var heavy := ItemCatalog.get_armor(0, "cuirass", true)
@@ -106,7 +106,7 @@ func t_in_game() -> void:
 	wm.clock.advance_hours(10.0)
 	await frames(3)
 	check("hunger grows with time", surv.hunger > h0 + 30.0, "%f -> %f" % [h0, surv.hunger])
-	var bread := load("res://scripts/Resources/Consumables/bread.tres") as ItemData
+	var bread := load("res://data/consumables/bread.tres") as ItemData
 	inv.add_item(bread, 1)
 	var before := surv.hunger
 	(p.get_node("StatusEffects") as StatusEffects)._cooldown = 0.0
@@ -197,11 +197,11 @@ func t_in_game() -> void:
 		Currency.add_gold(inv, 6000)
 		check("buying it", Homes.buy(b, inv, wm) == "" and Homes.owns(sale))
 		var built := InteriorBuilder.build(b, 3)
-		var root: Node3D = built["root"]
-		check("your home has planters, a bed and an alchemy lab", not root.find_children("*", "Planter", true, false).is_empty() \
-			and not root.find_children("*", "RestSpot", true, false).is_empty() \
-			and root.find_children("*", "CraftingStation", true, false).any(func(s: Node) -> bool: return (s as CraftingStation).kind == "alchemy_lab"))
-		root.free()
+		var body_root: Node3D = built["root"]
+		check("your home has planters, a bed and an alchemy lab", not body_root.find_children("*", "Planter", true, false).is_empty() \
+			and not body_root.find_children("*", "RestSpot", true, false).is_empty() \
+			and body_root.find_children("*", "CraftingStation", true, false).any(func(s: Node) -> bool: return (s as CraftingStation).kind == "alchemy_lab"))
+		body_root.free()
 		check("cities have a carriage stop", Carriage.stop_for(city).length() > 0.0)
 	# The ragdoll fix: a body far below the world (where dungeons are) still falls
 	var floor_body := StaticBody3D.new()

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"health_potion"
+display_name = "Health Potion"
+description = "A red potion that mends flesh almost as fast as you can drink it."
+item_type = 3
+weight = 0.4
+value = 60
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "temple", "camp")
+use_verb = "Drink"
+effect_group = "potion"
+heal_amount = 80.0
+effect_duration = 3.0

@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for stage 9d (bigger dungeons, floors, gates, secrets, traps, new types).
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage9d.gd
 
-const D := "res://scripts/Resources/World/Dungeons/"
+const D := "res://data/world/Dungeons/"
 
 var passes := 0
 var fails := 0
@@ -31,7 +31,7 @@ func _run() -> void:
 	world = Node3D.new()
 	root.add_child(world)
 	await frames(2)
-	await t_sizes()
+	t_sizes()
 	await t_features()
 	await t_types()
 	await t_in_game()
@@ -138,7 +138,7 @@ func t_types() -> void:
 		await frames(1)
 	var found := {}
 	for b in ["ashlands", "frozen_crown", "coast", "badlands", "tundra"]:
-		var biome := load("res://scripts/Resources/World/%s.tres" % b) as BiomeData
+		var biome := load("res://data/world/%s.tres" % b) as BiomeData
 		for rule in biome.poi_rules:
 			if rule.poi is DungeonEntrancePOIData:
 				found[String((rule.poi as DungeonEntrancePOIData).dungeon.id)] = true
@@ -148,7 +148,7 @@ func t_types() -> void:
 func t_in_game() -> void:
 	print("-- floors in the game")
 	WorldState.clear()
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(40)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var p := get_first_node_in_group("player") as CharacterBody3D

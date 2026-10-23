@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_84d88"]
+
+[resource]
+script = ExtResource("1_84d88")
+id = &"silver_boots"
+display_name = "Silver Boots"
+description = "Silvered steel that gleams even in the dark. Heavy armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 4.2
+value = 54
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 4.6000000000000005
+}
+tier = 3
+min_level = 17
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"silver_heavy"
+animation_set = &"boots"

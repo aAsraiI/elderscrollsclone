@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_2eg30"]
+
+[resource]
+script = ExtResource("1_2eg30")
+id = &"copper_ring_endurance"
+display_name = "Copper Ring of Endurance"
+description = "+10 maximum stamina while worn."
+item_type = 2
+equip_slot = 8
+weight = 0.1
+value = 60
+stat_modifiers = {
+"max_stamina": 10.0
+}
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

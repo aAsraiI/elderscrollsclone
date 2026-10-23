@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="FactionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/factions/faction_data.gd" id="1_f"]
+
+[resource]
+script = ExtResource("1_f")
+id = &"hunters"
+display_name = "Hunters' Lodge"
+description = "Trackers and trappers who keep the wild beasts in check and sell what they bring home."
+ranks = PackedStringArray("Tracker", "Hunter", "Stalker", "Huntsman", "Master of the Hunt")
+skills = PackedStringArray("one_handed", "two_handed", "sneak")
+perk_stat = "max_stamina"
+perk_per_rank = 5.0
+discount_merchants = PackedStringArray("provisioner", "general")
+quest_types = PackedStringArray("hunt", "deliver")
+reward_base = 70
+gate_mid = "G-HL03"
+gate_final = "G-HL06"

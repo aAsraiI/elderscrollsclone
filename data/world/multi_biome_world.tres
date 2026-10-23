@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="WorldSettings" format=3 uid="uid://bc51kxd22av30"]
+
+[ext_resource type="Script" uid="uid://k5yg4cqcklq7" path="res://scripts/world/world_settings.gd" id="1_ws"]
+[ext_resource type="Script" uid="uid://byq7rdfuh6gn" path="res://scripts/world/biome_placement.gd" id="2_bp"]
+[ext_resource type="Resource" uid="uid://cdcb4g7003tw7" path="res://data/world/plains.tres" id="3_plains"]
+[ext_resource type="Resource" uid="uid://d4q5idmw0rql" path="res://data/world/desert.tres" id="4_desert"]
+[ext_resource type="Resource" uid="uid://cc3boqjbwt1wu" path="res://data/world/snow_mountains.tres" id="5_snow"]
+
+[sub_resource type="Resource" id="Resource_snow"]
+script = ExtResource("2_bp")
+biome = ExtResource("5_snow")
+cell = Vector2i(-3, -4)
+size_cells = Vector2i(6, 2)
+
+[sub_resource type="Resource" id="Resource_plains_a"]
+script = ExtResource("2_bp")
+biome = ExtResource("3_plains")
+cell = Vector2i(-3, -2)
+size_cells = Vector2i(3, 3)
+
+[sub_resource type="Resource" id="Resource_desert_a"]
+script = ExtResource("2_bp")
+biome = ExtResource("4_desert")
+cell = Vector2i(0, -2)
+size_cells = Vector2i(3, 3)
+
+[sub_resource type="Resource" id="Resource_plains_b"]
+script = ExtResource("2_bp")
+biome = ExtResource("3_plains")
+cell = Vector2i(-3, 1)
+size_cells = Vector2i(6, 2)
+
+[resource]
+script = ExtResource("1_ws")
+placements = Array[ExtResource("2_bp")]([SubResource("Resource_snow"), SubResource("Resource_plains_a"), SubResource("Resource_desert_a"), SubResource("Resource_plains_b")])
+spawn_placement = 1
+road_traffic = false

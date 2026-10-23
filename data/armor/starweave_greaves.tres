@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_gr4vq"]
+
+[resource]
+script = ExtResource("1_gr4vq")
+id = &"starweave_greaves"
+display_name = "Starweave Leggings"
+description = "Star-metal spun into thread. Light armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 4.0
+value = 2448
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 10.100000000000001
+}
+tier = 7
+min_level = 74
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"starforged_light"
+animation_set = &"greaves"

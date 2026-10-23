@@ -1,0 +1,94 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_hgn5o"]
+[ext_resource type="Resource" path="res://data/encounters/desert_raiders.tres" id="2_ofbxx"]
+[ext_resource type="Resource" path="res://data/encounters/desert_beasts.tres" id="3_chwfb"]
+[ext_resource type="Resource" path="res://data/encounters/desert_prospector.tres" id="4_2u524"]
+[ext_resource type="Resource" path="res://data/encounters/desert_caravan.tres" id="5_3evps"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="6_bkmdb"]
+[ext_resource type="Resource" path="res://data/world/POIs/ruined_shrine.tres" id="7_bswou"]
+[ext_resource type="Resource" path="res://data/world/POIs/standing_stones.tres" id="8_3xsts"]
+[ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="9_f8si1"]
+[ext_resource type="Resource" path="res://data/world/POIs/crypt_entrance.tres" id="10_pgco0"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="11_yfbrx"]
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="12_lwaoe"]
+[ext_resource type="Resource" path="res://data/world/POIs/abandoned_mine_entrance.tres" id="12_ofbxx"]
+[ext_resource type="Resource" path="res://data/world/POIs/fort_ruin_entrance.tres" id="13_chwfb"]
+
+[sub_resource type="Resource" id="Resource_3o4xy"]
+script = ExtResource("6_bkmdb")
+poi = ExtResource("7_bswou")
+count_min = 2.0
+count_max = 3.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_3g6b6"]
+script = ExtResource("6_bkmdb")
+poi = ExtResource("8_3xsts")
+count_min = 0.5
+count_max = 1.5
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_r347b"]
+script = ExtResource("6_bkmdb")
+poi = ExtResource("9_f8si1")
+count_min = 1.5
+count_max = 2.5
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_kt13t"]
+script = ExtResource("6_bkmdb")
+poi = ExtResource("10_pgco0")
+count_min = 1.5
+count_max = 2.5
+extra_spacing = 50.0
+
+[sub_resource type="Resource" id="Resource_x4wka"]
+script = ExtResource("6_bkmdb")
+poi = ExtResource("11_yfbrx")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_chwfb"]
+script = ExtResource("6_bkmdb")
+poi = ExtResource("12_ofbxx")
+count_min = 0.2
+count_max = 0.35
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_2u524"]
+script = ExtResource("6_bkmdb")
+poi = ExtResource("13_chwfb")
+count_min = 0.08
+count_max = 0.15
+extra_spacing = 80.0
+border_margin = 80.0
+
+[resource]
+script = ExtResource("12_lwaoe")
+id = &"badlands"
+display_name = "Badlands"
+map_color = Color(0.72, 0.42, 0.26, 1)
+blend_distance = 260.0
+base_height = 22.0
+hills_amplitude = 16.0
+hills_scale = 320.0
+hills_octaves = 2
+mountain_amplitude = 60.0
+mountain_scale = 500.0
+mountain_coverage = 0.45
+detail_amplitude = 0.25
+detail_scale = 7.0
+ground_color = Color(0.62, 0.36, 0.22, 1)
+ground_color_alt = Color(0.7, 0.46, 0.28, 1)
+patch_scale = 70.0
+steep_color = Color(0.5, 0.28, 0.2, 1)
+tree_style = 3
+tree_density = 4.0
+tree_color = Color(0.32, 0.5, 0.26, 1)
+poi_rules = Array[ExtResource("6_bkmdb")]([SubResource("Resource_3o4xy"), SubResource("Resource_3g6b6"), SubResource("Resource_r347b"), SubResource("Resource_kt13t"), SubResource("Resource_x4wka"), SubResource("Resource_chwfb"), SubResource("Resource_2u524")])
+level_min = 33
+level_max = 57
+encounters = Array[ExtResource("1_hgn5o")]([ExtResource("2_ofbxx"), ExtResource("3_chwfb"), ExtResource("4_2u524"), ExtResource("5_3evps")])

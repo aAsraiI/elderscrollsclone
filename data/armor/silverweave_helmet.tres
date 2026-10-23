@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ks3p5"]
+
+[resource]
+script = ExtResource("1_ks3p5")
+id = &"silverweave_helmet"
+display_name = "Silverweave Hood"
+description = "Cloth woven with silver thread, light as silk. Light armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 2.1
+value = 65
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 4.5
+}
+tier = 3
+min_level = 17
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"silver_light"
+animation_set = &"helmet"

@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_hi17h"]
+
+[resource]
+script = ExtResource("1_hi17h")
+id = &"dragonbone_spear"
+display_name = "Dragonbone Spear"
+description = "Carved from the bones of great wyrms. Two-handed. The longest reach of any weapon and quick thrusts, but it only hits one foe at a time."
+item_type = 1
+equip_slot = 6
+weight = 10.8
+value = 3375
+governing_skill = "two_handed"
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("weapon", "smithy")
+weapon_damage = 72.8
+reach = 3.0
+attack_cooldown = 0.8
+attack_windup = 0.14
+attack_active = 0.15
+stamina_cost = 10.0
+knockback = 3.75
+poise_damage = 30.0
+two_handed = true
+heavy_charge_time = 0.5
+heavy_poise_mult = 1.8
+heavy_reach_bonus = 0.6
+animation_set = &"spear"

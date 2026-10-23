@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for stage 4: dialogue, topics, disposition, persuasion, the journal. Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage4.gd
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 
 var passes := 0
 var fails := 0
@@ -165,7 +165,7 @@ func make_player(parent: Node) -> CharacterBody3D:
 
 
 func _settings() -> WorldSettings:
-	var s := (load(R + "World/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
+	var s := (load(R + "world/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
 	s.view_distance_chunks = 3
 	s.spawn_radius_chunks = 1
 	s.debug_map_enabled = false

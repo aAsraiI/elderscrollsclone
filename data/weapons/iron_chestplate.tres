@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://bu7yro4jl28nt"]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"iron_chestplate"
+display_name = "Iron Cuirass"
+description = "Plain, sturdy iron. Heavy armor for the chest."
+item_type = 2
+equip_slot = 2
+weight = 15.0
+value = 41
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 13.5
+}
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"iron_heavy"
+animation_set = &"cuirass"
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

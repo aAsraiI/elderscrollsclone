@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"iron_shield"
+display_name = "Iron Shield"
+description = "Plain, sturdy iron. Hold right click to block. Raise it just before a hit lands to parry. Left click while blocking to bash."
+item_type = 2
+equip_slot = 7
+weight = 8.0
+value = 30
+governing_skill = "block"
+stat_modifiers = {
+"armor": 10.0
+}
+loot_tags = PackedStringArray("armor", "smithy")
+secondary_action = 1
+animation_set = &"shield"
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

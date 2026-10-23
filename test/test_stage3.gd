@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for stage 3: townspeople, their day, locks that follow them, guards. Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage3.gd
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 
 var passes := 0
 var fails := 0
@@ -41,7 +41,7 @@ func _run() -> void:
 
 
 func _settings() -> WorldSettings:
-	var s := (load(R + "World/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
+	var s := (load(R + "world/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
 	s.view_distance_chunks = 3
 	s.spawn_radius_chunks = 1
 	s.debug_map_enabled = false
@@ -212,7 +212,6 @@ func t_world() -> void:
 	holder.name = "WorldHolder"
 	root.add_child(holder)
 	var player := make_player(holder)
-	var inv := player.get_node("Inventory") as Inventory
 	var wm := WorldManager.new()
 	wm.name = "World"
 	wm.settings = _settings()

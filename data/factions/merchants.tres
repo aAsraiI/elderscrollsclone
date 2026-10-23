@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="FactionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/factions/faction_data.gd" id="1_f"]
+
+[resource]
+script = ExtResource("1_f")
+id = &"merchants"
+display_name = "Merchant Consortium"
+description = "The trading houses of the realm, moving goods between towns and settling who sells what, and where."
+ranks = PackedStringArray("Runner", "Trader", "Factor", "Partner", "Magnate")
+join_requirement = "no_bounty"
+skills = PackedStringArray("speech")
+perk_stat = "carry_capacity"
+perk_per_rank = 15.0
+discount_merchants = PackedStringArray("general", "jeweler", "provisioner", "alchemy", "smith", "peddler")
+quest_types = PackedStringArray("deliver", "persuade")
+reward_base = 80
+gate_mid = "G-MC03"
+gate_final = "G-MC06"

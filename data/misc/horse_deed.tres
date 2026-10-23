@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_efjaw"]
+
+[resource]
+script = ExtResource("1_efjaw")
+id = &"horse_deed"
+display_name = "Horse Deed"
+description = "Proof that a horse is yours. Use it to call your horse to you."
+weight = 0.5
+value = 1500
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

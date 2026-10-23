@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_3o1e5"]
+
+[resource]
+script = ExtResource("1_3o1e5")
+id = &"bear_claw"
+display_name = "Bear Claw"
+description = "An alchemical ingredient. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 10
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "hunter")
+ingredient_effects = PackedStringArray("restore_stamina", "fortify_health", "fortify_attack", "fortify_strength")

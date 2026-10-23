@@ -25,7 +25,7 @@ func frames(n: int) -> void:
 
 
 func _run() -> void:
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(30)
 	var sm := get_first_node_in_group("save_manager") as SaveManager
 	check("main scene has a SaveManager (auto-created)", sm != null)
@@ -38,7 +38,7 @@ func _run() -> void:
 	pm.close()
 	var inv := player.get_node("Inventory") as Inventory
 	var fx := player.get_node("StatusEffects") as StatusEffects
-	var bread: ItemData = load("res://scripts/Resources/Consumables/bread.tres")
+	var bread: ItemData = load("res://data/consumables/bread.tres")
 	fx.use_item(bread)
 	clock.set_time(19.25, 3)
 	Currency.add_gold(inv, 42)

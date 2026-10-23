@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/ice_cavern.tres" id="1_qv6fr"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="2_hqon4"]
+
+[resource]
+script = ExtResource("2_hqon4")
+dungeon = ExtResource("1_qv6fr")
+color = Color(0.75, 0.85, 0.95, 1)
+enter_name = "Ice Cavern"
+id = &"ice_cavern_entrance"
+display_name = "Ice Cave"
+map_color = Color(0.7, 0.9, 1, 1)
+footprint_radius = 14.0
+flatten_radius = 7.0

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_g0jil"]
+
+[resource]
+script = ExtResource("1_g0jil")
+id = &"silver_arrow"
+display_name = "Silver Arrow"
+description = "Shot from a bow. Better arrows hit harder."
+value = 6
+stackable = true
+max_stack = 999
+tier = 3
+min_level = 17
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_arrow = true
+arrow_damage = 12.5
+ingredient_effects = PackedStringArray()

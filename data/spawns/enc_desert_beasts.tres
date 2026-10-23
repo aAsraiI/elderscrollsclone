@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3 uid="uid://bex8qr6lrrrnh"]
+
+[ext_resource type="Script" uid="uid://dg8b8xgiyxnc8" path="res://scripts/actors/enemy_data.gd" id="ed"]
+[ext_resource type="Resource" path="res://data/enemies/dune_stalker.tres" id="e_dune_stalker"]
+[ext_resource type="Script" uid="uid://bq60lvmw1j4xb" path="res://scripts/actors/spawn_entry.gd" id="s"]
+[ext_resource type="Script" uid="uid://cri67k8ygdytl" path="res://scripts/actors/spawn_table.gd" id="t"]
+
+[sub_resource type="Resource" id="entry_0"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("e_dune_stalker")])
+count_min = 2
+count_max = 3
+
+[resource]
+script = ExtResource("t")
+entries = Array[ExtResource("s")]([SubResource("entry_0")])

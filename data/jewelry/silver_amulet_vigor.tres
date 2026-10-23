@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_xtvk0"]
+
+[resource]
+script = ExtResource("1_xtvk0")
+id = &"silver_amulet_vigor"
+display_name = "Silver Amulet of Vigor"
+description = "+30 maximum health while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 252
+stat_modifiers = {
+"max_health": 30.0
+}
+tier = 3
+min_level = 15
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

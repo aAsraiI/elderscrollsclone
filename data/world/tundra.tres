@@ -1,0 +1,87 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_2gv2s"]
+[ext_resource type="Resource" path="res://data/encounters/snow_reavers.tres" id="2_fhdby"]
+[ext_resource type="Resource" path="res://data/encounters/snow_beasts.tres" id="3_167v0"]
+[ext_resource type="Resource" path="res://data/encounters/snow_trapper.tres" id="4_smixw"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="5_k6xp8"]
+[ext_resource type="Resource" path="res://data/encounters/night_werewolf.tres" id="5_smixw"]
+[ext_resource type="Resource" path="res://data/encounters/night_vampire.tres" id="6_k6xp8"]
+[ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="6_sx8yx"]
+[ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="7_ah8mw"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="8_7owl3"]
+[ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="9_1jv2r"]
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="10_aa8v0"]
+[ext_resource type="Resource" path="res://data/world/POIs/barrow_entrance.tres" id="10_fhdby"]
+[ext_resource type="Resource" path="res://data/world/POIs/ice_cavern_entrance.tres" id="11_167v0"]
+
+[sub_resource type="Resource" id="Resource_cqhew"]
+script = ExtResource("5_k6xp8")
+poi = ExtResource("6_sx8yx")
+count_min = 2.0
+count_max = 3.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_fubvx"]
+script = ExtResource("5_k6xp8")
+poi = ExtResource("7_ah8mw")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 60.0
+
+[sub_resource type="Resource" id="Resource_36kvh"]
+script = ExtResource("5_k6xp8")
+poi = ExtResource("8_7owl3")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_k346d"]
+script = ExtResource("5_k6xp8")
+poi = ExtResource("9_1jv2r")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 60.0
+
+[sub_resource type="Resource" id="Resource_167v0"]
+script = ExtResource("5_k6xp8")
+poi = ExtResource("10_fhdby")
+count_min = 0.15
+count_max = 0.3
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_smixw"]
+script = ExtResource("5_k6xp8")
+poi = ExtResource("11_167v0")
+count_min = 0.1
+count_max = 0.2
+extra_spacing = 80.0
+border_margin = 80.0
+
+[resource]
+script = ExtResource("10_aa8v0")
+id = &"tundra"
+display_name = "Tundra"
+map_color = Color(0.74, 0.78, 0.74, 1)
+blend_distance = 380.0
+base_height = 30.0
+hills_amplitude = 7.0
+hills_scale = 280.0
+mountain_amplitude = 15.0
+mountain_scale = 800.0
+mountain_coverage = 0.65
+ground_color = Color(0.76, 0.79, 0.76, 1)
+ground_color_alt = Color(0.6, 0.65, 0.56, 1)
+steep_color = Color(0.36, 0.36, 0.4, 1)
+steep_slope_start = 32.0
+steep_slope_full = 52.0
+peak_color = Color(0.97, 0.98, 1, 1)
+peak_blend = 40.0
+tree_style = 1
+tree_density = 4.0
+tree_color = Color(0.16, 0.3, 0.2, 1)
+poi_rules = Array[ExtResource("5_k6xp8")]([SubResource("Resource_cqhew"), SubResource("Resource_fubvx"), SubResource("Resource_36kvh"), SubResource("Resource_k346d"), SubResource("Resource_167v0"), SubResource("Resource_smixw")])
+level_min = 57
+level_max = 80
+encounters = Array[ExtResource("1_2gv2s")]([ExtResource("2_fhdby"), ExtResource("3_167v0"), ExtResource("4_smixw"), ExtResource("5_smixw"), ExtResource("6_k6xp8")])

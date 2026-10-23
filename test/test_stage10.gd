@@ -84,8 +84,8 @@ func t_alchemy_data() -> void:
 	check("every ingredient has 4 effects", all_four)
 	var lonely := counts.keys().filter(func(e: String) -> bool: return int(counts[e]) < 2)
 	check("every effect is in at least two ingredients (so it can be brewed)", lonely.is_empty(), str(lonely))
-	var lav := load("res://scripts/Resources/Ingredients/lavender.tres") as ItemData
-	var blue := load("res://scripts/Resources/Ingredients/blue_mountain_flower.tres") as ItemData
+	var lav := load("res://data/ingredients/lavender.tres") as ItemData
+	var blue := load("res://data/ingredients/blue_mountain_flower.tres") as ItemData
 	check("ingredient files carry their effects", lav.ingredient_effects.size() == 4)
 	check("lavender + mountain flower share Restore Health", Alchemy.shared_effects([lav, blue]).has(&"restore_health"))
 	var p1 := CraftedItems.potion([{"id": &"restore_health", "mag": 30, "dur": 0}], false)
@@ -108,7 +108,7 @@ func t_crafting_data() -> void:
 	check("every recipe ingredient exists", bad.is_empty(), str(bad.slice(0, 5)))
 	var tiers := {}
 	for r in Recipes.for_station("forge"):
-		tiers[Recipes.item(r["result"]).tier] = true
+		tiers[Recipes.load_item(r["result"]).tier] = true
 	check("every tier can be forged", tiers.size() == 7, str(tiers.keys()))
 	var weak := Enchanting.make_effect(&"fire_damage", 0, 1.0, true)
 	var strong := Enchanting.make_effect(&"fire_damage", 4, 1.0, true)
@@ -116,7 +116,7 @@ func t_crafting_data() -> void:
 	var sword := ItemCatalog.get_weapon(ItemCatalog.Weapon.SWORD, 0)
 	var fine := CraftedItems.gear(sword, 2)
 	check("an improved sword hits harder", fine.weapon_damage > sword.weapon_damage and fine.display_name.begins_with("Superior"))
-	var ring := load("res://scripts/Resources/Jewelry/silver_ring_vigor.tres") as ItemData
+	var ring := load("res://data/jewelry/silver_ring_vigor.tres") as ItemData
 	if ring != null:
 		var e := Enchanting.make_effect(&"resist_fire", 2, 1.0, false)
 		var magic_ring := CraftedItems.gear(ring, 0, [e])
@@ -149,7 +149,7 @@ func t_calendar() -> void:
 func t_in_game() -> void:
 	print("-- in the game")
 	WorldState.clear()
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(60)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var p := get_first_node_in_group("player") as CharacterBody3D
@@ -160,7 +160,7 @@ func t_in_game() -> void:
 	var caster := p.get_node("SpellCaster") as SpellCaster
 	check("you start knowing Flames and Healing", book.knows("flames") and book.knows("healing"))
 	check("the Magic page is in the Tab menu", (p.get_node("MenuHub") as MenuHub).page_index("magic") == 4 and p.get_node_or_null("MagicUI") != null)
-	var shield := load("res://scripts/Resources/iron_shield.tres") as ItemData
+	var shield := load("res://data/weapons/iron_shield.tres") as ItemData
 	eq.equip(shield)
 	book.equip_spell("healing")
 	check("a spell takes the off hand", book.get_equipped() != null and eq.get_equipped(ItemData.EquipSlot.OFF_HAND) == null)
@@ -231,22 +231,22 @@ func t_in_game() -> void:
 		check("...and drops when let go", not grabber.is_holding())
 		check("the body's place follows the ragdoll", e.global_position.distance_to(rag.root_part.global_position) < 1.5)
 	# Alchemy, cooking, forging, enchanting
-	var lav := load("res://scripts/Resources/Ingredients/lavender.tres") as ItemData
-	var blue := load("res://scripts/Resources/Ingredients/blue_mountain_flower.tres") as ItemData
+	var lav := load("res://data/ingredients/lavender.tres") as ItemData
+	var blue := load("res://data/ingredients/blue_mountain_flower.tres") as ItemData
 	inv.add_item(lav, 2)
 	inv.add_item(blue, 2)
 	var potion := Alchemy.brew(p, [lav, blue])
 	check("brewing makes a potion", potion != null and inv.has_item(potion) and potion.magic_effects.any(func(x: Dictionary) -> bool: return x["id"] == &"restore_health"))
 	check("...and teaches the effects", book.known_ingredient_effects(lav).size() >= 1)
-	var mat := "res://scripts/Resources/Materials/"
+	var mat := "res://data/materials/"
 	inv.add_item(load(mat + "raw_meat.tres"), 1)
 	var roast: Dictionary = Recipes.for_station("cooking_pot").filter(func(r: Dictionary) -> bool: return String(r["result"]).ends_with("roast_meat.tres"))[0]
-	var meat := load("res://scripts/Resources/Consumables/roast_meat.tres") as ItemData
+	var meat := load("res://data/consumables/roast_meat.tres") as ItemData
 	var had := inv.get_count(meat)
 	check("cooking roasts meat", Recipes.make(roast, p) != null and inv.get_count(meat) > had)
 	inv.add_item(load(mat + "iron_ingot.tres"), 6)
 	inv.add_item(load(mat + "leather_strips.tres"), 3)
-	var dagger_r: Array = Recipes.for_station("forge").filter(func(r: Dictionary) -> bool: return String(r["result"]).ends_with("iron_dagger.tres"))
+	var dagger_r: Array = Recipes.for_station("forge").filter(func(r: Dictionary) -> bool: return String(r["result"]).ends_with("weapons/iron_dagger.tres"))
 	check("the forge makes an iron dagger", not dagger_r.is_empty() and Recipes.make(dagger_r[0], p) != null)
 	var sword := ItemCatalog.get_weapon(ItemCatalog.Weapon.SWORD, 0)
 	inv.add_item(sword, 1)
@@ -287,10 +287,10 @@ func t_in_game() -> void:
 			smithy = b
 	if smithy != null:
 		var built := InteriorBuilder.build(smithy, 7)
-		var root: Node3D = built["root"]
-		var kinds: Array = root.find_children("*", "CraftingStation", true, false).map(func(s: Node) -> String: return (s as CraftingStation).kind)
+		var body_root: Node3D = built["root"]
+		var kinds: Array = body_root.find_children("*", "CraftingStation", true, false).map(func(s: Node) -> String: return (s as CraftingStation).kind)
 		check("a smithy has a forge, smelter, tanning rack, grindstone and workbench", kinds.has("forge") and kinds.has("smelter") and kinds.has("tanning_rack") and kinds.has("grindstone") and kinds.has("workbench"), str(kinds))
-		root.free()
+		body_root.free()
 	# Townsfolk: free time is spent in many places, not only the square
 	var life := wm.life
 	if life != null:

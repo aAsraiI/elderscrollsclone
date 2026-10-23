@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_fgwar"]
+
+[resource]
+script = ExtResource("1_fgwar")
+id = &"juniper_berries"
+display_name = "Juniper Berries"
+description = "An alchemical ingredient. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 4
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("alchemy", "kitchen")
+ingredient_effects = PackedStringArray("fortify_lockpicking", "regenerate_health", "weakness_shock", "resist_frost")

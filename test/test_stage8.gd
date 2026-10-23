@@ -3,7 +3,7 @@ extends SceneTree
 ## separate vitals bars, items in your hands, items bumping into each other). Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage8.gd
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 
 var passes := 0
 var fails := 0
@@ -66,10 +66,10 @@ func t_theme() -> void:
 
 func t_models() -> void:
 	print("-- item models")
-	var sword: ItemData = load(R + "iron_sword.tres")
-	var shield: ItemData = load(R + "iron_shield.tres")
-	var potion: ItemData = load(R + "Consumables/health_potion.tres")
-	for it: ItemData in [sword, shield, potion, load(R + "Treasure/ruby.tres"), load(R + "iron_chestplate.tres")]:
+	var sword: ItemData = load(R + "weapons/iron_sword.tres")
+	var shield: ItemData = load(R + "weapons/iron_shield.tres")
+	var potion: ItemData = load(R + "consumables/health_potion.tres")
+	for it: ItemData in [sword, shield, potion, load(R + "treasure/ruby.tres"), load(R + "weapons/iron_chestplate.tres")]:
 		var m := ItemModels.build_world(it)
 		check("%s has a placeholder model" % it.display_name, m.find_children("*", "MeshInstance3D", true, false).size() > 0)
 		m.free()
@@ -81,8 +81,8 @@ func t_models() -> void:
 
 func t_main_menu() -> void:
 	print("-- main menu")
-	check("the game starts in the main menu", ProjectSettings.get_setting("application/run/main_scene") == "res://main_menu.tscn")
-	change_scene_to_file("res://main_menu.tscn")
+	check("the game starts in the main menu", ProjectSettings.get_setting("application/run/main_scene") == "res://scenes/game/main_menu.tscn")
+	change_scene_to_file("res://scenes/game/main_menu.tscn")
 	await frames(10)
 	var menu := current_scene as MainMenu
 	check("main menu loads", menu != null)
@@ -178,19 +178,19 @@ func t_game() -> void:
 	check("third click goes back to pick-up order", inv_ui._sort_column == -1)
 	await frames(2)
 	check("the selected item is shown as a 3D model", inv_ui._preview_holder.get_child_count() > 0)
-	var hammer: ItemData = load(R + "iron_warhammer.tres")
+	var hammer: ItemData = load(R + "weapons/iron_warhammer.tres")
 	inv_ui._refresh()
 	for row in inv_ui._tree.get_root().get_children():
 		if row.get_metadata(0) == hammer:
 			row.select(0)
 	inv_ui._update_details()
 	check("unworn gear is compared with what you hold", inv_ui._details.text.contains("damage") and inv_ui._details.text.contains("vs "), inv_ui._details.text.left(200))
-	var daggers := inv.get_count(load(R + "iron_dagger.tres"))
+	var daggers := inv.get_count(load(R + "weapons/iron_dagger.tres"))
 	for row in inv_ui._tree.get_root().get_children():
-		if (row.get_metadata(0) as ItemData).resource_path.ends_with("iron_dagger.tres"):
+		if (row.get_metadata(0) as ItemData).resource_path.ends_with("weapons/iron_dagger.tres"):
 			row.select(0)
 	inv_ui._drop_selected(true)
-	check("Shift+Q drops the whole stack", daggers >= 2 and inv.get_count(load(R + "iron_dagger.tres")) == 0, str(daggers))
+	check("Shift+Q drops the whole stack", daggers >= 2 and inv.get_count(load(R + "weapons/iron_dagger.tres")) == 0, str(daggers))
 	inv_ui.close()
 
 	# HUD bars
@@ -217,7 +217,7 @@ func t_game() -> void:
 	current_scene.add_child(floor_body)
 	floor_body.global_position = Vector3(player.global_position.x, floor_y, player.global_position.z)
 	var p := floor_body.global_position + Vector3.UP * 1.0
-	var bread: ItemData = load(R + "Consumables/bread.tres")
+	var bread: ItemData = load(R + "consumables/bread.tres")
 	var a := WorldItem.spawn(bread, 1, current_scene, p)
 	var b := WorldItem.spawn(bread, 1, current_scene, p + Vector3.UP * 0.6)
 	check("items are on the Items physics layer and collide with it", (a.collision_layer & WorldItem.ITEM_LAYER) != 0 and (a.collision_mask & WorldItem.ITEM_LAYER) != 0)
@@ -235,7 +235,7 @@ func t_game() -> void:
 	mesh.mesh = BoxMesh.new()
 	ps.pack(mesh)
 	mesh.free()
-	var custom := (load(R + "iron_sword.tres") as ItemData).duplicate() as ItemData
+	var custom := (load(R + "weapons/iron_sword.tres") as ItemData).duplicate() as ItemData
 	custom.display_name = "Test Blade"
 	custom.view_scene = ps
 	custom.view_offset = Vector3(0.0, 0.1, 0.0)

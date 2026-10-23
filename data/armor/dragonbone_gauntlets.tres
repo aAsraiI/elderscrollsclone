@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_juxnh"]
+
+[resource]
+script = ExtResource("1_juxnh")
+id = &"dragonbone_gauntlets"
+display_name = "Dragonbone Gauntlets"
+description = "Carved from the bones of great wyrms. Heavy armor for the hands."
+item_type = 2
+equip_slot = 3
+weight = 3.6
+value = 675
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 7.0
+}
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"dragonbone_heavy"
+animation_set = &"gauntlets"

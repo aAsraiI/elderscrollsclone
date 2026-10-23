@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="FactionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/factions/faction_data.gd" id="1_f"]
+
+[resource]
+script = ExtResource("1_f")
+id = &"mages"
+display_name = "Mages Guild"
+description = "Keepers of old books and older secrets."
+ranks = PackedStringArray("Apprentice", "Journeyman", "Evoker", "Magister", "Arch-Mage")
+perk_stat = "max_magicka"
+perk_per_rank = 10.0
+discount_merchants = PackedStringArray("alchemy", "temple")
+quest_types = PackedStringArray("retrieve", "deliver", "persuade")
+reward_base = 60
+gate_mid = "G-MG03"
+gate_final = "G-MG06"

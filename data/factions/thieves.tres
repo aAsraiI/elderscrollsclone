@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="FactionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/factions/faction_data.gd" id="1_f"]
+
+[resource]
+script = ExtResource("1_f")
+id = &"thieves"
+display_name = "Thieves Guild"
+description = "They do not exist. Ask a pawnbroker in a city, quietly."
+ranks = PackedStringArray("Footpad", "Cutpurse", "Shadow", "Master Thief", "Guildmaster")
+join_requirement = "has_stolen"
+hidden = true
+skills = PackedStringArray("sneak", "security")
+perk_stat = "security_bonus"
+perk_per_rank = 0.03
+discount_merchants = PackedStringArray("pawnbroker")
+discount_per_rank = 0.04
+quest_types = PackedStringArray("steal")
+reward_base = 80
+gate_mid = "G-TG03"
+gate_final = "G-TG06"

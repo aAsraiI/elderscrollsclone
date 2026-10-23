@@ -1,0 +1,70 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_uapfi"]
+[ext_resource type="Resource" path="res://data/encounters/snow_reavers.tres" id="2_fqerg"]
+[ext_resource type="Resource" path="res://data/encounters/snow_beasts.tres" id="3_2neev"]
+[ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="4_tplft"]
+[ext_resource type="Resource" path="res://data/encounters/snow_trapper.tres" id="5_8dw1d"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="6_5sjo6"]
+[ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="7_8fwqt"]
+[ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="8_pqcbl"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="9_ie6f6"]
+[ext_resource type="Resource" path="res://data/world/POIs/standing_stones.tres" id="10_xdp2i"]
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="11_fbwxn"]
+[ext_resource type="Resource" path="res://data/world/POIs/ashen_temple_entrance.tres" id="11_fqerg"]
+
+[sub_resource type="Resource" id="Resource_wgm6g"]
+script = ExtResource("6_5sjo6")
+poi = ExtResource("7_8fwqt")
+count_max = 1.5
+extra_spacing = 60.0
+
+[sub_resource type="Resource" id="Resource_tw5pc"]
+script = ExtResource("6_5sjo6")
+poi = ExtResource("8_pqcbl")
+count_min = 2.0
+count_max = 3.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_dya0r"]
+script = ExtResource("6_5sjo6")
+poi = ExtResource("9_ie6f6")
+count_max = 1.5
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_lgn5m"]
+script = ExtResource("6_5sjo6")
+poi = ExtResource("10_xdp2i")
+count_min = 0.5
+count_max = 1.5
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_2neev"]
+script = ExtResource("6_5sjo6")
+poi = ExtResource("11_fqerg")
+count_min = 0.25
+count_max = 0.4
+extra_spacing = 80.0
+border_margin = 80.0
+
+[resource]
+script = ExtResource("11_fbwxn")
+id = &"ashlands"
+display_name = "Ashlands"
+map_color = Color(0.26, 0.19, 0.17, 1)
+blend_distance = 320.0
+base_height = 35.0
+hills_amplitude = 20.0
+hills_scale = 300.0
+mountain_amplitude = 80.0
+mountain_scale = 600.0
+mountain_coverage = 0.45
+ground_color = Color(0.19, 0.18, 0.18, 1)
+ground_color_alt = Color(0.3, 0.2, 0.16, 1)
+steep_color = Color(0.12, 0.11, 0.11, 1)
+tree_style = 1
+tree_color = Color(0.16, 0.32, 0.18, 1)
+poi_rules = Array[ExtResource("6_5sjo6")]([SubResource("Resource_wgm6g"), SubResource("Resource_tw5pc"), SubResource("Resource_dya0r"), SubResource("Resource_lgn5m"), SubResource("Resource_2neev")])
+level_min = 70
+level_max = 93
+encounters = Array[ExtResource("1_uapfi")]([ExtResource("2_fqerg"), ExtResource("3_2neev"), ExtResource("4_tplft"), ExtResource("5_8dw1d")])

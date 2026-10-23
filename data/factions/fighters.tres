@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="FactionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/factions/faction_data.gd" id="1_f"]
+
+[resource]
+script = ExtResource("1_f")
+id = &"fighters"
+display_name = "Fighters Guild"
+description = "Swords for hire: guarding, hunting, clearing out bandits. Honest work for honest pay."
+ranks = PackedStringArray("Associate", "Swordsman", "Warden", "Champion", "Guildmaster")
+skills = PackedStringArray("one_handed", "two_handed", "block")
+perk_stat = "max_health"
+perk_per_rank = 5.0
+discount_merchants = PackedStringArray("smith")
+quest_types = PackedStringArray("kill", "retrieve")
+reward_base = 70
+gate_mid = "G-FG03"
+gate_final = "G-FG06"

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"starforged_sword"
+display_name = "Starforged Sword"
+description = "Forged from fallen star-metal that hums faintly. A balanced blade. Swings in an arc and can hit several enemies. Tap to chain a combo, hold to charge a heavy attack."
+item_type = 1
+equip_slot = 6
+weight = 6.25
+value = 4250
+governing_skill = "one_handed"
+tier = 7
+min_level = 74
+loot_tags = PackedStringArray("weapon", "smithy")
+weapon_damage = 74.0
+reach = 2.2
+attack_style = 1
+arc_degrees = 100.0
+attack_cooldown = 0.7
+attack_windup = 0.12
+stamina_cost = 7.8
+knockback = 3.25
+poise_damage = 24.0
+animation_set = &"sword"
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

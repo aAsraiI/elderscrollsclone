@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_8nb0f"]
+
+[resource]
+script = ExtResource("1_8nb0f")
+id = &"copper_amulet_endurance"
+display_name = "Copper Amulet of Endurance"
+description = "+15 maximum stamina while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 84
+stat_modifiers = {
+"max_stamina": 15.0
+}
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

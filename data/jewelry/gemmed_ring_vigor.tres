@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_lekb8"]
+
+[resource]
+script = ExtResource("1_lekb8")
+id = &"gemmed_ring_vigor"
+display_name = "Gemmed Ring of Vigor"
+description = "+55 maximum health while worn."
+item_type = 2
+equip_slot = 8
+weight = 0.1
+value = 1400
+stat_modifiers = {
+"max_health": 55.0
+}
+tier = 7
+min_level = 60
+loot_tags = PackedStringArray("jewelry", "jeweler", "rich_home", "crypt", "vault")

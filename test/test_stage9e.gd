@@ -56,7 +56,7 @@ func _speaker(r: TownLife.Resident, wm: WorldManager) -> DialogueEngine.Speaker:
 func t_in_game() -> void:
 	print("-- in the game")
 	WorldState.clear()
-	change_scene_to_file("res://test_level.tscn")
+	change_scene_to_file("res://scenes/game/game.tscn")
 	await frames(40)
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var p := get_first_node_in_group("player") as CharacterBody3D
@@ -108,12 +108,12 @@ func t_in_game() -> void:
 		var spot := node.get_node_or_null("Dig_" + String(dig["id"])) as DigSpot if node != null else null
 		check("a dig spot appears at the place", spot != null)
 		if spot != null:
-			var inv := p.get_node("Inventory") as Inventory
-			spot.interact(inv)
+			var dig_inv := p.get_node("Inventory") as Inventory
+			spot.interact(dig_inv)
 			await frames(2)
 			check("no digging without a tool", not qm.is_ready(dig))
-			inv.add_item(load("res://scripts/Resources/Clutter/shovel.tres"))
-			spot.interact(inv)
+			dig_inv.add_item(load("res://data/clutter/shovel.tres"))
+			spot.interact(dig_inv)
 			await frames(2)
 			check("with a shovel the artifact comes up", qm.is_ready(dig))
 	var hunter_giver: DialogueEngine.Speaker = null
@@ -127,7 +127,7 @@ func t_in_game() -> void:
 		check("the Lodge offers a hunt for a named beast", not hunt.is_empty() and hunt["type"] == "hunt" and String(hunt["name"]).begins_with("The Hunt for"))
 	# the museum
 	var inv := p.get_node("Inventory") as Inventory
-	var idol: ItemData = load("res://scripts/Resources/Artifacts/sunfire_idol.tres")
+	var idol: ItemData = load("res://data/artifacts/sunfire_idol.tres")
 	inv.add_item(idol)
 	var gold := Currency.get_gold(inv)
 	var st := p.get_node("Stats") as Stats

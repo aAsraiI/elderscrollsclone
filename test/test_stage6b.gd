@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for stage 6b: more guards, the five guilds, ranks and perks, and guild jobs. Run with:
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage6b.gd
 
-const R := "res://scripts/Resources/"
+const R := "res://data/"
 
 var passes := 0
 var fails := 0
@@ -127,13 +127,13 @@ func t_factions() -> void:
 	skills.levels[&"one_handed"] = 12
 	check("with the skill too, a promotion", Factions.promote("fighters", p) == "Swordsman" and Factions.rank("fighters") == 2)
 	check("rank perk: +5 health per rank", is_equal_approx(stats.get_stat("max_health"), 50010.0), str(stats.get_stat("max_health")))
-	check("members get better prices from smiths", is_equal_approx(Factions.discount_for(load(R + "Merchants/smith.tres")), 0.06))
-	check("but not from an alchemist", Factions.discount_for(load(R + "Merchants/alchemy.tres")) == 0.0)
+	check("members get better prices from smiths", is_equal_approx(Factions.discount_for(load(R + "merchants/smith.tres")), 0.06))
+	check("but not from an alchemist", Factions.discount_for(load(R + "merchants/alchemy.tres")) == 0.0)
 	Factions.join("mages", p)
 	check("the Mages Guild goes by player level until there are spells", String(Factions.next_rank("mages", p)["skill"]) == "player level")
 	var item := QuestItems.get_item("q7", "Lost Journal")
 	check("quest items save and load as themselves", SaveUtil.path_to_item(SaveUtil.item_to_path(item)) == item)
-	check("merchants won't buy quest items", not (load(R + "Merchants/general.tres") as MerchantData).will_buy(item))
+	check("merchants won't buy quest items", not (load(R + "merchants/general.tres") as MerchantData).will_buy(item))
 	holder.queue_free()
 	WorldState.clear()
 
@@ -147,11 +147,10 @@ func t_world() -> void:
 	holder.name = "WorldHolder"
 	root.add_child(holder)
 	var p := make_player(holder)
-	var inv := p.get_node("Inventory") as Inventory
 	var skills := p.get_node("Skills") as Skills
 	var st := p.get_node("Stealth") as Stealth
 	var ui := p.get_node("DialogueUI") as DialogueUI
-	var s := (load(R + "World/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
+	var s := (load(R + "world/multi_biome_world.tres") as WorldSettings).duplicate() as WorldSettings
 	s.view_distance_chunks = 3
 	s.spawn_radius_chunks = 1
 	s.debug_map_enabled = false
@@ -179,7 +178,7 @@ func t_world() -> void:
 				posted += 1
 				var gate := town.town.get_gates_world()[r.data.post]
 				var body_ok := r.node != null and is_instance_valid(r.node) and Vector2(r.node.global_position.x - gate.x, r.node.global_position.z - gate.z).length() < 15.0
-				check("a gate guard stands by gate %d" % r.data.post, body_ok, "%s vs gate %s" % [r.node.global_position if r.node != null and is_instance_valid(r.node) else "no body", gate])
+				check("a gate guard stands by gate %d" % r.data.post, body_ok, "%s vs gate %s" % [str(r.node.global_position) if r.node != null and is_instance_valid(r.node) else "no body", gate])
 	check("more guards: %d in a %s" % [guards, (town.poi as TownData).display_name.to_lower()], guards == Residents.GUARDS[int((town.poi as TownData).kind)] and guards >= 3)
 	check("two of them stand watch at the gates", posted == 2)
 
@@ -198,13 +197,13 @@ func t_world() -> void:
 	check("every city has a pawnbroker (the Thieves Guild's contact)", every_city_fence)
 	var leaders := {}
 	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
-		var sp := DialogueEngine.Speaker.new()
-		sp.data = r.data
-		sp.id = r.data.id
-		sp.role = r.data.role
-		sp.town = r.town
-		sp.home = wm.get_building(r.data.home_id)
-		var lead := Factions.leader_of(sp, wm)
+		var res_sp := DialogueEngine.Speaker.new()
+		res_sp.data = r.data
+		res_sp.id = r.data.id
+		res_sp.role = r.data.role
+		res_sp.town = r.town
+		res_sp.home = wm.get_building(r.data.home_id)
+		var lead := Factions.leader_of(res_sp, wm)
 		if lead != "":
 			leaders[lead] = r
 	check("a city has leaders for the Fighters, Mages, Knights and Thieves", leaders.has("fighters") and leaders.has("mages") and leaders.has("knights") and leaders.has("thieves"), str(leaders.keys()))
@@ -235,7 +234,7 @@ func t_world() -> void:
 
 	# the same game makes the same jobs
 	var saved := WorldState.to_dict()
-	var sp_f := DialogueEngine.speaker_for(fighter.node, wm) if fighter.node != null and is_instance_valid(fighter.node) else null
+	var _sp_f := DialogueEngine.speaker_for(fighter.node, wm) if fighter.node != null and is_instance_valid(fighter.node) else null
 	WorldState.from_dict(saved)
 	var list_before: Array = QuestManager.all_quests().duplicate(true)
 	WorldState.set_record(QuestManager.STATE, {"list": [], "counter": 0})
@@ -431,7 +430,7 @@ func _deliver_and_persuade(wm: WorldManager, qm: QuestManager, p: Node3D, _giver
 		check("and reported", QuestManager.get_quest(String(pq["id"]))["status"] == "done" and Factions.quests_done("mages") == 2)
 
 
-func _assassins(wm: WorldManager, qm: QuestManager, p: Node3D, ui: DialogueUI, st: Stealth) -> void:
+func _assassins(wm: WorldManager, qm: QuestManager, p: Node3D, ui: DialogueUI, _st: Stealth) -> void:
 	# a murder, then a night outside: the stranger comes
 	WorldState.erase_record(Factions.HISTORY)
 	Factions.note_crime("murders")

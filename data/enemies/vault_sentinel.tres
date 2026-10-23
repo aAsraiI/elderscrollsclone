@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_me4ti"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_4crip"]
+
+[resource]
+script = ExtResource("2_4crip")
+id = &"vault_sentinel"
+display_name = "Vault Sentinel"
+color = Color(0.7, 0.55, 0.3, 1)
+health_mult = 1.5
+poise_mult = 1.6
+armor_tier_offset = 1
+kit = 11
+move_speed = 2.8
+knockback_resistance = 0.4
+talk_name = "Vault Sentinel"
+talk_lines = PackedStringArray()

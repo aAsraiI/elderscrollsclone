@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_xhhgb"]
+
+[resource]
+script = ExtResource("1_xhhgb")
+id = &"dragonbone_helmet"
+display_name = "Dragonbone Helmet"
+description = "Carved from the bones of great wyrms. Heavy armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 6.0
+value = 1013
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 10.5
+}
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"dragonbone_heavy"
+animation_set = &"helmet"

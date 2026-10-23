@@ -1,0 +1,91 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="1_biome"]
+[ext_resource type="Resource" path="res://data/encounters/night_werewolf.tres" id="6_rwip1"]
+[ext_resource type="Resource" path="res://data/encounters/night_vampire.tres" id="7_u8k0c"]
+[ext_resource type="Resource" path="res://data/world/POIs/abandoned_mine_entrance.tres" id="11_yw0kk"]
+[ext_resource type="Resource" path="res://data/world/POIs/barrow_entrance.tres" id="12_ox1p8"]
+[ext_resource type="Resource" path="res://data/world/POIs/fort_ruin_entrance.tres" id="13_imqa2"]
+[ext_resource type="Resource" path="res://data/encounters/snow_reavers.tres" id="enc_0"]
+[ext_resource type="Resource" path="res://data/encounters/snow_beasts.tres" id="enc_1"]
+[ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="enc_2"]
+[ext_resource type="Resource" path="res://data/encounters/snow_trapper.tres" id="enc_3"]
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="enc_script"]
+[ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="poi_0"]
+[ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="poi_1"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
+[ext_resource type="Resource" path="res://data/world/POIs/standing_stones.tres" id="poi_3"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
+
+[sub_resource type="Resource" id="rule_0"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_0")
+count_max = 1.5
+extra_spacing = 60.0
+
+[sub_resource type="Resource" id="rule_1"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_1")
+count_min = 2.0
+count_max = 3.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="rule_2"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_2")
+count_max = 1.5
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="rule_3"]
+script = ExtResource("rule_script")
+poi = ExtResource("poi_3")
+count_min = 0.5
+count_max = 1.5
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_ox1p8"]
+script = ExtResource("rule_script")
+poi = ExtResource("11_yw0kk")
+count_min = 0.15
+count_max = 0.3
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_imqa2"]
+script = ExtResource("rule_script")
+poi = ExtResource("12_ox1p8")
+count_min = 0.08
+count_max = 0.15
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_rwip1"]
+script = ExtResource("rule_script")
+poi = ExtResource("13_imqa2")
+count_min = 0.1
+count_max = 0.18
+extra_spacing = 80.0
+border_margin = 80.0
+
+[resource]
+script = ExtResource("1_biome")
+id = &"highlands"
+display_name = "Highlands"
+map_color = Color(0.5, 0.55, 0.38, 1)
+blend_distance = 320.0
+base_height = 40.0
+hills_amplitude = 22.0
+hills_scale = 300.0
+mountain_amplitude = 55.0
+mountain_scale = 600.0
+mountain_coverage = 0.45
+ground_color = Color(0.4, 0.45, 0.28, 1)
+ground_color_alt = Color(0.46, 0.44, 0.32, 1)
+steep_color = Color(0.42, 0.4, 0.38, 1)
+tree_style = 1
+tree_density = 30.0
+tree_color = Color(0.16, 0.32, 0.18, 1)
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_ox1p8"), SubResource("Resource_imqa2"), SubResource("Resource_rwip1")])
+level_min = 10
+level_max = 24
+encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("6_rwip1"), ExtResource("7_u8k0c")])

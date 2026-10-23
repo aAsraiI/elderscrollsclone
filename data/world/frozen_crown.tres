@@ -1,0 +1,77 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_xwta7"]
+[ext_resource type="Resource" path="res://data/encounters/snow_reavers.tres" id="2_n4p71"]
+[ext_resource type="Resource" path="res://data/encounters/snow_beasts.tres" id="3_tvq7f"]
+[ext_resource type="Resource" path="res://data/encounters/snow_trapper.tres" id="4_rbkkf"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="5_3q7vo"]
+[ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="6_xaft8"]
+[ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="7_dao40"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="8_a6c0m"]
+[ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="9_g3sy1"]
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="10_fyq6l"]
+[ext_resource type="Resource" path="res://data/world/POIs/ice_cavern_entrance.tres" id="10_n4p71"]
+
+[sub_resource type="Resource" id="Resource_urbge"]
+script = ExtResource("5_3q7vo")
+poi = ExtResource("6_xaft8")
+count_min = 2.0
+count_max = 3.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_1c3y7"]
+script = ExtResource("5_3q7vo")
+poi = ExtResource("7_dao40")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 60.0
+
+[sub_resource type="Resource" id="Resource_u56h8"]
+script = ExtResource("5_3q7vo")
+poi = ExtResource("8_a6c0m")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 40.0
+
+[sub_resource type="Resource" id="Resource_qukog"]
+script = ExtResource("5_3q7vo")
+poi = ExtResource("9_g3sy1")
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 60.0
+
+[sub_resource type="Resource" id="Resource_tvq7f"]
+script = ExtResource("5_3q7vo")
+poi = ExtResource("10_n4p71")
+count_min = 0.2
+count_max = 0.35
+extra_spacing = 80.0
+border_margin = 80.0
+
+[resource]
+script = ExtResource("10_fyq6l")
+id = &"frozen_crown"
+display_name = "Frozen Crown"
+map_color = Color(0.94, 0.97, 1, 1)
+blend_distance = 450.0
+base_height = 80.0
+hills_amplitude = 18.0
+hills_scale = 280.0
+mountain_amplitude = 200.0
+mountain_scale = 800.0
+mountain_coverage = 0.75
+ground_color = Color(0.9, 0.93, 0.98, 1)
+ground_color_alt = Color(0.82, 0.88, 0.95, 1)
+steep_color = Color(0.36, 0.36, 0.4, 1)
+steep_slope_start = 32.0
+steep_slope_full = 52.0
+peak_color = Color(0.97, 0.98, 1, 1)
+peak_height = 130.0
+peak_blend = 40.0
+tree_style = 1
+tree_density = 6.0
+tree_color = Color(0.16, 0.3, 0.2, 1)
+poi_rules = Array[ExtResource("5_3q7vo")]([SubResource("Resource_urbge"), SubResource("Resource_1c3y7"), SubResource("Resource_u56h8"), SubResource("Resource_qukog"), SubResource("Resource_tvq7f")])
+level_min = 80
+level_max = 100
+encounters = Array[ExtResource("1_xwta7")]([ExtResource("2_n4p71"), ExtResource("3_tvq7f"), ExtResource("4_rbkkf")])

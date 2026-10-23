@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SimplePOIData" format=3 uid="uid://ctkcd8v0rjb18"]
+
+[ext_resource type="Resource" uid="uid://d16pw57m06olc" path="res://data/spawns/garrison_tower.tres" id="garrison_table"]
+[ext_resource type="Resource" path="res://data/weapons/iron_shield.tres" id="item_0_0"]
+[ext_resource type="Resource" uid="uid://bu7yro4jl28nt" path="res://data/weapons/iron_chestplate.tres" id="item_0_1"]
+[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/items/loot_entry.gd" id="loot"]
+[ext_resource type="Script" uid="uid://bh6ud8ognltkf" path="res://scripts/world/poi_container.gd" id="pc"]
+[ext_resource type="Script" uid="uid://djbu7s6uo36b5" path="res://scripts/world/simple_poi_data.gd" id="sp"]
+
+[sub_resource type="Resource" id="c0_l0"]
+script = ExtResource("loot")
+item = ExtResource("item_0_0")
+chance = 0.6
+
+[sub_resource type="Resource" id="c0_l1"]
+script = ExtResource("loot")
+item = ExtResource("item_0_1")
+chance = 0.3
+
+[sub_resource type="Resource" id="container_0"]
+script = ExtResource("pc")
+display_name = "Tower Chest"
+offset = Vector3(0, 0, -4.2)
+chance = 0.8
+loot = Array[ExtResource("loot")]([SubResource("c0_l0"), SubResource("c0_l1")])
+
+[resource]
+script = ExtResource("sp")
+shape = 3
+color = Color(0.55, 0.53, 0.5, 1)
+containers = Array[ExtResource("pc")]([SubResource("container_0")])
+id = &"watchtower"
+display_name = "Watchtower"
+map_color = Color(0.7, 0.7, 0.9, 1)
+footprint_radius = 16.0
+flatten_radius = 8.0
+max_slope_deg = 10.0
+garrison = ExtResource("garrison_table")

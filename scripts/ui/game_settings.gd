@@ -38,16 +38,17 @@ const DEFAULTS := {
 	"graphics_preset": 3,  # 0 custom, 1 low, 2 medium, 3 high, 4 ultra (see PRESETS)
 	"view_distance": 10,  # terrain chunks drawn around you (64 m each)
 	"shadows": 2,  # 0 off, 1 near only, 2 full
+	"far_land": true,  # the coarse land and town outlines past the view distance (FarLand)
 }
 
 ## Graphics quality presets (Settings > Video): what each one sets. High is the default look.
 const PRESETS := {
-	1: {"render_scale": 0.75, "grass": 0, "view_distance": 6, "shadows": 0},
-	2: {"render_scale": 1.0, "grass": 1, "view_distance": 8, "shadows": 1},
-	3: {"render_scale": 1.0, "grass": 2, "view_distance": 10, "shadows": 2},
-	4: {"render_scale": 1.0, "grass": 3, "view_distance": 14, "shadows": 2},
+	1: {"render_scale": 0.75, "grass": 0, "view_distance": 6, "shadows": 0, "far_land": false},
+	2: {"render_scale": 1.0, "grass": 1, "view_distance": 8, "shadows": 1, "far_land": true},
+	3: {"render_scale": 1.0, "grass": 2, "view_distance": 10, "shadows": 2, "far_land": true},
+	4: {"render_scale": 1.0, "grass": 3, "view_distance": 14, "shadows": 2, "far_land": true},
 }
-const PRESET_KEYS := ["render_scale", "grass", "view_distance", "shadows"]
+const PRESET_KEYS := ["render_scale", "grass", "view_distance", "shadows", "far_land"]
 
 ## How the Settings screen shows each option. kind: slider / check / choice.
 ## For sliders: min, max, step, and fmt (how the value is printed).
@@ -73,6 +74,7 @@ const OPTIONS := [
 	{"tab": "Video", "key": "render_scale", "label": "Render scale", "kind": "slider", "min": 0.5, "max": 1.0, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
 	{"tab": "Video", "key": "grass", "label": "Grass and flowers", "kind": "choice", "choices": ["Off", "Low", "Medium", "High"]},
 	{"tab": "Video", "key": "view_distance", "label": "View distance", "kind": "slider", "min": 4.0, "max": 16.0, "step": 1.0, "fmt": "%d m", "scale": 64.0},
+	{"tab": "Video", "key": "far_land", "label": "Distant land and towns", "kind": "check"},
 	{"tab": "Video", "key": "shadows", "label": "Shadows", "kind": "choice", "choices": ["Off", "Near only", "Full"]},
 	{"tab": "Video", "key": "weather_effects", "label": "Rain and snow", "kind": "check"},
 	{"tab": "Audio", "key": "master_volume", "label": "Master volume", "kind": "slider", "min": 0.0, "max": 1.0, "step": 0.05, "fmt": "%d%%", "scale": 100.0},

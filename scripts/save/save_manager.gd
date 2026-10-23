@@ -212,7 +212,7 @@ func save_game(slot: String) -> bool:
 	var err := DirAccess.make_dir_recursive_absolute(dir)
 	if err != OK:
 		return _save_fail(slot, "Could not create the save folder (error %d)." % err)
-	err = SaveUtil.write_json_atomic(dir + "/save.json", data)
+	err = SaveUtil.write_json_atomic(dir + "/save.json", data, true, true)
 	if err != OK:
 		return _save_fail(slot, "Could not write the save file (error %d)." % err)
 	SaveUtil.write_json_atomic(dir + "/meta.json", data["meta"], false)
@@ -328,7 +328,7 @@ func build_save_data() -> Dictionary:
 	var dungeons := _get_dungeons()
 	if dungeons != null:
 		data["dungeon"] = dungeons.to_dict()
-	data["world_state"] = WorldState.to_dict()
+	data["world_state"] = WorldState.to_save_dict()
 	var clock := _get_clock()
 	if clock != null:
 		data["clock"] = clock.to_dict()

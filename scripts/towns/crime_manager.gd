@@ -188,7 +188,10 @@ func report(kind: String, value: int = 0, victim: Enemy = null) -> Dictionary:
 	if town_id != "":
 		add_bounty(town_id, amount)
 	var p := _player()
+	var town_name := town.town.display_name if town != null and town.town != null else ""
+	var day := world.clock.day if world.clock != null else 1
 	for w in list:
+		NpcMemory.remember(w.display_name, town_name, kind, "", day)
 		var npc_id := String(w.get_meta("npc_id", ""))
 		if npc_id != "" and world.life != null:
 			var r := world.life.get_resident(npc_id)

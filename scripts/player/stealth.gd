@@ -139,15 +139,7 @@ func detection_level() -> int:
 
 ## How easy the player is to see right now (1 = standing in daylight)
 func visibility() -> float:
-	var light := 1.0
-	var dm := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
-	if dm != null and dm.is_inside():
-		light = 0.75 if dm.is_in_building() else 0.5
-	else:
-		var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
-		if clock != null:
-			light = 0.3 + 0.7 * clock.get_daylight()
-	var v := light
+	var v := light_level()
 	var speed := Vector2(_player.velocity.x, _player.velocity.z).length() if _player != null else 0.0
 	if sneaking:
 		var skill := _skills.get_level(&"sneak") if _skills != null else 1
@@ -319,3 +311,84 @@ func _update_hud() -> void:
 		eye.queue_redraw()
 	_eye_label.text = ["Hidden", "Noticed", "Seen"][level]
 	_eye_label.add_theme_color_override("font_color", [Color(0.8, 0.8, 0.85), Color(1.0, 0.8, 0.25), Color(1.0, 0.35, 0.3)][level])
+
+
+# ---------------------------------------------------------------- light and shadow
+
+## How dark it is where no lamp reaches: inside a building, down a dungeon, and outdoors at night
+const DARK_BUILDING := 0.3
+const DARK_DUNGEON := 0.2
+const DARK_NIGHT := 0.25
+## How strongly a lamp at full energy lights you when you stand right under it
+const LAMP_STRENGTH := 0.55
+
+var _light_cache := 0.0
+var _light_clock := 0.0
+var _lights: Array[Light3D] = []
+var _lights_for: Object = null  # the interior, or the spot outdoors, the lamp list is for
+var _lights_pos := Vector3.INF
+
+
+## How lit the player is (1 = full daylight): the darkness of the place, plus every lamp, torch and
+## lantern nearby (OmniLight3D / SpotLight3D), each by how close you stand within its reach.
+## Worked out a few times a second.
+func light_level() -> float:
+	_light_clock -= get_process_delta_time()
+	if _light_clock > 0.0 and _player != null:
+		return _light_cache
+	_light_clock = 0.25
+	_light_cache = _measure_light()
+	return _light_cache
+
+
+func _measure_light() -> float:
+	if _player == null:
+		return 1.0
+	var base := 1.0
+	var dm := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
+	var inside := dm != null and dm.is_inside()
+	if inside:
+		base = DARK_BUILDING if dm.is_in_building() else DARK_DUNGEON
+	else:
+		var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
+		if clock != null:
+			base = DARK_NIGHT + (1.0 - DARK_NIGHT) * clock.get_daylight()
+	if base >= 0.95:
+		return base  # broad daylight: lamps change nothing
+	var lamps := 0.0
+	for l in _nearby_lights(dm, inside):
+		if not is_instance_valid(l) or not l.is_visible_in_tree():
+			continue
+		var reach := (l as OmniLight3D).omni_range if l is OmniLight3D else (l as SpotLight3D).spot_range
+		var d := l.global_position.distance_to(_player.global_position + Vector3.UP)
+		if d < reach:
+			var f := 1.0 - d / reach
+			lamps += l.light_energy * f * f * LAMP_STRENGTH
+	return clampf(base + lamps, 0.0, 1.0)
+
+
+# The lamps that could light the player: every light in the room or dungeon, or outdoors those
+# of the places within 60 m. The list is kept until the player moves on.
+func _nearby_lights(dm: DungeonManager, inside: bool) -> Array[Light3D]:
+	var key: Object = dm._root if inside and dm != null else null
+	var here := _player.global_position
+	if key == _lights_for and (inside or here.distance_to(_lights_pos) < 20.0):
+		return _lights
+	_lights_for = key
+	_lights_pos = here
+	_lights.clear()
+	var roots: Array[Node] = []
+	if inside and dm._root != null:
+		roots.append(dm._root)
+	else:
+		var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+		if world != null:
+			for p in world.get_pois_near(here, 60.0):
+				var n := world.get_poi_node(p.id)
+				if n != null:
+					roots.append(n)
+	for r in roots:
+		for l in r.find_children("*", "Light3D", true, false):
+			if l is OmniLight3D or l is SpotLight3D:
+				_lights.append(l)
+	return _lights

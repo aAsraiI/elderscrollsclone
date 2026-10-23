@@ -63,6 +63,8 @@ static func attempt(kind: Kind, s: DialogueEngine.Speaker, player: Node, rng: Ra
 	var change: int = GAIN[kind] if ok else LOSS[kind]
 	if ok and BRIBES.has(kind):
 		Currency.spend_gold(player.get_node("Inventory") as Inventory, int(BRIBES[kind]))
+		var clock := player.get_tree().get_first_node_in_group("world_clock") as WorldClock if player != null and player.is_inside_tree() else null
+		NpcMemory.remember(s.name, s.town.town.display_name if s.town != null and s.town.town != null else "", "gift", str(BRIBES[kind]), clock.day if clock != null else 1)
 	var disp := DialogueState.change_disposition(s.id, s.base_disposition, change)
 	var skills := player.get_node_or_null("Skills") as Skills if player != null else null
 	if skills != null:

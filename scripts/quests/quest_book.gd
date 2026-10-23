@@ -372,6 +372,7 @@ func finish(id: String) -> void:
 		if inv.has_item(item):
 			inv.remove_item(item, inv.get_count(item))
 	var lines := _give_reward(d)
+	_remember_giver(d)
 	var f := String(d.get("faction", ""))
 	if ClanTerritory.CLANS.has(f) and world != null and world.map != null:
 		# a clan's work wins it ground in the land where it was done
@@ -878,3 +879,16 @@ func debug_complete(id: String) -> void:
 	if status(id) == "":
 		start(id)
 	finish(id)
+
+
+# The person who gave the quest remembers you did it (NpcMemory): a named townsperson or a lord
+func _remember_giver(d: Dictionary) -> void:
+	var who: Dictionary = d.get("giver", {})
+	var day := world.clock.day if world != null and world.clock != null else 1
+	if who.has("cast"):
+		NpcMemory.remember(String(who["cast"]), String(who.get("town", "")), "quest", String(d["name"]), day)
+	elif who.has("lord"):
+		for biome in NamedSettlements.LIST:
+			for e: Dictionary in NamedSettlements.LIST[biome]:
+				if String(e["name"]) == String(who["lord"]):
+					NpcMemory.remember(String(e["lord"]), String(who["lord"]), "quest", String(d["name"]), day)

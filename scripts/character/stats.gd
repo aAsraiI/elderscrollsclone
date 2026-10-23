@@ -80,6 +80,8 @@ var health: float
 var magicka: float
 var stamina: float
 var is_dead := false
+## Nothing hurts (the debug console's "god")
+var invulnerable := false
 
 # source_id -> { stat_name: amount }
 var _modifiers: Dictionary = {}
@@ -162,6 +164,8 @@ func remove_modifiers(source: String) -> void:
 func modify_vital(vital: String, amount: float, spent: bool = true) -> void:
 	match vital:
 		"health":
+			if invulnerable and amount < 0.0:
+				return
 			if is_dead and amount > 0.0:
 				return  # the dead stay dead until revive()
 			health = clampf(health + amount, 0.0, get_stat("max_health"))

@@ -83,6 +83,8 @@ var _player: CharacterBody3D
 var _target: Object
 var _node: Node3D
 var _mode: StringName = MODE_CARRY
+## How hard a light thing is thrown (attack while carrying it)
+const THROW_IMPULSE := 9.0
 var _weight := 0.0
 var _strain := 0.0
 var _exclude: Array[RID] = []
@@ -171,6 +173,23 @@ func grab(target: Object, hit_point: Vector3 = Vector3.INF) -> bool:
 	else:
 		_begin_drag(hit_point)
 	grabbed.emit(target)
+	return true
+
+
+## Attack while carrying something: let go of it with a shove along where you look. Light things
+## fly, heavy ones barely leave your hands. What it hits is knocked loose (WorldItem.wake()).
+func throw() -> bool:
+	if _target == null or _mode != MODE_CARRY:
+		return false
+	var rb := _node as RigidBody3D
+	var cam := get_viewport().get_camera_3d()
+	release(&"thrown")
+	if rb == null or not is_instance_valid(rb) or cam == null:
+		return true
+	var mass_factor := 1.0 / maxf(rb.mass, 0.5)
+	rb.apply_central_impulse(-cam.global_basis.z * THROW_IMPULSE * clampf(mass_factor * 4.0, 0.15, 1.0) * rb.mass)
+	if rb.has_method("on_thrown"):
+		rb.on_thrown()
 	return true
 
 

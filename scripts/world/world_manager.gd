@@ -71,6 +71,7 @@ var discovery: Discovery
 var weather: Weather
 
 var _chunks := {}      # Vector2i -> TerrainChunk
+var _far: FarLand  # the coarse land and town outlines past the view distance (real game only)
 var _inflight := {}    # Vector2i -> worker task id
 var _finished: Array[Dictionary] = []
 var _mutex := Mutex.new()
@@ -559,9 +560,19 @@ func apply_settings() -> void:
 	if view != settings.view_distance_chunks:
 		settings.view_distance_chunks = view
 		_last_center = Vector2i(1 << 30, 1 << 30)  # the next frame works out which chunks to keep
-	# Fog thick enough at the edge of the view distance to hide chunks appearing
+	# The distant land and towns (FarLand), switched on and off from Settings
+	var far := bool(GameSettings.get_value("far_land"))
+	if far and _far == null:
+		_far = FarLand.new()
+		_far.name = "FarLand"
+		add_child(_far)
+	elif not far and _far != null:
+		_far.queue_free()
+		_far = null
+	# Fog thick enough at the edge of what is drawn to hide things appearing
 	if clock != null:
-		clock.set_base_fog(2.5 / (view * settings.chunk_size))
+		var reach := FarLand.REACH * 0.9 if _far != null else float(view) * settings.chunk_size
+		clock.set_base_fog(2.5 / reach)
 	var shadows := int(GameSettings.get_value("shadows"))
 	var host: Node = get_parent() if get_parent() != null else self
 	for sun: DirectionalLight3D in host.find_children("*", "DirectionalLight3D", true, false):

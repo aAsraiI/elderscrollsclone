@@ -310,6 +310,9 @@ static func greeting(s: Speaker, world: WorldManager) -> String:
 	if s.asleep:
 		return "Wha-? Who's there? What are you doing in here? ...Fine. What do you want?"
 	var clock: WorldClock = world.clock if world != null else null
+	var remembered := NpcMemory.greeting(s, clock.day if clock != null else 1)
+	if remembered != "":
+		return remembered  # something they remember about you (NpcMemory)
 	var hour := clock.hour if clock != null else 12.0
 	var time_word := "Good morning" if hour < 12.0 else ("Good afternoon" if hour < 18.0 else "Good evening")
 	if disp < TALK_MIN:

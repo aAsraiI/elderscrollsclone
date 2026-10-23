@@ -40,5 +40,25 @@ static func to_dict() -> Dictionary:
 	return records.duplicate(true)
 
 
+## Record groups that the game works out again by itself, so a save file leaves them out. Empty for
+## now: "npcact/" looked like one, but TownLife uses it after a load to know a lock you picked is yours
+## to keep (without it, owners lock their doors again at once). Saves are compressed instead.
+const NOT_SAVED: Array[String] = []
+
+
+## What goes into a save file: every record except the ones the game rebuilds on its own
+static func to_save_dict() -> Dictionary:
+	var out := {}
+	for k: String in records:
+		var skip := false
+		for p in NOT_SAVED:
+			if k.begins_with(p):
+				skip = true
+				break
+		if not skip:
+			out[k] = records[k].duplicate(true) if records[k] is Dictionary else records[k]
+	return out
+
+
 static func from_dict(data: Dictionary) -> void:
 	records = data.duplicate(true)

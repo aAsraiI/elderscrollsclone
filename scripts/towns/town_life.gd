@@ -536,6 +536,8 @@ func _make_body(r: Resident, parent: Node3D, pos: Vector3) -> Enemy:
 	e.persist_mode = Enemy.PersistMode.CORPSE_ONLY
 	e.spawn_key = d.id
 	e.set_meta("npc_id", d.id)
+	if d.role == NpcData.Role.GUARD:
+		e.set_meta("guard", true)  # townsfolk in trouble call for these (Enemy._call_guards)
 	e.rotation.y = rng.randf() * TAU
 	e.position = parent.to_local(pos) if parent.is_inside_tree() else pos
 	parent.add_child(e)

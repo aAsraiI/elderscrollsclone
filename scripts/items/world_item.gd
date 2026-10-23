@@ -120,6 +120,34 @@ func get_prompt() -> String:
 	return "%s %s%s" % [verb, item.display_name, " x%d" % count if count > 1 else ""]
 
 
+# ---- Knocking things over
+
+## A placed item (frozen on its shelf) comes loose: bumped, hit, or struck by something thrown.
+## It stays where its owner put it until then, so a tidy room only gets messy when you make it so.
+func wake(push: Vector3 = Vector3.ZERO) -> void:
+	if freeze:
+		freeze = false
+	if push != Vector3.ZERO:
+		apply_central_impulse(push * mass)
+
+
+## Just thrown (Grabber.throw): for a moment it knocks loose whatever it flies into
+func on_thrown() -> void:
+	contact_monitor = true
+	max_contacts_reported = 4
+	if not body_entered.is_connected(_on_thrown_hit):
+		body_entered.connect(_on_thrown_hit)
+	get_tree().create_timer(3.0).timeout.connect(func() -> void:
+		if is_instance_valid(self) and body_entered.is_connected(_on_thrown_hit):
+			body_entered.disconnect(_on_thrown_hit)
+			contact_monitor = false)
+
+
+func _on_thrown_hit(body: Node) -> void:
+	if body is WorldItem and body != self:
+		(body as WorldItem).wake(linear_velocity * 0.4)
+
+
 # ---- Grabbing (hold interact). The Interactor / Grabber call these.
 
 func can_grab() -> bool:

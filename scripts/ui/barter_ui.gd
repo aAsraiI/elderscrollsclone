@@ -66,8 +66,17 @@ func open_for(s: DialogueEngine.Speaker) -> bool:
 	shop = Barter.open_shop(shop_id, merchant, clock.day if clock != null else 1, zone.x, zone.y, Barter.GOLD_SCALE[clampi(kind, 0, 2)])
 	deal = Barter.deal_for(_player, DialogueEngine.get_disposition(s))
 	deal.guild = Factions.discount_for(merchant)
+	# The town's market (Economy): what the land makes, what you've flooded it with, festivals
+	var market_pos := b.world_pos if b != null else s.position
+	var town := world.get_town_at(market_pos, 40.0)
+	var biome := world.get_biome_at(market_pos.x, market_pos.z)
+	var fest := Festivals.current(clock)
+	deal.town_id = town.id if town != null else ""
+	deal.biome = biome.get_key() if biome != null else ""
+	deal.festival = town != null and Festivals.keeps(fest, world, town)
+	deal.today = clock.day if clock != null else 1
 	_title.text = "%s  ·  %s" % [shop_name, s.name]
-	_message.text = ""
+	_message.text = Economy.note(deal.town_id, deal.biome, deal.festival, deal.today) if deal.town_id != "" else ""
 	_open = true
 	_root.visible = true
 	get_tree().paused = true

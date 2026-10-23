@@ -29,6 +29,11 @@ class Deal:
 	var sell_mult := 1.0
 	## Stage 6: standing in the merchant's guild (0.1 = 10% better prices)
 	var guild := 0.0
+	## The market this deal is in (Economy): set by the barter window. town_id "" = no market prices
+	var town_id := ""
+	var biome := ""
+	var festival := false
+	var today := 1
 
 
 ## A shop while you are trading with it
@@ -57,6 +62,8 @@ static func deal_for(player: Node, disposition: int) -> Deal:
 
 static func buy_price(item: ItemData, m: MerchantData, d: Deal) -> int:
 	var f := m.markup * d.buy_mult * (1.0 - float(d.speech) / 400.0) * (1.2 - float(d.disposition) * 0.004) * (1.0 - d.guild)
+	if d.town_id != "":
+		f *= Economy.buy_factor(item, d.town_id, d.biome, d.festival, d.today)
 	return maxi(1, ceili(float(item.value) * f))
 
 
@@ -66,6 +73,8 @@ static func sell_price(item: ItemData, m: MerchantData, d: Deal) -> int:
 		return 0
 	var rate := m.treasure_rate if item.treasure else m.sell_rate
 	var f := rate * d.sell_mult * (1.0 + float(d.speech) / 300.0) * (0.8 + float(d.disposition) * 0.004) * (1.0 + d.guild)
+	if d.town_id != "":
+		f *= Economy.sell_factor(item, d.town_id, d.biome, d.festival, d.today)
 	var p := floori(float(item.value) * f)
 	return clampi(maxi(p, 1), 1, maxi(buy_price(item, m, d) - 1, 1))
 
@@ -178,6 +187,7 @@ static func buy(s: Shop, player_inv: Inventory, item: ItemData, count: int, d: D
 	s.inventory.remove_item(item, count)
 	player_inv.add_item(item, count)
 	s.gold += total
+	Economy.record(d.town_id, item, -count, d.today)  # buys it up a little
 	save_shop(s)
 	return {"error": "", "count": count, "gold": total}
 
@@ -208,5 +218,6 @@ static func sell(s: Shop, player_inv: Inventory, equipment: Equipment, item: Ite
 		CrimeManager.remove_stolen(item, mini(count, stolen))  # a fence takes the stolen ones first
 	Currency.add_gold(player_inv, total)
 	s.gold -= total
+	Economy.record(d.town_id, item, count, d.today)  # floods the town's market a little
 	save_shop(s)
 	return {"error": "", "count": count, "gold": total}

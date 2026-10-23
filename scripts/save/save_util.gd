@@ -40,12 +40,13 @@ static func path_to_item(path: String) -> ItemData:
 
 ## Writes JSON so that a crash or a full disk can never leave a half-written save behind:
 ## write to .tmp, check it reads back, keep the old file as .bak, then rename into place.
-static func write_json_atomic(path: String, data: Variant, keep_backup: bool = true) -> Error:
+## compress: compact JSON, gzip-compressed (a save shrinks to about a tenth); read_json reads both.
+static func write_json_atomic(path: String, data: Variant, keep_backup: bool = true, compress: bool = false) -> Error:
 	var tmp := path + ".tmp"
-	var file := FileAccess.open(tmp, FileAccess.WRITE)
+	var file := FileAccess.open_compressed(tmp, FileAccess.WRITE, FileAccess.COMPRESSION_GZIP) if compress else FileAccess.open(tmp, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify(data, "\t"))
+	file.store_string(JSON.stringify(data) if compress else JSON.stringify(data, "\t"))
 	file.close()
 	if read_json(tmp) == null:
 		DirAccess.remove_absolute(tmp)
@@ -58,11 +59,23 @@ static func write_json_atomic(path: String, data: Variant, keep_backup: bool = t
 	return DirAccess.rename_absolute(tmp, path)
 
 
-## Parsed JSON, or null if the file is missing or damaged
+## Parsed JSON, or null if the file is missing or damaged. Reads plain and compressed files.
 static func read_json(path: String) -> Variant:
 	if not FileAccess.file_exists(path):
 		return null
-	var text := FileAccess.get_file_as_string(path)
+	var text := ""
+	var probe := FileAccess.open(path, FileAccess.READ)
+	var head := probe.get_buffer(4) if probe != null else PackedByteArray()
+	if probe != null:
+		probe.close()
+	if head.get_string_from_ascii() == "GCPF":  # Godot's compressed file header
+		var f := FileAccess.open_compressed(path, FileAccess.READ, FileAccess.COMPRESSION_GZIP)
+		if f == null:
+			return null
+		text = f.get_as_text()
+		f.close()
+	else:
+		text = FileAccess.get_file_as_string(path)
 	if text == "":
 		return null
 	var json := JSON.new()

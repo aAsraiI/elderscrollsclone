@@ -946,6 +946,9 @@ func _sweep() -> void:
 	var t0 := float(act["t"])
 	var t1 := 1.0 - _phase_left / maxf(_phase_len, 0.001)
 	act["t"] = t1
+	if not act.has("knocked"):
+		act["knocked"] = true
+		_knock_items(xf.origin - xf.basis.z * reach * 0.8, -xf.basis.z)
 
 	var lines: Array = []
 	var hits: Array[Dictionary]
@@ -1298,3 +1301,21 @@ func _draw_debug(lines: Array) -> void:
 	mi.material_override = mat
 	host.add_child(mi)
 	get_tree().create_timer(0.4).timeout.connect(mi.queue_free)
+
+
+# A swing knocks loose the things on shelves and tables it passes through (attack rays don't hit
+# items, so a small sphere where the weapon lands finds them)
+func _knock_items(at: Vector3, forward: Vector3) -> void:
+	var space: PhysicsDirectSpaceState3D = body.get_world_3d().direct_space_state if body != null and body.is_inside_tree() else null
+	if space == null:
+		return
+	var shape := SphereShape3D.new()
+	shape.radius = 0.7
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = Transform3D(Basis.IDENTITY, at)
+	query.collision_mask = WorldItem.ITEM_LAYER
+	for hit in space.intersect_shape(query, 8):
+		var item := hit["collider"] as WorldItem
+		if item != null:
+			item.wake(forward * 2.5 + Vector3.UP * 0.8)

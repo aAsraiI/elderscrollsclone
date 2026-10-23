@@ -70,6 +70,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_zoom(false)
 		return
 	if event.is_action_pressed("attack"):
+		# Carrying something: attack throws it instead of swinging
+		var grabber := get_parent().get_node_or_null("Head/RayCast3D/Grabber") as Grabber
+		if grabber != null and grabber.throw():
+			return
 		_primary_held = true
 		_break_invisibility()
 		combat.begin_charge()

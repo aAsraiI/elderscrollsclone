@@ -40,6 +40,7 @@
 [ext_resource type="Script" uid="uid://wgdhge03tyk8" path="res://scripts/ui/favorites_menu.gd" id="44_favoritesmenu"]
 [ext_resource type="Script" uid="uid://dus6phuqbl3dr" path="res://scripts/ui/menu_hub.gd" id="45_menuhub"]
 [ext_resource type="Script" uid="uid://bjlhafok21djj" path="res://scripts/ui/council_ui.gd" id="46_councilui"]
+[ext_resource type="Script" uid="uid://cw0ei8eo0x62m" path="res://scripts/ui/debug_console.gd" id="47_debugconsole"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_g4v7s"]
 radius = 0.4
@@ -176,3 +177,6 @@ script = ExtResource("45_menuhub")
 
 [node name="CouncilUI" type="CanvasLayer" parent="." unique_id=1900000027]
 script = ExtResource("46_councilui")
+
+[node name="DebugConsole" type="CanvasLayer" parent="." unique_id=1900000028]
+script = ExtResource("47_debugconsole")

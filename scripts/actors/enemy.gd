@@ -214,6 +214,7 @@ var _casting: SpellData
 var _cast_left := 0.0
 var _drinking := 0.0
 var _flank_angle := 0.0
+var _retreated := false  # broke off once this fight already (_maybe_retreat)
 var _calm_until := -1.0
 var _fear_until := -1.0
 var _frenzy_until := -1.0
@@ -740,7 +741,7 @@ func _tick_chase(delta: float) -> void:
 			and is_on_floor() and _facing_error(to_target) < 0.3:
 		_lunge(to_target)
 		return
-	var goal := to_target.normalized()
+	var goal := _flank_goal(to_target, dist)
 	# Stuck behind a house for a second: take the streets (when there is a route to follow)
 	_chase_check_time += delta
 	if _chase_check_time >= 1.0:
@@ -760,6 +761,27 @@ func _tick_chase(delta: float) -> void:
 	var dir := _around_walls(goal)
 	velocity.x = move_toward(velocity.x, dir.x * move_speed, acceleration * delta)
 	velocity.z = move_toward(velocity.z, dir.z * move_speed, acceleration * delta)
+
+
+# Several hunting the same target: each swings out to its own side (its flank angle) so they arrive
+# around the target instead of in a line. A lone hunter, a beast pack's leader or one already close
+# just runs straight in.
+func _flank_goal(to_target: Vector3, dist: float) -> Vector3:
+	var straight := to_target.normalized()
+	if dist < 4.0 or dist > 25.0 or absf(_flank_angle) < 0.2 or cunning < 0.3:
+		return straight
+	var allies := 0
+	for e in ActorRegistry.near(_target.global_position, 25.0):
+		if e != self and e._target == _target and not e.is_dead():
+			allies += 1
+			if allies >= 1:
+				break
+	if allies == 0:
+		return straight
+	# Aim at a spot beside the target, about 5 m out at up to 70 degrees round from the straight line
+	var side := straight.rotated(Vector3.UP, _flank_angle * deg_to_rad(70.0))
+	var spot := to_target - side * 5.0
+	return spot.normalized() if spot.length() > 0.5 else straight
 
 
 # Running into a wall (a house between it and its target): slide along the wall toward the side
@@ -1434,13 +1456,51 @@ func _on_damaged(info: DamageInfo, amount: float) -> void:
 		Disposition.FRIENDLY:
 			if by_creature:
 				_target = info.source as Enemy  # run from what hit it
+				_call_guards(info.source as Enemy)
 			_flee_until = _clock + flee_time
 			_drop_talk()
 			if state != State.STAGGER:
 				_enter_state(State.FLEE)
 			return
+	_maybe_retreat(info)
 	if state == State.IDLE or state == State.WANDER or state == State.PATROL:
 		_enter_state(State.CHASE)
+
+
+# A townsperson attacked by a creature shouts, and the nearest free guard comes to fight it
+# (the player attacking someone is a crime instead: CrimeManager's witnesses handle that)
+func _call_guards(attacker: Enemy) -> void:
+	if not has_meta("npc_id") or attacker.disposition != Disposition.HOSTILE:
+		return
+	_popup("Guards!", global_position + Vector3.UP * 2.2, Color(1.0, 0.85, 0.4), 40)
+	var best: Enemy = null
+	for e in ActorRegistry.near(global_position, 50.0):
+		if not e.has_meta("guard") or e.is_dead():
+			continue
+		var free := e._target == null or not is_instance_valid(e._target) or e._target == attacker
+		if free and (best == null or e.global_position.distance_to(global_position) < best.global_position.distance_to(global_position)):
+			best = e
+	if best != null:
+		best.fight(attacker)
+
+
+# Badly hurt, with no potion left to drink: a person (not a beast or a spirit) may break off and
+# run for a few seconds, once a fight, then come back at it
+func _maybe_retreat(info: DamageInfo) -> void:
+	if _retreated or disposition != Disposition.HOSTILE or body_kind != CreatureBody.Kind.HUMANOID:
+		return
+	if style == Style.BEAST or style == Style.SPIRIT or potions > 0 or stats.is_dead:
+		return
+	if stats.health > stats.get_stat("max_health") * 0.25 or randf() > 0.25 + cunning * 0.4:
+		return
+	_retreated = true
+	var from := info.source as Node3D if info.source is Node3D and is_instance_valid(info.source) else _target
+	if from == null or state == State.STAGGER:
+		return
+	_target = from  # flee_from() is for the peaceful; a hostile one runs, then idles and comes back
+	_flee_until = _clock + 4.0 + cunning * 3.0
+	_popup("Retreat!", global_position + Vector3.UP * 2.2, Color(0.9, 0.9, 0.9), 32)
+	_enter_state(State.FLEE)
 
 
 func _drop_talk() -> void:

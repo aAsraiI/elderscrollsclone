@@ -53,6 +53,17 @@ static func generate(town: PlacedPOI, map: WorldMap) -> Array[NpcData]:
 				n.wake_hour = 6.5
 			NpcData.Role.FARMER:
 				n.work_start = snappedf(rng.randf_range(6.5, 7.25), 0.25)
+			NpcData.Role.LORD:
+				# The lord holds court from morning to evening, and is proud with strangers
+				n.work_start = 8.0
+				n.work_end = 19.0
+				n.wake_hour = 7.0
+				n.sleep_hour = 22.5
+				n.personality = NpcData.Personality.PROUD
+				n.base_disposition = 40 if b.seat_type == "castle" else 45
+				n.level = zone.y
+				n.color = NamedSettlements.house_color(b.house).darkened(0.1)
+				n.faction = town.id
 		out.append(n)
 	# at least one guard for every six buildings, so big towns get more
 	var guard_count: int = maxi(GUARDS[clampi(int((town.poi as TownData).kind), 0, 2)], layout.buildings.size() / 6)
@@ -110,6 +121,8 @@ static func lines_for(n: NpcData, layout: TownLayout, everyone: Array[NpcData]) 
 			out.append("The temple doors are open to all who need them.")
 		NpcData.Role.GUILD_MEMBER:
 			out.append("%s is always looking for able hands." % String(GUILD_NAMES.get(n.faction, "The guild")).capitalize())
+		NpcData.Role.LORD:
+			out.append("I hold %s and all its lands. Bring your petitions to %s by day." % [town, b.display_name if b != null else "my hall"])
 		NpcData.Role.FARMER:
 			out.append(["Crops are coming in well this year.", "Wolves took two of my sheep last week.", "Up before dawn, every day. That's farming."][rng.randi_range(0, 2)])
 		NpcData.Role.GUARD:

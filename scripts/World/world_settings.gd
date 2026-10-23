@@ -67,6 +67,10 @@ extends Resource
 @export_range(0, 8) var towns_per_region_max := 3
 ## One city in every biome, in its biggest region
 @export var city_per_biome := true
+## Build the named settlements of the realm (NamedSettlements: Kingsreach, Merewater...), each
+## with its lord's seat, instead of random towns. Biomes with no named settlements keep the
+## random ones.
+@export var named_settlements := false
 ## Empty ground (m) kept between two settlements, on top of their own size
 @export_range(0.0, 2000.0, 10.0, "or_greater") var town_spacing := 260.0
 @export var roads_enabled := true
@@ -173,6 +177,8 @@ func layout_hash() -> int:
 				parts.append("%s:%d:%.3f:%.3f" % [rule.poi.get_key(), rule.count_mode, rule.count_min, rule.count_max])
 	if towns_enabled:
 		parts.append("towns:%d:%d:%s:%s" % [towns_per_region_min, towns_per_region_max, city_per_biome, roads_enabled])
+		if named_settlements:
+			parts.append("named:%d" % NamedSettlements.count())
 		for t in get_town_templates():
 			parts.append(t.get_key())
 	return ("%f|%s" % [cell_size, "|".join(parts)]).hash()

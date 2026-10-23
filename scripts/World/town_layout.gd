@@ -63,6 +63,8 @@ var gates: Array[Vector3] = []
 ## water nearby). Tradesmen are picked from these: fishermen only where there is water.
 var biome_key := ""
 var shore := Vector3.INF
+## Named towns: the NamedSettlements entry (its lord and seat); empty for random towns
+var named: Dictionary = {}
 
 var _rects: Array[Rect2] = []
 # Street network for walking (built the first time someone asks for a route)
@@ -78,11 +80,14 @@ static func generate(p_data: TownData, placed: PlacedPOI, town_name: String, map
 	t.display_name = town_name
 	t.origin = placed.position
 	t.yaw = placed.yaw
+	t.named = placed.named
 	var rng := RandomNumberGenerator.new()
 	rng.seed = placed.seed_value ^ 0x70E7
 	t._make_streets()
 	t._survey(map)
 	t._place_buildings(rng)
+	if not t.named.is_empty():
+		t._assign_cast(QuestBook.cast_for(town_name))
 	for b in t.buildings:
 		b.town_id = t.town_id
 		b.town_name = town_name
@@ -118,6 +123,14 @@ func get_gate_outward(i: int) -> Vector3:
 
 func get_building(index: int) -> BuildingPlot:
 	return buildings[index] if index >= 0 and index < buildings.size() else null
+
+
+## The lord's seat (named towns only), or null
+func get_seat() -> BuildingPlot:
+	for b in buildings:
+		if b.kind == BuildingPlot.Kind.SEAT:
+			return b
+	return null
 
 
 func count_kind(kind: BuildingPlot.Kind) -> int:
@@ -394,6 +407,8 @@ func _make_anchors() -> Array[Dictionary]:
 func _place_buildings(rng: RandomNumberGenerator) -> void:
 	var d := data
 	var wanted: Array[Dictionary] = []  # {"kind", "guild", "trade"}
+	if not named.is_empty():  # the lord's seat goes first, so it gets a spot near the middle
+		wanted.append({"kind": BuildingPlot.Kind.SEAT})
 	for i in d.roll_count(rng, d.temples_min, d.temples_max):
 		wanted.append({"kind": BuildingPlot.Kind.TEMPLE})
 	var halls := mini(d.roll_count(rng, d.guild_halls_min, d.guild_halls_max), d.guilds.size())
@@ -430,32 +445,45 @@ func _place_buildings(rng: RandomNumberGenerator) -> void:
 	for w in wanted:
 		var plot := _make_plot(w, rng, used_names)
 		var order: Array[int] = orders[_order_kind(plot.kind)]
-		for ai in order:  # no spot fits: the town simply has one building less
-			var a: Dictionary = anchors[ai]
-			if a["dead"]:
-				continue
-			var away: Vector3 = a["out"]
-			plot.local_yaw = atan2(away.x, away.z)  # the front (-Z) looks back at the street
-			plot.local_pos = a["pos"] + away * plot.size.z * 0.5
-			var rect := plot.get_local_rect()
-			if _fits(rect):
-				_rects.append(rect)
-				plot.index = buildings.size()
-				plot.id = "%s/b%d" % [town_id, plot.index]
-				buildings.append(plot)
-				var dead_zone := rect.grow(GAP + 1.0)
-				for other in anchors:
-					var p: Vector3 = other["pos"]
-					if dead_zone.has_point(Vector2(p.x, p.z)):
-						other["dead"] = true
+		# The seat must be built: if it fits nowhere, it shrinks and tries again
+		var tries := 4 if plot.kind == BuildingPlot.Kind.SEAT else 1
+		for attempt in tries:
+			if attempt > 0:
+				plot.size = Vector3(plot.size.x * 0.8, plot.size.y, plot.size.z * 0.8)
+			if _try_place(plot, order, anchors):
 				break
+
+
+# Puts a building at the first free spot in `order`. False when no spot fits (the town simply has
+# one building less).
+func _try_place(plot: BuildingPlot, order: Array[int], anchors: Array[Dictionary]) -> bool:
+	for ai in order:
+		var a: Dictionary = anchors[ai]
+		if a["dead"]:
+			continue
+		var away: Vector3 = a["out"]
+		plot.local_yaw = atan2(away.x, away.z)  # the front (-Z) looks back at the street
+		plot.local_pos = a["pos"] + away * plot.size.z * 0.5
+		var rect := plot.get_local_rect()
+		if _fits(rect):
+			_rects.append(rect)
+			plot.index = buildings.size()
+			plot.id = "%s/b%d" % [town_id, plot.index]
+			buildings.append(plot)
+			var dead_zone := rect.grow(GAP + 1.0)
+			for other in anchors:
+				var p: Vector3 = other["pos"]
+				if dead_zone.has_point(Vector2(p.x, p.z)):
+					other["dead"] = true
+			return true
+	return false
 
 
 # Which list of spots a kind of building uses: important buildings near the middle, the smithy
 # halfway out, farms at the edge, houses anywhere
 static func _order_kind(kind: BuildingPlot.Kind) -> String:
 	match kind:
-		BuildingPlot.Kind.TEMPLE, BuildingPlot.Kind.GUILD_HALL, BuildingPlot.Kind.INN, BuildingPlot.Kind.SHOP:
+		BuildingPlot.Kind.SEAT, BuildingPlot.Kind.TEMPLE, BuildingPlot.Kind.GUILD_HALL, BuildingPlot.Kind.INN, BuildingPlot.Kind.SHOP:
 			return "center"
 		BuildingPlot.Kind.SMITHY:
 			return "middle"
@@ -516,6 +544,8 @@ func _make_plot(w: Dictionary, rng: RandomNumberGenerator, used_names: Dictionar
 	p.kind = w["kind"]
 	p.guild = String(w.get("guild", ""))
 	p.trade = String(w.get("trade", ""))
+	if p.kind == BuildingPlot.Kind.SEAT:
+		return _make_seat(p)
 	var owner := NameGen.person(rng)
 	for i in 8:
 		if not used_names.has(owner):
@@ -560,3 +590,93 @@ func _make_plot(w: Dictionary, rng: RandomNumberGenerator, used_names: Dictionar
 		p.lock_level = rng.randi_range(mini(data.house_lock_min, data.house_lock_max), maxi(data.house_lock_min, data.house_lock_max))
 		p.starts_locked = rng.randf() < data.house_locked_chance
 	return p
+
+
+## Seat sizes (width, wall height, depth): a great lord's castle, a baron's keep, a knight's
+## tower house, a village reeve's house
+const SEAT_SIZES := {
+	"castle": Vector3(24.0, 9.0, 18.0),
+	"keep": Vector3(15.0, 7.0, 12.0),
+	"tower": Vector3(8.0, 11.0, 8.0),
+	"reeve": Vector3(11.0, 4.0, 8.0),
+}
+
+
+# The lord's seat of a named town: its size from the kind of seat, its owner the lord. Open by day
+# like other public buildings, with a strong lock at night.
+func _make_seat(p: BuildingPlot) -> BuildingPlot:
+	p.seat_type = String(named.get("seat", "reeve"))
+	p.house = String(named.get("house", ""))
+	p.size = SEAT_SIZES.get(p.seat_type, SEAT_SIZES["reeve"])
+	p.owner_name = String(named.get("lord", "The Reeve"))
+	p.display_name = String(named.get("hall", "Reeve's House"))
+	p.lock_level = clampi(data.house_lock_max + (40 if p.seat_type == "castle" else 20), 1, 99)
+	p.starts_locked = false
+	return p
+
+
+## Words that come before a name ("Watch Captain Bertil Ames" lives at "Bertil Ames's House")
+const NAME_TITLES := ["Watch", "Captain", "Sergeant", "Reeve", "Sir", "Dame", "Lady", "Lord", "Old", "Sister", "Brother",
+	"Master", "Mistress", "Elder", "Baron", "Baroness", "Duke", "Duchess", "Prince", "Princess", "Skald", "Harbour-Thane",
+	"Harbourmaster", "Customs", "Admiral", "Bridgewarden", "Alchemist", "Swordmaster", "Waterwarden", "Caravan-mistress",
+	"Games-master", "Wise-woman", "Hunt-leader", "Spire-Captain", "Spire-Engineer", "Glass-Warden", "Runner-captain",
+	"Archivist", "Steward", "Shepherd", "Prospector", "Fisherwoman", "Farmer", "Boatwright", "Peat-cutter", "Widow",
+	"Knight-Commander", "Jarl-Consort", "Alpha", "Choirmaster", "The"]
+
+
+## The people a named town's quests need get the homes and work places of ordinary townsfolk
+## (the innkeeper, the priest, a house), so they live their day like everyone else. Same every
+## time: the list is sorted and the buildings are taken in order.
+func _assign_cast(cast: Array) -> void:
+	var taken := {}
+	var sale := Homes.for_sale_id(self, int(data.kind))
+	for c: Dictionary in cast:
+		var b := _cast_home(String(c.get("at", "house")), taken, sale)
+		if b == null:
+			continue
+		taken[b.id] = true
+		b.owner_name = String(c["name"])
+		if b.kind == BuildingPlot.Kind.HOUSE and b.trade == "":
+			b.display_name = "%s's House" % short_name(b.owner_name)
+		elif b.kind == BuildingPlot.Kind.FARM:
+			b.display_name = "%s Farm" % short_name(b.owner_name)
+
+
+func _cast_home(at: String, taken: Dictionary, sale: String) -> BuildingPlot:
+	var kind := BuildingPlot.Kind.HOUSE
+	var guild := ""
+	match at:
+		"inn":
+			kind = BuildingPlot.Kind.INN
+		"temple":
+			kind = BuildingPlot.Kind.TEMPLE
+		"smithy":
+			kind = BuildingPlot.Kind.SMITHY
+		"shop":
+			kind = BuildingPlot.Kind.SHOP
+		_:
+			if at.begins_with("guild:"):
+				kind = BuildingPlot.Kind.GUILD_HALL
+				guild = at.trim_prefix("guild:")
+	for pass_i in 3:
+		for b in buildings:
+			if taken.has(b.id) or b.id == sale:
+				continue
+			match pass_i:
+				0:  # the kind asked for
+					if b.kind == kind and (guild == "" or b.guild == guild) and (kind != BuildingPlot.Kind.HOUSE or b.trade == ""):
+						return b
+				1:  # any ordinary house
+					if b.kind == BuildingPlot.Kind.HOUSE:
+						return b
+				2:  # a farm, a last resort
+					if b.kind == BuildingPlot.Kind.FARM:
+						return b
+	return null
+
+
+static func short_name(full: String) -> String:
+	var words := full.split(" ", false)
+	while words.size() > 1 and NAME_TITLES.has(words[0]):
+		words.remove_at(0)
+	return " ".join(words)

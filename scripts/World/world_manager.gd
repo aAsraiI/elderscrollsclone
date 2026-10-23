@@ -59,6 +59,9 @@ var clock: WorldClock
 var life: TownLife
 var crime: CrimeManager
 var quests: QuestManager
+## The written quests of the design bible (QuestBook) and the instanced realms (RealmManager)
+var book: QuestBook
+var realms: RealmManager
 var road_life: RoadLife
 ## Found places and fast travel
 var discovery: Discovery
@@ -134,6 +137,12 @@ func _ready() -> void:
 	quests = QuestManager.new()
 	quests.name = "QuestManager"
 	add_child(quests)
+	book = QuestBook.new()
+	book.name = "QuestBook"
+	add_child(book)
+	realms = RealmManager.new()
+	realms.name = "RealmManager"
+	add_child(realms)
 	road_life = RoadLife.new()
 	road_life.name = "RoadLife"
 	road_life.enabled = road_life_enabled and settings.road_traffic

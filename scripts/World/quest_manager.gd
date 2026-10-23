@@ -19,7 +19,7 @@ extends Node
 ## Saved in WorldState: "quests" (every job, and the counter) and "assassins/invited".
 
 const STATE := "quests"
-const TOPICS: Array[String] = ["membership", "advancement", "clear bounty", "a delivery"]
+const TOPICS: Array[String] = ["membership", "advancement", "clear bounty", "a delivery", "the territory war"]
 const PERSUADE_GOAL := 70
 const CHIEF_BODY := "res://scripts/Resources/Enemies/bandit_brute.tres"
 const BEAST_BODY := "res://scripts/Resources/Enemies/frost_bear.tres"
@@ -98,6 +98,7 @@ static func active_targets() -> Array:
 	var st := Story.target()
 	if not st.is_empty():
 		out.append(st)
+	out.append_array(QuestBook.targets())
 	return out
 
 
@@ -367,6 +368,8 @@ func on_murder(victim: Enemy, witnessed: bool) -> void:
 func fill_container(c: ContainerComponent) -> void:
 	if c.save_id == "":
 		return
+	if world != null and world.book != null:
+		world.book.fill_container(c)
 	for q: Dictionary in all_quests():
 		if q["status"] == "active" and String(q.get("container", "")) == c.save_id and not bool(q.get("placed", false)):
 			c.inventory.add_item(QuestItems.get_item(String(q["id"]), String(q["item_name"])))
@@ -437,9 +440,13 @@ func extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 			out.append("clear bounty")
 	if not _delivery_for(s).is_empty():
 		out.append("a delivery")
+	if ClanTerritory.CLANS.has(leader):
+		out.append("the territory war")
 	var story := get_tree().get_first_node_in_group("story") as Story
 	if story != null:
 		out.append_array(story.topics_for(s))
+	if world != null and world.book != null:
+		out.append_array(world.book.topics_for(s))
 	return out
 
 
@@ -461,6 +468,10 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 		var told := story.respond(s, topic)
 		if not told.is_empty():
 			return told
+	if world != null and world.book != null:
+		var written := world.book.respond(s, topic)
+		if not written.is_empty():
+			return written
 	var leader := Factions.leader_of(s, world)
 	var p := _player()
 	if topic == "a delivery":
@@ -471,6 +482,8 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 		return _say("Ah, at last! Thank you. Here, for your trouble: %d gold." % gold, q)
 	if leader == "":
 		return {}
+	if topic == "the territory war" and ClanTerritory.CLANS.has(leader):
+		return _say("The clans war over the night of every land. %s Work for us where you would see us rule." % ClanTerritory.summary())
 	var d := Factions.get_data(leader)
 	var guild := d.display_name
 	match topic:

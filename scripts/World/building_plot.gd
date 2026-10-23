@@ -6,7 +6,8 @@ extends RefCounted
 ##
 ## Local space of a building: its middle on the ground, the front (with the door) faces -Z.
 
-enum Kind { HOUSE, FARM, SHOP, INN, SMITHY, TEMPLE, GUILD_HALL }
+## SEAT = the government building of a named town, where its lord sits (see NamedSettlements)
+enum Kind { HOUSE, FARM, SHOP, INN, SMITHY, TEMPLE, GUILD_HALL, SEAT }
 
 ## "<town id>/b<n>", stable across runs and saves
 var id := ""
@@ -20,6 +21,9 @@ var owner_name := ""
 var trade := ""
 ## Guild halls: "fighters", "mages" or "knights"
 var guild := ""
+## Seats: "castle", "keep", "tower" or "reeve", and the house whose banners hang on it
+var seat_type := ""
+var house := ""
 ## Width (x), wall height (y), depth (z) in meters
 var size := Vector3(7.0, 3.4, 6.0)
 ## Farms: the field behind the house (width along the street, depth behind the house)
@@ -40,7 +44,7 @@ var town_name := ""
 
 
 static func kind_name(k: Kind) -> String:
-	return ["House", "Farm", "Shop", "Inn", "Smithy", "Temple", "Guild Hall"][int(k)]
+	return ["House", "Farm", "Shop", "Inn", "Smithy", "Temple", "Guild Hall", "Seat"][int(k)]
 
 
 ## Is this a place people may walk into by day (shops, the inn, temple, guild halls)?

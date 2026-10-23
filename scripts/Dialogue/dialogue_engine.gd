@@ -248,6 +248,13 @@ static func greeting_topics(s: Speaker) -> PackedStringArray:
 static func topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
 	var general := PackedStringArray()
 	var named := PackedStringArray()
+	# Quest topics (a written quest's hook, the next thing to ask) are known as soon as the person
+	# who has them is met
+	if world != null and world.book != null and not s.asleep:
+		for t in world.book.topics_for(s):
+			DialogueState.learn(t)
+		if Factions.leader_of(s, world) in ClanTerritory.CLANS:
+			DialogueState.learn("the territory war")
 	for t in DialogueState.known_topics():
 		if not can_discuss(s, t, world):
 			continue
@@ -273,6 +280,8 @@ static func can_discuss(s: Speaker, topic: String, world: WorldManager) -> bool:
 	# Guild leaders' topics (membership, advancement...) and job topics only for those who have them
 	if QuestManager.TOPICS.has(topic):
 		return world != null and world.quests != null and world.quests.extra_topics(s).has(topic)
+	if world != null and world.book != null and world.book.topics_for(s).has(topic):
+		return true
 	match String(e.get("kind", "")):
 		"generic":
 			return topic != "the law" or s.data != null
@@ -426,6 +435,10 @@ static func _generic(s: Speaker, topic: String, world: WorldManager) -> String:
 					return "Crops and animals. Up before dawn, in bed after dark."
 				NpcData.Role.GUARD:
 					return "Keeping the peace in %s. Ask me about the law if you're unsure of it." % town
+				NpcData.Role.LORD:
+					if s.home != null and s.home.seat_type == "reeve":
+						return "The village chose me as its reeve. I keep %s: the tithes, the disputes, the roof on the mill." % town
+					return "I hold %s from %s. Petitions are heard here by day, and the law of these lands is mine to keep." % [town, home]
 			if s.data == null:
 				return "I go where the road takes me."
 			return "Odd jobs around %s. Whatever pays." % town
@@ -449,6 +462,11 @@ static func _generic(s: Speaker, topic: String, world: WorldManager) -> String:
 		"the law":
 			if s.role == NpcData.Role.GUARD:
 				return "Steal or kill in %s and you'll answer to us. We see more than you think." % town
+			if s.role == NpcData.Role.LORD:
+				var owed := CrimeManager.get_bounty(s.town.id) if s.town != null else 0
+				if owed > 0:
+					return "You owe %d gold to %s. Pay my guards, or answer for it in my cells." % [owed, town]
+				return "In %s the law is mine, and my guards carry it out. Keep to it and we will have no quarrel." % town
 			return "Ask a guard about the law. They'll be glad to tell you."
 	return ""
 

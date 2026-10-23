@@ -29,12 +29,15 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			h = 6.5
 		BuildingPlot.Kind.INN, BuildingPlot.Kind.GUILD_HALL:
 			h = 4.2
+		BuildingPlot.Kind.SEAT:
+			h = {"castle": 7.0, "keep": 5.5, "tower": 4.2}.get(b.seat_type, 3.6)
+	var stone_hall := b.kind == BuildingPlot.Kind.TEMPLE or (b.kind == BuildingPlot.Kind.SEAT and b.seat_type != "reeve")
 	var root := Node3D.new()
 	root.name = "Interior"
 	root.set_meta("building_id", b.id)
 
-	var floor_color := WOOD.darkened(0.25) if b.kind != BuildingPlot.Kind.TEMPLE else STONE.lightened(0.1)
-	var wall_color := Color(0.55, 0.47, 0.36) if b.kind != BuildingPlot.Kind.TEMPLE else STONE.lightened(0.25)
+	var floor_color := WOOD.darkened(0.25) if not stone_hall else STONE.lightened(0.1)
+	var wall_color := Color(0.55, 0.47, 0.36) if not stone_hall else STONE.lightened(0.25)
 	POIBuilder.add_box(root, Vector3(w + WALL * 2.0, WALL, d + WALL * 2.0), Vector3(0.0, -WALL * 0.5, 0.0), floor_color)
 	POIBuilder.add_box(root, Vector3(w + WALL * 2.0, WALL, d + WALL * 2.0), Vector3(0.0, h + WALL * 0.5, 0.0), wall_color.darkened(0.35))
 	for z in [-d * 0.5 - WALL * 0.5, d * 0.5 + WALL * 0.5]:
@@ -172,6 +175,43 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			for i in 4:
 				seats.append(Vector3(1.6 * (1.0 if i % 2 == 0 else -1.0), 0.0, d * 0.05 + (float(i / 2) - 0.5) * 2.0))
 			chests += _chest(root, b, 0, "Guild Chest", Vector3(-w * 0.5 + 0.8, 0.35, d * 0.5 - 1.0), _shop_loot(), interior_seed)
+		BuildingPlot.Kind.SEAT:
+			# The lord's high seat on a dais at the far end, under the house banners
+			var banner := NamedSettlements.house_color(b.house)
+			var dais_w := minf(w * 0.5, 7.0)
+			POIBuilder.add_box(root, Vector3(dais_w, 0.4, 2.6), Vector3(0.0, 0.2, d * 0.5 - 1.3), STONE.darkened(0.1))
+			POIBuilder.add_box(root, Vector3(1.2, 0.6, 1.0), Vector3(0.0, 0.7, d * 0.5 - 1.0), DARK_WOOD)
+			POIBuilder.add_box(root, Vector3(1.2, 1.8, 0.25), Vector3(0.0, 1.5, d * 0.5 - 0.45), DARK_WOOD)
+			for x in [-dais_w * 0.35, dais_w * 0.35]:
+				POIBuilder.add_box(root, Vector3(1.2, minf(h * 0.55, 3.4), 0.06), Vector3(x, h * 0.55, d * 0.5 - 0.05), banner, 0.0, Vector3.ZERO, false)
+			# A long table down the hall for council and petitioners (not in a reeve's small house)
+			if b.seat_type != "reeve":
+				var table_d := maxf(d - 7.5, 2.0)
+				POIBuilder.add_box(root, Vector3(1.4, 0.8, table_d), Vector3(0.0, 0.4, 0.0), WOOD)
+				for side in [-1.0, 1.0]:
+					POIBuilder.add_box(root, Vector3(0.4, 0.45, table_d), Vector3(side * 1.1, 0.23, 0.0), DARK_WOOD)
+				for i in 4:
+					seats.append(Vector3(1.6 * (1.0 if i % 2 == 0 else -1.0), 0.0, (float(i / 2) - 0.5) * minf(table_d * 0.5, 3.0)))
+			else:
+				seats.append_array(_table(root, Vector3(w * 0.15, 0.0, -d * 0.1), 2))
+				_hearth(root, Vector3(w * 0.5 - 0.5, 0.0, 0.0))
+			work = Vector3(0.0, 0.0, d * 0.5 - 3.0)  # before the high seat, hearing petitions
+			beds.append(_bed(root, Vector3(-w * 0.5 + 0.8, 0.0, -d * 0.5 + 1.6)))
+			var chest_name := "Tithe Chest" if b.seat_type == "reeve" else "Treasury Chest"
+			chests += _chest(root, b, 0, chest_name, Vector3(w * 0.5 - 0.8, 0.35, d * 0.5 - 1.0), _shop_loot(), interior_seed)
+			# The town's lorebooks, on the lord's bookshelf (LoreBooks)
+			var books := LoreBooks.for_town(b.town_name)
+			if not books.is_empty():
+				var loot: Array[LootEntry] = []
+				for id in books:
+					var le := LootEntry.new()
+					le.item = LoreBooks.get_item(id)
+					loot.append(le)
+				var shelf := POIBuilder.make_chest("Bookshelf", loot, "building/%s/lore" % b.id, interior_seed | 1)
+				root.add_child(shelf)
+				shelf.position = Vector3(-w * 0.5 + 0.8, 0.35, d * 0.5 - 1.0)
+				stations.append(shelf.position)
+				chests += 1
 
 	# Furnish the rest of the room and put things on every surface (owned: taking them is theft;
 	# guild halls belong to the guild, so members may help themselves)
@@ -225,6 +265,8 @@ static func theme_for(b: BuildingPlot, rng: RandomNumberGenerator) -> String:
 			return "smithy"
 		BuildingPlot.Kind.TEMPLE:
 			return "temple"
+		BuildingPlot.Kind.SEAT:
+			return "home" if b.seat_type == "reeve" else "rich_home"
 		BuildingPlot.Kind.GUILD_HALL:
 			var g := "guild_" + b.guild
 			return g if RoomDecorator.THEMES.has(g) else "guild"

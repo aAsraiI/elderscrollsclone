@@ -76,6 +76,8 @@ func get_current_name() -> String:
 	var world := _get_world()
 	if world == null:
 		return ""
+	if current_entrance_id.begins_with(RealmManager.ENTRANCE_PREFIX):
+		return RealmManager.display_name(current_entrance_id.trim_prefix(RealmManager.ENTRANCE_PREFIX))
 	var b := world.get_building(current_entrance_id)
 	if b != null:
 		return b.display_name
@@ -185,7 +187,19 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 	var result := {}
 	var ambient := Color(0.03, 0.03, 0.04)
 	var building := world.get_building(entrance_id)
-	if building != null:
+	if entrance_id.begins_with(RealmManager.ENTRANCE_PREFIX):
+		# An instanced realm: a whole land of its own, far below everything else
+		var realm_id := entrance_id.trim_prefix(RealmManager.ENTRANCE_PREFIX)
+		if RealmManager.get_data(realm_id).is_empty():
+			return false
+		result = RealmBuilder.build(realm_id, ("%d|realm|%s" % [world.world_seed, realm_id]).hash())
+		ambient = result["ambient"]
+		current_spots = {}
+		current_floor = 0
+		floor_count = 1
+		_root = result["root"]
+		_root.position = Vector3(return_position.x, RealmManager.REALM_Y, return_position.z)
+	elif building != null:
 		var lvl := LevelCurve.place_level(world.map, building.world_pos)
 		result = InteriorBuilder.build(building, ("%d|interior|%s" % [world.world_seed, entrance_id]).hash(), lvl, world.clock.day if world.clock != null else 1)
 		ambient = result["ambient"]
@@ -218,6 +232,8 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 	_saved_rescue = world.rescue_fallen_player
 	world.rescue_fallen_player = false
 	_set_dark(true, ambient)
+	if result.has("sky"):
+		_set_realm_sky(result["sky"], result["fog"])
 
 	if move_player:
 		var player := _get_player()
@@ -249,7 +265,7 @@ func _set_dark(dark: bool, ambient: Color = Color(0.03, 0.03, 0.04)) -> void:
 			_saved_env = {
 				"bg_mode": e.background_mode, "ambient_source": e.ambient_light_source,
 				"ambient_color": e.ambient_light_color, "ambient_energy": e.ambient_light_energy,
-				"fog": e.fog_enabled,
+				"fog": e.fog_enabled, "fog_color": e.fog_light_color, "fog_density": e.fog_density, "bg_color": e.background_color,
 			}
 			e.background_mode = Environment.BG_COLOR
 			e.background_color = Color.BLACK
@@ -259,7 +275,7 @@ func _set_dark(dark: bool, ambient: Color = Color(0.03, 0.03, 0.04)) -> void:
 			e.fog_enabled = false
 		_hidden_lights.clear()
 		for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
-			if n.visible:
+			if n.visible and not n.has_meta("realm_light"):
 				n.visible = false
 				_hidden_lights.append(n)
 	else:
@@ -270,11 +286,31 @@ func _set_dark(dark: bool, ambient: Color = Color(0.03, 0.03, 0.04)) -> void:
 			e.ambient_light_color = _saved_env["ambient_color"]
 			e.ambient_light_energy = _saved_env["ambient_energy"]
 			e.fog_enabled = _saved_env["fog"]
+			e.fog_light_color = _saved_env["fog_color"]
+			e.fog_density = _saved_env["fog_density"]
+			e.background_color = _saved_env["bg_color"]
 		_saved_env = {}
 		for n in _hidden_lights:
 			if is_instance_valid(n):
 				n.visible = true
 		_hidden_lights.clear()
+
+
+# A realm has a sky of its own colour and its own fog (on top of _set_dark, which saved the world's)
+func _set_realm_sky(sky: Color, fog: Color) -> void:
+	var we := _find_first("WorldEnvironment") as WorldEnvironment
+	if we == null or we.environment == null:
+		return
+	var e := we.environment
+	e.background_color = sky
+	e.fog_enabled = true
+	e.fog_light_color = fog
+	e.fog_density = 0.004
+
+
+## Inside an instanced realm?
+func is_in_realm() -> bool:
+	return _root != null and _root.has_meta("realm_id")
 
 
 func _find_first(type_name: String) -> Node:

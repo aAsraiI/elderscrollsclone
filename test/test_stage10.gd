@@ -203,7 +203,17 @@ func t_in_game() -> void:
 	check("the dead fall as ragdolls", rag != null and rag.parts.size() >= 10, str(rag.parts.size() if rag != null else 0))
 	if rag != null:
 		var part: RigidBody3D = rag.parts["spine"]
-		p.global_position = part.global_position - fwd * 1.8 + Vector3.UP * 0.2
+		# Let the body finish falling, then stand beside it on solid ground. (The hold point follows
+		# the camera: a player dropped in mid-air falls during the test and drags the limb back down.)
+		for i in 120:
+			if rag.is_resting():
+				break
+			await physics(1)
+		p.global_position = part.global_position - fwd * 1.8 + Vector3.UP * 1.0
+		for i in 60:
+			await physics(1)
+			if p.is_on_floor():
+				break
 		await physics(2)
 		var comp: Variant = part.get_meta("interactable", null)
 		check("every limb can be searched", comp is ContainerComponent)
@@ -211,8 +221,11 @@ func t_in_game() -> void:
 		var ok := grabber.grab(comp, part.global_position)
 		check("a body can be grabbed by a limb", ok and grabber.get_held_target() == comp)
 		var start := part.global_position
-		await physics(40)
-		check("...and the limb comes up to you", grabber.is_holding() and part.global_position.distance_to(start) > 0.2, "holding=%s moved=%.2f sleeping=%s" % [grabber.is_holding(), part.global_position.distance_to(start), part.sleeping])
+		var rose := 0.0
+		for i in 40:
+			await physics(1)
+			rose = maxf(rose, part.global_position.y - start.y)
+		check("...and the limb comes up to you", grabber.is_holding() and rose > 0.2, "holding=%s rose=%.2f on_floor=%s" % [grabber.is_holding(), rose, p.is_on_floor()])
 		grabber.release()
 		await physics(5)
 		check("...and drops when let go", not grabber.is_holding())

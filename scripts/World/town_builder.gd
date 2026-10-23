@@ -73,12 +73,15 @@ static func _building(root: Node3D, b: BuildingPlot, layout: TownLayout, placed:
 	var roof := data.roof_color.darkened(rng.randf_range(0.0, 0.2))
 	if b.kind == BuildingPlot.Kind.TEMPLE:
 		wall = data.stone_color.lightened(0.15)
+	elif b.kind == BuildingPlot.Kind.SEAT and b.seat_type != "reeve":
+		wall = data.stone_color.darkened(rng.randf_range(0.0, 0.1))
 	# Walls sunk a meter into the ground, so a slope never shows a gap underneath
 	POIBuilder.add_box(holder, Vector3(s.x, s.y + 1.0, s.z), Vector3(0.0, (s.y - 1.0) * 0.5, 0.0), wall)
 	if s.y > 5.0:  # a band between the floors
 		POIBuilder.add_box(holder, Vector3(s.x + 0.15, 0.3, s.z + 0.15), Vector3(0.0, s.y * 0.5, 0.0), wall.darkened(0.3), 0.0, Vector3.ZERO, false)
 	var roof_h := s.x * 0.42
-	_roof(holder, Vector3(s.x + 0.8, roof_h, s.z + 0.8), Vector3(0.0, s.y + roof_h * 0.5, 0.0), roof)
+	if not (b.kind == BuildingPlot.Kind.SEAT and (b.seat_type == "castle" or b.seat_type == "tower")):  # those have battlements
+		_roof(holder, Vector3(s.x + 0.8, roof_h, s.z + 0.8), Vector3(0.0, s.y + roof_h * 0.5, 0.0), roof)
 
 	# Door and windows
 	var front := -s.z * 0.5
@@ -110,6 +113,8 @@ static func _building(root: Node3D, b: BuildingPlot, layout: TownLayout, placed:
 			var banner: Color = GUILD_COLORS.get(b.guild, Color.DIM_GRAY)
 			for side in [-1.0, 1.0]:
 				POIBuilder.add_box(holder, Vector3(1.0, 2.6, 0.06), Vector3(side * 2.3, 3.4, front - 0.08), banner, 0.0, Vector3.ZERO, false)
+		BuildingPlot.Kind.SEAT:
+			_seat(holder, b, data, wall, roof)
 
 	if b.kind == BuildingPlot.Kind.FARM:
 		_field(holder, b, rng)
@@ -119,6 +124,8 @@ static func _building(root: Node3D, b: BuildingPlot, layout: TownLayout, placed:
 	# Name over the door
 	if b.is_public():
 		var board: Color = SIGN_COLORS.get(b.kind, GUILD_COLORS.get(b.guild, Color(0.5, 0.4, 0.3)))
+		if b.kind == BuildingPlot.Kind.SEAT:
+			board = NamedSettlements.house_color(b.house).darkened(0.25)
 		POIBuilder.add_box(holder, Vector3(2.4, 0.6, 0.1), Vector3(0.0, 2.85, front - 0.15), board, 0.0, Vector3.ZERO, false)
 		_label(holder, b.display_name, Vector3(0.0, 2.85, front - 0.22), PI, 40)
 	else:
@@ -132,6 +139,62 @@ static func _building(root: Node3D, b: BuildingPlot, layout: TownLayout, placed:
 	door.default_locked = b.starts_locked
 	door.position = Vector3(0.0, 1.3, front - 0.45)
 	holder.add_child(door)
+
+
+# A lord's seat: a castle gets four corner towers, battlements and a gatehouse; a keep one great
+# tower; a knight's tower house battlements; a reeve's house a chimney and a banner pole. All hang
+# the banners of the house that holds the land.
+static func _seat(holder: Node3D, b: BuildingPlot, data: TownData, wall: Color, roof: Color) -> void:
+	var s := b.size
+	var front := -s.z * 0.5
+	var banner := NamedSettlements.house_color(b.house)
+	var dark := wall.darkened(0.15)
+	match b.seat_type:
+		"castle":
+			var th := s.y + 5.0
+			for c in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
+				var at := Vector3(c.x * s.x * 0.5, 0.0, c.y * s.z * 0.5)
+				POIBuilder.add_box(holder, Vector3(4.0, th + 1.0, 4.0), at + Vector3(0.0, th * 0.5 - 0.5, 0.0), dark)
+				_roof(holder, Vector3(4.6, 3.0, 4.6), at + Vector3(0.0, th + 1.5, 0.0), roof)
+			_battlements(holder, s, dark)
+			# the gatehouse around the door: two pillars and an arch, open in the middle
+			var gh := s.y + 2.0
+			for side in [-1.0, 1.0]:
+				POIBuilder.add_box(holder, Vector3(1.6, gh, 2.0), Vector3(side * 2.2, gh * 0.5, front - 1.0), dark)
+			POIBuilder.add_box(holder, Vector3(6.0, gh - 3.4, 2.0), Vector3(0.0, 3.4 + (gh - 3.4) * 0.5, front - 1.0), dark)
+			for side in [-1.0, 1.0]:
+				POIBuilder.add_box(holder, Vector3(1.6, 4.0, 0.08), Vector3(side * 5.5, s.y * 0.6, front - 0.1), banner, 0.0, Vector3.ZERO, false)
+		"keep":
+			var th := s.y + 6.0
+			var at := Vector3(s.x * 0.5 - 2.5, 0.0, s.z * 0.5 - 2.5)
+			POIBuilder.add_box(holder, Vector3(5.0, th + 1.0, 5.0), at + Vector3(0.0, th * 0.5 - 0.5, 0.0), dark)
+			_battlements(holder, Vector3(5.0, th, 5.0), dark, at)
+			for side in [-1.0, 1.0]:
+				POIBuilder.add_box(holder, Vector3(1.2, 3.0, 0.08), Vector3(side * 3.6, s.y * 0.6, front - 0.1), banner, 0.0, Vector3.ZERO, false)
+		"tower":
+			_battlements(holder, s, dark)
+			POIBuilder.add_box(holder, Vector3(1.2, 3.0, 0.08), Vector3(0.0, s.y * 0.65, front - 0.1), banner, 0.0, Vector3.ZERO, false)
+		_:
+			var ch := s.x * 0.42 + 1.4
+			POIBuilder.add_box(holder, Vector3(0.8, ch, 0.8), Vector3(s.x * 0.25, s.y + ch * 0.5, s.z * 0.2), data.stone_color.darkened(0.2))
+			var pole := Vector3(s.x * 0.5 + 1.0, 0.0, front - 0.5)
+			POIBuilder.add_box(holder, Vector3(0.15, 5.0, 0.15), pole + Vector3(0.0, 2.5, 0.0), DOOR_COLOR, 0.0, Vector3.ZERO, false)
+			POIBuilder.add_box(holder, Vector3(0.06, 1.2, 0.9), pole + Vector3(0.0, 4.2, 0.5), banner, 0.0, Vector3.ZERO, false)
+
+
+# Merlons along the top edge of a block of size `s` standing at `at`
+static func _battlements(holder: Node3D, s: Vector3, color: Color, at: Vector3 = Vector3.ZERO) -> void:
+	var y := s.y + 0.6
+	var n_x := maxi(int(s.x / 2.0), 2)
+	var n_z := maxi(int(s.z / 2.0), 2)
+	for i in n_x:
+		var x := -s.x * 0.5 + (float(i) + 0.5) * s.x / float(n_x)
+		for z in [-s.z * 0.5, s.z * 0.5]:
+			POIBuilder.add_box(holder, Vector3(0.9, 1.2, 0.5), at + Vector3(x, y, z), color, 0.0, Vector3.ZERO, false)
+	for i in n_z:
+		var z := -s.z * 0.5 + (float(i) + 0.5) * s.z / float(n_z)
+		for x in [-s.x * 0.5, s.x * 0.5]:
+			POIBuilder.add_box(holder, Vector3(0.5, 1.2, 0.9), at + Vector3(x, y, z), color, 0.0, Vector3.ZERO, false)
 
 
 static func _roof(parent: Node3D, size: Vector3, pos: Vector3, color: Color) -> void:

@@ -16,6 +16,23 @@ extends Resource
 @export var join_requirement := ""
 ## No hall: found through a contact (the Thieves Guild, the Assassins Cult)
 @export var hidden := false
+## Factions sharing a group are exclusive: swearing to one closes the others for good
+## ("houses", "vampire_clans"). Empty = no such rule.
+@export var exclusive_group := ""
+## "vampire" or "werewolf": only the afflicted may join, and a cure expels (see QuestBook)
+@export var requires_affliction := ""
+## A quest (QuestBook id) that must be done before joining: the house's trial. Its reward joins.
+@export var join_quest := ""
+## Done again to return after being expelled (clans and the pack)
+@export var penance_quest := ""
+## Who leads it, when that is a named person rather than a guild hall's owner, and where they live
+@export var leader_name := ""
+@export var leader_town := ""
+
+@export_group("Gates")
+## Quests (QuestBook ids) that must be done before rank 3 and before rank 5
+@export var gate_mid := ""
+@export var gate_final := ""
 
 @export_group("Promotion")
 ## Finished jobs needed to hold each rank (the first is joining)

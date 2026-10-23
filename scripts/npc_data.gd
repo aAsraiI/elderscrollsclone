@@ -9,7 +9,8 @@ extends Resource
 ##
 ## A hand-made NPC can be a saved NpcData resource later (and Dialogue, stage 4, can hang off it).
 
-enum Role { COMMONER, FARMER, MERCHANT, INNKEEPER, SMITH, PRIEST, GUILD_MEMBER, GUARD, WOODCUTTER, FISHERMAN, HUNTER, MINER, HERBALIST }
+## LORD = the lord or reeve of a named town, who sits in its seat (BuildingPlot.Kind.SEAT)
+enum Role { COMMONER, FARMER, MERCHANT, INNKEEPER, SMITH, PRIEST, GUILD_MEMBER, GUARD, WOODCUTTER, FISHERMAN, HUNTER, MINER, HERBALIST, LORD }
 enum Personality { FRIENDLY, CHEERFUL, GRUMPY, NERVOUS, PROUD, PIOUS }
 ## What someone is doing at a given hour
 enum Activity { SLEEP, WORK, LEISURE, PATROL }
@@ -73,6 +74,8 @@ static func role_for(kind: BuildingPlot.Kind) -> Role:
 			return Role.PRIEST
 		BuildingPlot.Kind.GUILD_HALL:
 			return Role.GUILD_MEMBER
+		BuildingPlot.Kind.SEAT:
+			return Role.LORD
 	return Role.COMMONER
 
 
@@ -95,8 +98,8 @@ static func role_for_plot(b: BuildingPlot) -> Role:
 
 ## Tradesmen work outside by their house (or on the shore): woodcutters, fishermen...
 static func is_tradesman(r: Role) -> bool:
-	return r >= Role.WOODCUTTER
+	return r >= Role.WOODCUTTER and r <= Role.HERBALIST
 
 
 static func role_name(r: Role) -> String:
-	return ["Townsperson", "Farmer", "Merchant", "Innkeeper", "Smith", "Priest", "Guild Member", "Guard", "Woodcutter", "Fisherman", "Hunter", "Miner", "Herbalist"][int(r)]
+	return ["Townsperson", "Farmer", "Merchant", "Innkeeper", "Smith", "Priest", "Guild Member", "Guard", "Woodcutter", "Fisherman", "Hunter", "Miner", "Herbalist", "Lord"][int(r)]

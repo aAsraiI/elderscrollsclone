@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="FactionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/faction_data.gd" id="1_f"]
+
+[resource]
+script = ExtResource("1_f")
+id = &"vyrel"
+display_name = "House Vyrel"
+description = "The Earldom of Cinderreach. Ashborn fire-mages who would end the shame of 251 CA."
+ranks = PackedStringArray("Retainer", "Sworn Blade", "Banneret", "Knight of the House", "Hand of the House")
+hidden = false
+exclusive_group = "houses"
+requires_affliction = ""
+join_quest = "H-VY01"
+penance_quest = ""
+leader_name = "Archon Seraphine Vyrel"
+leader_town = "Cinderhold"
+gate_mid = "H-VY04"
+gate_final = "H-VY07"
+quests_for_rank = PackedInt32Array(0, 1, 3, 5, 7)
+level_for_rank = PackedInt32Array(1, 1, 1, 1, 1)
+perk_stat = "max_magicka"
+perk_per_rank = 5.0
+quest_types = PackedStringArray("retrieve", "kill")
+reward_base = 90

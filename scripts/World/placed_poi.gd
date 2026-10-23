@@ -17,6 +17,8 @@ var seed_value := 0
 var region := -1
 ## Towns only: the planned streets and buildings
 var town: TownLayout
+## Named towns only: the NamedSettlements entry (name, lord, seat...); empty for random towns
+var named: Dictionary = {}
 
 
 func get_anchor_chunk(chunk_size: float) -> Vector2i:

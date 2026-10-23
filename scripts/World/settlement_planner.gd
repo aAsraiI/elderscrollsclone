@@ -40,18 +40,32 @@ static func plan(map: WorldMap, grid: POIPlanner.SpaceGrid = null) -> Array[Plac
 		rng.seed = ("%d|towns|%s|%d,%d" % [map.world_seed, biome.get_key(), placement.cell.x, placement.cell.y]).hash()
 
 		var wanted: Array[TownData] = []
-		if settings.city_per_biome and city_region.get(biome.get_key(), -1) == region:
-			var city := _pick(templates, biome, true, rng)
-			if city != null:
-				wanted.append(city)
-		var count := rng.randi_range(mini(settings.towns_per_region_min, settings.towns_per_region_max), maxi(settings.towns_per_region_min, settings.towns_per_region_max))
-		for i in count:
-			var t := _pick(templates, biome, false, rng)
-			if t != null:
-				wanted.append(t)
+		var wanted_named: Array[Dictionary] = []  # the NamedSettlements entry of each, or {}
+		# A biome with named settlements gets exactly those, once (in its biggest region)
+		var named: Array = NamedSettlements.for_biome(biome.get_key()) if settings.named_settlements and city_region.get(biome.get_key(), -1) == region else []
+		if not named.is_empty():
+			for entry: Dictionary in named:
+				var nt := _pick_kind(templates, biome, NamedSettlements.town_kind(entry), rng)
+				if nt != null:
+					wanted.append(nt)
+					wanted_named.append(entry)
+		else:
+			if settings.city_per_biome and city_region.get(biome.get_key(), -1) == region:
+				var city := _pick(templates, biome, true, rng)
+				if city != null:
+					wanted.append(city)
+			var count := rng.randi_range(mini(settings.towns_per_region_min, settings.towns_per_region_max), maxi(settings.towns_per_region_min, settings.towns_per_region_max))
+			for i in count:
+				var t := _pick(templates, biome, false, rng)
+				if t != null:
+					wanted.append(t)
+			for i in wanted.size():
+				wanted_named.append({})
 
 		var counters := {}
-		for data in wanted:
+		for wi in wanted.size():
+			var data := wanted[wi]
+			var entry := wanted_named[wi]
 			var rule := POIRule.new()
 			rule.poi = data
 			rule.extra_spacing = settings.town_spacing
@@ -60,8 +74,12 @@ static func plan(map: WorldMap, grid: POIPlanner.SpaceGrid = null) -> Array[Plac
 			if area.size.x <= 0.0 or area.size.y <= 0.0:
 				continue
 			var spot := POIPlanner.find_spot(map, rng, area, region, rule, grid, max_radius, settings.poi_attempts * ATTEMPT_FACTOR)
+			if spot == Vector3.INF and not entry.is_empty():
+				# A named town must exist: try again with less room kept around it
+				rule.extra_spacing = settings.town_spacing * 0.4
+				spot = POIPlanner.find_spot(map, rng, area, region, rule, grid, max_radius, settings.poi_attempts * ATTEMPT_FACTOR * 2)
 			if spot == Vector3.INF:
-				push_warning("Towns: no room for a %s in %s" % [data.display_name, biome.display_name])
+				push_warning("Towns: no room for %s in %s" % [entry.get("name", "a " + data.display_name), biome.display_name])
 				continue
 			var k: int = counters.get(data.get_key(), 0)
 			counters[data.get_key()] = k + 1
@@ -73,6 +91,7 @@ static func plan(map: WorldMap, grid: POIPlanner.SpaceGrid = null) -> Array[Plac
 			# Towns line up with the compass (streets east-west), turned a little for character
 			placed.yaw = rng.randf_range(-0.35, 0.35)
 			placed.seed_value = ("%d|%s" % [map.world_seed, placed.id]).hash()
+			placed.named = entry
 			out.append(placed)
 			grid.add(placed)
 	return out
@@ -85,13 +104,33 @@ static func lay_out(map: WorldMap, towns: Array[PlacedPOI]) -> void:
 	for placed in towns:
 		var name_rng := RandomNumberGenerator.new()
 		name_rng.seed = placed.seed_value ^ 0x4A3E
-		var town_name := NameGen.town(name_rng)
-		for tries in 20:
-			if not used_names.has(town_name):
-				break
+		var town_name := String(placed.named.get("name", ""))
+		if town_name == "":
 			town_name = NameGen.town(name_rng)
+			for tries in 20:
+				if not used_names.has(town_name):
+					break
+				town_name = NameGen.town(name_rng)
 		used_names[town_name] = true
 		placed.town = TownLayout.generate(placed.poi as TownData, placed, town_name, map)
+
+
+## A template of exactly this kind (named settlements); falls back to any template of the kind
+## when none allows the biome
+static func _pick_kind(templates: Array[TownData], biome: BiomeData, kind: TownData.Kind, rng: RandomNumberGenerator) -> TownData:
+	var options: Array[TownData] = []
+	var fallback: Array[TownData] = []
+	for t in templates:
+		if t.kind != kind or t.weight <= 0.0:
+			continue
+		fallback.append(t)
+		if t.allows_biome(biome):
+			options.append(t)
+	if options.is_empty():
+		options = fallback
+	if options.is_empty():
+		return null
+	return options[rng.randi_range(0, options.size() - 1)]
 
 
 static func _pick(templates: Array[TownData], biome: BiomeData, city: bool, rng: RandomNumberGenerator) -> TownData:

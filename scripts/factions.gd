@@ -11,7 +11,11 @@ extends RefCounted
 ## Ask them about "membership" to join, "duties" for work, "advancement" for promotion.
 
 const DIR := "res://scripts/Resources/Factions/"
-const IDS: Array[String] = ["fighters", "mages", "knights", "thieves", "assassins", "antiquarians", "hunters", "merchants"]
+const IDS: Array[String] = ["fighters", "mages", "knights", "thieves", "assassins", "antiquarians", "hunters", "merchants",
+	"valcourt", "tidewell", "ashgrove", "morvaine", "brannoch", "sahrim", "kjellvar", "vyrel",
+	"velvet_court", "hollow_kin", "ashen_choir", "greyfang"]
+## The guilds of stage 6 (the rest are noble houses, vampire clans and the werewolf pack)
+const GUILDS: Array[String] = ["fighters", "mages", "knights", "thieves", "assassins", "antiquarians", "hunters", "merchants"]
 const HISTORY := "crime/history"
 
 static var _cache := {}
@@ -48,13 +52,25 @@ static func _store(id: String, r: int, quests: int) -> void:
 	WorldState.set_record("faction/" + id, {"rank": r, "quests": quests})
 
 
-## Why the player can't join ("" = they can)
-static func join_problem(id: String, player: Node) -> String:
+## Why the player can't join ("" = they can). for_trial: may they *start* the joining quest
+## (everything but the trial itself)?
+static func join_problem(id: String, player: Node, for_trial: bool = false) -> String:
 	var d := get_data(id)
 	if d == null:
 		return "There is no such guild."
 	if is_member(id):
 		return "You are already a member."
+	if d.exclusive_group != "":
+		var sworn := String(WorldState.get_record("fgroup/" + d.exclusive_group).get("id", ""))
+		if sworn != "" and sworn != id:
+			return "You are sworn to the %s. There is no going back from that." % display_name(sworn)
+	if d.requires_affliction != "" and not _afflicted(player, d.requires_affliction):
+		return "You are not one of us. You don't carry the blood." if d.requires_affliction == "vampire" else "You are not one of us. The moon does not call you."
+	if WorldState.has_record("fexpel/" + id) and d.penance_quest != "" and not QuestBook.is_done(d.penance_quest):
+		return "You turned your back on us. Do penance first."
+	if not for_trial and d.join_quest != "" and not QuestBook.is_done(d.join_quest):
+		var q := QuestBook.get_def(d.join_quest)
+		return "Prove yourself first. Ask about %s." % String(q.get("hook", "the trial"))
 	var history := WorldState.get_record(HISTORY)
 	match d.join_requirement:
 		"no_bounty":
@@ -73,9 +89,31 @@ static func join_problem(id: String, player: Node) -> String:
 static func join(id: String, player: Node) -> bool:
 	if join_problem(id, player) != "":
 		return false
-	_store(id, 1, 0)
+	var d := get_data(id)
+	var start := 1
+	if WorldState.has_record("fexpel/" + id):  # coming back: one rank lower than before
+		start = maxi(int(WorldState.get_record("fexpel/" + id).get("rank", 1)) - 1, 1)
+		WorldState.erase_record("fexpel/" + id)
+	if d.exclusive_group != "":
+		WorldState.set_record("fgroup/" + d.exclusive_group, {"id": id})
+	_store(id, start, quests_done(id))
 	apply_perks(player)
 	return true
+
+
+## Out (a cured vampire or werewolf): the old rank is remembered for a return after penance
+static func expel(id: String) -> void:
+	if not is_member(id):
+		return
+	WorldState.set_record("fexpel/" + id, {"rank": rank(id)})
+	_store(id, 0, quests_done(id))
+
+
+static func _afflicted(player: Node, kind: String) -> bool:
+	var a := player.get_node_or_null("Afflictions") as Afflictions if player != null else null
+	if a == null:
+		return false
+	return a.vampire if kind == "vampire" else a.werewolf
 
 
 ## What the next rank needs: {"rank", "name", "quests_needed", "quests_have", "skill", "skill_needed",
@@ -112,8 +150,14 @@ static func next_rank(id: String, player: Node) -> Dictionary:
 				names.append(def.display_name if def != null else sk)
 			skill_name = " or ".join(names)
 	var why := ""
+	# The questline's gate quests: one before rank 3, one before rank 5
+	var gate := d.gate_mid if r + 1 == 3 else (d.gate_final if r + 1 == 5 else "")
+	if gate != "" and not QuestBook.is_done(gate):
+		why = "to finish \"%s\"" % String(QuestBook.get_def(gate).get("name", gate))
 	if have_q < need_q:
-		why = "%d more job%s" % [need_q - have_q, "" if need_q - have_q == 1 else "s"]
+		if why != "":
+			why += " and "
+		why += "%d more job%s" % [need_q - have_q, "" if need_q - have_q == 1 else "s"]
 	if have_s < need_s:
 		why += (" and " if why != "" else "") + "%s %d" % [skill_name, need_s]
 	return {"rank": r + 1, "name": d.ranks[r], "quests_needed": need_q, "quests_have": have_q, "skill": skill_name,
@@ -171,6 +215,12 @@ static func leader_of(s: DialogueEngine.Speaker, world: WorldManager) -> String:
 		return ""
 	if s.enemy != null and is_instance_valid(s.enemy) and s.enemy.has_meta("leader_of"):
 		return String(s.enemy.get_meta("leader_of"))
+	# Houses, clans and the pack are led by named people (their lord, or someone in town)
+	if s.name != "":
+		for id in IDS:
+			var d := get_data(id)
+			if d != null and d.leader_name != "" and d.leader_name == s.name:
+				return id
 	if s.data == null or s.home == null:
 		return ""
 	if s.role == NpcData.Role.GUILD_MEMBER and s.home.kind == BuildingPlot.Kind.GUILD_HALL and IDS.has(s.home.guild):

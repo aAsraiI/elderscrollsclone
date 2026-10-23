@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="FactionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/faction_data.gd" id="1_f"]
+
+[resource]
+script = ExtResource("1_f")
+id = &"ashen_choir"
+display_name = "The Ashen Choir"
+description = "Blood-sorcerers who sing toward a sky with no sun. Only the turned may join."
+ranks = PackedStringArray("Neonate", "Blooded", "Kindred", "Elder", "Sire")
+hidden = true
+exclusive_group = "vampire_clans"
+requires_affliction = "vampire"
+join_quest = "V-AC01"
+penance_quest = "V-AC00"
+leader_name = "Choirmaster Somnir"
+leader_town = "Cinderhold"
+gate_mid = "V-AC04"
+gate_final = "V-AC07"
+quests_for_rank = PackedInt32Array(0, 1, 3, 5, 7)
+level_for_rank = PackedInt32Array(1, 1, 1, 1, 1)
+perk_stat = "max_magicka"
+perk_per_rank = 6.0
+quest_types = PackedStringArray("retrieve", "assassinate")
+reward_base = 90

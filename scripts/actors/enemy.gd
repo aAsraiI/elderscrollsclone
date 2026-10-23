@@ -222,8 +222,20 @@ var _lying_restore := false
 var _killing_push := Vector3.ZERO
 
 
+## Every creature and NPC starts as a copy of scenes/actors/enemy.tscn: change a default there (in
+## the Inspector) and every actor in the game gets it. Use this instead of Enemy.new().
+const SCENE := "res://scenes/actors/enemy.tscn"
+static var _scene: PackedScene
+
+
+static func create() -> Enemy:
+	if _scene == null:
+		_scene = load(SCENE) as PackedScene
+	return _scene.instantiate() as Enemy
+
+
 static func spawn(parent: Node, pos: Vector3, weapon: ItemData = null, off_hand: ItemData = null) -> Enemy:
-	var e := Enemy.new()
+	var e := Enemy.create()
 	e.starting_weapon = weapon
 	e.starting_off_hand = off_hand
 	# Set the position BEFORE entering the tree, otherwise the physics engine briefly sees the
@@ -1573,7 +1585,7 @@ func get_persist_data() -> Dictionary:
 
 
 static func restore(data: Dictionary, parent: Node) -> Enemy:
-	var e := Enemy.new()
+	var e := Enemy.create()
 	e.display_name = String(data.get("name", "Bandit"))
 	e.level = int(data.get("level", 1))
 	e.body_scale = float(data.get("body_scale", 1.0))

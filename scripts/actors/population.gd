@@ -13,7 +13,7 @@ extends RefCounted
 ## (a dungeon being built), then it is a position inside that parent.
 ## opts: "key" (String, makes the kill be remembered), "persist_mode" (Enemy.PersistMode)
 static func spawn_enemy(data: EnemyData, level: int, parent: Node, pos: Vector3, rng: RandomNumberGenerator, opts: Dictionary = {}) -> Enemy:
-	var e := Enemy.new()
+	var e := Enemy.create()
 	data.apply(e, level, rng)
 	e.persist_mode = int(opts.get("persist_mode", Enemy.PersistMode.CORPSE_ONLY)) as Enemy.PersistMode
 	e.spawn_key = String(opts.get("key", ""))

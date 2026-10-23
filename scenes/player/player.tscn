@@ -13,6 +13,32 @@
 [ext_resource type="Script" uid="uid://dty2v7ld1iws7" path="res://scripts/ui/interaction_hud.gd" id="9_b26j0"]
 [ext_resource type="Script" uid="uid://j8g1y5dajjii" path="res://scripts/ui/vitals_hud.gd" id="9_ivps1"]
 [ext_resource type="Script" uid="uid://bcv6aq8js5amd" path="res://scripts/character/skills.gd" id="10_n7ghd"]
+[ext_resource type="Script" uid="uid://cwitfwokdsnxj" path="res://scripts/player/status_effects.gd" id="20_statuseffects"]
+[ext_resource type="Script" uid="uid://de3qgkqfji1ss" path="res://scripts/ui/pause_menu.gd" id="21_pausemenu"]
+[ext_resource type="Script" uid="uid://cmross2dvlks1" path="res://scripts/ui/compass_hud.gd" id="22_compasshud"]
+[ext_resource type="Script" uid="uid://dm2b5a3u3jrv" path="res://scripts/player/stealth.gd" id="23_stealth"]
+[ext_resource type="Script" uid="uid://15aunvfx53mc" path="res://scripts/dialogue/dialogue_ui.gd" id="24_dialogueui"]
+[ext_resource type="Script" uid="uid://ch8g8xyranm8w" path="res://scripts/ui/barter_ui.gd" id="25_barterui"]
+[ext_resource type="Script" uid="uid://dd5lf8tyisxi3" path="res://scripts/dialogue/journal_ui.gd" id="26_journalui"]
+[ext_resource type="Script" uid="uid://d2cwifh232ie0" path="res://scripts/magic/active_magic.gd" id="27_activemagic"]
+[ext_resource type="Script" uid="uid://btyx7vy1d8og5" path="res://scripts/magic/spellbook.gd" id="28_spellbook"]
+[ext_resource type="Script" uid="uid://cd635mvyciv3a" path="res://scripts/magic/spell_caster.gd" id="29_spellcaster"]
+[ext_resource type="Script" uid="uid://dc4obb5gymrq2" path="res://scripts/character/afflictions.gd" id="30_afflictions"]
+[ext_resource type="Script" uid="uid://petl8fw7mw2o" path="res://scripts/character/survival.gd" id="31_survival"]
+[ext_resource type="Script" uid="uid://018oefhln6m8" path="res://scripts/character/powers.gd" id="32_powers"]
+[ext_resource type="Script" uid="uid://cdj1coxecp63s" path="res://scripts/player/night_vision.gd" id="33_nightvision"]
+[ext_resource type="Script" uid="uid://dm4p21i1jvnua" path="res://scripts/player/third_person.gd" id="34_thirdperson"]
+[ext_resource type="Script" uid="uid://cvmf7ojrp86hu" path="res://scripts/player/swimming.gd" id="35_swimming"]
+[ext_resource type="Script" uid="uid://7to26ph2okkh" path="res://scripts/actors/rider.gd" id="36_rider"]
+[ext_resource type="Script" uid="uid://dorep63ltodo7" path="res://scripts/audio/sound_fx.gd" id="37_soundfx"]
+[ext_resource type="Script" uid="uid://lq13wwds54n0" path="res://scripts/ui/tutorial.gd" id="38_tutorial"]
+[ext_resource type="Script" uid="uid://bo5lbme6uegr2" path="res://scripts/actors/followers.gd" id="39_followers"]
+[ext_resource type="Script" uid="uid://b8khjdj8oebay" path="res://scripts/combat/ranged_combat.gd" id="40_rangedcombat"]
+[ext_resource type="Script" uid="uid://bg46rn8vmw1fr" path="res://scripts/magic/magic_ui.gd" id="41_magicui"]
+[ext_resource type="Script" uid="uid://cpfs3qkgg44ag" path="res://scripts/crafting/crafting_ui.gd" id="42_craftingui"]
+[ext_resource type="Script" uid="uid://bvxv3w1mfvsc5" path="res://scripts/ui/wait_menu.gd" id="43_waitmenu"]
+[ext_resource type="Script" uid="uid://wgdhge03tyk8" path="res://scripts/ui/favorites_menu.gd" id="44_favoritesmenu"]
+[ext_resource type="Script" uid="uid://dus6phuqbl3dr" path="res://scripts/ui/menu_hub.gd" id="45_menuhub"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_g4v7s"]
 radius = 0.4
@@ -68,3 +94,81 @@ script = ExtResource("7_dw050")
 
 [node name="PlayerCombat" type="Node" parent="." unique_id=1643539161]
 script = ExtResource("8_b26j0")
+
+[node name="StatusEffects" type="Node" parent="." unique_id=1900000001]
+script = ExtResource("20_statuseffects")
+
+[node name="PauseMenu" type="CanvasLayer" parent="." unique_id=1900000002]
+script = ExtResource("21_pausemenu")
+
+[node name="CompassHUD" type="CanvasLayer" parent="." unique_id=1900000003]
+script = ExtResource("22_compasshud")
+
+[node name="Stealth" type="Node" parent="." unique_id=1900000004]
+script = ExtResource("23_stealth")
+
+[node name="DialogueUI" type="CanvasLayer" parent="." unique_id=1900000005]
+script = ExtResource("24_dialogueui")
+
+[node name="BarterUI" type="CanvasLayer" parent="." unique_id=1900000006]
+script = ExtResource("25_barterui")
+
+[node name="JournalUI" type="CanvasLayer" parent="." unique_id=1900000007]
+script = ExtResource("26_journalui")
+
+[node name="ActiveMagic" type="Node" parent="." unique_id=1900000008]
+script = ExtResource("27_activemagic")
+
+[node name="Spellbook" type="Node" parent="." unique_id=1900000009]
+script = ExtResource("28_spellbook")
+
+[node name="SpellCaster" type="Node" parent="." unique_id=1900000010]
+script = ExtResource("29_spellcaster")
+
+[node name="Afflictions" type="Node" parent="." unique_id=1900000011]
+script = ExtResource("30_afflictions")
+
+[node name="Survival" type="Node" parent="." unique_id=1900000012]
+script = ExtResource("31_survival")
+
+[node name="Powers" type="Node" parent="." unique_id=1900000013]
+script = ExtResource("32_powers")
+
+[node name="NightVision" type="Node" parent="." unique_id=1900000014]
+script = ExtResource("33_nightvision")
+
+[node name="ThirdPerson" type="Node" parent="." unique_id=1900000015]
+script = ExtResource("34_thirdperson")
+
+[node name="Swimming" type="Node" parent="." unique_id=1900000016]
+script = ExtResource("35_swimming")
+
+[node name="Rider" type="Node" parent="." unique_id=1900000017]
+script = ExtResource("36_rider")
+
+[node name="SoundFX" type="Node" parent="." unique_id=1900000018]
+script = ExtResource("37_soundfx")
+
+[node name="Tutorial" type="CanvasLayer" parent="." unique_id=1900000019]
+script = ExtResource("38_tutorial")
+
+[node name="Followers" type="Node" parent="." unique_id=1900000020]
+script = ExtResource("39_followers")
+
+[node name="RangedCombat" type="Node" parent="." unique_id=1900000021]
+script = ExtResource("40_rangedcombat")
+
+[node name="MagicUI" type="CanvasLayer" parent="." unique_id=1900000022]
+script = ExtResource("41_magicui")
+
+[node name="CraftingUI" type="CanvasLayer" parent="." unique_id=1900000023]
+script = ExtResource("42_craftingui")
+
+[node name="WaitMenu" type="CanvasLayer" parent="." unique_id=1900000024]
+script = ExtResource("43_waitmenu")
+
+[node name="FavoritesMenu" type="CanvasLayer" parent="." unique_id=1900000025]
+script = ExtResource("44_favoritesmenu")
+
+[node name="MenuHub" type="CanvasLayer" parent="." unique_id=1900000026]
+script = ExtResource("45_menuhub")

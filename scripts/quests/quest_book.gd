@@ -590,7 +590,7 @@ func _want_talker(wanted: Dictionary, id: String, who: Dictionary, _d: Dictionar
 	wanted[key] = true
 	if _spawned.has(key) and is_instance_valid(_spawned[key]):
 		return
-	var e := Enemy.new()
+	var e := Enemy.create()
 	e.display_name = String(who["name"])
 	e.talk_name = String(who["name"])
 	e.talk_lines = PackedStringArray(["..."])

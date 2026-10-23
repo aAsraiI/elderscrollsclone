@@ -526,7 +526,7 @@ func _make_body(r: Resident, parent: Node3D, pos: Vector3) -> Enemy:
 	var d := r.data
 	var rng := RandomNumberGenerator.new()
 	rng.seed = d.id.hash()
-	var e := Enemy.new()
+	var e := Enemy.create()
 	d.body.apply(e, d.level, rng)
 	e.display_name = d.display_name
 	e.talk_name = d.display_name

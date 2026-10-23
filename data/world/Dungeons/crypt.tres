@@ -1,13 +1,13 @@
-[gd_resource type="Resource" script_class="DungeonData" format=3]
+[gd_resource type="Resource" script_class="DungeonData" format=3 uid="uid://m08f186fwogx"]
 
 [ext_resource type="Resource" path="res://data/enemies/crypt_warden.tres" id="boss"]
-[ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="dd"]
-[ext_resource type="Resource" path="res://data/weapons/iron_sword.tres" id="item_0"]
-[ext_resource type="Resource" path="res://data/weapons/iron_chestplate.tres" id="item_1"]
+[ext_resource type="Script" uid="uid://ci0vbba2cennc" path="res://scripts/dungeons/dungeon_data.gd" id="dd"]
+[ext_resource type="Resource" uid="uid://ccs0i8i2yls70" path="res://data/weapons/iron_sword.tres" id="item_0"]
+[ext_resource type="Resource" uid="uid://bu7yro4jl28nt" path="res://data/weapons/iron_chestplate.tres" id="item_1"]
 [ext_resource type="Resource" path="res://data/weapons/iron_warhammer.tres" id="item_2"]
 [ext_resource type="Resource" path="res://data/weapons/steel_greatsword.tres" id="item_3"]
-[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="loot"]
-[ext_resource type="Resource" path="res://data/spawns/dungeon_crypt.tres" id="spawn_table"]
+[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/items/loot_entry.gd" id="loot"]
+[ext_resource type="Resource" uid="uid://ddg7mrjsyk25w" path="res://data/spawns/dungeon_crypt.tres" id="spawn_table"]
 
 [sub_resource type="Resource" id="loot_0"]
 script = ExtResource("loot")

@@ -194,7 +194,7 @@ func _hub(root: Node3D, _rng: RandomNumberGenerator) -> void:
 	var npcs: Array = data.get("npcs", [])
 	for k in npcs.size():
 		var a := float(k) / maxf(npcs.size(), 1.0) * TAU + 1.2
-		var e := Enemy.new()
+		var e := Enemy.create()
 		e.display_name = String(npcs[k])
 		e.talk_name = String(npcs[k])
 		e.talk_lines = PackedStringArray(["Few living souls find their way to %s." % data.get("hub", "this place")])

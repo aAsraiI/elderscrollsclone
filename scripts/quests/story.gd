@@ -243,7 +243,7 @@ func _spawn_cult(site: PlacedPOI) -> void:
 		var x := site.position.x + cos(a) * (2.0 if i == 0 else 9.0)
 		var z := site.position.z + sin(a) * (2.0 if i == 0 else 9.0)
 		var pos := Vector3(x, world.get_height_at(x, z) + 0.5, z)
-		var e := Enemy.new()
+		var e := Enemy.create()
 		data.apply(e, level + (4 if i == 0 else 0), rng)
 		e.persist_mode = Enemy.PersistMode.NEVER
 		if i == 0:

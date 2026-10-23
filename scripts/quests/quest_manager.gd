@@ -621,7 +621,7 @@ func _on_entered(id: String) -> void:
 
 
 static func _make_contact(parent: Node, at: Vector3, name_shown: String) -> Enemy:
-	var e := Enemy.new()
+	var e := Enemy.create()
 	e.display_name = name_shown
 	e.talk_name = name_shown
 	e.talk_lines = PackedStringArray(CONTACT_LINES)

@@ -4,6 +4,20 @@
 [ext_resource type="Script" uid="uid://bvxopsfcgkrun" path="res://scripts/world/world_manager.gd" id="2_1c2mv"]
 [ext_resource type="Resource" path="res://data/world/realm_world.tres" id="3_f7g2b"]
 
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+
+[sub_resource type="Sky" id="Sky_world"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_world"]
+background_mode = 2
+sky = SubResource("Sky_world")
+ambient_light_source = 3
+tonemap_mode = 2
+fog_enabled = true
+fog_light_color = Color(0.7, 0.78, 0.88, 1)
+fog_density = 0.0039
+
 [node name="Node3D" type="Node3D" unique_id=1603210140]
 
 [node name="Player" parent="." unique_id=344828858 instance=ExtResource("1_37kl0")]
@@ -12,3 +26,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8165417, 0)
 [node name="World" type="Node3D" parent="." unique_id=1672149302]
 script = ExtResource("2_1c2mv")
 settings = ExtResource("3_f7g2b")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1900001001]
+environment = SubResource("Environment_world")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1900001002]
+transform = Transform3D(0.8191518, -0.439339, 0.3686878, 0, 0.6427203, 0.7660443, -0.5735763, -0.6274411, 0.52654076, 0, 0, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 200.0

@@ -349,7 +349,7 @@ func _summon(kind: String, _dur: float) -> Variant:
 		var old := _summons.pop_front() as Enemy
 		_unsummon(old)
 	var level := skills.get_player_level() if skills != null else 5
-	var e := Enemy.new()
+	var e := Enemy.create()
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	data.apply(e, maxi(level, 3), rng)

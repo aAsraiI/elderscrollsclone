@@ -68,15 +68,19 @@ func apply_settings() -> void:
 	if cam != null:
 		cam.fov = float(GameSettings.get_value("fov"))
 
-func _ready() -> void:
+# Runs before any child's _ready (the HUDs and helpers in player.tscn look for these)
+func _enter_tree() -> void:
 	add_to_group("player")  # enemies look for this group
-	combat = _combat
+	combat = get_node_or_null("MeleeCombat") as MeleeCombat
 	equipment = get_node_or_null("Equipment") as Equipment
-	collision_mask |= ENEMY_LAYER  # so you can't walk through enemies
-	# Registered first so the physics loop never asks for an action that doesn't exist yet
+	# Registered first so no child and no physics frame asks for an action that doesn't exist yet
 	Bindings.apply()  # your keys (Settings > Controls) and the controller layout
 	_register_input_actions()
-	_ensure_helpers()
+
+
+func _ready() -> void:
+	collision_mask |= ENEMY_LAYER  # so you can't walk through enemies
+	_ensure_helpers()  # player.tscn has them all; this only fills in any that were removed
 	add_to_group("settings_listener")
 	GameSettings.apply(get_tree())  # also calls apply_settings() below
 

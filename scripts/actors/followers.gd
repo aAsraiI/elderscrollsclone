@@ -44,7 +44,7 @@ func hire() -> String:
 		return "Nobody answers"
 	var skills := _player.get_node_or_null("Skills") as Skills
 	var level := maxi(skills.get_player_level() if skills != null else 3, 3)
-	var e := Enemy.new()
+	var e := Enemy.create()
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	data.apply(e, level, rng)

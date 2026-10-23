@@ -143,7 +143,7 @@ func _make(kind: String, at: Vector3, index: int) -> Enemy:
 	if body == null:
 		return null
 	var level := LevelCurve.zone_range(world.map, at)
-	var e := Enemy.new()
+	var e := Enemy.create()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _rng.randi()
 	body.apply(e, level.y + 2 if kind == "wardens" else level.x, rng)

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_4roaw"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_6i7rd"]
+
+[resource]
+script = ExtResource("2_6i7rd")
+id = &"ash_hound"
+display_name = "Ash Hound"
+color = Color(0.25, 0.2, 0.18, 1)
+health_mult = 0.9
+damage_mult = 1.1
+poise_mult = 0.8
+loot_quality = 0.0
+armor_tier_offset = -9
+kit = 0
+move_speed = 4.8
+detection_range = 17.0
+knockback_resistance = 0.1
+talk_name = "Ash Hound"
+talk_lines = PackedStringArray()

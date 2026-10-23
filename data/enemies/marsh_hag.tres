@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_wemh1"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_4celm"]
+
+[resource]
+script = ExtResource("2_4celm")
+id = &"marsh_hag"
+display_name = "Marsh Hag"
+color = Color(0.35, 0.42, 0.3, 1)
+body_scale = 0.95
+health_mult = 0.9
+poise_mult = 0.7
+loot_quality = 1.2
+kit = 3
+move_speed = 3.0
+detection_range = 16.0
+talk_name = "Marsh Hag"
+talk_lines = PackedStringArray()

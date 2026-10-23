@@ -1128,6 +1128,7 @@ func _damage_for(flat: float, mult: float) -> float:
 func _act_damage(act: Dictionary) -> float:
 	var w: ItemData = act["weapon"]
 	var mult := float(act["dmg_mult"])
+	mult *= _charge_mult()
 	match int(act["kind"]):
 		Kind.BASH:
 			return _damage_for(w.bash_damage if w != null else 0.0, BASH_DAMAGE_MULT * mult)
@@ -1169,6 +1170,8 @@ func _act_reach(act: Dictionary) -> float:
 	var r := _reach_of(w)
 	if bool(act["heavy"]) and w != null:
 		r += w.heavy_reach_bonus
+	if body != null and body.has_meta("riding"):
+		r += MOUNTED_REACH  # from the saddle you reach further down and out
 	return r
 
 
@@ -1178,7 +1181,10 @@ func _is_arc(act: Dictionary) -> bool:
 
 
 func _reach_of(weapon: ItemData) -> float:
-	return (weapon.reach if weapon != null else UNARMED_REACH) + stats.get_stat("reach_bonus")
+	var r := (weapon.reach if weapon != null else UNARMED_REACH) + stats.get_stat("reach_bonus")
+	if body is Enemy and (body as Enemy).body_scale > 1.3:
+		r += ((body as Enemy).body_scale - 1.3) * 1.5  # trolls, giants, the dragon: long arms and necks
+	return r
 
 
 func _weapon_in(slot: int) -> ItemData:
@@ -1319,3 +1325,21 @@ func _knock_items(at: Vector3, forward: Vector3) -> void:
 		var item := hit["collider"] as WorldItem
 		if item != null:
 			item.wake(forward * 2.5 + Vector3.UP * 0.8)
+
+
+# ---------------------------------------------------------------- fighting from the saddle
+
+## Extra reach on horseback, and how much a galloping horse adds to a blow at full speed
+const MOUNTED_REACH := 0.8
+const CHARGE_BONUS := 0.6
+
+
+# A blow struck from a moving horse carries the horse's speed: up to +CHARGE_BONUS at a gallop
+func _charge_mult() -> float:
+	if body == null or not body.has_meta("riding"):
+		return 1.0
+	var h := body.get_meta("riding") as Horse
+	if h == null or not is_instance_valid(h):
+		return 1.0
+	var speed := Vector2(h.velocity.x, h.velocity.z).length()
+	return 1.0 + CHARGE_BONUS * clampf(speed / Rider.GALLOP, 0.0, 1.0)

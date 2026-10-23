@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_nyoc4"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_64o2i"]
+
+[resource]
+script = ExtResource("2_64o2i")
+id = &"sand_scorpion"
+display_name = "Sand Scorpion"
+color = Color(0.75, 0.6, 0.35, 1)
+body_scale = 1.1
+health_mult = 1.3
+damage_mult = 1.2
+poise_mult = 1.4
+loot_quality = 0.0
+armor_tier_offset = -9
+kit = 0
+move_speed = 3.8
+detection_range = 13.0
+telegraph_time = 0.4
+knockback_resistance = 0.3
+talk_name = "Sand Scorpion"
+talk_lines = PackedStringArray()

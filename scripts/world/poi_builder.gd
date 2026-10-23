@@ -72,6 +72,8 @@ static func build_shape(root: Node3D, shape: int, s: float, color: Color, placed
 			_ruins(root, s, color, rng)
 		SimplePOIData.Shape.SHRINE:
 			_shrine(root, s, color)
+		SimplePOIData.Shape.DRAGON_LAIR:
+			_dragon_lair(root, s, color, placed, map, rng)
 
 
 static func _standing_stones(root: Node3D, s: float, color: Color, placed: PlacedPOI, map: WorldMap, rng: RandomNumberGenerator) -> void:
@@ -165,6 +167,36 @@ static func _ruins(root: Node3D, s: float, color: Color, rng: RandomNumberGenera
 	for i in 3:
 		var h := rng.randf_range(1.5, 4.5) * s
 		add_box(root, Vector3(0.9, h, 0.9) * s, Vector3(rng.randf_range(-w * 0.3, w * 0.3), h * 0.5, rng.randf_range(-d * 0.3, d * 0.3)), color.darkened(0.15), rng.randf() * TAU)
+
+
+# A ring of broken crags around scorched ground, old bones, and the hoard glinting at the back
+static func _dragon_lair(root: Node3D, s: float, color: Color, placed: PlacedPOI, map: WorldMap, rng: RandomNumberGenerator) -> void:
+	var radius := 16.0 * s
+	var n := 14
+	for i in n:
+		var a := float(i) / float(n) * TAU + rng.randf_range(-0.1, 0.1)
+		if absf(wrapf(a - PI * 1.5, -PI, PI)) < 0.35:
+			continue  # the way in, at the front (-Z)
+		var lx := cos(a) * radius
+		var lz := sin(a) * radius
+		var h := rng.randf_range(4.0, 9.0) * s
+		var gy := ground_y(placed, map, lx, lz)
+		add_box(root, Vector3(rng.randf_range(4.0, 6.5), h, rng.randf_range(3.0, 5.0)) * Vector3(s, 1.0, s), Vector3(lx, gy + h * 0.5 - 0.8, lz),
+			color.darkened(rng.randf_range(0.0, 0.3)), -a + PI * 0.5, Vector3(rng.randf_range(-0.15, 0.15), 0.0, rng.randf_range(-0.15, 0.15)))
+	var cy := ground_y(placed, map, 0.0, 0.0)
+	add_box(root, Vector3(radius * 1.6, 0.08, radius * 1.6), Vector3(0.0, cy + 0.02, 0.0), Color(0.08, 0.07, 0.06), 0.0, Vector3.ZERO, false)
+	# Bones of what it ate: a few rib cages and a great skull
+	var bone := Color(0.78, 0.74, 0.64)
+	for j in 3:
+		var at := Vector3(rng.randf_range(-radius * 0.5, radius * 0.5), cy, rng.randf_range(-radius * 0.4, radius * 0.2))
+		var yaw := rng.randf() * TAU
+		for k in 5:
+			add_box(root, Vector3(0.18, 1.6, 0.18) * s, at + Vector3(cos(yaw), 0.0, -sin(yaw)) * (float(k) - 2.0) * 0.5 * s + Vector3(0.0, 0.6 * s, 0.0), bone, yaw, Vector3(0.0, 0.0, 0.5), false)
+	add_box(root, Vector3(1.4, 1.0, 2.0) * s, Vector3(radius * 0.3, cy + 0.5 * s, -radius * 0.2), bone, 0.6, Vector3.ZERO, false)
+	# The hoard: a low mound of gold at the back of the lair
+	var hoard := Vector3(0.0, cy, radius * 0.55)
+	add_box(root, Vector3(5.0, 0.8, 3.5) * s, hoard + Vector3(0.0, 0.3 * s, 0.0), Color(0.78, 0.62, 0.25), 0.0, Vector3.ZERO, false, true)
+	add_box(root, Vector3(3.0, 0.6, 2.2) * s, hoard + Vector3(0.4, 0.9 * s, 0.2), Color(0.85, 0.7, 0.3), 0.4, Vector3.ZERO, false, true)
 
 
 static func _shrine(root: Node3D, s: float, color: Color) -> void:

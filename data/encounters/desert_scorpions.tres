@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_pcp1p"]
+[ext_resource type="Resource" path="res://data/spawns/enc_desert_scorpions.tres" id="2_6cubf"]
+
+[resource]
+script = ExtResource("1_pcp1p")
+id = &"desert_scorpions"
+display_name = "Sand Scorpions"
+table = ExtResource("2_6cubf")
+weight = 2.0
+aggro = true
+message = "The sand shifts around you."

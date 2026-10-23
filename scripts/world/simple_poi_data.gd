@@ -4,7 +4,7 @@ extends POIData
 ## Until you have real models it builds a simple placeholder out of boxes. Assign a Scene to
 ## use your own model instead (its origin = the middle of the site, its front faces -Z).
 
-enum Shape { NONE, STANDING_STONES, CAMP, TOWER, RUINS, SHRINE }
+enum Shape { NONE, STANDING_STONES, CAMP, TOWER, RUINS, SHRINE, DRAGON_LAIR }
 
 ## Your own model. Leave empty to use the placeholder Shape below.
 @export var scene: PackedScene

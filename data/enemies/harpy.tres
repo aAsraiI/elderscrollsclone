@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_7c8vg"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_8ki8l"]
+
+[resource]
+script = ExtResource("2_8ki8l")
+id = &"harpy"
+display_name = "Harpy"
+color = Color(0.55, 0.45, 0.35, 1)
+body_scale = 0.9
+health_mult = 0.8
+poise_mult = 0.6
+loot_quality = 0.0
+armor_tier_offset = -9
+kit = 0
+move_speed = 5.0
+detection_range = 18.0
+telegraph_time = 0.25
+talk_name = "Harpy"
+talk_lines = PackedStringArray()

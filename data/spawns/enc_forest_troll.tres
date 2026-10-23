@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_4r4qp"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_sn3fp"]
+[ext_resource type="Resource" path="res://data/enemies/forest_troll.tres" id="3_f1owv"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="4_7h57o"]
+
+[sub_resource type="Resource" id="Resource_4r4qp"]
+script = ExtResource("1_4r4qp")
+members = Array[ExtResource("2_sn3fp")]([ExtResource("3_f1owv")])
+min_level = 10
+
+[resource]
+script = ExtResource("4_7h57o")
+entries = Array[ExtResource("1_4r4qp")]([SubResource("Resource_4r4qp")])

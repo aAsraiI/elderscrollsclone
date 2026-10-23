@@ -10,6 +10,8 @@ const PRICES := [0, 2500, 5000]  # village (none), town, city
 
 
 static func owns(building_id: String) -> bool:
+	if building_id == "homestead":
+		return Homestead.owns()  # the house you built yourself
 	return building_id != "" and WorldState.has_record("home/" + building_id)
 
 

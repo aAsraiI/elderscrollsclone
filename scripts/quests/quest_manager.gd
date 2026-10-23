@@ -19,7 +19,7 @@ extends Node
 ## Saved in WorldState: "quests" (every job, and the counter) and "assassins/invited".
 
 const STATE := "quests"
-const TOPICS: Array[String] = ["membership", "advancement", "clear bounty", "a delivery", "the territory war"]
+const TOPICS: Array[String] = ["membership", "advancement", "clear bounty", "a delivery", "the territory war", "marriage", "our shop", "land for sale"]
 const PERSUADE_GOAL := 70
 const CHIEF_BODY := "res://data/enemies/bandit_brute.tres"
 const BEAST_BODY := "res://data/enemies/frost_bear.tres"
@@ -179,6 +179,52 @@ func offer(faction: String, s: DialogueEngine.Speaker, only_type: String = "") -
 	return q
 
 
+## A bounty from a town hall's board (BountyBoard): a bandit chief or a beast near the town.
+## Returns the job (already saved), or {} if there is nothing to hunt nearby.
+func offer_bounty(town: PlacedPOI, board_id: String) -> Dictionary:
+	if world == null or town == null:
+		return {}
+	var counter := _counter()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = ("%d|bounty|%s|%d" % [world.world_seed, town.id, counter]).hash()
+	var board := DialogueEngine.Speaker.new()
+	board.id = board_id
+	board.name = "the bounty board in %s" % town.town.display_name
+	board.town = town
+	var qid := "q%d" % counter
+	var q := {}
+	for t in (["kill", "hunt"] if rng.randf() < 0.6 else ["hunt", "kill"]):
+		q = _make(t, qid, town, board, rng)
+		if not q.is_empty():
+			break
+	if q.is_empty():
+		return {}
+	var skills := _player().get_node_or_null("Skills") as Skills
+	q["id"] = qid
+	q["faction"] = "bounty"
+	q["giver"] = board_id
+	q["giver_name"] = board.name
+	q["giver_town"] = town.town.display_name
+	q["status"] = "active"
+	q["reward"] = 120 + 20 * (skills.get_player_level() if skills != null else 1) + rng.randi_range(0, 40)
+	var list := all_quests().duplicate(true)
+	list.append(q)
+	_save_list(list, counter + 1)
+	if world.get_poi_node(String(q["target"])) != null:
+		var placed := world.get_poi(String(q["target"]))
+		for e in on_garrison(placed, world.get_poi_node(placed.id)):
+			world.add_to_garrison(placed.id, e)
+	return q
+
+
+## The board's bounty that is still open (active), or {}
+func bounty_of(board_id: String) -> Dictionary:
+	for q: Dictionary in all_quests():
+		if q["status"] == "active" and String(q.get("giver", "")) == board_id:
+			return q
+	return {}
+
+
 func _make(type: String, _qid: String, town: PlacedPOI, s: DialogueEngine.Speaker, rng: RandomNumberGenerator) -> Dictionary:
 	var from := town.position if town != null else _player().global_position
 	match type:
@@ -204,7 +250,7 @@ func _make(type: String, _qid: String, town: PlacedPOI, s: DialogueEngine.Speake
 		"kill":
 			var options: Array[PlacedPOI] = []
 			for p in _pois_near(from, 2200.0):
-				if p.poi is SimplePOIData and p.poi.garrison != null:
+				if p.poi is SimplePOIData and p.poi.garrison != null and p.poi.id != &"dragon_lair":
 					options.append(p)
 			if options.is_empty():
 				return {}
@@ -226,7 +272,7 @@ func _make(type: String, _qid: String, town: PlacedPOI, s: DialogueEngine.Speake
 			# a ruin or other old place nearby; the artifact is buried there (a DigSpot appears)
 			var options: Array[PlacedPOI] = []
 			for p in _pois_near(from, 2800.0):
-				if p.poi is SimplePOIData and p.poi.garrison != null:
+				if p.poi is SimplePOIData and p.poi.garrison != null and p.poi.id != &"dragon_lair":
 					options.append(p)
 			if options.is_empty():
 				return {}
@@ -253,7 +299,7 @@ func _make(type: String, _qid: String, town: PlacedPOI, s: DialogueEngine.Speake
 			# a named beast, met at a place out in the wild
 			var options: Array[PlacedPOI] = []
 			for p in _pois_near(from, 2400.0):
-				if p.poi is SimplePOIData and p.poi.garrison != null:
+				if p.poi is SimplePOIData and p.poi.garrison != null and p.poi.id != &"dragon_lair":
 					options.append(p)
 			if options.is_empty():
 				return {}
@@ -476,6 +522,8 @@ func extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 		out.append_array(story.topics_for(s))
 	if world != null and world.book != null:
 		out.append_array(world.book.topics_for(s))
+	out.append_array(Marriage.topics_for(s))
+	out.append_array(Homestead.topics_for(s))
 	return out
 
 
@@ -501,6 +549,12 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 		var written := world.book.respond(s, topic)
 		if not written.is_empty():
 			return written
+	var wed := Marriage.respond(s, topic, _player(), world.clock.day if world != null and world.clock != null else 1)
+	if not wed.is_empty():
+		return wed
+	var land := Homestead.respond(s, topic, _player(), world, world.clock.day if world != null and world.clock != null else 1)
+	if not land.is_empty():
+		return land
 	var leader := Factions.leader_of(s, world)
 	var p := _player()
 	if topic == "a delivery":

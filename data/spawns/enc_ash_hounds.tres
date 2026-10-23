@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_lgmg5"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_6gv87"]
+[ext_resource type="Resource" path="res://data/enemies/ash_hound.tres" id="3_o3hk3"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="4_x86gs"]
+
+[sub_resource type="Resource" id="Resource_7bcog"]
+script = ExtResource("1_lgmg5")
+members = Array[ExtResource("2_6gv87")]([ExtResource("3_o3hk3")])
+count_min = 2
+count_max = 4
+min_level = 6
+
+[resource]
+script = ExtResource("4_x86gs")
+entries = Array[ExtResource("1_lgmg5")]([SubResource("Resource_7bcog")])

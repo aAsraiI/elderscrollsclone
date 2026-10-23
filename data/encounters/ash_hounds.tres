@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_a0by5"]
+[ext_resource type="Resource" path="res://data/spawns/enc_ash_hounds.tres" id="2_j68ap"]
+
+[resource]
+script = ExtResource("1_a0by5")
+id = &"ash_hounds"
+display_name = "Ash Hounds"
+table = ExtResource("2_j68ap")
+weight = 2.0
+aggro = true
+message = "Howls rise from the ash."

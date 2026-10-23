@@ -1,7 +1,8 @@
 class_name Rider
 extends Node
-## Riding (see Horse). Under the Player: while riding you sit in the saddle, the horse moves, and
-## you can't fight. Also owns your horse: brings it back after a load and remembers where it is.
+## Riding (see Horse). Under the Player: while riding you sit in the saddle and the horse moves. You
+## can fight from the saddle: more reach, and a gallop adds to every blow (MeleeCombat._charge_mult).
+## Also owns your horse: brings it back after a load and remembers where it is.
 
 const DEED := "res://data/misc/horse_deed.tres"
 const WALK := 6.0
@@ -15,6 +16,7 @@ var _save_timer := 0.0
 func _ready() -> void:
 	_player = get_parent() as CharacterBody3D
 	_restore.call_deferred()
+	Boat.restore.call_deferred(_player)  # and the boat you sailed last
 
 
 func is_riding() -> bool:

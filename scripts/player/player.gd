@@ -179,6 +179,9 @@ func _physics_process(delta: float) -> void:
 	if swim != null and swim.is_swimming():
 		swim.swim_move(delta, input_dir, Input.is_action_pressed("sprint"))
 		return
+	if has_meta("boat"):
+		(get_meta("boat") as Boat).steer(delta, input_dir, Input.is_action_pressed("sprint"))
+		return
 	var rider := get_node_or_null("Rider") as Rider
 	if rider != null and rider.is_riding():
 		rider.ride(delta, input_dir, Input.is_action_pressed("sprint"))
@@ -266,7 +269,7 @@ func _ensure_helpers() -> void:
 		var caster := SpellCaster.new()
 		caster.name = "SpellCaster"
 		add_child(caster)
-	for extra in [["Afflictions", Afflictions], ["Survival", Survival], ["Powers", Powers], ["NightVision", NightVision], ["ThirdPerson", ThirdPerson], ["Swimming", Swimming], ["Rider", Rider], ["SoundFX", SoundFX], ["Tutorial", Tutorial], ["Followers", Followers], ["RangedCombat", RangedCombat], ["CouncilUI", CouncilUI], ["DebugConsole", DebugConsole]]:
+	for extra in [["Afflictions", Afflictions], ["Survival", Survival], ["Powers", Powers], ["NightVision", NightVision], ["ThirdPerson", ThirdPerson], ["Swimming", Swimming], ["Rider", Rider], ["SoundFX", SoundFX], ["Tutorial", Tutorial], ["Followers", Followers], ["RangedCombat", RangedCombat], ["CouncilUI", CouncilUI], ["DebugConsole", DebugConsole], ["Homestead", Homestead]]:
 		if get_node_or_null(extra[0]) == null:
 			var n: Node = extra[1].new()
 			n.name = extra[0]

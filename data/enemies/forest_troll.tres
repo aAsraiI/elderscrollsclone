@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_k2d3i"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_j8cmk"]
+
+[resource]
+script = ExtResource("2_j8cmk")
+id = &"forest_troll"
+display_name = "Forest Troll"
+color = Color(0.3, 0.38, 0.25, 1)
+body_scale = 1.6
+health_mult = 2.6
+damage_mult = 1.5
+poise_mult = 2.8
+loot_quality = 0.5
+kit = 0
+detection_range = 13.0
+telegraph_time = 0.55
+knockback_resistance = 0.5
+talk_name = "Forest Troll"
+talk_lines = PackedStringArray()

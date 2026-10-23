@@ -1,19 +1,21 @@
 [gd_resource type="Resource" script_class="BiomeData" format=3 uid="uid://c6afmxypjs1pv"]
 
-[ext_resource type="Script" uid="uid://0fpv5k8e3f4r" path="res://scripts/world/encounter_data.gd" id="1_bgs2j"]
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_bgs2j"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wanderer.tres" id="2_7cgks"]
 [ext_resource type="Resource" path="res://data/encounters/plains_caravan.tres" id="3_jxyjy"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="4_03kbe"]
 [ext_resource type="Resource" path="res://data/encounters/plains_hunter.tres" id="5_iqdjq"]
 [ext_resource type="Resource" path="res://data/encounters/night_werewolf.tres" id="6_03kbe"]
-[ext_resource type="Script" uid="uid://clkfbb8lga0d6" path="res://scripts/world/poi_rule.gd" id="6_ss271"]
-[ext_resource type="Resource" uid="uid://ctkcd8v0rjb18" path="res://data/world/POIs/watchtower.tres" id="7_11qyg"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="6_ss271"]
+[ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="7_11qyg"]
 [ext_resource type="Resource" path="res://data/encounters/night_vampire.tres" id="7_iqdjq"]
-[ext_resource type="Resource" uid="uid://4kobovt0lhye" path="res://data/world/POIs/ruined_shrine.tres" id="8_jgf62"]
+[ext_resource type="Resource" path="res://data/world/POIs/ruined_shrine.tres" id="8_jgf62"]
+[ext_resource type="Resource" path="res://data/encounters/coast_drowned.tres" id="8_yy5c7"]
+[ext_resource type="Resource" path="res://data/encounters/coast_raiders.tres" id="9_lqvpx"]
 [ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="9_snnxj"]
 [ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="10_xkhh2"]
-[ext_resource type="Resource" uid="uid://bk7ydnyeb77t0" path="res://data/world/POIs/bandit_camp.tres" id="11_jfcnk"]
-[ext_resource type="Script" uid="uid://bula71da23th1" path="res://scripts/world/biome_data.gd" id="12_6utju"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="11_jfcnk"]
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="12_6utju"]
 [ext_resource type="Resource" path="res://data/world/POIs/sewers_entrance.tres" id="12_7cgks"]
 [ext_resource type="Resource" path="res://data/world/POIs/sunken_vault_entrance.tres" id="13_jxyjy"]
 
@@ -82,4 +84,4 @@ tree_color = Color(0.24, 0.44, 0.2, 1)
 poi_rules = Array[ExtResource("6_ss271")]([SubResource("Resource_7ta4w"), SubResource("Resource_8m2gg"), SubResource("Resource_ar1jx"), SubResource("Resource_51a4c"), SubResource("Resource_nnn3e"), SubResource("Resource_jxyjy"), SubResource("Resource_03kbe")])
 level_min = 10
 level_max = 27
-encounters = Array[ExtResource("1_bgs2j")]([ExtResource("2_7cgks"), ExtResource("3_jxyjy"), ExtResource("4_03kbe"), ExtResource("5_iqdjq"), ExtResource("6_03kbe"), ExtResource("7_iqdjq")])
+encounters = Array[ExtResource("1_bgs2j")]([ExtResource("2_7cgks"), ExtResource("3_jxyjy"), ExtResource("4_03kbe"), ExtResource("5_iqdjq"), ExtResource("6_03kbe"), ExtResource("7_iqdjq"), ExtResource("8_yy5c7"), ExtResource("9_lqvpx")])

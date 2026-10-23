@@ -88,9 +88,9 @@ static func build_for(e: Node3D, p_kind: Kind, seed_value: int) -> CreatureBody:
 ## Which kind of body an enemy type gets (by its EnemyData id)
 static func kind_for(id: String) -> Kind:
 	match id:
-		"wolf", "giant_rat", "frost_bear", "dune_stalker":
+		"wolf", "giant_rat", "frost_bear", "dune_stalker", "bog_lurker", "ash_hound", "harpy", "grave_ghoul", "dragon":
 			return Kind.BEAST
-		"deep_crawler", "crawler_queen":
+		"deep_crawler", "crawler_queen", "giant_spider", "sand_scorpion":
 			return Kind.CRAWLER
 		"fire_spirit", "ice_wraith":
 			return Kind.SPIRIT
@@ -361,6 +361,9 @@ func _weapon_model(w: ItemData) -> Node3D:
 # ---------------------------------------------------------------- beasts
 
 func _build_beast(fur: Color) -> void:
+	if enemy != null and enemy.display_name.to_lower().contains("dragon"):
+		_build_dragon(fur)
+		return
 	var big: bool = enemy != null and enemy.display_name.to_lower().contains("bear")
 	m_cloth = _mat(fur)
 	m_skin = _mat(fur.darkened(0.3))
@@ -392,6 +395,53 @@ func _build_beast(fur: Color) -> void:
 		_part(knee, _box(Vector3(0.1, 0.05, 0.14) * (1.0 if not big else 1.6)), Vector3(0, -leg_len * 0.9, -0.03), m_boots)
 	var tail := _bone("tail", torso, Vector3(0, 0.18, length * 0.5))
 	_part(tail, _capsule(0.05, 0.45 if not big else 0.16), Vector3(0, 0, 0.18), m_cloth, Vector3(PI * 0.5, 0, 0))
+
+
+# A dragon: the beast's bones (so it walks and bites like one) on a long scaled body, with horns,
+# a spined tail and two great wings that beat slowly (see _animate_beast)
+func _build_dragon(scales: Color) -> void:
+	m_cloth = _mat(scales, 0.6)
+	m_skin = _mat(scales.darkened(0.35), 0.7)
+	m_boots = _mat(Color(0.15, 0.13, 0.12))
+	m_hair = _mat(Color(0.82, 0.78, 0.66))  # horns and claws
+	var height := 1.05
+	var length := 2.4
+	var width := 0.95
+	var torso := _bone("torso", self, Vector3(0, height, 0))
+	_part(torso, _box(Vector3(width, width * 0.85, length)), Vector3(0, 0.1, 0), m_cloth)
+	_part(torso, _box(Vector3(width * 0.7, 0.2, length * 0.9)), Vector3(0, -0.32, 0), m_skin)  # pale belly plates
+	for i in 6:
+		_part(torso, _box(Vector3(0.08, 0.28, 0.2)), Vector3(0, width * 0.5 + 0.12, -length * 0.4 + i * length * 0.16), m_hair)
+	var neck := _bone("neck", torso, Vector3(0, 0.3, -length * 0.5))
+	_part(neck, _box(Vector3(width * 0.5, width * 0.5, 1.0)), Vector3(0, 0.25, -0.4), m_cloth, Vector3(0.45, 0, 0))
+	var head := _bone("head", neck, Vector3(0, 0.55, -0.9))
+	_part(head, _box(Vector3(width * 0.55, width * 0.45, 0.6)), Vector3(0, 0, -0.15), m_cloth)
+	_part(head, _box(Vector3(width * 0.4, width * 0.25, 0.45)), Vector3(0, -0.05, -0.6), m_skin)  # snout
+	var jaw := _bone("jaw", head, Vector3(0, -0.2, -0.3))
+	_part(jaw, _box(Vector3(width * 0.35, 0.1, 0.55)), Vector3(0, -0.04, -0.25), m_skin)
+	for side in [-1.0, 1.0]:
+		_part(head, _box(Vector3(0.08, 0.08, 0.6)), Vector3(side * width * 0.2, 0.25, 0.25), m_hair, Vector3(0.6, side * 0.3, 0))  # horns
+		_part(head, _box(Vector3(0.07, 0.05, 0.03)), Vector3(side * width * 0.2, 0.08, -0.45), _eye_mat())
+	var legs := {"fl": Vector3(-width * 0.45, 0, -length * 0.35), "fr": Vector3(width * 0.45, 0, -length * 0.35),
+		"bl": Vector3(-width * 0.45, 0, length * 0.35), "br": Vector3(width * 0.45, 0, length * 0.35)}
+	var leg_len := height * 0.55
+	for k in legs:
+		var hip := _bone(k + "_hip", torso, legs[k])
+		_part(hip, _capsule(0.17, leg_len), Vector3(0, -leg_len * 0.45, 0), m_cloth)
+		var knee := _bone(k + "_knee", hip, Vector3(0, -leg_len * 0.9, 0))
+		_part(knee, _capsule(0.13, leg_len), Vector3(0, -leg_len * 0.45, 0), m_skin)
+		_part(knee, _box(Vector3(0.3, 0.08, 0.36)), Vector3(0, -leg_len * 0.9, -0.08), m_hair)
+	var tail := _bone("tail", torso, Vector3(0, 0.15, length * 0.5))
+	_part(tail, _box(Vector3(width * 0.45, width * 0.4, 1.4)), Vector3(0, 0, 0.7), m_cloth)
+	var tip := _bone("tail_tip", tail, Vector3(0, 0, 1.4))
+	_part(tip, _box(Vector3(width * 0.22, width * 0.2, 1.3)), Vector3(0, 0, 0.65), m_cloth)
+	_part(tip, _box(Vector3(0.5, 0.06, 0.4)), Vector3(0, 0, 1.3), m_hair)
+	var membrane := _mat(scales.darkened(0.5).lerp(Color(0.4, 0.1, 0.08), 0.3), 0.9)
+	membrane.cull_mode = BaseMaterial3D.CULL_DISABLED
+	for side in [-1.0, 1.0]:
+		var wing := _bone("wing_" + ("l" if side < 0 else "r"), torso, Vector3(side * width * 0.45, width * 0.45, -length * 0.15))
+		_part(wing, _box(Vector3(2.2, 0.08, 0.12)), Vector3(side * 1.1, 0.15, 0), m_skin, Vector3(0, 0, side * 0.15))  # the arm
+		_part(wing, _box(Vector3(2.1, 0.02, 1.5)), Vector3(side * 1.05, 0.08, 0.75), membrane, Vector3(0, 0, side * 0.15))
 
 
 func _eye_mat() -> StandardMaterial3D:
@@ -813,6 +863,15 @@ func _animate_beast(delta: float) -> void:
 		t["neck"] = Vector3(0.5, 0, 0)
 	if _flinch > 0.0:
 		t["torso"].z += 0.2 * _flinch
+	if bones.has("wing_l"):
+		# Folded at rest, half-open and beating when it fights, spread wide as it strikes
+		var fighting: bool = enemy.state == Enemy.State.ATTACK or enemy.state == Enemy.State.CHASE
+		var spread := 0.15 if not fighting else 0.55 + sin(_time * 3.0) * 0.35
+		if combat != null and combat.get_phase() == MeleeCombat.Phase.ACTIVE:
+			spread = 0.9
+		t["wing_l"] = Vector3(0, 0.6 * (1.0 - spread), -spread * 0.9)
+		t["wing_r"] = Vector3(0, -0.6 * (1.0 - spread), spread * 0.9)
+		t["tail_tip"] = Vector3(0, sin(_time * 2.2) * 0.35, 0)
 	for k in t:
 		_rot(k, t[k], rate, delta)
 	var base_h: float = bones["torso"].position.y if not has_meta("torso_h") else float(get_meta("torso_h"))

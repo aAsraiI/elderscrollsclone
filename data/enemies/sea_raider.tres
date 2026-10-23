@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_sr81u"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_ltg88"]
+
+[resource]
+script = ExtResource("2_ltg88")
+id = &"sea_raider"
+display_name = "Sea Raider"
+color = Color(0.25, 0.3, 0.45, 1)
+kit = 12
+move_speed = 3.3
+detection_range = 15.0
+knockback_resistance = 0.05
+talk_name = "Sea Raider"
+talk_lines = PackedStringArray()

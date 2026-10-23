@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_80dnp"]
+[ext_resource type="Resource" path="res://data/spawns/enc_coast_drowned.tres" id="2_lvp5x"]
+
+[resource]
+script = ExtResource("1_80dnp")
+id = &"coast_drowned"
+display_name = "The Drowned"
+table = ExtResource("2_lvp5x")
+weight = 1.5
+aggro = true
+night_only = true
+message = "Wet footsteps come up from the shore."

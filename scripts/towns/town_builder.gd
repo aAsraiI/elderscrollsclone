@@ -333,3 +333,7 @@ static func _pier(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: Worl
 		var at := layout.shore + out * (1.5 + 2.2 * float(k))
 		POIBuilder.add_box(root, Vector3(2.2, 0.2, 2.2), Vector3(at.x, sea + 0.5, at.z), Color(0.45, 0.33, 0.2), yaw)
 		POIBuilder.add_box(root, Vector3(0.2, 3.0, 0.2), Vector3(at.x, sea - 1.0, at.z) + Basis(Vector3.UP, yaw) * Vector3(1.0, 0, 0), DOOR_COLOR, 0.0, Vector3.ZERO, false)
+	# The town's rowboat, tied alongside the end of the pier (unless you sailed off in it)
+	if not Boat.taken_from(placed.id):
+		var tie := layout.shore + out * (1.5 + 2.2 * 3.0) + Basis(Vector3.UP, yaw) * Vector3(2.3, 0, 0)
+		Boat.make(root, Vector3(tie.x, sea - 0.05, tie.z), yaw + PI, placed.id)

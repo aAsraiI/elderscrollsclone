@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_atlqs"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_phrmn"]
+
+[resource]
+script = ExtResource("2_phrmn")
+id = &"grave_ghoul"
+display_name = "Grave Ghoul"
+color = Color(0.5, 0.52, 0.48, 1)
+damage_mult = 1.1
+poise_mult = 0.9
+loot_quality = 0.3
+kit = 0
+move_speed = 4.0
+knockback_resistance = 0.1
+talk_name = "Grave Ghoul"
+talk_lines = PackedStringArray()

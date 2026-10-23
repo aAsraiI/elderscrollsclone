@@ -756,7 +756,7 @@ func t_world() -> void:
 	check("the manager forgets freed creatures", em.get_alive_count() == 0)
 
 	# biome decides what shows up: the desert and the snow
-	var desert_names := ["Desert Raider", "Raider Marauder", "Cutthroat", "Dune Stalker", "Prospector", "Merchant", "Caravan Guard"]
+	var desert_names := ["Desert Raider", "Raider Marauder", "Cutthroat", "Dune Stalker", "Prospector", "Merchant", "Caravan Guard", "Sand Scorpion"]
 	var snow_names := ["Mountain Reaver", "Frost Raider", "Frost Bear", "Wolf", "Trapper"]
 	var desert_pos := _away_from_towns(wm, Vector3(750, 0, -250))
 	_teleport(wm, player, desert_pos)

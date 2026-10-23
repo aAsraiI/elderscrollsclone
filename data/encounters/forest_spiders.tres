@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_i1pvr"]
+[ext_resource type="Resource" path="res://data/spawns/enc_forest_spiders.tres" id="2_firwg"]
+
+[resource]
+script = ExtResource("1_i1pvr")
+id = &"forest_spiders"
+display_name = "Spider Nest"
+table = ExtResource("2_firwg")
+weight = 2.0
+aggro = true
+message = "Something skitters in the undergrowth..."

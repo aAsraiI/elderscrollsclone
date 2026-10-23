@@ -31,6 +31,10 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 	rng.seed = interior_seed
 	var w := maxf(b.size.x + 1.5, 7.0)
 	var d := maxf(b.size.z + 1.5, 6.5)
+	var arena := b.kind == BuildingPlot.Kind.GUILD_HALL and b.guild == "fighters"
+	if arena:  # room for the sand pit (Arena)
+		w = maxf(w, 16.0)
+		d = maxf(d, 22.0)
 	var h := 3.4
 	match b.kind:
 		BuildingPlot.Kind.TEMPLE:
@@ -150,9 +154,10 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			chests += _chest(root, b, 0, "Offering Box", Vector3(w * 0.5 - 0.8, 0.35, d * 0.5 - 1.0), _offering_loot(), interior_seed)
 			stations.append(_station(root, "alchemy_lab", Vector3(w * 0.5 - 0.45, 0.0, -d * 0.5 + 2.0), PI * 0.5))
 		BuildingPlot.Kind.GUILD_HALL:
-			POIBuilder.add_box(root, Vector3(1.2, 0.8, d * 0.45), Vector3(0.0, 0.4, d * 0.05), WOOD)
-			for side in [-1.0, 1.0]:
-				POIBuilder.add_box(root, Vector3(0.4, 0.45, d * 0.45), Vector3(side * 1.0, 0.23, d * 0.05), DARK_WOOD)
+			if not arena:
+				POIBuilder.add_box(root, Vector3(1.2, 0.8, d * 0.45), Vector3(0.0, 0.4, d * 0.05), WOOD)
+				for side in [-1.0, 1.0]:
+					POIBuilder.add_box(root, Vector3(0.4, 0.45, d * 0.45), Vector3(side * 1.0, 0.23, d * 0.05), DARK_WOOD)
 			var banner: Color = TownBuilder.GUILD_COLORS.get(b.guild, CLOTH)
 			for x in [-w * 0.25, w * 0.25]:
 				POIBuilder.add_box(root, Vector3(1.2, 2.4, 0.06), Vector3(x, h * 0.55, d * 0.5 - 0.05), banner, 0.0, Vector3.ZERO, false)
@@ -160,6 +165,22 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 				"fighters":
 					for i in 2:
 						POIBuilder.add_box(root, Vector3(0.35, 1.7, 0.35), Vector3(w * 0.5 - 1.2, 0.85, -d * 0.2 + float(i) * 2.0), Color(0.6, 0.5, 0.3))
+					# The arena: a sand pit ringed by a low wall (open toward the door), the gong
+					# at its near edge, benches for the crowd along the side walls
+					var pit := Vector3(0.0, 0.0, d * 0.5 - 6.5)
+					POIBuilder.add_box(root, Vector3(10.0, 0.04, 10.0), pit + Vector3(0.0, 0.02, 0.0), Color(0.72, 0.62, 0.42), 0.0, Vector3.ZERO, false)
+					for k in 16:
+						var a := float(k) / 16.0 * TAU
+						if absf(wrapf(a - PI * 1.5, -PI, PI)) < 0.3:
+							continue
+						POIBuilder.add_box(root, Vector3(2.0, 0.7, 0.3), pit + Vector3(cos(a), 0.0, sin(a)) * 5.0 + Vector3(0.0, 0.35, 0.0), DARK_WOOD, -a + PI * 0.5)
+					Arena.make(root, pit + Vector3(2.2, 0.0, -5.6), pit)
+					for k in 8:
+						stations.append(pit + Vector3(cos(float(k) * TAU / 8.0), 0.0, sin(float(k) * TAU / 8.0)) * 3.5)
+					stations.append(pit)
+					stations.append(pit + Vector3(2.2, 0.0, -5.6))
+					for side in [-1.0, 1.0]:
+						POIBuilder.add_box(root, Vector3(0.6, 0.45, 8.0), Vector3(side * (w * 0.5 - 0.6), 0.23, pit.z), WOOD)
 				"antiquarians":
 					stations.append(_station(root, "grindstone", Vector3(-w * 0.3, 0.0, -d * 0.5 + 0.8)))
 					stations.append(_station(root, "workbench", Vector3(w * 0.25, 0.0, -d * 0.5 + 0.6)))
@@ -182,6 +203,10 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			beds.append(_bed(root, Vector3(-w * 0.5 + 0.8, 0.0, -d * 0.5 + 1.6)))
 			for i in 4:
 				seats.append(Vector3(1.6 * (1.0 if i % 2 == 0 else -1.0), 0.0, d * 0.05 + (float(i / 2) - 0.5) * 2.0))
+			if arena:  # the fighters watch from the benches; the master stands by the gong
+				work = Vector3(3.4, 0.0, d * 0.5 - 12.4)
+				for i in 4:
+					seats[i] = Vector3((w * 0.5 - 0.6) * (1.0 if i % 2 == 0 else -1.0), 0.0, d * 0.5 - 6.5 + (float(i / 2) - 0.5) * 3.0)
 			chests += _chest(root, b, 0, "Guild Chest", Vector3(-w * 0.5 + 0.8, 0.35, d * 0.5 - 1.0), _shop_loot(), interior_seed)
 		BuildingPlot.Kind.SEAT:
 			# The lord's high seat on a dais at the far end, under the house banners
@@ -205,6 +230,9 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 				_hearth(root, Vector3(w * 0.5 - 0.5, 0.0, 0.0))
 			work = Vector3(0.0, 0.0, d * 0.5 - 3.0)  # before the high seat, hearing petitions
 			beds.append(_bed(root, Vector3(-w * 0.5 + 0.8, 0.0, -d * 0.5 + 1.6)))
+			# The town's bounty board by the door (BountyBoard)
+			var board := BountyBoard.make(root, Vector3(w * 0.5 - 0.15, 0.0, -d * 0.5 + 1.6), -PI * 0.5, b.town_id)
+			stations.append(board.position)
 			var chest_name := "Tithe Chest" if b.seat_type == "reeve" else "Treasury Chest"
 			chests += _chest(root, b, 0, chest_name, Vector3(w * 0.5 - 0.8, 0.35, d * 0.5 - 1.0), _shop_loot(), interior_seed)
 			# The town's lorebooks, on the lord's bookshelf (LoreBooks)
@@ -298,6 +326,7 @@ static func _dawnhold(b: BuildingPlot, interior_seed: int, level: int) -> Dictio
 		var shelf := POIBuilder.make_chest("Bookshelf", shelf_loot, "building/%s/lore" % b.id, interior_seed | 1)
 		root.add_child(shelf)
 		shelf.position = Vector3(-14.0, 0.35, 13.8)  # the Chancellor's shelves
+	BountyBoard.make(root, Vector3(6.9, 0.0, -11.5), -PI * 0.5, b.town_id)  # on the east wall by the great door
 	var beds: Array[Vector3] = []
 	var seats: Array[Vector3] = []
 	for c in marks.get_children():

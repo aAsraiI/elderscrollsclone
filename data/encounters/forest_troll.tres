@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_phxyw"]
+[ext_resource type="Resource" path="res://data/spawns/enc_forest_troll.tres" id="2_oj13m"]
+
+[resource]
+script = ExtResource("1_phxyw")
+id = &"forest_troll"
+display_name = "Forest Troll"
+table = ExtResource("2_oj13m")
+weight = 0.8
+aggro = true
+message = "A great shape shoulders through the trees."

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_d65ar"]
+[ext_resource type="Resource" path="res://data/spawns/enc_swamp_lurkers.tres" id="2_7srbm"]
+
+[resource]
+script = ExtResource("1_d65ar")
+id = &"swamp_lurkers"
+display_name = "Bog Lurkers"
+table = ExtResource("2_7srbm")
+weight = 2.0
+aggro = true
+message = "The bog heaves."

@@ -112,6 +112,8 @@ static func trade_status(s: DialogueEngine.Speaker, world: WorldManager) -> Dict
 	if s != null and s.enemy != null and is_instance_valid(s.enemy) and s.enemy.has_meta("merchant"):
 		var path := MERCHANT_DIR + String(s.enemy.get_meta("merchant")) + ".tres"
 		return {"merchant": load(path) as MerchantData if ResourceLoader.exists(path) else null, "open": true, "why": ""}
+	if Marriage.is_spouse(s) and not s.asleep:  # your spouse's little shop is always open to you
+		return {"merchant": load(MERCHANT_DIR + "general.tres") as MerchantData, "open": true, "why": ""}
 	if s == null or s.data == null or s.data.work_id == "" or world == null:
 		return {"merchant": null, "open": false, "why": ""}
 	var m := merchant_for(world.get_building(s.data.work_id))

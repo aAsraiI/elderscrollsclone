@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_uysbi"]
+[ext_resource type="Resource" path="res://data/spawns/enc_dead_ghouls.tres" id="2_johle"]
+
+[resource]
+script = ExtResource("1_uysbi")
+id = &"dead_ghouls"
+display_name = "Grave Ghouls"
+table = ExtResource("2_johle")
+weight = 2.0
+aggro = true
+night_only = true
+message = "Something is digging nearby."

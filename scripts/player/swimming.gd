@@ -43,7 +43,7 @@ func _physics_process(delta: float) -> void:
 	var inside := dm != null and dm.is_inside()
 	var y := _player.global_position.y
 	var was := _swimming
-	_swimming = not inside and y < _sea - 1.1 and not _player.has_meta("riding")
+	_swimming = not inside and y < _sea - 1.1 and not _player.has_meta("riding") and not _player.has_meta("boat")
 	if _swimming and not was:
 		_player.velocity.y *= 0.2
 	var head := (_player.get_node("Head") as Node3D).global_position.y

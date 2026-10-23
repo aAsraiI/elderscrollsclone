@@ -1,14 +1,15 @@
 [gd_resource type="Resource" script_class="SpawnTable" format=3 uid="uid://c1l6qrwk7ld64"]
 
 [ext_resource type="Resource" path="res://data/enemies/werewolf.tres" id="8_oibmh"]
-[ext_resource type="Script" uid="uid://dg8b8xgiyxnc8" path="res://scripts/actors/enemy_data.gd" id="ed"]
+[ext_resource type="Resource" path="res://data/enemies/giant_spider.tres" id="9_h16n8"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="ed"]
 [ext_resource type="Resource" path="res://data/enemies/bandit.tres" id="e_bandit"]
 [ext_resource type="Resource" path="res://data/enemies/bandit_brute.tres" id="e_bandit_brute"]
 [ext_resource type="Resource" path="res://data/enemies/cave_dweller.tres" id="e_cave_dweller"]
 [ext_resource type="Resource" path="res://data/enemies/cutthroat.tres" id="e_cutthroat"]
 [ext_resource type="Resource" path="res://data/enemies/wolf.tres" id="e_wolf"]
-[ext_resource type="Script" uid="uid://bq60lvmw1j4xb" path="res://scripts/actors/spawn_entry.gd" id="s"]
-[ext_resource type="Script" uid="uid://cri67k8ygdytl" path="res://scripts/actors/spawn_table.gd" id="t"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="s"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="t"]
 
 [sub_resource type="Resource" id="entry_0"]
 script = ExtResource("s")
@@ -48,6 +49,12 @@ members = Array[ExtResource("ed")]([ExtResource("8_oibmh")])
 weight = 0.6
 min_level = 12
 
+[sub_resource type="Resource" id="Resource_n0r0g"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("9_h16n8")])
+weight = 1.5
+count_max = 3
+
 [resource]
 script = ExtResource("t")
-entries = Array[ExtResource("s")]([SubResource("entry_0"), SubResource("entry_1"), SubResource("entry_2"), SubResource("entry_3"), SubResource("entry_4"), SubResource("Resource_5k4on")])
+entries = Array[ExtResource("s")]([SubResource("entry_0"), SubResource("entry_1"), SubResource("entry_2"), SubResource("entry_3"), SubResource("entry_4"), SubResource("Resource_5k4on"), SubResource("Resource_n0r0g")])

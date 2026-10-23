@@ -1,11 +1,12 @@
 [gd_resource type="Resource" script_class="SpawnTable" format=3 uid="uid://ddg7mrjsyk25w"]
 
 [ext_resource type="Resource" path="res://data/enemies/vampire.tres" id="5_b1067"]
-[ext_resource type="Script" uid="uid://dg8b8xgiyxnc8" path="res://scripts/actors/enemy_data.gd" id="ed"]
+[ext_resource type="Resource" path="res://data/enemies/grave_ghoul.tres" id="6_ya7fa"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="ed"]
 [ext_resource type="Resource" path="res://data/enemies/skeleton.tres" id="e_skeleton"]
 [ext_resource type="Resource" path="res://data/enemies/skeleton_knight.tres" id="e_skeleton_knight"]
-[ext_resource type="Script" uid="uid://bq60lvmw1j4xb" path="res://scripts/actors/spawn_entry.gd" id="s"]
-[ext_resource type="Script" uid="uid://cri67k8ygdytl" path="res://scripts/actors/spawn_table.gd" id="t"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="s"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="t"]
 
 [sub_resource type="Resource" id="entry_0"]
 script = ExtResource("s")
@@ -27,6 +28,12 @@ members = Array[ExtResource("ed")]([ExtResource("5_b1067")])
 weight = 0.6
 min_level = 8
 
+[sub_resource type="Resource" id="Resource_ovfs0"]
+script = ExtResource("s")
+members = Array[ExtResource("ed")]([ExtResource("6_ya7fa")])
+weight = 1.5
+count_max = 3
+
 [resource]
 script = ExtResource("t")
-entries = Array[ExtResource("s")]([SubResource("entry_0"), SubResource("entry_1"), SubResource("Resource_a5fgc")])
+entries = Array[ExtResource("s")]([SubResource("entry_0"), SubResource("entry_1"), SubResource("Resource_a5fgc"), SubResource("Resource_ovfs0")])

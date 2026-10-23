@@ -1,0 +1,51 @@
+[gd_resource type="Resource" script_class="SimplePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/poi_container.gd" id="1_2gy7b"]
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="2_wal08"]
+[ext_resource type="Resource" path="res://data/consumables/gold.tres" id="3_1irfg"]
+[ext_resource type="Resource" path="res://data/materials/gold_ingot.tres" id="4_je648"]
+[ext_resource type="Resource" path="res://data/materials/star_ore.tres" id="5_whmre"]
+[ext_resource type="Resource" path="res://data/spawns/garrison_dragon.tres" id="6_e7voh"]
+[ext_resource type="Script" path="res://scripts/world/simple_poi_data.gd" id="7_h12ub"]
+
+[sub_resource type="Resource" id="Resource_2gy7b"]
+script = ExtResource("2_wal08")
+item = ExtResource("3_1irfg")
+min_count = 600
+max_count = 1200
+
+[sub_resource type="Resource" id="Resource_wal08"]
+script = ExtResource("2_wal08")
+item = ExtResource("4_je648")
+min_count = 2
+max_count = 5
+chance = 0.8
+
+[sub_resource type="Resource" id="Resource_1irfg"]
+script = ExtResource("2_wal08")
+item = ExtResource("5_whmre")
+min_count = 2
+max_count = 5
+chance = 0.8
+
+[sub_resource type="Resource" id="Resource_je648"]
+script = ExtResource("1_2gy7b")
+display_name = "Dragon's Hoard"
+offset = Vector3(0, 0, 6.5)
+loot = Array[ExtResource("2_wal08")]([SubResource("Resource_2gy7b"), SubResource("Resource_wal08"), SubResource("Resource_1irfg")])
+
+[resource]
+script = ExtResource("7_h12ub")
+shape = 6
+color = Color(0.3, 0.28, 0.27, 1)
+containers = Array[ExtResource("1_2gy7b")]([SubResource("Resource_je648")])
+id = &"dragon_lair"
+display_name = "Dragon's Lair"
+map_color = Color(0.85, 0.15, 0.1, 1)
+footprint_radius = 26.0
+flatten_radius = 19.0
+max_slope_deg = 20.0
+garrison = ExtResource("6_e7voh")
+garrison_groups_max = 1
+garrison_radius = 4.0
+garrison_level_offset = 6

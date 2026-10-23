@@ -56,6 +56,9 @@ func open_for(s: DialogueEngine.Speaker) -> bool:
 	var b: BuildingPlot = world.get_building(s.data.work_id) if s.data != null else null
 	var shop_id := b.id if b != null else String(s.enemy.get_meta("shop_id", "road/" + s.name))
 	var shop_name := b.display_name if b != null else "Travelling Merchant"
+	if Marriage.is_spouse(s):
+		shop_id = Marriage.SHOP_ID
+		shop_name = "%s's Shop" % s.name
 	var zone := LevelCurve.zone_range(world.map, b.world_pos if b != null else s.position)
 	var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
 	var kind := int((s.town.poi as TownData).kind) if s.town != null and b != null else 1

@@ -167,7 +167,7 @@ func _apply_stage10(e: Enemy, level: int, rng: RandomNumberGenerator) -> void:
 			e.style = Enemy.Style.SPIRIT
 		_:
 			e.style = Enemy.Style.BRUTE if (e.starting_weapon != null and e.starting_weapon.two_handed) or body_scale >= 1.3 else Enemy.Style.DUELIST
-	if e.body_kind == CreatureBody.Kind.HUMANOID and disposition == Enemy.Disposition.HOSTILE and not key.contains("skeleton") and not key.contains("wight"):
+	if e.body_kind == CreatureBody.Kind.HUMANOID and disposition == Enemy.Disposition.HOSTILE and not key.contains("skeleton") and not key.contains("wight") and key != "drowned_sailor":
 		e.potions = 1 if rng.randf() < 0.5 else 0
 	var res := {}
 	var spell_ids: Array = []
@@ -204,8 +204,32 @@ func _apply_stage10(e: Enemy, level: int, rng: RandomNumberGenerator) -> void:
 		"werewolf":
 			res = {"resist_frost": 0.3, "resist_poison": 0.5}
 			e.style = Enemy.Style.BEAST
-		"deep_crawler", "crawler_queen", "dune_stalker":
+		"deep_crawler", "crawler_queen", "dune_stalker", "giant_spider", "sand_scorpion":
 			res = {"resist_poison": 0.6}
+		# Stage 15's creature families
+		"marsh_hag":
+			res = {"resist_poison": 0.8, "resist_shock": 0.3}
+			spell_ids = ["e_drain", "e_shock"]
+			e.style = Enemy.Style.MAGE
+		"bog_lurker":
+			res = {"resist_poison": 0.5, "resist_frost": 0.2}
+		"drowned_sailor":
+			res = {"resist_frost": 0.6, "resist_poison": 1.0, "resist_shock": -0.4}
+		"ash_hound":
+			res = {"resist_fire": 0.8, "resist_frost": -0.4}
+			spell_ids = ["e_firebolt"]
+			e.style = Enemy.Style.BEAST
+		"forest_troll":
+			res = {"resist_fire": -0.5, "resist_poison": 0.3}
+		"grave_ghoul":
+			res = {"resist_poison": 1.0, "resist_frost": 0.3, "resist_fire": -0.3}
+		"harpy":
+			res = {"resist_shock": 0.3}
+		"dragon":
+			res = {"resist_fire": 1.0, "resist_frost": -0.3, "resist_poison": 0.5, "resist_magic": 0.25}
+			spell_ids = ["e_firebolt"]  # its breath
+			e.style = Enemy.Style.BEAST
+			e.max_attackers = 4
 		"bandit", "raider", "cutthroat", "smuggler", "deserter":
 			# now and then a bandit has picked up a little magic
 			if rng.randf() < 0.15:
@@ -213,7 +237,7 @@ func _apply_stage10(e: Enemy, level: int, rng: RandomNumberGenerator) -> void:
 				e.style = Enemy.Style.MAGE
 	# Archers: hunters mostly, bandits and raiders now and then
 	var archer_chance: float = {"hunter": 0.7, "trapper": 0.6, "bandit": 0.25, "raider": 0.25, "smuggler": 0.2,
-		"deserter": 0.25, "frost_raider": 0.25, "reaver": 0.2, "wanderer": 0.15}.get(key, 0.0)
+		"deserter": 0.25, "frost_raider": 0.25, "reaver": 0.2, "wanderer": 0.15, "sea_raider": 0.3}.get(key, 0.0)
 	if spell_ids.is_empty() and rng.randf() < float(archer_chance):
 		var bow := ItemCatalog.get_bow(LevelCurve.tier_for_level(level))
 		if bow != null:

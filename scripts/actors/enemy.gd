@@ -1539,6 +1539,10 @@ func _on_died() -> void:
 		add_to_group("persistent")  # its corpse (and what is still in it) is saved
 	if spawn_key != "":
 		WorldState.set_record("kill/" + spawn_key, {"dead": true})
+	if enemy_id == "dragon":
+		var slain := int(WorldState.get_record("dragons_slain").get("n", 0)) + 1
+		WorldState.set_record("dragons_slain", {"n": slain})
+		Locks.toast(get_tree(), "The dragon is dead. They will call you Dragonslayer." if slain == 1 else "Another dragon falls.")
 	_drop_talk()
 	set_physics_process(false)
 	set_process(false)

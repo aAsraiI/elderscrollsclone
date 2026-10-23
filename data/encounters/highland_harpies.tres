@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_nnirs"]
+[ext_resource type="Resource" path="res://data/spawns/enc_highland_harpies.tres" id="2_jgdws"]
+
+[resource]
+script = ExtResource("1_nnirs")
+id = &"highland_harpies"
+display_name = "Harpies"
+table = ExtResource("2_jgdws")
+weight = 1.6
+aggro = true
+message = "Shrieks from the crags above!"

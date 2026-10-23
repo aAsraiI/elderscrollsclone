@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_gg4u0"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_eps2u"]
+
+[resource]
+script = ExtResource("2_eps2u")
+id = &"giant_spider"
+display_name = "Giant Spider"
+color = Color(0.18, 0.16, 0.14, 1)
+body_scale = 1.2
+health_mult = 1.1
+damage_mult = 1.1
+poise_mult = 0.9
+loot_quality = 0.0
+armor_tier_offset = -9
+kit = 0
+move_speed = 4.2
+detection_range = 15.0
+telegraph_time = 0.35
+knockback_resistance = 0.2
+talk_name = "Giant Spider"
+talk_lines = PackedStringArray()

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_dbyrp"]
+[ext_resource type="Resource" path="res://data/spawns/enc_coast_raiders.tres" id="2_e20rd"]
+
+[resource]
+script = ExtResource("1_dbyrp")
+id = &"coast_raiders"
+display_name = "Sea Raiders"
+table = ExtResource("2_e20rd")
+weight = 2.0
+aggro = true
+message = "A raiding party comes up from the beach!"

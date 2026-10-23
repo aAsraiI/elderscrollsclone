@@ -1,11 +1,12 @@
 [gd_resource type="Resource" script_class="SpawnTable" format=3 uid="uid://dixo1t0jey66"]
 
-[ext_resource type="Script" uid="uid://bq60lvmw1j4xb" path="res://scripts/actors/spawn_entry.gd" id="1_f7q6i"]
-[ext_resource type="Script" uid="uid://dg8b8xgiyxnc8" path="res://scripts/actors/enemy_data.gd" id="2_vsk2j"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_f7q6i"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_vsk2j"]
 [ext_resource type="Resource" path="res://data/enemies/giant_rat.tres" id="3_kr4oq"]
 [ext_resource type="Resource" path="res://data/enemies/smuggler.tres" id="4_ucftj"]
 [ext_resource type="Resource" path="res://data/enemies/cutthroat.tres" id="5_c7d7u"]
-[ext_resource type="Script" uid="uid://cri67k8ygdytl" path="res://scripts/actors/spawn_table.gd" id="6_omuof"]
+[ext_resource type="Resource" path="res://data/enemies/drowned_sailor.tres" id="6_2wbfj"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="6_omuof"]
 
 [sub_resource type="Resource" id="Resource_st67m"]
 script = ExtResource("1_f7q6i")
@@ -26,6 +27,11 @@ members = Array[ExtResource("2_vsk2j")]([ExtResource("5_c7d7u")])
 count_max = 2
 min_level = 4
 
+[sub_resource type="Resource" id="Resource_4wxxy"]
+script = ExtResource("1_f7q6i")
+members = Array[ExtResource("2_vsk2j")]([ExtResource("6_2wbfj")])
+count_max = 2
+
 [resource]
 script = ExtResource("6_omuof")
-entries = Array[ExtResource("1_f7q6i")]([SubResource("Resource_st67m"), SubResource("Resource_5oti8"), SubResource("Resource_rodxj")])
+entries = Array[ExtResource("1_f7q6i")]([SubResource("Resource_st67m"), SubResource("Resource_5oti8"), SubResource("Resource_rodxj"), SubResource("Resource_4wxxy")])

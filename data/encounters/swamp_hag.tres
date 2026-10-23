@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="1_reilf"]
+[ext_resource type="Resource" path="res://data/spawns/enc_swamp_hag.tres" id="2_jyska"]
+
+[resource]
+script = ExtResource("1_reilf")
+id = &"swamp_hag"
+display_name = "Marsh Hag's Coven"
+table = ExtResource("2_jyska")
+aggro = true
+night_only = true
+message = "Cackling drifts over the water."

@@ -868,6 +868,8 @@ func _enter_state(new_state: State) -> void:
 			animation.trigger(AnimationHooks.IDLE, animation_set)
 		State.CHASE:
 			animation.trigger(AnimationHooks.RUN, animation_set)
+			if old != State.ATTACK and old != State.CHASE and disposition == Disposition.HOSTILE:
+				SoundFX.bark(self)  # it has seen you
 		State.ATTACK:
 			animation.trigger(AnimationHooks.IDLE, animation_set)  # MeleeCombat plays the attack itself
 			_circle_dir = 1.0 if randf() < 0.5 else -1.0

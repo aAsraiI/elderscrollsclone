@@ -3,7 +3,7 @@ extends Node
 ## Plays the game's sounds and music. Lives under the Player (player.gd adds it).
 ##   effects  swings, hits, blocks, getting hurt, spells, bows, footsteps, picking things up,
 ##            thunder and rain (made by Synth unless real files are in res://audio/)
-##   music    a slow pad that follows the mood: day, night, dungeon, or combat when something is
+##   music    a slow pad that follows the mood: day, town, night, dungeon, or combat when something is
 ##            hunting you; tracks are made in the background and cross-fade
 ## Volumes: Settings > Audio (Master, Music, Sound effects).
 
@@ -66,6 +66,44 @@ func _vol(key: String) -> float:
 	return clampf(float(GameSettings.get_value(key)), 0.0001, 1.0)
 
 
+## The voice a creature makes (by its EnemyData id), "" for none
+static func voice_of(e: Enemy) -> String:
+	match e.enemy_id:
+		"dragon":
+			return "roar"
+		"wolf", "ash_hound", "frost_bear", "werewolf", "bog_lurker", "cave_troll", "forest_troll", "frost_giant", "dune_stalker":
+			return "growl"
+		"harpy", "giant_rat":
+			return "screech"
+		"giant_spider", "sand_scorpion", "deep_crawler", "crawler_queen":
+			return "hiss"
+		"skeleton", "skeleton_knight", "barrow_wight", "wight_lord", "crypt_warden", "grave_ghoul", "drowned_sailor", "vampire":
+			return "groan"
+		"fire_spirit", "ice_wraith", "vault_sentinel", "vault_guardian":
+			return ""
+	return "shout" if e.body_kind == CreatureBody.Kind.HUMANOID else "grunt"
+
+
+## A creature's call where it stands (heard in 3D), pitched to its size
+static func bark(e: Enemy) -> void:
+	var voice := voice_of(e)
+	if voice == "" or not e.is_inside_tree() or DisplayServer.get_name() == "headless":
+		return
+	var s := Synth.get_sound(voice)
+	if s == null:
+		return
+	var p := AudioStreamPlayer3D.new()
+	p.stream = s
+	p.unit_size = 6.0 * maxf(e.body_scale, 1.0)
+	p.max_distance = 60.0
+	p.volume_db = linear_to_db(clampf(float(GameSettings.get_value("sfx_volume")), 0.0001, 1.0))
+	p.pitch_scale = clampf(1.15 / maxf(e.body_scale, 0.5), 0.5, 1.6) * randf_range(0.9, 1.1)
+	e.add_child(p)
+	p.position = Vector3.UP * 1.2 * e.body_scale
+	p.play()
+	p.finished.connect(p.queue_free)
+
+
 func apply_settings() -> void:
 	pass  # read every frame through _vol()
 
@@ -116,7 +154,32 @@ func _footsteps(delta: float) -> void:
 		var stealth := _player.get_node_or_null("Stealth") as Stealth
 		if stealth != null and stealth.sneaking:
 			return
-		play("step", 0.2, 0.8 if _player.has_meta("riding") else 1.0)
+		play("step_" + surface(), 0.2, 0.8 if _player.has_meta("riding") else 1.0)
+
+
+## What the player is walking on: stone, wood, water, snow, sand or grass
+func surface() -> String:
+	var dm := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
+	if dm != null and dm.is_inside():
+		return "wood" if dm.is_in_building() else "stone"
+	var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if world == null:
+		return "grass"
+	var p := _player.global_position
+	if world.settings.water_enabled and p.y < world.settings.sea_level + 0.25:
+		return "water"
+	if world.get_town_at(p, 0.0) != null:
+		return "stone"
+	var w := Weather.get_instance(get_tree())
+	if w != null and w.snow_cover > 0.5:
+		return "snow"
+	var biome := world.map.get_biome_at(p.x, p.z)
+	var id := String(biome.id) if biome != null else ""
+	if id in ["snow_mountains", "tundra", "frozen_crown"]:
+		return "snow"
+	if id in ["desert", "coast"]:
+		return "sand"
+	return "grass"
 
 
 func _weather_sounds() -> void:
@@ -143,6 +206,10 @@ func _update_mood() -> void:
 	var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
 	if clock != null and clock.is_night():
 		mood = "night"
+	else:
+		var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+		if world != null and world.get_town_at(_player.global_position, 30.0) != null:
+			mood = "town"
 	var dm := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
 	if dm != null and dm.is_inside() and not dm.is_in_building():
 		mood = "dungeon"

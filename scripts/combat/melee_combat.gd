@@ -556,6 +556,7 @@ func take_damage(info: DamageInfo) -> float:
 			if skills != null:
 				skills.add_xp(&"block", absorbed * BLOCK_XP_PER_DAMAGE)
 			animation.trigger(AnimationHooks.BLOCK_HIT, _block_item.animation_set)
+			HitFX.sparks(get_tree(), _fx_point(info))
 			blocked.emit(info, absorbed)
 		else:
 			# Out of stamina: the guard breaks and the hit lands in full
@@ -590,8 +591,17 @@ func take_damage(info: DamageInfo) -> float:
 		_shove(info)
 		if info.result != &"blocked" and not info.dot:
 			_apply_poise(info)
+	if final > 0.5 and not info.dot and info.element == &"" and info.result != &"blocked" and HitFX.bleeds(body):
+		HitFX.blood(get_tree(), _fx_point(info), info.direction, clampf(final / maxf(stats.get_stat("max_health"), 1.0) * 4.0, 0.2, 1.5))
 	damaged.emit(info, final)
 	return final
+
+
+# Where a hit's blood or sparks go: where it landed, or about chest height on this body
+func _fx_point(info: DamageInfo) -> Vector3:
+	if info.hit_position != Vector3.ZERO:
+		return info.hit_position
+	return body.global_position + Vector3.UP * 1.2 if body != null else Vector3.ZERO
 
 
 func _do_parry(info: DamageInfo) -> void:
@@ -604,6 +614,7 @@ func _do_parry(info: DamageInfo) -> void:
 	var attacker := info.get_attacker_combat() as MeleeCombat
 	if attacker != null and attacker != self and attacker.is_alive():
 		attacker.force_stagger(PARRY_STUN, info)
+	HitFX.sparks(get_tree(), _fx_point(info))
 	parried.emit(info)
 
 

@@ -50,20 +50,6 @@ class Backdrop extends Control:
 
 	func _draw() -> void:
 		var s := size
-		draw_rect(Rect2(Vector2.ZERO, s), Color(0.025, 0.027, 0.035))
-		# soft glow low on the horizon, drawn as stacked translucent circles
-		var glow := Vector2(s.x * 0.68, s.y * 1.05)
-		for i in 14:
-			var r := s.y * (1.1 - i * 0.07)
-			draw_circle(glow, r, Color(0.55, 0.30, 0.12, 0.022))
-		# far mountains
-		var pts := PackedVector2Array([Vector2(0, s.y)])
-		for i in 33:
-			var x := s.x * i / 32.0
-			var h := 0.70 + 0.07 * sin(i * 0.9 + 1.3) + 0.05 * sin(i * 2.3)
-			pts.append(Vector2(x, s.y * h))
-		pts.append(Vector2(s.x, s.y))
-		draw_colored_polygon(pts, Color(0.035, 0.035, 0.045))
 		for e in _embers:
 			var flicker := 0.5 + 0.5 * sin(_t * 3.0 + e.x * 40.0)
 			draw_circle(Vector2(e.x * s.x + sin(_t + e.y * 9.0) * 6.0, e.y * s.y), 1.0 + e.z * 30.0, Color(1.0, 0.65, 0.3, 0.15 + 0.35 * flicker * (1.0 - e.y)))
@@ -105,7 +91,10 @@ func _input(event: InputEvent) -> void:
 
 
 func _build_ui() -> void:
-	_backdrop = Backdrop.new()
+	var scene3d := MenuBackdrop.new()  # the ruined keep at dusk, behind everything
+	scene3d.name = "MenuBackdrop"
+	add_child(scene3d)
+	_backdrop = Backdrop.new()  # embers and the shade behind the buttons, over the 3D scene
 	add_child(_backdrop)
 	_backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 

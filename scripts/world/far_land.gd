@@ -27,11 +27,7 @@ func _ready() -> void:
 	_mesh = MeshInstance3D.new()
 	_mesh.name = "FarTerrain"
 	_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.vertex_color_is_srgb = true
-	mat.roughness = 1.0
-	_mesh.material_override = mat
+	_mesh.material_override = NatureMeshes.terrain_material()  # the same ground as up close
 	add_child(_mesh)
 
 

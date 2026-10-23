@@ -8,16 +8,15 @@ extends RefCounted
 ## and nothing hidden. Their collision stays as it is; only the drawing moves into the merged mesh.
 ## Named boxes ("Gate", "SecretWall"...) are left alone because code finds and moves them by name.
 
-static var _material: StandardMaterial3D
+static var _material: ShaderMaterial
 
 
-## Shared material: the boxes' colors travel as vertex colors
-static func material() -> StandardMaterial3D:
+## Shared material: the boxes' colours travel as vertex colours, and shaders/built.gdshader turns
+## them into stone blocks, wood grain or worn plaster (see that file)
+static func material() -> ShaderMaterial:
 	if _material == null:
-		_material = StandardMaterial3D.new()
-		_material.vertex_color_use_as_albedo = true
-		_material.vertex_color_is_srgb = true
-		_material.roughness = 0.9
+		_material = ShaderMaterial.new()
+		_material.shader = load("res://shaders/built.gdshader") as Shader
 	return _material
 
 

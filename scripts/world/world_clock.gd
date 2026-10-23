@@ -52,6 +52,8 @@ var _was_night := false
 var _last_hour_int := 8
 var _sun: DirectionalLight3D
 var _env: Environment
+## The sky (shaders/sky.gdshader: stars, two moons, clouds), put in place of the scene's own
+var _sky_mat: ShaderMaterial
 var _apply_timer := 0.0
 var _base_fog := -1.0
 
@@ -179,6 +181,9 @@ func apply_now() -> void:
 		_sun.shadow_enabled = day_factor * float(w.get("sun", 1.0)) > 0.08 and int(GameSettings.get_value("shadows")) > 0
 	if _env != null and not _in_dungeon():
 		_env.background_energy_multiplier = lerpf(NIGHT_SKY, 1.0, day_factor) * float(w.get("sky", 1.0))
+		if _sky_mat != null:
+			_env.background_energy_multiplier = lerpf(0.6, 1.0, day_factor) * float(w.get("sky", 1.0))  # the shader darkens the night itself
+			_update_sky(elevation, day_factor, w)
 		_env.ambient_light_energy = lerpf(NIGHT_AMBIENT, 1.0, day_factor) * float(w.get("ambient", 1.0)) + float(w.get("flash", 0.0))
 		if _base_fog < 0.0:
 			_base_fog = _env.fog_density
@@ -332,6 +337,27 @@ func _find_nodes() -> void:
 		var envs := get_tree().root.find_children("*", "WorldEnvironment", true, false)
 		if not envs.is_empty():
 			_env = (envs[0] as WorldEnvironment).environment
+	if _env != null and _env.sky != null and _sky_mat == null:
+		_sky_mat = ShaderMaterial.new()
+		_sky_mat.shader = load("res://shaders/sky.gdshader") as Shader
+		_env.sky.sky_material = _sky_mat
+		_env.fog_sky_affect = 0.15  # fog counts the sky as endlessly far: at 1.0 it hides it all
+
+
+# The sky shader: how much day, dawn and dusk colour, clouds from the weather, where the moons are.
+# Lune crosses the sky opposite the sun; the small red Ember runs a little ahead of it.
+func _update_sky(elevation: float, day_factor: float, w: Dictionary) -> void:
+	var hours := float(day) * 24.0 + hour
+	_sky_mat.set_shader_parameter("day", day_factor)
+	_sky_mat.set_shader_parameter("dusk", clampf(1.0 - absf(elevation - 3.0) / 14.0, 0.0, 1.0))
+	var sky := float(w.get("sky", 1.0))
+	_sky_mat.set_shader_parameter("cloud_cover", clampf(0.3 + (1.0 - sky) * 1.3, 0.0, 1.0))
+	_sky_mat.set_shader_parameter("cloud_dark", clampf((1.0 - float(w.get("sun", 1.0))) * 1.2, 0.0, 1.0))
+	_sky_mat.set_shader_parameter("time_of_world", hours)
+	_sky_mat.set_shader_parameter("moon_phase", get_moon_phase())
+	for m in [["moon_dir", 0.0, 0.7], ["moon2_dir", 2.2, 0.45]]:
+		var a := (hour + 12.0 + float(m[1])) / 24.0 * TAU - PI * 0.5
+		_sky_mat.set_shader_parameter(m[0], Vector3(cos(a), sin(a) * float(m[2]) + 0.15, -0.45).normalized())
 
 
 func _in_dungeon() -> bool:

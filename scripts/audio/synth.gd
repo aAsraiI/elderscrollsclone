@@ -54,6 +54,34 @@ static func _make(name: String) -> AudioStreamWAV:
 			return _noise(2.0, 0.6, 0.0, 0.0, 0.25, true)
 		"wind":
 			return _noise(3.0, 0.03, 0.0, 0.0, 0.3, true)
+		# Footsteps by what you walk on (SoundFX picks one)
+		"step_grass":
+			return _noise(0.09, 0.08, 0.005, 28.0, 0.3)
+		"step_stone":
+			return _mix([_noise(0.05, 0.35, 0.0, 55.0, 0.3), _tone(0.05, 180.0, 0.0, 60.0, 0.25)])
+		"step_wood":
+			return _mix([_tone(0.1, 120.0, 0.0, 35.0, 0.45), _noise(0.05, 0.25, 0.0, 50.0, 0.2)])
+		"step_water":
+			return _mix([_noise(0.22, 0.5, 0.01, 12.0, 0.3), _sweep(0.15, 900.0, 400.0, 0.08)])
+		"step_snow":
+			return _noise(0.13, 0.05, 0.02, 18.0, 0.32)
+		"step_sand":
+			return _noise(0.11, 0.6, 0.01, 22.0, 0.22)
+		# Creature voices (SoundFX.bark: when they spot you, and when they strike)
+		"growl":
+			return _growl(0.7, 70.0, 55.0, 0.6, 0.6)
+		"roar":
+			return _growl(1.6, 90.0, 45.0, 0.8, 0.9)
+		"screech":
+			return _growl(0.5, 900.0, 600.0, 0.3, 0.35)
+		"hiss":
+			return _noise(0.6, 0.9, 0.05, 3.0, 0.3)
+		"grunt":
+			return _growl(0.25, 140.0, 110.0, 0.4, 0.45)
+		"groan":
+			return _growl(1.0, 95.0, 80.0, 0.5, 0.5)
+		"shout":
+			return _growl(0.45, 220.0, 170.0, 0.35, 0.45)
 		"level_up":
 			return _mix([_tone(0.6, 523.0, 0.0, 3.0, 0.3), _tone(0.6, 659.0, 0.1, 3.0, 0.3), _tone(0.7, 784.0, 0.2, 3.0, 0.3)])
 	return _tone(0.05, 440.0, 0.0, 30.0, 0.1)
@@ -115,6 +143,25 @@ static func _tone_data(dur: float, freq: float, delay: float, decay: float, vol:
 	return out
 
 
+# A throaty voice: a buzzing tone sliding from f0 to f1, roughened by noise (rough 0..1)
+static func _growl(dur: float, f0: float, f1: float, rough: float, vol: float) -> AudioStreamWAV:
+	var n := int(dur * RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(f0 * 13.0 + dur * 100.0)
+	var phase := 0.0
+	var grit := 0.0
+	for i in n:
+		var t := float(i) / n
+		phase += TAU * lerpf(f0, f1, t) * (1.0 + sin(t * 40.0) * 0.03) / RATE
+		grit += (rng.randf_range(-1.0, 1.0) - grit) * 0.3
+		var buzz := fposmod(phase / TAU, 1.0) * 2.0 - 1.0  # a sawtooth: harsh, like a throat
+		var env := minf(t * 12.0, 1.0) * pow(1.0 - t, 1.5)
+		out[i] = (buzz * (1.0 - rough) + grit * rough * 1.6) * (0.6 + 0.4 * sin(phase * 0.5)) * env * vol
+	return _wav(out)
+
+
 static func _sweep(dur: float, f0: float, f1: float, vol: float) -> AudioStreamWAV:
 	var n := int(dur * RATE)
 	var out := PackedFloat32Array()
@@ -162,6 +209,9 @@ static func make_music(mood: String) -> AudioStreamWAV:
 		"dungeon":
 			chords = [[110.0, 164.8, 207.7], [103.8, 155.6, 196.0], [110.0, 164.8, 196.0], [98.0, 146.8, 185.0]]
 			beat = 4.0
+		"town":  # D dorian, with a plucked lute line over it
+			chords = [[146.8, 220.0, 293.7], [130.8, 196.0, 261.6], [146.8, 174.6, 220.0], [164.8, 196.0, 246.9]]
+			beat = 2.4
 		_:
 			chords = [[110.0, 130.8, 164.8], [98.0, 116.5, 146.8], [87.3, 110.0, 130.8], [98.0, 123.5, 146.8]]
 			beat = 1.5
@@ -179,5 +229,12 @@ static func make_music(mood: String) -> AudioStreamWAV:
 				v += sin(TAU * float(f) * t) * 0.5 + sin(TAU * float(f) * 2.0 * t) * 0.12 + sin(TAU * float(f) * 0.5 * t) * 0.2
 			if mood == "combat":
 				v += sin(TAU * float(notes[0]) * 0.5 * t) * 0.9 * exp(-fmod(t, beat / 4.0) * 9.0)
+			if mood == "town":
+				# six plucks a chord, walking up and down its notes an octave higher
+				var step := beat / 6.0
+				var k := int(t / step)
+				var f := float(notes[[0, 1, 2, 1, 2, 0][k % 6]]) * 2.0
+				var tp := fmod(t, step)
+				v += (sin(TAU * f * tp) + sin(TAU * f * 2.0 * tp) * 0.3) * exp(-tp * 7.0) * 1.2
 			out[c * per + i] = v * env * 0.16
 	return _wav(out, MUSIC_RATE, true)

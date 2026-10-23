@@ -29,29 +29,6 @@ void fragment() {
 }
 """
 
-const TERRAIN_SHADER := """
-shader_type spatial;
-render_mode diffuse_burley;
-uniform vec3 season_tint = vec3(1.0);
-uniform float snow = 0.0;
-uniform float wetness = 0.0;
-varying vec3 world_n;
-void vertex() {
-	world_n = (MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz;
-}
-void fragment() {
-	vec3 c = COLOR.rgb;
-	float green = clamp((c.g - max(c.r, c.b)) * 6.0, 0.0, 1.0);
-	c = mix(c, c * season_tint, green);
-	float up = smoothstep(0.75, 0.92, normalize(world_n).y);
-	c = mix(c, vec3(0.9, 0.92, 0.97), snow * up * clamp(green + 0.25, 0.0, 1.0));
-	c *= 1.0 - wetness * 0.18;
-	ALBEDO = c;
-	ROUGHNESS = mix(0.95, 0.4, wetness);
-	SPECULAR = 0.25 + wetness * 0.35;
-}
-"""
-
 static var _grass_mesh: ArrayMesh
 static var _flower_mesh: ArrayMesh
 static var _rock_meshes: Array[Mesh] = []
@@ -66,10 +43,8 @@ static var _season := {"tint": Vector3.ONE, "snow": 0.0, "wet": 0.0, "wind": 1.0
 
 static func terrain_material() -> ShaderMaterial:
 	if _terrain_mat == null:
-		var sh := Shader.new()
-		sh.code = TERRAIN_SHADER
 		_terrain_mat = ShaderMaterial.new()
-		_terrain_mat.shader = sh
+		_terrain_mat.shader = load("res://shaders/terrain.gdshader") as Shader  # rock on slopes, earth, detail
 		_push()
 	return _terrain_mat
 

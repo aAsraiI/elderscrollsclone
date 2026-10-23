@@ -338,6 +338,7 @@ func _spawn_pois_for_chunk(c: Vector2i) -> void:
 			continue
 		node.name = "POI_%s" % p.poi.get_key()
 		node.set_meta("poi_id", p.id)
+		StaticBatch.merge(node)  # one draw call for all its plain boxes
 		_poi_root.add_child(node)
 		node.position = p.position
 		node.rotation.y = p.yaw
@@ -526,6 +527,8 @@ func _process(_delta: float) -> void:
 	if center != _last_center:
 		_last_center = center
 		_refresh_wanted(center)
+		for c: Vector2i in _chunks:
+			(_chunks[c] as TerrainChunk).set_cover(_cover_wanted(c))
 	_ensure_ground_under(center)
 	_dispatch_builds()
 	_finalize_chunks()
@@ -534,6 +537,12 @@ func _process(_delta: float) -> void:
 
 func _chunk_of(pos: Vector3) -> Vector2i:
 	return Vector2i(floori(pos.x / settings.chunk_size), floori(pos.z / settings.chunk_size))
+
+
+# Grass, flowers, rocks and bushes only exist on chunks close enough to the player to see them
+# (measured from the player's chunk, plus one chunk for wherever in it the player stands)
+func _cover_wanted(c: Vector2i) -> bool:
+	return Vector2(c - _last_center).length() * settings.chunk_size <= GroundCover.COVER_REACH + settings.chunk_size
 
 
 func _in_range(c: Vector2i) -> bool:
@@ -649,6 +658,7 @@ func _add_chunk(data: Dictionary) -> void:
 	add_child(chunk)
 	chunk.apply(data, _material)
 	_chunks[c] = chunk
+	chunk.set_cover(_cover_wanted(c))
 	chunk_loaded.emit(c)
 	_spawn_pois_for_chunk(c)
 

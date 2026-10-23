@@ -19,6 +19,8 @@ enum Kind { HUMANOID, BEAST, CRAWLER, SPIRIT }
 const LOD_NEAR := 30.0
 ## Beyond this it stops animating altogether (it is just a statue in the distance)
 const LOD_FAR := 90.0
+## Past this the body is not drawn at all (fog hides it long before)
+const DRAW_DISTANCE := 150.0
 
 var kind: Kind = Kind.HUMANOID
 ## Whose body this is: an Enemy, or the player (player.gd has the same few fields: velocity,
@@ -115,6 +117,7 @@ func _part(parent: Node3D, mesh: Mesh, at: Vector3, mat: Material, rot: Vector3 
 	mi.position = at
 	mi.rotation = rot
 	mi.material_override = mat
+	mi.visibility_range_end = DRAW_DISTANCE
 	parent.add_child(mi)
 	return mi
 

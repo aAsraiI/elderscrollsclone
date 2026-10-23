@@ -240,7 +240,32 @@ static func _write(buf: PackedFloat32Array, n: int, b: Basis, o: Vector3, c: Col
 
 # ---------------------------------------------------------------- main thread
 
+## The furthest any cover is drawn (rocks). Chunks further from the player than this don't build
+## their grass, flowers, rocks and bushes at all; see TerrainChunk.set_cover().
+const COVER_REACH := ROCK_RANGE + 40.0
+
+
+## What a chunk always has: boulder collision, herbs and ore (they are remembered when picked)
 static func apply(chunk: TerrainChunk, d: Dictionary) -> void:
+	if d.is_empty():
+		return
+	# Boulders are solid (shapes straight on the chunk's own body, like tree trunks)
+	for bl in d.get("boulders", []):
+		var b4: Vector4 = bl
+		var sphere := SphereShape3D.new()
+		sphere.radius = b4.w
+		var owner_id := chunk.create_shape_owner(chunk)
+		chunk.shape_owner_add_shape(owner_id, sphere)
+		chunk.shape_owner_set_transform(owner_id, Transform3D(Basis.IDENTITY, Vector3(b4.x, b4.y, b4.z)))
+	var origin := chunk.position
+	for h in d.get("herbs", []):
+		HarvestNode.make_herb(chunk, h["pos"], origin + h["pos"], String(h["climate"]), int(h["pick"]))
+	for o in d.get("ores", []):
+		HarvestNode.make_ore(chunk, o["pos"], origin + o["pos"], int(o["pick"]))
+
+
+## The cover you only see up close: grass, flowers, rocks and bushes (all tagged "cover")
+static func apply_cover(chunk: TerrainChunk, d: Dictionary) -> void:
 	if d.is_empty():
 		return
 	for block in d.get("grass", []):
@@ -258,19 +283,6 @@ static func apply(chunk: TerrainChunk, d: Dictionary) -> void:
 	var bushes: Dictionary = d.get("bushes", {})
 	if int(bushes.get("n", 0)) > 0:
 		_mmi(chunk, "Bushes", NatureMeshes.bush_mesh(), NatureMeshes.bush_material(), bushes["buf"], bushes["n"], BUSH_RANGE, false)
-	# Boulders are solid (shapes straight on the chunk's own body, like tree trunks)
-	for bl in d.get("boulders", []):
-		var b4: Vector4 = bl
-		var sphere := SphereShape3D.new()
-		sphere.radius = b4.w
-		var owner_id := chunk.create_shape_owner(chunk)
-		chunk.shape_owner_add_shape(owner_id, sphere)
-		chunk.shape_owner_set_transform(owner_id, Transform3D(Basis.IDENTITY, Vector3(b4.x, b4.y, b4.z)))
-	var origin := chunk.position
-	for h in d.get("herbs", []):
-		HarvestNode.make_herb(chunk, h["pos"], origin + h["pos"], String(h["climate"]), int(h["pick"]))
-	for o in d.get("ores", []):
-		HarvestNode.make_ore(chunk, o["pos"], origin + o["pos"], int(o["pick"]))
 
 
 static func _mmi(chunk: Node3D, n: String, mesh: Mesh, mat: Material, buf: PackedFloat32Array, count: int, range_end: float, shadows: bool) -> MultiMeshInstance3D:
@@ -288,5 +300,6 @@ static func _mmi(chunk: Node3D, n: String, mesh: Mesh, mat: Material, buf: Packe
 	mmi.visibility_range_end = range_end
 	mmi.visibility_range_end_margin = range_end * 0.15
 	mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	mmi.set_meta("cover", true)
 	chunk.add_child(mmi)
 	return mmi

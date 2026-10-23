@@ -224,6 +224,7 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 		current_spots = {}
 		_root = result["root"]
 		_root.position = Vector3(placed.position.x, DUNGEON_Y, placed.position.z)
+	StaticBatch.merge(_root)  # one draw call for all its plain boxes
 	add_child(_root)
 
 	current_entrance_id = entrance_id

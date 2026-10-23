@@ -8,6 +8,8 @@ extends StaticBody3D
 ## chunks are computed from the same numbers on both sides. No visible seams.
 
 var coord := Vector2i.ZERO
+var _details := {}  # ground cover data, kept so the cover can be rebuilt when the player comes back
+var _cover_on := false
 
 
 ## Heavy part. Returns {"coord", "arrays", "faces"}. Thread-safe.
@@ -164,7 +166,23 @@ func apply(data: Dictionary, material: Material) -> void:
 	collider.shape = shape
 	add_child(collider)
 	_add_trees(data.get("trees", {}))
-	GroundCover.apply(self, data.get("details", {}))
+	_details = data.get("details", {})
+	GroundCover.apply(self, _details)
+
+
+## Builds or frees this chunk's grass, flowers, rocks and bushes. WorldManager turns it on only
+## for chunks near the player (GroundCover.COVER_REACH), so far chunks carry no cover nodes.
+func set_cover(on: bool) -> void:
+	if on == _cover_on:
+		return
+	_cover_on = on
+	if on:
+		GroundCover.apply_cover(self, _details)
+		return
+	for c in get_children():
+		if c.has_meta("cover"):
+			remove_child(c)
+			c.queue_free()
 
 
 # ---------------------------------------------------------------- trees

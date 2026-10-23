@@ -387,7 +387,11 @@ func t_world() -> void:
 	var doors := node.find_children("*", "BuildingDoor", true, false)
 	check("every building has a door", doors.size() == town.town.buildings.size(), "%d doors, %d buildings" % [doors.size(), town.town.buildings.size()])
 	check("buildings have name signs", node.find_children("*", "Label3D", true, false).size() >= town.town.buildings.size())
-	check("buildings are solid", node.find_children("*", "StaticBody3D", true, false).size() > doors.size() * 2)
+	# Walls are merged into one body per town (StaticBatch), so count collision shapes, not bodies
+	var shapes := 0
+	for b in node.find_children("*", "StaticBody3D", true, false):
+		shapes += (b as StaticBody3D).get_shape_owners().size()
+	check("buildings are solid", shapes > doors.size() * 2, "%d shapes" % shapes)
 	check("a building can be found by its id", wm.get_building(town.town.buildings[0].id) == town.town.buildings[0])
 	check("a wrong id finds nothing", wm.get_building(town.id + "/b999") == null and wm.get_building("nonsense") == null)
 

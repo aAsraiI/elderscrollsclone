@@ -88,64 +88,86 @@ func _pick_ore() -> String:
 	return "iron_ore"
 
 
+## How far away herbs and ore stop being drawn (they are small; past this they are a few pixels)
+const DRAW_DISTANCE := 80.0
+
+# Shared by every herb and ore node: one mesh per herb kind and one material per color
+static var _herb_meshes := {}  # item_id -> ArrayMesh (surface 0 stems, surface 1 blooms)
+static var _materials := {}    # "color|glow|metal" -> StandardMaterial3D
+
+
+static func _material(color: Color, glow: bool = false, metal: bool = false) -> StandardMaterial3D:
+	var k := "%s|%s|%s" % [color.to_html(), glow, metal]
+	if not _materials.has(k):
+		var m := StandardMaterial3D.new()
+		m.albedo_color = color
+		m.emission_enabled = glow
+		m.emission = color * (0.5 if metal else 1.0)
+		if metal:
+			m.metallic = 0.7
+			m.roughness = 0.3
+		_materials[k] = m
+	return _materials[k]
+
+
+# Five stems with a bloom on each, as one mesh with two surfaces
+static func _herb_mesh(id: String) -> ArrayMesh:
+	if _herb_meshes.has(id):
+		return _herb_meshes[id]
+	var stem := BoxMesh.new()
+	stem.size = Vector3(0.03, 0.35, 0.03)
+	var bloom := SphereMesh.new()
+	bloom.radius = 0.06
+	bloom.height = 0.1
+	bloom.radial_segments = 6
+	bloom.rings = 3
+	var stems := SurfaceTool.new()
+	var blooms := SurfaceTool.new()
+	stems.begin(Mesh.PRIMITIVE_TRIANGLES)
+	blooms.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in 5:
+		var a := float(i) / 5.0 * TAU
+		stems.append_from(stem, 0, Transform3D(Basis.from_euler(Vector3(sin(a) * 0.3, 0, cos(a) * 0.3)), Vector3(cos(a) * 0.12, 0.17, sin(a) * 0.12)))
+		blooms.append_from(bloom, 0, Transform3D(Basis.IDENTITY, Vector3(cos(a) * 0.16, 0.36, sin(a) * 0.16)))
+	var mesh := stems.commit()
+	blooms.commit(mesh)
+	var col: Color = HERB_COLORS.get(id, Color(0.8, 0.8, 0.3))
+	mesh.surface_set_material(0, _material(Color(0.25, 0.45, 0.18)))
+	mesh.surface_set_material(1, _material(col, id == "glowcap"))
+	_herb_meshes[id] = mesh
+	return mesh
+
+
 func _build_visual() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
 	if kind == "herb":
-		var col: Color = HERB_COLORS.get(item_id, Color(0.8, 0.8, 0.3))
-		var leaf := StandardMaterial3D.new()
-		leaf.albedo_color = Color(0.25, 0.45, 0.18)
-		var bloom := StandardMaterial3D.new()
-		bloom.albedo_color = col
-		bloom.emission_enabled = item_id == "glowcap"
-		bloom.emission = col
-		for i in 5:
-			var a := float(i) / 5.0 * TAU
-			var stem := MeshInstance3D.new()
-			var bm := BoxMesh.new()
-			bm.size = Vector3(0.03, 0.35, 0.03)
-			stem.mesh = bm
-			stem.material_override = leaf
-			stem.position = Vector3(cos(a) * 0.12, 0.17, sin(a) * 0.12)
-			stem.rotation = Vector3(sin(a) * 0.3, 0, cos(a) * 0.3)
-			_visual.add_child(stem)
-			var head := MeshInstance3D.new()
-			var hm := SphereMesh.new()
-			hm.radius = 0.06
-			hm.height = 0.1
-			hm.radial_segments = 6
-			hm.rings = 3
-			head.mesh = hm
-			head.material_override = bloom
-			head.position = Vector3(cos(a) * 0.16, 0.36, sin(a) * 0.16)
-			_visual.add_child(head)
+		_add_part(_herb_mesh(item_id), null, Transform3D.IDENTITY)
 	else:
-		var rock := MeshInstance3D.new()
-		rock.mesh = NatureMeshes.rock_mesh(1)
-		var rm := StandardMaterial3D.new()
-		rm.albedo_color = Color(0.35, 0.33, 0.32)
-		rock.material_override = rm
-		rock.scale = Vector3(1.6, 1.1, 1.4)
-		rock.position.y = 0.3
-		_visual.add_child(rock)
-		var vein := StandardMaterial3D.new()
-		vein.albedo_color = ORE_COLORS.get(item_id, Color(0.7, 0.5, 0.4))
-		vein.metallic = 0.7
-		vein.roughness = 0.3
-		vein.emission_enabled = item_id == "star_ore" or item_id == "dragonstone_ore"
-		vein.emission = vein.albedo_color * 0.5
+		# Child 0 is the rock, child 1 the ore veins (hidden while the node is mined out)
+		_add_part(NatureMeshes.rock_mesh(1), _material(Color(0.35, 0.33, 0.32)),
+			Transform3D(Basis.from_scale(Vector3(1.6, 1.1, 1.4)), Vector3(0.0, 0.3, 0.0)))
 		var rng := RandomNumberGenerator.new()
 		rng.seed = key.hash()
+		var veins := SurfaceTool.new()
+		veins.begin(Mesh.PRIMITIVE_TRIANGLES)
 		for i in 6:
-			var nug := MeshInstance3D.new()
-			var bm := BoxMesh.new()
-			bm.size = Vector3(0.18, 0.12, 0.18) * rng.randf_range(0.7, 1.4)
-			nug.mesh = bm
-			nug.material_override = vein
+			var nug := BoxMesh.new()
+			nug.size = Vector3(0.18, 0.12, 0.18) * rng.randf_range(0.7, 1.4)
 			var a := rng.randf() * TAU
-			nug.position = Vector3(cos(a) * 0.6, rng.randf_range(0.3, 0.8), sin(a) * 0.55)
-			nug.rotation = Vector3(rng.randf(), rng.randf(), rng.randf())
-			_visual.add_child(nug)
+			var at := Vector3(cos(a) * 0.6, rng.randf_range(0.3, 0.8), sin(a) * 0.55)
+			veins.append_from(nug, 0, Transform3D(Basis.from_euler(Vector3(rng.randf(), rng.randf(), rng.randf())), at))
+		var glow := item_id == "star_ore" or item_id == "dragonstone_ore"
+		_add_part(veins.commit(), _material(ORE_COLORS.get(item_id, Color(0.7, 0.5, 0.4)), glow, true), Transform3D.IDENTITY)
+
+
+func _add_part(mesh: Mesh, mat: Material, xf: Transform3D) -> void:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = mat
+	mi.transform = xf
+	mi.visibility_range_end = DRAW_DISTANCE
+	_visual.add_child(mi)
 
 
 const ORE_COLORS := {"iron_ore": Color(0.55, 0.35, 0.28), "corundum_ore": Color(0.75, 0.5, 0.3), "silver_ore": Color(0.85, 0.87, 0.9),

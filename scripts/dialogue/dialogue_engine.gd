@@ -112,8 +112,10 @@ static func speaker_for(e: Enemy, world: WorldManager) -> Speaker:
 	return s
 
 
+## How much they like you: their own feeling, plus what their town and guild think of you (Reputation)
 static func get_disposition(s: Speaker) -> int:
-	return DialogueState.get_disposition(s.id, s.base_disposition)
+	var town := s.town.town.display_name if s.town != null and s.town.town != null else ""
+	return clampi(DialogueState.get_disposition(s.id, s.base_disposition) + Reputation.disposition_bonus(town, s.faction), 0, 100)
 
 
 # ---------------------------------------------------------------- the topic index
@@ -459,6 +461,10 @@ static func greeting(s: Speaker, world: WorldManager) -> String:
 	var night := clock != null and clock.is_night()
 	match s.role:
 		NpcData.Role.GUARD:
+			if Reputation.infamy(where) >= 20:
+				return "You. I know your face. One wrong step in %s and you're in irons." % where
+			if Reputation.fame(where) >= 30:
+				return "An honour. %s owes you, they say." % where
 			return ["Halt. ...Ah, just a traveler. What is it?", "Out late. State your business.", "Keep your hands where I can see them."][_pick(s, "greet guard", 3)] if night else ["Citizen. Keep the peace and we'll get along.", "Stay out of trouble in %s." % where, "Move along, unless you need something."][_pick(s, "greet guard", 3)]
 		NpcData.Role.INNKEEPER:
 			return "%s! Come in, sit down. A drink, a meal, a bed?" % time_word

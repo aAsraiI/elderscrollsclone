@@ -64,6 +64,9 @@ static func join_problem(id: String, player: Node, for_trial: bool = false) -> S
 		var sworn := String(WorldState.get_record("fgroup/" + d.exclusive_group).get("id", ""))
 		if sworn != "" and sworn != id:
 			return "You are sworn to the %s. There is no going back from that." % display_name(sworn)
+	for r in d.rivals:
+		if is_member(r):
+			return "You run with the %s. We want nothing to do with you." % display_name(r)
 	if d.requires_affliction != "" and not _afflicted(player, d.requires_affliction):
 		return "You are not one of us. You don't carry the blood." if d.requires_affliction == "vampire" else "You are not one of us. The moon does not call you."
 	if WorldState.has_record("fexpel/" + id) and d.penance_quest != "" and not QuestBook.is_done(d.penance_quest):
@@ -94,6 +97,9 @@ static func join(id: String, player: Node) -> bool:
 	if WorldState.has_record("fexpel/" + id):  # coming back: one rank lower than before
 		start = maxi(int(WorldState.get_record("fexpel/" + id).get("rank", 1)) - 1, 1)
 		WorldState.erase_record("fexpel/" + id)
+	if WorldState.has_record("fleft/" + id):  # came back after leaving: one rank lower
+		start = maxi(int(WorldState.get_record("fleft/" + id).get("rank", 1)) - 1, 1)
+		WorldState.erase_record("fleft/" + id)
 	if d.exclusive_group != "":
 		WorldState.set_record("fgroup/" + d.exclusive_group, {"id": id})
 	_store(id, start, quests_done(id))
@@ -237,3 +243,24 @@ static func note_crime(kind: String) -> void:
 	var h := WorldState.get_record(HISTORY).duplicate()
 	h[kind] = int(h.get(kind, 0)) + 1
 	WorldState.set_record(HISTORY, h)
+
+
+## Leaves a guild of your own free will ("leave the guild"): they think less of you, and you
+## come back one rank lower if you rejoin
+static func leave(id: String) -> void:
+	if not is_member(id):
+		return
+	WorldState.set_record("fleft/" + id, {"rank": rank(id)})
+	_store(id, 0, quests_done(id))
+	Reputation.add(id, -10)
+	DialogueState.system_entry("System", "Left the %s." % display_name(id), "")
+
+
+## Thrown out for a crime against the guild (killing one of its members, seen)
+static func expel_for_crime(id: String, why: String) -> void:
+	if not is_member(id):
+		return
+	expel(id)
+	Reputation.add(id, -30)
+	DialogueState.system_entry("System", "Expelled from the %s: %s" % [display_name(id), why], "")
+	Notices.quest(Engine.get_main_loop() as SceneTree, "Expelled", "The %s: %s" % [display_name(id), why], true)

@@ -22,7 +22,7 @@ extends Node
 ## Saved in WorldState: "quests" (every job, and the counter) and "assassins/invited".
 
 const STATE := "quests"
-const TOPICS: Array[String] = ["membership", "duties", "report back", "advancement", "clear bounty", "a delivery", "the territory war", "marriage", "our shop", "land for sale"]
+const TOPICS: Array[String] = ["membership", "duties", "report back", "advancement", "leave the guild", "clear bounty", "a delivery", "the territory war", "marriage", "our shop", "land for sale"]
 const REPORT := "report back"
 ## The skill a kind of job trains when it is handed in
 const SKILL_OF := {"retrieve": "athletics", "kill": "one_handed", "hunt": "archery", "steal": "security", "persuade": "speech",
@@ -45,6 +45,7 @@ var _stranger_time := 0.0
 var _extra_cache := {}
 var _extra_frame := -1
 var _radiant_spawned := {}
+var _leaving := {}  # guilds you asked to leave once (ask again to go)
 
 
 func _ready() -> void:
@@ -535,7 +536,9 @@ func abandon(q: Dictionary) -> void:
 
 
 # CrimeManager: a theft was seen. Inside a steal job's house, the job is blown.
-func _on_crime(kind: String, _town_id: String, _bounty: int, witnessed: bool) -> void:
+func _on_crime(kind: String, town_id: String, bounty: int, witnessed: bool) -> void:
+	if witnessed and world != null and world.get_poi(town_id) != null and world.get_poi(town_id).town != null:
+		Reputation.add_infamy(world.get_poi(town_id).town.display_name, maxi(bounty / 20, 1))  # the town remembers
 	if kind != "theft" or not witnessed or world == null or world.dungeons == null:
 		return
 	var root := world.dungeons.get_interior_root()
@@ -607,6 +610,10 @@ func _journal(q: Dictionary, text: String) -> void:
 ## CrimeManager tells us about a killing (for the assassination bonus)
 func on_murder(victim: Enemy, witnessed: bool) -> void:
 	var npc_id := String(victim.get_meta("npc_id", ""))
+	# killing one of your own guild, seen: you are thrown out
+	var r: TownLife.Resident = world.life.get_resident(npc_id) if world != null and world.life != null and npc_id != "" else null
+	if r != null and witnessed and Factions.get_data(r.data.faction) != null and Factions.is_member(r.data.faction):
+		Factions.expel_for_crime(r.data.faction, "you murdered %s." % r.data.display_name)
 	for q: Dictionary in all_quests():
 		if q["status"] == "active" and q["type"] == "assassinate" and q["target"] == npc_id:
 			q["witnessed"] = witnessed
@@ -717,6 +724,7 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 		out.append("duties")
 		if Factions.is_member(leader):
 			out.append("advancement")
+			out.append("leave the guild")
 			var job := active_for(leader)
 			if not job.is_empty() and is_ready(job):
 				out.append(REPORT)
@@ -812,9 +820,20 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 				return _say("You've earned it. From today you are a %s of the %s." % [title, guild])
 			var n := Factions.next_rank(leader, p)
 			return _say("Not yet. You still need %s." % n["why"] if String(n.get("why", "")) != "" and n.has("name") else String(n.get("why", "Not yet.")))
+		"leave the guild":
+			if not Factions.is_member(leader):
+				return {}
+			if not _leaving.has(leader):
+				_leaving[leader] = true
+				return _say("Leave the %s? Ask me again if you mean it. You would come back a rank lower." % guild)
+			_leaving.erase(leader)
+			Factions.leave(leader)
+			return _say("So be it. Your name is struck from our rolls.")
 		"duties", REPORT:
 			if not Factions.is_member(leader):
 				return _say("We only give work to members. Ask me about membership.")
+			if Reputation.get_rep(leader) <= -10:
+				return _say("After what you've done? Earn back our trust first.")
 			var q := active_for(leader)
 			if topic == REPORT and (q.is_empty() or not is_ready(q)):
 				return _say("You've nothing to report yet." if q.is_empty() else "Not done yet. %s" % q["objective"], q)
@@ -1008,6 +1027,8 @@ func _finish_offer(q: Dictionary, giver_name: String, rng: RandomNumberGenerator
 	var t := Radiant.template(String(q["type"]))
 	if t != null:
 		q["reward"] = maxi(int(q.get("reward", 0)), int(q.get("template_reward", 0)) + rng.randi_range(0, 30))
+	if Factions.get_data(String(q.get("faction", ""))) != null and Reputation.get_rep(String(q["faction"])) >= 30:
+		q["reward"] = roundi(int(q["reward"]) * 1.1)  # a respected member gets the better-paid work
 		if t.days > 0:
 			q["deadline_day"] = int(q.get("offered_day", 1)) + t.days
 

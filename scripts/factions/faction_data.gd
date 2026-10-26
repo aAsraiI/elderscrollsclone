@@ -19,6 +19,8 @@ extends Resource
 ## Factions sharing a group are exclusive: swearing to one closes the others for good
 ## ("houses", "vampire_clans"). Empty = no such rule.
 @export var exclusive_group := ""
+## Guilds that will not have you while you belong to this one (and the other way round)
+@export var rivals: PackedStringArray = []
 ## "vampire" or "werewolf": only the afflicted may join, and a cure expels (see QuestBook)
 @export var requires_affliction := ""
 ## A quest (QuestBook id) that must be done before joining: the house's trial. Its reward joins.

@@ -99,6 +99,7 @@ func t_radiant() -> void:
 	await _journal_ux()
 	await _hud()
 	await _radiant_v2()
+	_guilds()
 	await _across_a_load()
 
 
@@ -439,6 +440,42 @@ func _radiant_v2() -> void:
 	check("a town gives out only so many jobs a day", String(said.get("text", "")).contains("all the work"), String(said.get("text", "")))
 	WorldState.erase_record("radiant_day/" + city.id)
 	_clear_jobs()
+
+
+# ---------------------------------------------------------------- 1.12.11 guilds and reputation
+
+func _guilds() -> void:
+	print("-- guilds and reputation")
+	check("rivals: a thief can't join the Knightly Order", Factions.join_problem("knights", p).contains("Thieves"), Factions.join_problem("knights", p))
+	var ls := _speaker(leaders["mages"])
+	check("members can leave", wm.quests.extra_topics(ls).has("leave the guild"))
+	var first := String(wm.quests.respond(ls, "leave the guild")["text"])
+	check("leaving asks first", first.contains("Ask me again") and Factions.is_member("mages"))
+	wm.quests.respond(ls, "leave the guild")
+	check("asking again leaves", not Factions.is_member("mages"))
+	Factions.join("mages", p)
+	check("and you can come back", Factions.is_member("mages"))
+	var fighter: TownLife.Resident = null
+	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
+		if r.data.faction == "fighters" and r != leaders["fighters"]:
+			fighter = r
+	if fighter != null and fighter.node != null and is_instance_valid(fighter.node):
+		wm.quests.on_murder(fighter.node, true)
+		check("murdering a guildmate in sight gets you expelled", not Factions.is_member("fighters"))
+		check("and the guild hates you for it", Reputation.get_rep("fighters") < 0)
+		WorldState.erase_record("fexpel/fighters")
+		Factions.join("fighters", p)
+	var before := Reputation.infamy(city.town.display_name)
+	wm.quests._on_crime("theft", city.id, 100, true)
+	check("crimes seen in a town add to your infamy there", Reputation.infamy(city.town.display_name) > before)
+	var s := _speaker(leaders["fighters"])
+	var plain := DialogueState.get_disposition(s.id, s.base_disposition)
+	Reputation.add_fame(city.town.display_name, 80)
+	check("fame makes people like you more", DialogueEngine.get_disposition(s) > plain)
+	Reputation.add_fame(city.town.display_name, -80)
+	Reputation.add("fighters", -100)
+	check("a guild that distrusts you gives no work", String(wm.quests.respond(s, "duties")["text"]).contains("trust"))
+	Reputation.add("fighters", 100)
 
 
 func _clear_jobs() -> void:

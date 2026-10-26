@@ -5,8 +5,11 @@
 [ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="3_vwvgu"]
 [ext_resource type="Resource" path="res://data/spawns/dungeon_ice.tres" id="4_jhu4c"]
 
+[ext_resource type="Resource" path="res://data/interiors/recipes/cave.tres" id="rcp_113"]
+
 [resource]
 script = ExtResource("3_vwvgu")
+recipe = ExtResource("rcp_113")
 id = &"ice_cavern"
 display_name = "Ice Cavern"
 min_rooms = 7

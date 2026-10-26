@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_47xlt"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_oqj7b"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="3_0g561"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_o5oyy"]
+size = Vector3(0.9, 4.7, 0.9)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lw7s4"]
+size = Vector3(1.1, 0.3, 1.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ota6e"]
+size = Vector3(1.1, 4.7, 1.1)
+
+[node name="Pillar" type="StaticBody3D" unique_id=155347044]
+script = ExtResource("1_47xlt")
+tags = PackedStringArray("pillar")
+socket_kinds = PackedStringArray("FURNITURE")
+themes = PackedStringArray("fort", "crypt", "ruin", "rich", "sewer")
+radius = 0.55
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=80629972]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0)
+material_override = ExtResource("2_oqj7b")
+mesh = SubResource("BoxMesh_o5oyy")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1537059025]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+material_override = ExtResource("3_0g561")
+mesh = SubResource("BoxMesh_lw7s4")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=946845570]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0)
+shape = SubResource("BoxShape3D_ota6e")

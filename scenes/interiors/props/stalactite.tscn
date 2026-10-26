@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_4cff3"]
+[ext_resource type="Material" path="res://data/interiors/materials/rock_dark.tres" id="2_opjj6"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_qp3ht"]
+top_radius = 0.3
+bottom_radius = 0.025
+height = 1.2
+radial_segments = 10
+
+[node name="Stalactite" type="StaticBody3D" unique_id=1169114470]
+collision_layer = 0
+script = ExtResource("1_4cff3")
+tags = PackedStringArray("rock")
+socket_kinds = PackedStringArray("CEILING", "DECORATION")
+themes = PackedStringArray("cave", "ice")
+snap = 2
+radius = 0.3
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=2060297460]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
+material_override = ExtResource("2_opjj6")
+mesh = SubResource("CylinderMesh_qp3ht")

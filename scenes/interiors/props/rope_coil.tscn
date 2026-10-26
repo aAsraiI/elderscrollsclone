@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_jlobs"]
+[ext_resource type="Material" path="res://data/interiors/materials/straw.tres" id="2_vgvjb"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_uut52"]
+top_radius = 0.3
+bottom_radius = 0.3
+height = 0.2
+radial_segments = 10
+
+[node name="RopeCoil" type="StaticBody3D" unique_id=126900831]
+collision_layer = 0
+script = ExtResource("1_jlobs")
+tags = PackedStringArray("rope")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("mine", "cave", "fort", "sewer")
+radius = 0.3
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=688183684]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+material_override = ExtResource("2_vgvjb")
+mesh = SubResource("CylinderMesh_uut52")

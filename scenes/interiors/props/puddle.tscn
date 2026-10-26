@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_33rpx"]
+[ext_resource type="Material" path="res://data/interiors/materials/water.tres" id="2_nqygr"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_sv51g"]
+size = Vector3(1.6, 0.02, 1.2)
+
+[node name="Puddle" type="StaticBody3D" unique_id=799017813]
+collision_layer = 0
+script = ExtResource("1_33rpx")
+tags = PackedStringArray("water")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("sewer", "cave", "ruin", "crypt")
+radius = 0.8
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=305970461]
+transform = Transform3D(0.9553365, 0, 0.29552022, 0, 1, 0, -0.29552022, 0, 0.9553365, 0, 0.01, 0)
+material_override = ExtResource("2_nqygr")
+mesh = SubResource("BoxMesh_sv51g")

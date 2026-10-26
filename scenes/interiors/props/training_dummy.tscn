@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_ycim5"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_mnrf7"]
+[ext_resource type="Material" path="res://data/interiors/materials/straw.tres" id="3_8a4d6"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_5vy1w"]
+size = Vector3(0.1, 1.6, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_74y3d"]
+size = Vector3(0.6, 0.12, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0ri2m"]
+size = Vector3(0.4, 0.6, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_m4ddh"]
+size = Vector3(0.6, 1.6, 0.6)
+
+[node name="TrainingDummy" type="StaticBody3D" unique_id=1170094787]
+script = ExtResource("1_ycim5")
+tags = PackedStringArray("dummy", "training")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("fort")
+radius = 0.3
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=554210188]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+material_override = ExtResource("2_mnrf7")
+mesh = SubResource("BoxMesh_5vy1w")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=249004648]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0)
+material_override = ExtResource("2_mnrf7")
+mesh = SubResource("BoxMesh_74y3d")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1663687263]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+material_override = ExtResource("3_8a4d6")
+mesh = SubResource("BoxMesh_0ri2m")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=389405381]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("BoxShape3D_m4ddh")

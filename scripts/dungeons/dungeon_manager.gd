@@ -224,7 +224,10 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 			return false
 		var dungeon_seed := ("%d|dungeon|%s" % [world.world_seed, entrance_id]).hash()
 		var zone := LevelCurve.zone_range(world.map, placed.position)  # a dungeon is as hard as the land around its door
-		result = DungeonBuilder.build(poi.dungeon, dungeon_seed, entrance_id, zone.x, zone.y, _next_floor)
+		if StitchedInterior.uses_modules(poi.dungeon, entrance_id):
+			result = StitchedInterior.build(poi.dungeon, dungeon_seed, entrance_id, zone.x, zone.y)  # room modules (Alpha 1.13)
+		else:
+			result = DungeonBuilder.build(poi.dungeon, dungeon_seed, entrance_id, zone.x, zone.y, _next_floor)
 		current_floor = int(result.get("floor", 0))
 		floor_count = int(result.get("floors", 1))
 		if _arrive_down and result.get("down_spot") != null:

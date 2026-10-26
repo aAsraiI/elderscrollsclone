@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_fky62"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="2_bmxus"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_hmnlx"]
+size = Vector3(0.05, 1.5, 0.05)
+
+[node name="Chain" type="StaticBody3D" unique_id=2055244438]
+collision_layer = 0
+script = ExtResource("1_fky62")
+tags = PackedStringArray("chain")
+socket_kinds = PackedStringArray("CEILING", "DECORATION")
+themes = PackedStringArray("fort", "crypt", "lair", "sewer")
+snap = 2
+radius = 0.2
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1405501333]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.75, 0)
+material_override = ExtResource("2_bmxus")
+mesh = SubResource("BoxMesh_hmnlx")

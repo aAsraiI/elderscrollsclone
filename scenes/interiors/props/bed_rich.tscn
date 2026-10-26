@@ -1,0 +1,44 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_fyc2y"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_oopuc"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_red.tres" id="3_de58r"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_4h5yq"]
+size = Vector3(1.6, 0.4, 2.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cuxuk"]
+size = Vector3(1.5, 0.16, 2.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3ccax"]
+size = Vector3(1.6, 1.2, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lea02"]
+size = Vector3(2.2, 1.2, 2.9499998)
+
+[node name="BedRich" type="StaticBody3D" unique_id=962589452]
+script = ExtResource("1_fyc2y")
+tags = PackedStringArray("bed")
+socket_kinds = PackedStringArray("FURNITURE")
+themes = PackedStringArray("house", "rich", "fort")
+radius = 1.4749999642372131
+wealth_min = 2
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1833385121]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+material_override = ExtResource("2_oopuc")
+mesh = SubResource("BoxMesh_4h5yq")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1036199372]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.48, 0)
+material_override = ExtResource("3_de58r")
+mesh = SubResource("BoxMesh_cuxuk")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=45329123]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 1.05)
+material_override = ExtResource("2_oopuc")
+mesh = SubResource("BoxMesh_3ccax")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1460718431]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0.37499994)
+shape = SubResource("BoxShape3D_lea02")

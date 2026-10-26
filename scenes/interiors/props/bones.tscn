@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_bwvi1"]
+[ext_resource type="Material" path="res://data/interiors/materials/bone.tres" id="2_v0o06"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_3nvtp"]
+size = Vector3(0.5, 0.06, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7odiu"]
+size = Vector3(0.4, 0.05, 0.05)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a7lak"]
+size = Vector3(0.2, 0.18, 0.2)
+
+[node name="Bones" type="StaticBody3D" unique_id=190940147]
+collision_layer = 0
+script = ExtResource("1_bwvi1")
+tags = PackedStringArray("bones", "remains")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("crypt", "cave", "lair", "ruin", "sewer")
+radius = 0.32500000298023224
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1419724477]
+transform = Transform3D(0.921061, 0, 0.38941833, 0, 1, 0, -0.38941833, 0, 0.921061, 0, 0.03, 0)
+material_override = ExtResource("2_v0o06")
+mesh = SubResource("BoxMesh_3nvtp")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1528164944]
+transform = Transform3D(0.6967067, 0, -0.7173561, 0, 1, 0, 0.7173561, 0, 0.6967067, 0.1, 0.03, 0.15)
+material_override = ExtResource("2_v0o06")
+mesh = SubResource("BoxMesh_7odiu")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1275407373]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.09, -0.1)
+material_override = ExtResource("2_v0o06")
+mesh = SubResource("BoxMesh_a7lak")

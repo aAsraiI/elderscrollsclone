@@ -5,8 +5,11 @@
 [ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="3_j22hk"]
 [ext_resource type="Resource" path="res://data/spawns/dungeon_ashen.tres" id="4_tcuy0"]
 
+[ext_resource type="Resource" path="res://data/interiors/recipes/bandit_hideout.tres" id="rcp_113"]
+
 [resource]
 script = ExtResource("3_j22hk")
+recipe = ExtResource("rcp_113")
 id = &"ashen_temple"
 display_name = "Ashen Temple"
 min_rooms = 8

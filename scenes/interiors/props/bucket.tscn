@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_3owx1"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_2jb6g"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_v5pox"]
+top_radius = 0.175
+bottom_radius = 0.15
+height = 0.4
+radial_segments = 10
+
+[node name="Bucket" type="StaticBody3D" unique_id=614894026]
+collision_layer = 0
+script = ExtResource("1_3owx1")
+tags = PackedStringArray("bucket")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray()
+radius = 0.2
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=376319516]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+material_override = ExtResource("2_2jb6g")
+mesh = SubResource("CylinderMesh_v5pox")

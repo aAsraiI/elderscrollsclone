@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_ofdy3"]
+[ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="2_tafho"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_3d4i8"]
+size = Vector3(0.9, 1.6, 0.9)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bqmbs"]
+size = Vector3(0.9, 0.9, 1.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_i5gse"]
+size = Vector3(2.35, 1.6, 2.15)
+
+[node name="BrokenPillar" type="StaticBody3D" unique_id=1924844099]
+script = ExtResource("1_ofdy3")
+tags = PackedStringArray("pillar", "rubble")
+socket_kinds = PackedStringArray("FURNITURE", "DECORATION")
+themes = PackedStringArray("ruin", "crypt")
+radius = 1.1749999821186066
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1992134360]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+material_override = ExtResource("2_tafho")
+mesh = SubResource("BoxMesh_3d4i8")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=370170471]
+transform = Transform3D(0.87758255, 0, 0.47942555, 0, 1, 0, -0.47942555, 0, 0.87758255, 1, 0.45, 0.8)
+material_override = ExtResource("2_tafho")
+mesh = SubResource("BoxMesh_bqmbs")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1486139239]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.725, 0.8, 0.625)
+shape = SubResource("BoxShape3D_i5gse")

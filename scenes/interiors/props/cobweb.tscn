@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_3lo25"]
+[ext_resource type="Material" path="res://data/interiors/materials/paper.tres" id="2_xjqs8"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_mrwi2"]
+size = Vector3(1.4, 0.02, 1.4)
+
+[node name="Cobweb" type="StaticBody3D" unique_id=267071329]
+collision_layer = 0
+script = ExtResource("1_3lo25")
+tags = PackedStringArray("cobweb")
+socket_kinds = PackedStringArray("CEILING", "DECORATION")
+themes = PackedStringArray("crypt", "cave", "ruin", "mine", "lair", "sewer")
+snap = 2
+radius = 0.7
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=177326764]
+transform = Transform3D(0.7648422, 0, 0.64421767, 0, 1, 0, -0.64421767, 0, 0.7648422, 0, -0.05, 0)
+material_override = ExtResource("2_xjqs8")
+mesh = SubResource("BoxMesh_mrwi2")

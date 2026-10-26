@@ -1,0 +1,53 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_svmbc"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="2_7ehv8"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_xcasg"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_tt0jj"]
+size = Vector3(0.06, 0.05, 3.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qx8ji"]
+size = Vector3(0.06, 0.05, 3.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5eedy"]
+size = Vector3(1.3, 0.04, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yu5jh"]
+size = Vector3(1.3, 0.04, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_f0r5r"]
+size = Vector3(1.3, 0.04, 0.2)
+
+[node name="Rails" type="StaticBody3D" unique_id=814499167]
+collision_layer = 0
+script = ExtResource("1_svmbc")
+tags = PackedStringArray("rails", "mine")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("mine")
+radius = 2.4
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1956939464]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.03, 0)
+material_override = ExtResource("2_7ehv8")
+mesh = SubResource("BoxMesh_tt0jj")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=476640877]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.03, 0)
+material_override = ExtResource("2_7ehv8")
+mesh = SubResource("BoxMesh_qx8ji")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1490120675]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -1.2)
+material_override = ExtResource("3_xcasg")
+mesh = SubResource("BoxMesh_5eedy")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=117868723]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+material_override = ExtResource("3_xcasg")
+mesh = SubResource("BoxMesh_yu5jh")
+
+[node name="Part4" type="MeshInstance3D" parent="." unique_id=1028170588]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 1.2)
+material_override = ExtResource("3_xcasg")
+mesh = SubResource("BoxMesh_f0r5r")

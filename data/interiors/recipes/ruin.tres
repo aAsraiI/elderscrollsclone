@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_r"]
+
+[resource]
+script = ExtResource("1_r")
+themes = PackedStringArray("ruin", "crypt")
+mix = 0.2
+rooms_base = 7
+rooms_per_10_levels = 3
+required = PackedStringArray("library", "fallen_hall")
+branching = 0.35
+corridors = 0.5
+extra_floors = 0
+density = 1.0
+light = 0

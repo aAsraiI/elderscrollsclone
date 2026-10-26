@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_gf4iu"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_xx5d4"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_red.tres" id="3_plr6n"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_blue.tres" id="4_hde7e"]
+[ext_resource type="Material" path="res://data/interiors/materials/paper.tres" id="5_2ie26"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_j5k68"]
+size = Vector3(1.4, 2, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kdysk"]
+size = Vector3(1.2, 0.3, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7kde0"]
+size = Vector3(1.2, 0.3, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n5ioi"]
+size = Vector3(1.2, 0.3, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ad20u"]
+size = Vector3(1.4, 2, 1.4)
+
+[node name="Bookshelf" type="StaticBody3D" unique_id=1815367142]
+script = ExtResource("1_gf4iu")
+tags = PackedStringArray("shelf", "books")
+socket_kinds = PackedStringArray("FURNITURE", "WALL_DECORATION")
+themes = PackedStringArray("fort", "ruin", "house", "rich", "lair", "crypt")
+snap = 1
+radius = 0.7
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1192863242]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+material_override = ExtResource("2_xx5d4")
+mesh = SubResource("BoxMesh_j5k68")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1251875870]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.06)
+material_override = ExtResource("3_plr6n")
+mesh = SubResource("BoxMesh_kdysk")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1057817260]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, -0.06)
+material_override = ExtResource("4_hde7e")
+mesh = SubResource("BoxMesh_7kde0")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=1500917027]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -0.06)
+material_override = ExtResource("5_2ie26")
+mesh = SubResource("BoxMesh_n5ioi")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1316157754]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_ad20u")

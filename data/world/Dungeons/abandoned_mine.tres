@@ -5,8 +5,11 @@
 [ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="3_my4w5"]
 [ext_resource type="Resource" path="res://data/spawns/dungeon_mine.tres" id="4_xel4j"]
 
+[ext_resource type="Resource" path="res://data/interiors/recipes/mine.tres" id="rcp_113"]
+
 [resource]
 script = ExtResource("3_my4w5")
+recipe = ExtResource("rcp_113")
 id = &"abandoned_mine"
 display_name = "Abandoned Mine"
 min_rooms = 6

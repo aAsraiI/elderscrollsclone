@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_rycfx"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_0lsie"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_y818o"]
+size = Vector3(0.25, 4.6, 0.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jwf88"]
+size = Vector3(0.25, 4.6, 0.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ufvib"]
+size = Vector3(3.6, 0.3, 0.3)
+
+[node name="SupportBeams" type="StaticBody3D" unique_id=1658568929]
+collision_layer = 0
+script = ExtResource("1_rycfx")
+tags = PackedStringArray("beams", "mine")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("mine")
+radius = 1.8
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1106831404]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 2.3, 0)
+material_override = ExtResource("2_0lsie")
+mesh = SubResource("BoxMesh_y818o")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1721364921]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 2.3, 0)
+material_override = ExtResource("2_0lsie")
+mesh = SubResource("BoxMesh_jwf88")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=490817116]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0)
+material_override = ExtResource("2_0lsie")
+mesh = SubResource("BoxMesh_ufvib")

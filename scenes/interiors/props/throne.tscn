@@ -1,0 +1,44 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_48q7m"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_fo2p2"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_red.tres" id="3_f8c5e"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ixn4v"]
+size = Vector3(1.2, 0.5, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r4pgr"]
+size = Vector3(1, 0.1, 0.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nh2lv"]
+size = Vector3(1.2, 2.2, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_veh2v"]
+size = Vector3(1.2, 2.5, 1.65)
+
+[node name="Throne" type="StaticBody3D" unique_id=1080608206]
+script = ExtResource("1_48q7m")
+tags = PackedStringArray("throne", "seat")
+socket_kinds = PackedStringArray("FURNITURE")
+themes = PackedStringArray("fort", "rich", "crypt", "lair")
+radius = 0.825
+wealth_min = 1
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=251347605]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+material_override = ExtResource("2_fo2p2")
+mesh = SubResource("BoxMesh_ixn4v")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=415303545]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+material_override = ExtResource("3_f8c5e")
+mesh = SubResource("BoxMesh_r4pgr")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1763153640]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0.45)
+material_override = ExtResource("2_fo2p2")
+mesh = SubResource("BoxMesh_nh2lv")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=144681100]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0.22499996)
+shape = SubResource("BoxShape3D_veh2v")

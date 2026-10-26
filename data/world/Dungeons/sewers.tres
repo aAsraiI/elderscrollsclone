@@ -5,8 +5,11 @@
 [ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="3_hgqvy"]
 [ext_resource type="Resource" path="res://data/spawns/dungeon_sewers.tres" id="4_1xn8g"]
 
+[ext_resource type="Resource" path="res://data/interiors/recipes/sewer.tres" id="rcp_113"]
+
 [resource]
 script = ExtResource("3_hgqvy")
+recipe = ExtResource("rcp_113")
 id = &"sewers"
 display_name = "Old Sewers"
 max_rooms = 8

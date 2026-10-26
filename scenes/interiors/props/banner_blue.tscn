@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_eub40"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_bh8hd"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_blue.tres" id="3_050a4"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_aarce"]
+size = Vector3(1.1, 0.08, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tceds"]
+size = Vector3(1, 2.2, 0.04)
+
+[node name="BannerBlue" type="StaticBody3D" unique_id=257368393]
+collision_layer = 0
+script = ExtResource("1_eub40")
+tags = PackedStringArray("banner")
+socket_kinds = PackedStringArray("WALL_DECORATION")
+themes = PackedStringArray("fort", "rich", "house")
+snap = 1
+radius = 0.5500000268220901
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=757180806]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0.1)
+material_override = ExtResource("2_bh8hd")
+mesh = SubResource("BoxMesh_aarce")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=473013448]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0.12)
+material_override = ExtResource("3_050a4")
+mesh = SubResource("BoxMesh_tceds")

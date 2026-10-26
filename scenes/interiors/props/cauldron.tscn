@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_61vwq"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="2_6hos4"]
+[ext_resource type="Material" path="res://data/interiors/materials/water.tres" id="3_n4n4b"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_40m1x"]
+top_radius = 0.45
+bottom_radius = 0.35
+height = 0.6
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_sxffw"]
+top_radius = 0.375
+bottom_radius = 0.375
+height = 0.04
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_utrn7"]
+size = Vector3(0.9, 0.63, 0.9)
+
+[node name="Cauldron" type="StaticBody3D" unique_id=1562380954]
+script = ExtResource("1_61vwq")
+tags = PackedStringArray("cauldron", "kitchen")
+socket_kinds = PackedStringArray("FURNITURE", "DECORATION")
+themes = PackedStringArray()
+radius = 0.45
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1320054165]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+material_override = ExtResource("2_6hos4")
+mesh = SubResource("CylinderMesh_40m1x")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1173788717]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.71, 0)
+material_override = ExtResource("3_n4n4b")
+mesh = SubResource("CylinderMesh_sxffw")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=2028069327]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.41499996, 0)
+shape = SubResource("BoxShape3D_utrn7")

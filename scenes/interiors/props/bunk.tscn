@@ -1,0 +1,83 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_bm0oa"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_osasj"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth.tres" id="3_8xxg3"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_606vm"]
+size = Vector3(1, 0.12, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_no6oi"]
+size = Vector3(0.92, 0.1, 1.9)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kpxvx"]
+size = Vector3(1, 0.12, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kuemj"]
+size = Vector3(0.92, 0.1, 1.9)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0ysj2"]
+size = Vector3(0.08, 1.9, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sgm08"]
+size = Vector3(0.08, 1.9, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_npghe"]
+size = Vector3(0.08, 1.9, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2yu4v"]
+size = Vector3(0.08, 1.9, 0.08)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_so75s"]
+size = Vector3(2, 1.9, 2)
+
+[node name="Bunk" type="StaticBody3D" unique_id=1985622864]
+script = ExtResource("1_bm0oa")
+tags = PackedStringArray("bed", "bunk")
+socket_kinds = PackedStringArray("FURNITURE")
+themes = PackedStringArray("fort", "mine", "lair")
+radius = 1.0
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1897406508]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+material_override = ExtResource("2_osasj")
+mesh = SubResource("BoxMesh_606vm")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=46320110]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.51, 0)
+material_override = ExtResource("3_8xxg3")
+mesh = SubResource("BoxMesh_no6oi")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=880119352]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+material_override = ExtResource("2_osasj")
+mesh = SubResource("BoxMesh_kpxvx")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=1954383200]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.61, 0)
+material_override = ExtResource("3_8xxg3")
+mesh = SubResource("BoxMesh_kuemj")
+
+[node name="Part4" type="MeshInstance3D" parent="." unique_id=2114617212]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44, 0.95, -0.94)
+material_override = ExtResource("2_osasj")
+mesh = SubResource("BoxMesh_0ysj2")
+
+[node name="Part5" type="MeshInstance3D" parent="." unique_id=1896923079]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44, 0.95, 0.94)
+material_override = ExtResource("2_osasj")
+mesh = SubResource("BoxMesh_sgm08")
+
+[node name="Part6" type="MeshInstance3D" parent="." unique_id=455118731]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.44, 0.95, -0.94)
+material_override = ExtResource("2_osasj")
+mesh = SubResource("BoxMesh_npghe")
+
+[node name="Part7" type="MeshInstance3D" parent="." unique_id=418760146]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.44, 0.95, 0.94)
+material_override = ExtResource("2_osasj")
+mesh = SubResource("BoxMesh_2yu4v")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1235172167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("BoxShape3D_so75s")

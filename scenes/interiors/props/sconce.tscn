@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_elt3w"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="2_6485w"]
+[ext_resource type="Material" path="res://data/interiors/materials/glow.tres" id="3_c3d0n"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_g2jyp"]
+size = Vector3(0.12, 0.4, 0.15)
+
+[sub_resource type="BoxMesh" id="BoxMesh_t3te2"]
+size = Vector3(0.1, 0.18, 0.1)
+
+[node name="Sconce" type="StaticBody3D" unique_id=496657960]
+collision_layer = 0
+script = ExtResource("1_elt3w")
+tags = PackedStringArray("torch", "light")
+socket_kinds = PackedStringArray("LIGHT", "WALL_DECORATION")
+themes = PackedStringArray()
+snap = 1
+radius = 0.2
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=710393609]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0.1)
+material_override = ExtResource("2_6485w")
+mesh = SubResource("BoxMesh_g2jyp")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=285192521]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0)
+material_override = ExtResource("3_c3d0n")
+mesh = SubResource("BoxMesh_t3te2")
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=2139586854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -0.3)
+light_color = Color(1, 0.68, 0.38, 1)
+light_energy = 1.3
+omni_range = 7.0

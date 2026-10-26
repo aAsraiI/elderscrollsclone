@@ -1,0 +1,58 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_753mk"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_5sdlc"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="3_k7vdo"]
+[ext_resource type="Material" path="res://data/interiors/materials/rock_dark.tres" id="4_skfol"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_hggs1"]
+size = Vector3(0.9, 0.6, 1.4)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_kg1uq"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.1
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_2hkko"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.1
+radial_segments = 10
+
+[sub_resource type="BoxMesh" id="BoxMesh_n3tmw"]
+size = Vector3(0.7, 0.2, 1.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xl4xo"]
+size = Vector3(1.4, 0.85, 1.4)
+
+[node name="MineCart" type="StaticBody3D" unique_id=132964282]
+script = ExtResource("1_753mk")
+tags = PackedStringArray("cart", "mine")
+socket_kinds = PackedStringArray("FURNITURE", "DECORATION")
+themes = PackedStringArray("mine")
+radius = 0.7
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=188882505]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+material_override = ExtResource("2_5sdlc")
+mesh = SubResource("BoxMesh_hggs1")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=545357397]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.48, 0.2, 0.45)
+material_override = ExtResource("3_k7vdo")
+mesh = SubResource("CylinderMesh_kg1uq")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=817407215]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.48, 0.2, -0.45)
+material_override = ExtResource("3_k7vdo")
+mesh = SubResource("CylinderMesh_2hkko")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=1696745650]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+material_override = ExtResource("4_skfol")
+mesh = SubResource("BoxMesh_n3tmw")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1705051359]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.575, 0)
+shape = SubResource("BoxShape3D_xl4xo")

@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_rk3lx"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_pvix2"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_jg4lw"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_67qls"]
+top_radius = 0.19
+bottom_radius = 0.19
+height = 0.05
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_cwtfp"]
+top_radius = 0.04
+bottom_radius = 0.04
+height = 0.43
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jqk0n"]
+size = Vector3(0.38, 0.48000002, 0.38)
+
+[node name="Stool" type="StaticBody3D" unique_id=449039702]
+script = ExtResource("1_rk3lx")
+tags = PackedStringArray("stool", "seat")
+socket_kinds = PackedStringArray("FURNITURE", "DECORATION")
+themes = PackedStringArray()
+radius = 0.2
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1107576617]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+material_override = ExtResource("2_pvix2")
+mesh = SubResource("CylinderMesh_67qls")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=313374380]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21, 0)
+material_override = ExtResource("3_jg4lw")
+mesh = SubResource("CylinderMesh_cwtfp")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1479824407]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.23499998, 0)
+shape = SubResource("BoxShape3D_jqk0n")

@@ -1,0 +1,53 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_4w2yf"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_uf6ff"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="3_5nqp6"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_8q3i3"]
+top_radius = 0.3
+bottom_radius = 0.3
+height = 0.9
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pq2yl"]
+top_radius = 0.315
+bottom_radius = 0.315
+height = 0.06
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_qwpmj"]
+top_radius = 0.315
+bottom_radius = 0.315
+height = 0.06
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wpa5h"]
+size = Vector3(0.63, 0.9, 0.63)
+
+[node name="Barrel" type="StaticBody3D" unique_id=651565992]
+script = ExtResource("1_4w2yf")
+tags = PackedStringArray("barrel", "storage")
+socket_kinds = PackedStringArray("DECORATION", "FURNITURE")
+themes = PackedStringArray()
+radius = 0.315
+weight = 2.0
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=34243374]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+material_override = ExtResource("2_uf6ff")
+mesh = SubResource("CylinderMesh_8q3i3")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1667589859]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+material_override = ExtResource("3_5nqp6")
+mesh = SubResource("CylinderMesh_pq2yl")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=645421512]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+material_override = ExtResource("3_5nqp6")
+mesh = SubResource("CylinderMesh_qwpmj")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=243134685]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("BoxShape3D_wpa5h")

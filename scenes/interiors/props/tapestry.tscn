@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_l1mhk"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_blue.tres" id="2_5tcj1"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_tq5tm"]
+size = Vector3(2, 2.4, 0.04)
+
+[node name="Tapestry" type="StaticBody3D" unique_id=239296260]
+collision_layer = 0
+script = ExtResource("1_l1mhk")
+tags = PackedStringArray("tapestry", "banner")
+socket_kinds = PackedStringArray("WALL_DECORATION")
+themes = PackedStringArray("rich", "fort", "house")
+snap = 1
+radius = 1.0
+wealth_min = 1
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1973544012]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0.12)
+material_override = ExtResource("2_5tcj1")
+mesh = SubResource("BoxMesh_tq5tm")

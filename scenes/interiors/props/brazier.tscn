@@ -1,0 +1,60 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_ugcwl"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="2_va3tm"]
+[ext_resource type="Material" path="res://data/interiors/materials/glow.tres" id="3_aiyv8"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_u15rm"]
+top_radius = 0.4
+bottom_radius = 0.25
+height = 0.3
+radial_segments = 10
+
+[sub_resource type="BoxMesh" id="BoxMesh_r4k72"]
+size = Vector3(0.06, 0.75, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ihg0m"]
+size = Vector3(0.06, 0.75, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1twrb"]
+size = Vector3(0.5, 0.2, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dxq5j"]
+size = Vector3(0.8, 1.145, 0.8)
+
+[node name="Brazier" type="StaticBody3D" unique_id=1726335750]
+script = ExtResource("1_ugcwl")
+tags = PackedStringArray("brazier", "light", "fire")
+socket_kinds = PackedStringArray("LIGHT", "DECORATION")
+themes = PackedStringArray()
+radius = 0.4
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1227852485]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+material_override = ExtResource("2_va3tm")
+mesh = SubResource("CylinderMesh_u15rm")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1302537892]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.38, 0)
+material_override = ExtResource("2_va3tm")
+mesh = SubResource("BoxMesh_r4k72")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=533299235]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.38, 0)
+material_override = ExtResource("2_va3tm")
+mesh = SubResource("BoxMesh_ihg0m")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=2120715347]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
+material_override = ExtResource("3_aiyv8")
+mesh = SubResource("BoxMesh_1twrb")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=4813679]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5775, 0)
+shape = SubResource("BoxShape3D_dxq5j")
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=2109523199]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+light_color = Color(1, 0.55, 0.25, 1)
+light_energy = 1.6
+omni_range = 9.0

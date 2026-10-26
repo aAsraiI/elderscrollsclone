@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_6fmkm"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_ghewt"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_77fee"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lsyjp"]
+size = Vector3(0.8, 0.8, 0.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_muihm"]
+size = Vector3(0.7, 0.7, 0.7)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4tr0b"]
+size = Vector3(1.64, 1.5, 0.85)
+
+[node name="Crates" type="StaticBody3D" unique_id=707562429]
+script = ExtResource("1_6fmkm")
+tags = PackedStringArray("crate", "storage")
+socket_kinds = PackedStringArray("DECORATION", "FURNITURE")
+themes = PackedStringArray()
+radius = 0.82
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=290703512]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.4, 0)
+material_override = ExtResource("2_ghewt")
+mesh = SubResource("BoxMesh_77fee")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1888530394]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.4, 0.05)
+material_override = ExtResource("2_ghewt")
+mesh = SubResource("BoxMesh_lsyjp")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1113911313]
+transform = Transform3D(0.9553365, 0, 0.29552022, 0, 1, 0, -0.29552022, 0, 0.9553365, 0, 1.15, 0)
+material_override = ExtResource("2_ghewt")
+mesh = SubResource("BoxMesh_muihm")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1817634482]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0.025000006)
+shape = SubResource("BoxShape3D_4tr0b")

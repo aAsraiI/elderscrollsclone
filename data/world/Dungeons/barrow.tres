@@ -5,8 +5,11 @@
 [ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="3_qv0if"]
 [ext_resource type="Resource" path="res://data/spawns/dungeon_barrow.tres" id="4_rxldf"]
 
+[ext_resource type="Resource" path="res://data/interiors/recipes/crypt.tres" id="rcp_113"]
+
 [resource]
 script = ExtResource("3_qv0if")
+recipe = ExtResource("rcp_113")
 id = &"barrow"
 display_name = "Ancient Barrow"
 min_rooms = 7

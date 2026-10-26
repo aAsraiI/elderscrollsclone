@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_cpodn"]
+[ext_resource type="Material" path="res://data/interiors/materials/ice.tres" id="2_p0t68"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_xkl0x"]
+size = Vector3(0.3, 1.2, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_e322w"]
+size = Vector3(0.25, 0.8, 0.25)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6y85f"]
+size = Vector3(0.57500005, 1.2, 0.375)
+
+[node name="Crystal" type="StaticBody3D" unique_id=527512038]
+script = ExtResource("1_cpodn")
+tags = PackedStringArray("crystal", "light")
+socket_kinds = PackedStringArray("LIGHT", "DECORATION")
+themes = PackedStringArray("ice", "cave")
+radius = 0.2875000089406967
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=468546268]
+transform = Transform3D(0.921061, 0, 0.38941833, 0, 1, 0, -0.38941833, 0, 0.921061, 0, 0.6, 0)
+material_override = ExtResource("2_p0t68")
+mesh = SubResource("BoxMesh_xkl0x")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=2068151762]
+transform = Transform3D(0.9553365, 0, -0.29552022, 0, 1, 0, 0.29552022, 0, 0.9553365, 0.3, 0.4, 0.1)
+material_override = ExtResource("2_p0t68")
+mesh = SubResource("BoxMesh_e322w")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1605012024]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1375, 0.6, 0.037499994)
+shape = SubResource("BoxShape3D_6y85f")
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=1645761620]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+light_color = Color(0.6, 0.8, 1, 1)
+light_energy = 0.8
+omni_range = 6.0

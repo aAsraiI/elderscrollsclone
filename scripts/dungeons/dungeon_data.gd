@@ -57,6 +57,10 @@ extends Resource
 @export_range(0.0, 1.0, 0.01) var secret_chance := 0.6
 ## From this level on, a gate on each floor blocks the way to its last room until you find the lever
 @export var gate_from_level := 10
+@export_group("Stitched rooms (Alpha 1.13)")
+## Build it from room modules with this recipe (data/interiors/recipes/) instead of the old
+## generator. Empty = the old generator.
+@export var recipe: DungeonRecipe
 
 
 ## Floors this dungeon has at this level

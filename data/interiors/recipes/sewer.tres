@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_r"]
+
+[resource]
+script = ExtResource("1_r")
+themes = PackedStringArray("sewer")
+mix = 0.0
+rooms_base = 7
+rooms_per_10_levels = 2
+required = PackedStringArray("cistern")
+branching = 0.4
+corridors = 0.7
+extra_floors = 0
+density = 0.9
+light = 1

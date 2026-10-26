@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_48o8v"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_vr7io"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_red.tres" id="3_kmwj4"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_2aa0o"]
+size = Vector3(1.1, 0.08, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_una0h"]
+size = Vector3(1, 2.2, 0.04)
+
+[node name="Banner" type="StaticBody3D" unique_id=363395485]
+collision_layer = 0
+script = ExtResource("1_48o8v")
+tags = PackedStringArray("banner")
+socket_kinds = PackedStringArray("WALL_DECORATION")
+themes = PackedStringArray("fort", "rich", "house")
+snap = 1
+radius = 0.5500000268220901
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=296368439]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0.1)
+material_override = ExtResource("2_vr7io")
+mesh = SubResource("BoxMesh_2aa0o")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1810546277]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0.12)
+material_override = ExtResource("3_kmwj4")
+mesh = SubResource("BoxMesh_una0h")

@@ -1,0 +1,57 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_nbddb"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="2_4hodj"]
+[ext_resource type="Material" path="res://data/interiors/materials/paper.tres" id="3_8bemr"]
+[ext_resource type="Material" path="res://data/interiors/materials/glow.tres" id="4_sy052"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_oc38h"]
+size = Vector3(0.3, 0.05, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qru7x"]
+size = Vector3(0.06, 1.3, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mans4"]
+size = Vector3(0.08, 0.2, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1wl1i"]
+size = Vector3(0.05, 0.08, 0.05)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_62fko"]
+size = Vector3(0.3, 1.605, 0.3)
+
+[node name="CandleStand" type="StaticBody3D" unique_id=1168646860]
+script = ExtResource("1_nbddb")
+tags = PackedStringArray("candle", "light")
+socket_kinds = PackedStringArray("LIGHT", "DECORATION")
+themes = PackedStringArray()
+radius = 0.2
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=41251150]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+material_override = ExtResource("2_4hodj")
+mesh = SubResource("BoxMesh_oc38h")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=2021744046]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.68, 0)
+material_override = ExtResource("2_4hodj")
+mesh = SubResource("BoxMesh_qru7x")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=2017961499]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.43, 0)
+material_override = ExtResource("3_8bemr")
+mesh = SubResource("BoxMesh_mans4")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=1055439958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.57, 0)
+material_override = ExtResource("4_sy052")
+mesh = SubResource("BoxMesh_1wl1i")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=881868471]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8075, 0)
+shape = SubResource("BoxShape3D_62fko")
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=1168019997]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+light_color = Color(1, 0.68, 0.38, 1)
+light_energy = 0.9

@@ -5,8 +5,11 @@
 [ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="3_n8u32"]
 [ext_resource type="Resource" path="res://data/spawns/dungeon_fort.tres" id="4_8q88u"]
 
+[ext_resource type="Resource" path="res://data/interiors/recipes/fort_over_crypt.tres" id="rcp_113"]
+
 [resource]
 script = ExtResource("3_n8u32")
+recipe = ExtResource("rcp_113")
 id = &"fort_ruin"
 display_name = "Ruined Fort"
 min_rooms = 7

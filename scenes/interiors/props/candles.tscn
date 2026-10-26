@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_1jhnp"]
+[ext_resource type="Material" path="res://data/interiors/materials/paper.tres" id="2_bn4ia"]
+[ext_resource type="Material" path="res://data/interiors/materials/glow.tres" id="3_h7iav"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_qae7m"]
+size = Vector3(0.07, 0.25, 0.07)
+
+[sub_resource type="BoxMesh" id="BoxMesh_v7hxm"]
+size = Vector3(0.07, 0.18, 0.07)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2nvnv"]
+size = Vector3(0.04, 0.06, 0.04)
+
+[node name="Candles" type="StaticBody3D" unique_id=1836540246]
+collision_layer = 0
+script = ExtResource("1_1jhnp")
+tags = PackedStringArray("candle", "light", "tabletop")
+socket_kinds = PackedStringArray("LIGHT", "DECORATION")
+themes = PackedStringArray("crypt", "lair", "house", "rich", "ruin")
+radius = 0.2
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1585516094]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0.13, 0)
+material_override = ExtResource("2_bn4ia")
+mesh = SubResource("BoxMesh_qae7m")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=502173870]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08, 0.09, 0.05)
+material_override = ExtResource("2_bn4ia")
+mesh = SubResource("BoxMesh_v7hxm")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1413638275]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0.29, 0)
+material_override = ExtResource("3_h7iav")
+mesh = SubResource("BoxMesh_2nvnv")
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=1627986929]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+light_color = Color(1, 0.68, 0.38, 1)
+light_energy = 0.7
+omni_range = 4.0

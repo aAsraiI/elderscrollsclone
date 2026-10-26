@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="BiomeData" format=3 uid="uid://cljyaqba3d0rw"]
 
-[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="1_biome"]
+[ext_resource type="Script" uid="uid://bula71da23th1" path="res://scripts/world/biome_data.gd" id="1_biome"]
 [ext_resource type="Resource" path="res://data/encounters/night_werewolf.tres" id="5_ci6ew"]
 [ext_resource type="Resource" path="res://data/encounters/night_vampire.tres" id="6_lyudj"]
 [ext_resource type="Resource" path="res://data/encounters/swamp_lurkers.tres" id="7_7i13v"]
@@ -9,12 +9,12 @@
 [ext_resource type="Resource" path="res://data/encounters/plains_ambush.tres" id="enc_0"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="enc_1"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wanderer.tres" id="enc_2"]
-[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="enc_script"]
+[ext_resource type="Script" uid="uid://0fpv5k8e3f4r" path="res://scripts/world/encounter_data.gd" id="enc_script"]
 [ext_resource type="Resource" path="res://data/world/POIs/crypt_entrance.tres" id="poi_0"]
-[ext_resource type="Resource" path="res://data/world/POIs/ruined_shrine.tres" id="poi_1"]
-[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
+[ext_resource type="Resource" uid="uid://4kobovt0lhye" path="res://data/world/POIs/ruined_shrine.tres" id="poi_1"]
+[ext_resource type="Resource" uid="uid://bk7ydnyeb77t0" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
 [ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="poi_3"]
-[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
+[ext_resource type="Script" uid="uid://clkfbb8lga0d6" path="res://scripts/world/poi_rule.gd" id="rule_script"]
 
 [sub_resource type="Resource" id="rule_0"]
 script = ExtResource("rule_script")

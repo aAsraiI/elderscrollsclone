@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_ue2nm"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_mpjwc"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="3_3ixin"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_loudj"]
+size = Vector3(0.05, 1, 0.05)
+
+[sub_resource type="BoxMesh" id="BoxMesh_djokv"]
+size = Vector3(0.4, 0.08, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yraya"]
+size = Vector3(0.05, 1, 0.05)
+
+[node name="Pickaxes" type="StaticBody3D" unique_id=1009946660]
+collision_layer = 0
+script = ExtResource("1_ue2nm")
+tags = PackedStringArray("tools", "mine")
+socket_kinds = PackedStringArray("WALL_DECORATION", "DECORATION")
+themes = PackedStringArray("mine")
+snap = 1
+radius = 0.2875000163912773
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1546346465]
+transform = Transform3D(0.9800666, 0, 0.19866933, 0, 1, 0, -0.19866933, 0, 0.9800666, -0.2, 0.5, 0.1)
+material_override = ExtResource("2_mpjwc")
+mesh = SubResource("BoxMesh_loudj")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1009272054]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.98, 0.1)
+material_override = ExtResource("3_3ixin")
+mesh = SubResource("BoxMesh_djokv")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=2099310413]
+transform = Transform3D(0.9800666, 0, -0.19866933, 0, 1, 0, 0.19866933, 0, 0.9800666, 0.2, 0.5, 0.1)
+material_override = ExtResource("2_mpjwc")
+mesh = SubResource("BoxMesh_yraya")

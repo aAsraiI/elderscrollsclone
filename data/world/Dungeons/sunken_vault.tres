@@ -5,8 +5,11 @@
 [ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="3_xw1ry"]
 [ext_resource type="Resource" path="res://data/spawns/dungeon_vault.tres" id="4_c4y3c"]
 
+[ext_resource type="Resource" path="res://data/interiors/recipes/ruin.tres" id="rcp_113"]
+
 [resource]
 script = ExtResource("3_xw1ry")
+recipe = ExtResource("rcp_113")
 id = &"sunken_vault"
 display_name = "Sunken Vault"
 min_rooms = 8

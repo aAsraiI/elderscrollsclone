@@ -1,0 +1,44 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_whevt"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_g5ypt"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="3_44u0k"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="4_jsjvr"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_y647p"]
+size = Vector3(0.5, 0.1, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5g8j6"]
+size = Vector3(0.08, 1.4, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tewh6"]
+size = Vector3(0.6, 0.7, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6ixyg"]
+size = Vector3(0.6, 1.5500001, 0.6)
+
+[node name="ArmorStand" type="StaticBody3D" unique_id=73629853]
+script = ExtResource("1_whevt")
+tags = PackedStringArray("armor", "rack")
+socket_kinds = PackedStringArray("FURNITURE", "DECORATION")
+themes = PackedStringArray("fort", "rich", "house")
+radius = 0.3
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1081530780]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+material_override = ExtResource("2_g5ypt")
+mesh = SubResource("BoxMesh_y647p")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1172509527]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+material_override = ExtResource("3_44u0k")
+mesh = SubResource("BoxMesh_5g8j6")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=476129158]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+material_override = ExtResource("4_jsjvr")
+mesh = SubResource("BoxMesh_tewh6")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=451236404]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77500004, 0)
+shape = SubResource("BoxShape3D_6ixyg")

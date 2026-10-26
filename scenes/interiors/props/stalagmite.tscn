@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_h7i32"]
+[ext_resource type="Material" path="res://data/interiors/materials/rock.tres" id="2_yp4g7"]
+[ext_resource type="Material" path="res://data/interiors/materials/rock_dark.tres" id="3_lra8q"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ygotf"]
+top_radius = 0.025
+bottom_radius = 0.35
+height = 1.6
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_dmnof"]
+top_radius = 0.025
+bottom_radius = 0.2
+height = 0.9
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_c7esu"]
+size = Vector3(0.95000005, 1.6, 0.75)
+
+[node name="Stalagmite" type="StaticBody3D" unique_id=756749984]
+script = ExtResource("1_h7i32")
+tags = PackedStringArray("rock", "stalagmite")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("cave", "ice", "mine")
+radius = 0.4750000089406967
+weight = 2.0
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=46167167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+material_override = ExtResource("2_yp4g7")
+mesh = SubResource("CylinderMesh_ygotf")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=2004474398]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.45, 0.2)
+material_override = ExtResource("3_lra8q")
+mesh = SubResource("CylinderMesh_dmnof")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1094465348]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12500001, 0.8, 0.025000006)
+shape = SubResource("BoxShape3D_c7esu")

@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_35ahn"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_3ub46"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="3_wiqku"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_qbmd8"]
+size = Vector3(1.8, 1.2, 0.6)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_swey7"]
+top_radius = 0.25
+bottom_radius = 0.25
+height = 0.7
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_7aagt"]
+top_radius = 0.25
+bottom_radius = 0.25
+height = 0.7
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6he2d"]
+size = Vector3(1.8, 1.3, 1.8)
+
+[node name="KegRack" type="StaticBody3D" unique_id=1642343407]
+script = ExtResource("1_35ahn")
+tags = PackedStringArray("barrel", "drink")
+socket_kinds = PackedStringArray("FURNITURE", "WALL_DECORATION")
+themes = PackedStringArray("fort", "house", "lair")
+snap = 1
+radius = 0.9
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1201104118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0.05)
+material_override = ExtResource("2_3ub46")
+mesh = SubResource("BoxMesh_qbmd8")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1118237604]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.95, -0.05)
+material_override = ExtResource("3_wiqku")
+mesh = SubResource("CylinderMesh_swey7")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=600239884]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.95, -0.05)
+material_override = ExtResource("3_wiqku")
+mesh = SubResource("CylinderMesh_7aagt")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=283227481]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0.050000012)
+shape = SubResource("BoxShape3D_6he2d")

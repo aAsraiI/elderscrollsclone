@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_2w3rv"]
+[ext_resource type="Material" path="res://data/interiors/materials/straw.tres" id="2_kdi1j"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_kyuma"]
+size = Vector3(1.4, 0.6, 1.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7i4ky"]
+size = Vector3(1.4, 0.6, 1.4)
+
+[node name="HayPile" type="StaticBody3D" unique_id=1324702625]
+script = ExtResource("1_2w3rv")
+tags = PackedStringArray("hay")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("fort", "lair", "house")
+radius = 0.7
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1396258021]
+transform = Transform3D(0.9800666, 0, 0.19866933, 0, 1, 0, -0.19866933, 0, 0.9800666, 0, 0.3, 0)
+material_override = ExtResource("2_kdi1j")
+mesh = SubResource("BoxMesh_kyuma")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=753308674]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+shape = SubResource("BoxShape3D_7i4ky")

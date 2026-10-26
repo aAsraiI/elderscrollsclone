@@ -1,0 +1,67 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_n3qqe"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_u8m5p"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_va10q"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_tqas1"]
+size = Vector3(0.45, 0.06, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jovs8"]
+size = Vector3(0.45, 0.5, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0i0bu"]
+size = Vector3(0.08, 0.42, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8tgpo"]
+size = Vector3(0.08, 0.42, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8wikx"]
+size = Vector3(0.08, 0.42, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8cc6a"]
+size = Vector3(0.08, 0.42, 0.08)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mr3a2"]
+size = Vector3(0.45, 0.98, 0.65)
+
+[node name="Chair" type="StaticBody3D" unique_id=944462573]
+script = ExtResource("1_n3qqe")
+tags = PackedStringArray("chair", "seat")
+socket_kinds = PackedStringArray("FURNITURE")
+themes = PackedStringArray()
+radius = 0.32500000298023224
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1379445370]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+material_override = ExtResource("2_u8m5p")
+mesh = SubResource("BoxMesh_tqas1")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=67321808]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.73, 0.2)
+material_override = ExtResource("2_u8m5p")
+mesh = SubResource("BoxMesh_jovs8")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1161658708]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.165, 0.21, -0.165)
+material_override = ExtResource("3_va10q")
+mesh = SubResource("BoxMesh_0i0bu")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=1184688433]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.165, 0.21, 0.165)
+material_override = ExtResource("3_va10q")
+mesh = SubResource("BoxMesh_8tgpo")
+
+[node name="Part4" type="MeshInstance3D" parent="." unique_id=882404565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.165, 0.21, -0.165)
+material_override = ExtResource("3_va10q")
+mesh = SubResource("BoxMesh_8wikx")
+
+[node name="Part5" type="MeshInstance3D" parent="." unique_id=1381167234]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.165, 0.21, 0.165)
+material_override = ExtResource("3_va10q")
+mesh = SubResource("BoxMesh_8cc6a")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=371742927]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.49, 0.10000001)
+shape = SubResource("BoxShape3D_mr3a2")

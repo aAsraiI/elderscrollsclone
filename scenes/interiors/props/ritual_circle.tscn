@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_ig2ve"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_red.tres" id="2_ns8o1"]
+[ext_resource type="Material" path="res://data/interiors/materials/paper.tres" id="3_k2v27"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_b0l8f"]
+top_radius = 1.3
+bottom_radius = 1.3
+height = 0.02
+radial_segments = 10
+
+[sub_resource type="BoxMesh" id="BoxMesh_op184"]
+size = Vector3(0.1, 0.3, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_y6jbq"]
+size = Vector3(0.1, 0.3, 0.1)
+
+[node name="RitualCircle" type="StaticBody3D" unique_id=334244995]
+collision_layer = 0
+script = ExtResource("1_ig2ve")
+tags = PackedStringArray("ritual")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("lair", "crypt", "ruin")
+radius = 1.3
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1699931895]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
+material_override = ExtResource("2_ns8o1")
+mesh = SubResource("CylinderMesh_b0l8f")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1916004643]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.15, 0)
+material_override = ExtResource("3_k2v27")
+mesh = SubResource("BoxMesh_op184")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=394622553]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.15, 0)
+material_override = ExtResource("3_k2v27")
+mesh = SubResource("BoxMesh_y6jbq")

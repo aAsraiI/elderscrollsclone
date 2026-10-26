@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="EnemyData" format=3]
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://tggdhdc5ox7x"]
 
-[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="1_weiu5"]
+[ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/items/loot_entry.gd" id="1_weiu5"]
 [ext_resource type="Resource" path="res://data/materials/dragonbone_plate.tres" id="2_u5bp0"]
 [ext_resource type="Resource" path="res://data/materials/dragonstone_ore.tres" id="3_jvlxs"]
-[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="4_hvdwq"]
+[ext_resource type="Script" uid="uid://dg8b8xgiyxnc8" path="res://scripts/actors/enemy_data.gd" id="4_hvdwq"]
 
 [sub_resource type="Resource" id="Resource_weiu5"]
 script = ExtResource("1_weiu5")
@@ -34,4 +34,3 @@ detection_range = 34.0
 telegraph_time = 0.6
 heavy_chance = 0.4
 knockback_resistance = 0.95
-talk_lines = PackedStringArray()

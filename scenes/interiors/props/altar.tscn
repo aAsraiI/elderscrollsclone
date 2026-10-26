@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_kc4aq"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_8dbmf"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_red.tres" id="3_mwl8h"]
+[ext_resource type="Material" path="res://data/interiors/materials/paper.tres" id="4_xawm2"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_2ihqa"]
+size = Vector3(1.8, 1, 0.9)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qs4lu"]
+size = Vector3(1.9, 0.05, 0.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_duw22"]
+size = Vector3(0.1, 0.3, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qniu2"]
+size = Vector3(0.1, 0.3, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vh70d"]
+size = Vector3(1.9, 1.35, 1.9)
+
+[node name="Altar" type="StaticBody3D" unique_id=1067768566]
+script = ExtResource("1_kc4aq")
+tags = PackedStringArray("altar")
+socket_kinds = PackedStringArray("FURNITURE")
+themes = PackedStringArray("crypt", "lair", "ruin", "rich")
+radius = 0.95
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=500751729]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = ExtResource("2_8dbmf")
+mesh = SubResource("BoxMesh_2ihqa")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=210381995]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.03, 0)
+material_override = ExtResource("3_mwl8h")
+mesh = SubResource("BoxMesh_qs4lu")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=14036402]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 1.2, 0)
+material_override = ExtResource("4_xawm2")
+mesh = SubResource("BoxMesh_duw22")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=2033648342]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 1.2, 0)
+material_override = ExtResource("4_xawm2")
+mesh = SubResource("BoxMesh_qniu2")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=271020708]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.675, 0)
+shape = SubResource("BoxShape3D_vh70d")

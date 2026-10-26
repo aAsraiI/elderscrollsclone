@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_r0guh"]
+[ext_resource type="Material" path="res://data/interiors/materials/fungus_glow.tres" id="2_va4ci"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_n1y8c"]
+top_radius = 0.15
+bottom_radius = 0.06
+height = 0.3
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_kc8nj"]
+top_radius = 0.11
+bottom_radius = 0.05
+height = 0.22
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_3oaoh"]
+top_radius = 0.09
+bottom_radius = 0.04
+height = 0.18
+radial_segments = 10
+
+[node name="Fungus" type="StaticBody3D" unique_id=638890888]
+collision_layer = 0
+script = ExtResource("1_r0guh")
+tags = PackedStringArray("fungus", "light")
+socket_kinds = PackedStringArray("LIGHT", "DECORATION")
+themes = PackedStringArray("cave", "mine", "lair", "sewer")
+radius = 0.32500002
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=189555186]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+material_override = ExtResource("2_va4ci")
+mesh = SubResource("CylinderMesh_n1y8c")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=596058210]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.11, 0.1)
+material_override = ExtResource("2_va4ci")
+mesh = SubResource("CylinderMesh_kc8nj")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=760199640]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.09, 0.15)
+material_override = ExtResource("2_va4ci")
+mesh = SubResource("CylinderMesh_3oaoh")
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=537161026]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+light_color = Color(0.4, 0.9, 0.7, 1)
+light_energy = 0.8

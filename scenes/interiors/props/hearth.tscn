@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_ovaka"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_0q2de"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="3_hy3n3"]
+[ext_resource type="Material" path="res://data/interiors/materials/glow.tres" id="4_ae0nx"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_lw5il"]
+size = Vector3(1.8, 1.4, 0.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5v5h2"]
+size = Vector3(1, 0.6, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4m6vr"]
+size = Vector3(0.7, 0.3, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7nx6k"]
+size = Vector3(1.8, 1.4, 1.8)
+
+[node name="Hearth" type="StaticBody3D" unique_id=816097998]
+script = ExtResource("1_ovaka")
+tags = PackedStringArray("hearth", "kitchen", "fire", "light")
+socket_kinds = PackedStringArray("FURNITURE", "LIGHT")
+themes = PackedStringArray("fort", "house", "rich", "lair")
+snap = 1
+radius = 0.9
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1370682271]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0.1)
+material_override = ExtResource("2_0q2de")
+mesh = SubResource("BoxMesh_lw5il")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1282592727]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -0.1)
+material_override = ExtResource("3_hy3n3")
+mesh = SubResource("BoxMesh_5v5h2")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=569781590]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, -0.2)
+material_override = ExtResource("4_ae0nx")
+mesh = SubResource("BoxMesh_4m6vr")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1668555235]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0.100000024)
+shape = SubResource("BoxShape3D_7nx6k")
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=1618055373]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -0.8)
+light_color = Color(1, 0.5, 0.2, 1)
+light_energy = 1.4
+omni_range = 7.0

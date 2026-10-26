@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_m8p6c"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth.tres" id="2_pxcfl"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_4s0p8"]
+size = Vector3(0.5, 0.6, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cvnco"]
+size = Vector3(0.5, 0.55, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_s7ghe"]
+size = Vector3(1.05, 0.6, 0.6)
+
+[node name="Sacks" type="StaticBody3D" unique_id=211499194]
+script = ExtResource("1_m8p6c")
+tags = PackedStringArray("sack", "storage")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray()
+radius = 0.5250000059604645
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1100536397]
+transform = Transform3D(0.9800666, 0, 0.19866933, 0, 1, 0, -0.19866933, 0, 0.9800666, -0.25, 0.3, 0)
+material_override = ExtResource("2_pxcfl")
+mesh = SubResource("BoxMesh_4s0p8")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1609379520]
+transform = Transform3D(0.9553365, 0, -0.29552022, 0, 1, 0, 0.29552022, 0, 0.9553365, 0.3, 0.28, 0.1)
+material_override = ExtResource("2_pxcfl")
+mesh = SubResource("BoxMesh_cvnco")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1020419698]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.025000006, 0.3, 0.049999997)
+shape = SubResource("BoxShape3D_s7ghe")

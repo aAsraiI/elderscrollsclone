@@ -747,11 +747,13 @@ func _tick_chase(delta: float) -> void:
 	if to_target.length() > lose_range:
 		_lose_target()
 		return
-	_face(to_target, delta)
+	# Facing: on the run it looks where it is going (round a house, out to its flank), or it would
+	# walk at you sideways; casting, shooting, holding its distance or close in, it watches the target
+	var dist := to_target.length()
 	if _casting != null:
+		_face(to_target, delta)
 		_slow_down(delta, acceleration)
 		return
-	var dist := to_target.length()
 	if style == Style.ARCHER and ranged != null and ranged.has_bow():
 		_tick_archer(delta, to_target, dist)
 		return
@@ -760,12 +762,14 @@ func _tick_chase(delta: float) -> void:
 	# Mages and spirits hold their distance while they can still cast
 	if (style == Style.MAGE or style == Style.SPIRIT) and not spells.is_empty() and dist < 16.0 and dist > 5.0 \
 			and stats.magicka > 15.0 and _can_see_target_simple():
+		_face(to_target, delta)
 		_slow_down(delta, acceleration)
 		var side := Vector3(-to_target.z, 0.0, to_target.x).normalized() * _circle_dir * circle_speed
 		velocity.x = move_toward(velocity.x, side.x, acceleration * delta)
 		velocity.z = move_toward(velocity.z, side.z, acceleration * delta)
 		return
 	if dist <= _attack_start_distance():
+		_face(to_target, delta)
 		_enter_state(State.ATTACK)
 		return
 	if _lunge_cd <= 0.0 and dist > 3.2 and dist < 7.5 and (style == Style.BEAST or (style == Style.DUELIST and cunning >= 0.45)) \
@@ -792,6 +796,10 @@ func _tick_chase(delta: float) -> void:
 	var dir := _around_walls(goal)
 	velocity.x = move_toward(velocity.x, dir.x * move_speed, acceleration * delta)
 	velocity.z = move_toward(velocity.z, dir.z * move_speed, acceleration * delta)
+	if dist > 4.0:
+		_face_travel(dir, delta)
+	else:
+		_face(to_target, delta)
 
 
 # Several hunting the same target: each swings out to its own side (its flank angle) so they arrive
@@ -1061,6 +1069,7 @@ func _tick_archer(delta: float, to_target: Vector3, dist: float) -> void:
 	_shot_cd -= delta
 	var fwd := to_target.normalized()
 	if ranged.is_drawing():
+		_face(to_target, delta)
 		_slow_down(delta, acceleration)
 		_draw_left -= delta
 		if body != null:
@@ -1076,7 +1085,9 @@ func _tick_archer(delta: float, to_target: Vector3, dist: float) -> void:
 		var dir := _around_walls(fwd)
 		velocity.x = move_toward(velocity.x, dir.x * move_speed, acceleration * delta)
 		velocity.z = move_toward(velocity.z, dir.z * move_speed, acceleration * delta)
+		_face_travel(dir, delta)
 		return
+	_face(to_target, delta)
 	if dist < 6.0:
 		velocity.x = move_toward(velocity.x, -fwd.x * move_speed, acceleration * delta)
 		velocity.z = move_toward(velocity.z, -fwd.z * move_speed, acceleration * delta)
@@ -1404,6 +1415,13 @@ func _face(to_target: Vector3, delta: float) -> void:
 		return
 	var yaw := atan2(-to_target.x, -to_target.z)
 	rotation.y = lerp_angle(rotation.y, yaw, clampf(turn_speed * delta, 0.0, 1.0))
+
+
+# On the move: face the way it is actually going (velocity lags the wish, and walls bend it), so the
+# legs never carry it sideways; standing, face `fallback`
+func _face_travel(fallback: Vector3, delta: float) -> void:
+	var v := Vector3(velocity.x, 0.0, velocity.z)
+	_face(v if v.length() > 0.8 else fallback, delta)
 
 
 func _facing_error(to_target: Vector3) -> float:

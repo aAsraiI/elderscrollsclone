@@ -176,10 +176,12 @@ func t_stealth() -> void:
 	clock.control_environment = false
 	world.add_child(clock)
 	clock.set_time(1.0)
+	st.forget_light()
 	st.awareness.clear()
 	_watch(st, 3.0)
 	check("at night, 10 m away is too far to be seen", not st.is_detected_by(watcher), "%.2f" % st.awareness_of(watcher))
 	clock.set_time(12.0)
+	st.forget_light()
 	_watch(st, 1.5)
 	check("by day, the same spot is in plain view", st.is_detected_by(watcher))
 

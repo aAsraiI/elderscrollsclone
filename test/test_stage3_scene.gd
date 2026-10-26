@@ -45,6 +45,10 @@ func _run() -> void:
 	for b in town.town.buildings:
 		if owner != null and b.id != owner.data.home_id and not b.is_public() and other == null:
 			other = b
+	# town life sends people home over a few real seconds, which headless frames can outrun
+	var t0 := Time.get_ticks_msec()
+	while owner != null and owner.inside != owner.data.home_id and Time.get_ticks_msec() - t0 < 10000:
+		await frames(10)
 	check("at 1:00 a townsperson is home asleep", owner != null and owner.inside == owner.data.home_id)
 	check("their door is locked", Locks.is_locked(owner.data.home_id, false))
 	var home := wm.get_building(owner.data.home_id)

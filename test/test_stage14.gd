@@ -137,7 +137,7 @@ func t_in_game() -> void:
 	wm.clock.set_time(23.0, 2)
 	wm.clock.apply_now()
 	await secs(0.5)
-	stealth._light_clock = 0.0
+	stealth.forget_light()
 	var dark := stealth.light_level()
 	var lamp := OmniLight3D.new()
 	lamp.omni_range = 8.0
@@ -148,7 +148,7 @@ func t_in_game() -> void:
 		poi_node.add_child(lamp)
 		lamp.global_position = player.global_position + Vector3(0, 2.0, 0)
 		stealth._lights_for = self  # forget the list so it is looked up again
-		stealth._light_clock = 0.0
+		stealth.forget_light()
 		var lit := stealth.light_level()
 		check("at night, standing under a lamp makes you easier to see", lit > dark + 0.2, "%f vs %f" % [lit, dark])
 		lamp.queue_free()

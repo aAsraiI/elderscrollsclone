@@ -98,7 +98,10 @@ func t_in_game() -> void:
 	inv.add_item(heavy, 1)
 	check("a forbidden armor won't go on", not eq.equip(heavy))
 	check("the racial power is set", (p.get_node("Powers") as Powers).racial == "highborn")
-	await frames(130)
+	# the story looks for a new character 3 s in (real time, which headless frames can outrun)
+	var t0 := Time.get_ticks_msec()
+	while Story.stage() == 0 and Time.get_ticks_msec() - t0 < 20000:
+		await frames(10)
 	check("the main story begins", Story.stage() == 1 and not Story.target().is_empty())
 	# Survival
 	var surv := p.get_node("Survival") as Survival

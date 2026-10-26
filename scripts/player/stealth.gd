@@ -323,7 +323,7 @@ const DARK_NIGHT := 0.25
 const LAMP_STRENGTH := 0.55
 
 var _light_cache := 0.0
-var _light_clock := 0.0
+var _light_until := 0  # msec: the cached light level is good until then
 var _lights: Array[Light3D] = []
 var _lights_for: Object = null  # the interior, or the spot outdoors, the lamp list is for
 var _lights_pos := Vector3.INF
@@ -333,12 +333,17 @@ var _lights_pos := Vector3.INF
 ## lantern nearby (OmniLight3D / SpotLight3D), each by how close you stand within its reach.
 ## Worked out a few times a second.
 func light_level() -> float:
-	_light_clock -= get_process_delta_time()
-	if _light_clock > 0.0 and _player != null:
+	var now := Time.get_ticks_msec()
+	if now < _light_until and _player != null:
 		return _light_cache
-	_light_clock = 0.25
+	_light_until = now + 250
 	_light_cache = _measure_light()
 	return _light_cache
+
+
+## Measure the light again on the next ask (the time of day jumped, the player moved somewhere new)
+func forget_light() -> void:
+	_light_until = 0
 
 
 func _measure_light() -> float:

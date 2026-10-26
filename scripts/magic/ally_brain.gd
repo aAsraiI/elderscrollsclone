@@ -52,7 +52,11 @@ func _physics_process(delta: float) -> void:
 	elif d > FOLLOW_DIST:
 		var to := leader.global_position
 		if not _body.is_on_route() or _body.route.is_empty() or _body.route[_body.route.size() - 1].distance_to(to) > 2.0:
-			_body.follow_route(PackedVector3Array([to]), false, 1.0 if d > 10.0 else 0.6)
+			var way := PackedVector3Array([to])
+			var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+			if world != null and world.dungeons != null and world.dungeons.nav != null:
+				way = world.dungeons.nav.path(_body.global_position, to)  # through the dungeon's doorways
+			_body.follow_route(way, false, 1.0 if d > 10.0 else 0.6)
 	elif _body.is_on_route():
 		_body.stop_route()
 

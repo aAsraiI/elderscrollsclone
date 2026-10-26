@@ -33,6 +33,9 @@ var counts := {}    # module path -> times used
 var links: Array = []   # [room a, door a, room b, door b]
 ## The join to a hidden room (InteriorFeatures walls it off behind a loose stone), or []
 var secret_link: Array = []
+## The hand-made set-piece's room index, or -1
+var set_piece := -1
+var set_tried := false
 
 
 ## Plans an interior. Returns the plan (no nodes yet): call build() to make the scene.
@@ -86,6 +89,9 @@ func _run() -> void:
 			required.erase(p.entry.kind)
 			if p.entry.role == RoomModule.Role.STAIRS:
 				floors_left -= 1
+		if not set_tried and not recipe.set_pieces.is_empty() and _room_count() >= target / 2:
+			set_tried = true
+			_place_set_piece()
 	if recipe.boss:
 		_place_boss(theme)
 	if rng.randf() < 0.6:
@@ -254,6 +260,9 @@ func _place_boss(theme: String) -> void:
 func build(dungeon_id: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Interior"
+	# what a baked copy needs to be read back as a plan (from_scene): the joins and the hidden one
+	root.set_meta("links", links.duplicate(true))
+	root.set_meta("secret_link", secret_link.duplicate())
 	for p in placed:
 		var room := (load(p.entry.path) as PackedScene).instantiate() as RoomModule
 		room.name = "R%d_%s" % [p.index, p.entry.path.get_file().get_basename()]
@@ -279,6 +288,60 @@ func summary() -> String:
 	for c in occupied:
 		floors[(c as Vector3i).y] = true
 	return "%d rooms (%d counted), %d cells, %d links, floors %s" % [placed.size(), _room_count(), occupied.size(), links.size(), str(floors.keys())]
+
+
+# One of the recipe's hand-made rooms, on the deepest open doorway it fits (no main-path dead end:
+# a set-piece is somewhere you pass through or look into)
+func _place_set_piece() -> void:
+	var entries: Array = []
+	for ps in recipe.set_pieces:
+		if ps != null:
+			var e := ModuleLibrary._read(ps.resource_path)
+			if e != null:
+				entries.append(e)
+	if entries.is_empty():
+		return
+	var e = entries[rng.randi_range(0, entries.size() - 1)]
+	var open := _open_doors()
+	open.sort_custom(func(x: Array, y: Array) -> bool: return placed[x[0]].depth > placed[y[0]].depth)
+	for spot in open:
+		if placed[spot[0]].entry.role in [RoomModule.Role.BOSS, RoomModule.Role.DEAD_END]:
+			continue
+		var p := _try_join(spot, e)
+		if p != null:
+			set_piece = p.index
+			return
+
+
+## A plan read back from a built or baked interior (DungeonPreview's Bake, or a hand-made scene
+## made of room modules): its rooms in child order, their places, and the joins it was built with
+## (meta "links"; without them the rooms are taken as they are, and doors and levers are left out)
+static func from_scene(root: Node3D) -> DungeonAssembler:
+	var a := DungeonAssembler.new()
+	a.recipe = DungeonRecipe.new()
+	for c in root.get_children():
+		var room := c as RoomModule
+		if room == null or room.scene_file_path == "":
+			continue
+		var e := ModuleLibrary._read(room.scene_file_path)
+		if e == null:
+			continue
+		var p := Placed.new()
+		p.entry = e
+		p.xform = room.transform
+		p.index = a.placed.size()
+		p.depth = int(room.get_meta("depth", p.index))
+		p.cells = a._cells_of(e, p.xform)
+		for cell in p.cells:
+			a.occupied[cell] = p.index
+		a.placed.append(p)
+	a.links = root.get_meta("links", []).duplicate(true)
+	a.secret_link = root.get_meta("secret_link", []).duplicate()
+	for l: Array in a.links:
+		if int(l[0]) < a.placed.size() and int(l[2]) < a.placed.size():
+			a.placed[int(l[0])].used.append(int(l[1]))
+			a.placed[int(l[2])].used.append(int(l[3]))
+	return a
 
 
 # A small room off a far doorway that will be hidden behind a loose stone

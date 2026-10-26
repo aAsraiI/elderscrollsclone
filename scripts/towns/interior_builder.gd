@@ -29,6 +29,11 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 		return _dawnhold(b, interior_seed, level)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = interior_seed
+	var module := InteriorOverrides.building_scene(b)  # a hand-made one wins
+	if module == "":
+		module = pick_module(b, rng)
+	if module != "":
+		return _from_module(b, module, interior_seed, level, today, rng)
 	var w := maxf(b.size.x + 1.5, 7.0)
 	var d := maxf(b.size.z + 1.5, 6.5)
 	var arena := b.kind == BuildingPlot.Kind.GUILD_HALL and b.guild == "fighters"
@@ -344,6 +349,290 @@ static func _dawnhold(b: BuildingPlot, interior_seed: int, level: int) -> Dictio
 		"chests": chests,
 		"decor": {"pieces": 0, "items": 0},
 		"spots": {"exit": start, "beds": beds, "work": at.call("Throne"), "seats": seats},
+	}
+
+
+# ---------------------------------------------------------------- module interiors (Alpha 1.13)
+
+## The building interiors made as scenes (tools/build_houses.gd, then yours to edit): every scene
+## in this folder is a RoomModule whose kind says which buildings may use it
+const HOUSE_DIR := "res://scenes/interiors/houses/"
+const MODULE_KINDS := {
+	BuildingPlot.Kind.HOUSE: "house", BuildingPlot.Kind.FARM: "farm", BuildingPlot.Kind.SHOP: "shop",
+	BuildingPlot.Kind.SMITHY: "smithy", BuildingPlot.Kind.INN: "inn", BuildingPlot.Kind.TEMPLE: "temple",
+	BuildingPlot.Kind.GUILD_HALL: "guild", BuildingPlot.Kind.SEAT: "seat",
+}
+
+## What each guild keeps at its hall's station spots (Station_guild<n>)
+const GUILD_STATIONS := {
+	"mages": ["spell_altar", "enchanter", "alchemy_lab"], "antiquarians": ["grindstone", "workbench"],
+	"hunters": ["tanning_rack", "workbench"], "thieves": ["workbench"],
+}
+
+static var _modules: Array = []  # [path, kind, floor area]
+
+
+static func house_modules() -> Array:
+	if _modules.is_empty() and DirAccess.dir_exists_absolute(HOUSE_DIR):
+		for f in DirAccess.get_files_at(HOUSE_DIR):
+			f = f.trim_suffix(".remap")
+			if not f.ends_with(".tscn"):
+				continue
+			var room := (load(HOUSE_DIR + f) as PackedScene).instantiate() as RoomModule
+			if room != null:
+				var size := room.bounds().size
+				_modules.append([HOUSE_DIR + f, room.kind, size.x * size.z])
+				room.free()
+	return _modules
+
+
+## Which interior scene a building uses ("" = none fits; it is built the old way): one of its kind
+## close to its size outside. One house in five is a manor.
+static func pick_module(b: BuildingPlot, rng: RandomNumberGenerator) -> String:
+	if not MODULE_KINDS.has(b.kind):
+		return ""
+	var kind: String = MODULE_KINDS[b.kind]
+	if kind == "guild" and b.guild == "fighters":
+		return ""  # the Fighters' hall is the arena (built the old way, sized for the pit)
+	if kind == "seat" and b.seat_type == "reeve":
+		kind = "manor"  # a reeve lives in a manor
+	if kind == "house" and rng.randf() < 0.2:
+		kind = "manor"
+	var area := (b.size.x + 1.5) * (b.size.z + 1.5)
+	var fits := house_modules().filter(func(m: Array) -> bool: return m[1] == kind)
+	if fits.is_empty():
+		return ""
+	fits.sort_custom(func(x: Array, y: Array) -> bool: return absf(x[2] - area) < absf(y[2] - area) or (absf(x[2] - area) == absf(y[2] - area) and x[0] < y[0]))
+	var best: float = absf(fits[0][2] - area)
+	var near := fits.filter(func(m: Array) -> bool: return absf(m[2] - area) <= best + 0.1)
+	return near[rng.randi_range(0, near.size() - 1)][0]
+
+
+## The way from one spot to another indoors: back out through the doorways or down the stairs from a
+## spot that needs them, then along the way to the next (spots["via"]); else straight there
+static func route(spots: Dictionary, from: Vector3, to: Vector3) -> PackedVector3Array:
+	var via: Dictionary = spots.get("via", {})
+	var out := PackedVector3Array()
+	for k: Vector3 in via:
+		if k.distance_to(from) < 1.0 and k.distance_to(to) > 1.0:
+			var back: PackedVector3Array = via[k]
+			for i in range(back.size() - 1, -1, -1):
+				out.append(back[i])
+			break
+	for k: Vector3 in via:
+		if k.distance_to(to) < 0.1:
+			out.append_array(via[k])
+			break
+	out.append(to)
+	return out
+
+
+# A building from its scene: the spawn points furnish it (RoomFiller), the markers say where the
+# door, the beds, the chests, the stations and the people's places are
+static func _from_module(b: BuildingPlot, path: String, interior_seed: int, level: int, today: int, rng: RandomNumberGenerator) -> Dictionary:
+	var room := (load(path) as PackedScene).instantiate() as RoomModule
+	room.set_meta("room_id", "building/%s" % b.id)
+	RoomFiller.fill(room, {"props_only": true, "seed": interior_seed})
+	var root := Node3D.new()
+	root.name = "Interior"
+	root.set_meta("building_id", b.id)
+	root.set_meta("module", path)
+	# everything comes out of the module, so the decorator measures each piece on its own
+	for n in room.find_children("*", "", true, false):
+		n.owner = null
+	for c in room.get_children():
+		room.remove_child(c)
+		root.add_child(c)
+	var floors := room.cells.y
+	var room_theme := String(room.themes[0]) if not room.themes.is_empty() else "house"
+	var bounds := room.bounds()
+	room.free()
+	var marks := {}
+	for c in root.get_children():
+		if c is Marker3D:
+			marks[String(c.name)] = c
+	# a building over a cellar: its ground floor (where the door is) goes to y 0, the cellar below
+	var ground := (marks["Door"] as Node3D).position.y if marks.has("Door") else 0.0
+	if ground != 0.0:
+		for c in root.get_children():
+			(c as Node3D).position.y -= ground
+	var at := func(n: String, fallback: Vector3 = Vector3.ZERO) -> Vector3: return (marks[n] as Node3D).position if marks.has(n) else fallback
+	var numbered := func(prefix: String) -> Array:
+		var out: Array = []
+		var i := 0
+		while marks.has("%s%d" % [prefix, i]):
+			out.append(marks["%s%d" % [prefix, i]])
+			i += 1
+		return out
+	var hx := bounds.size.x * 0.5
+	var hz := bounds.size.z * 0.5
+	var h := RoomModule.LEVEL - (InteriorKit.SLAB if floors > 1 else 0.0)
+
+	# lamps on every floor, one every 7 m or so
+	var lx := maxi(int(round(bounds.size.x / 7.0)), 1)
+	var lz := maxi(int(round(bounds.size.z / 7.0)), 1)
+	for f in floors:
+		for ix in lx:
+			for iz in lz:
+				var lamp := OmniLight3D.new()
+				lamp.light_color = LAMP_COLOR
+				lamp.light_energy = 1.3
+				lamp.omni_range = maxf(bounds.size.x / lx, bounds.size.z / lz) * 1.2 + 2.0
+				lamp.position = Vector3(-hx + (ix + 0.5) * bounds.size.x / lx, f * RoomModule.LEVEL - ground + 3.2, -hz + (iz + 0.5) * bounds.size.z / lz)
+				root.add_child(lamp)
+
+	var door: Vector3 = at.call("Door", Vector3(0, 0, -hz + 0.7))
+	var exit := DungeonDoor.new()
+	exit.name = "Exit"
+	exit.entrance_id = b.id
+	exit.label = "Leave %s" % b.display_name
+	exit.is_exit = true
+	root.add_child(exit)
+	exit.position = door + Vector3(0, 1.3, 0)
+
+	var beds: Array[Vector3] = []
+	for m: Node3D in numbered.call("Bed"):
+		beds.append(m.position)
+		RestSpot.make_bed(root, m.position, b)
+	var seats: Array[Vector3] = []
+	for m: Node3D in numbered.call("Seat"):
+		seats.append(m.position)
+	var work: Vector3 = at.call("Work")
+	var stations: Array[Vector3] = []
+	for n: String in marks:
+		if not n.begins_with("Station_"):
+			continue
+		var kind := n.substr(8)
+		if kind == "trade":
+			kind = {"alchemy": "alchemy_lab", "jeweler": "workbench"}.get(b.trade, "")
+		elif kind.begins_with("guild"):
+			var own: Array = GUILD_STATIONS.get(b.guild, [])
+			var i := kind.substr(5).to_int()
+			kind = own[i] if i < own.size() else ""
+		if kind != "":
+			stations.append(_station(root, kind, (marks[n] as Node3D).position, (marks[n] as Node3D).rotation.y))
+	var chests := 0
+	var chest_marks: Array = numbered.call("Chest")
+	for i in chest_marks.size():
+		var cname := "%s's Chest" % NameGen.first_name(b.owner_name)
+		var loot := _home_loot()
+		match b.kind:
+			BuildingPlot.Kind.SHOP:
+				cname = "Merchant Chest"
+				loot = _shop_loot()
+			BuildingPlot.Kind.SMITHY:
+				cname = "Smith's Chest"
+				loot = _shop_loot()
+			BuildingPlot.Kind.INN:
+				cname = "Innkeeper's Chest"
+				loot = _shop_loot()
+			BuildingPlot.Kind.TEMPLE:
+				cname = "Offering Box"
+				loot = _offering_loot()
+			BuildingPlot.Kind.GUILD_HALL:
+				cname = "Guild Chest"
+				loot = _shop_loot()
+			BuildingPlot.Kind.SEAT:
+				cname = "Tithe Chest" if b.seat_type == "reeve" else "Treasury Chest"
+				loot = _shop_loot()
+		if i > 0:
+			cname = "Strongbox"
+			loot = _shop_loot()
+		chests += _chest(root, b, i, cname, (chest_marks[i] as Node3D).position + Vector3(0, 0.35, 0), loot, interior_seed)
+	if b.kind == BuildingPlot.Kind.INN:
+		NoticeBoard.make(root, at.call("Notice", Vector3(-2.6, 0, -hz + 0.15)), (marks["Notice"] as Node3D).rotation.y if marks.has("Notice") else 0.0, b.town_id)
+	if b.kind == BuildingPlot.Kind.TEMPLE:
+		RestSpot.make_shrine(root, at.call("Shrine", Vector3(0, 0, hz - 1.3)))
+	# the banners of the guild or the lord's house
+	var banner_color := CLOTH
+	if b.kind == BuildingPlot.Kind.GUILD_HALL:
+		banner_color = TownBuilder.GUILD_COLORS.get(b.guild, CLOTH)
+	elif b.kind == BuildingPlot.Kind.SEAT:
+		banner_color = NamedSettlements.house_color(b.house)
+	for m: Node3D in numbered.call("Banner"):
+		POIBuilder.add_box(root, Vector3(1.2, 2.6, 0.06), m.position + Vector3(0, 2.6, -0.03), banner_color, 0.0, Vector3.ZERO, false)
+	if b.kind == BuildingPlot.Kind.GUILD_HALL and b.guild == "antiquarians" and marks.has("Case"):
+		var case := MuseumCase.new()
+		case.name = "MuseumCase"
+		root.add_child(case)
+		case.position = at.call("Case")
+		case.rotation.y = (marks["Case"] as Node3D).rotation.y
+	if b.kind == BuildingPlot.Kind.SEAT:
+		var board_mark: Vector3 = at.call("Bounty", Vector3(hx - 0.15, 0, 0))
+		var board := BountyBoard.make(root, board_mark, (marks["Bounty"] as Node3D).rotation.y if marks.has("Bounty") else -PI * 0.5, b.town_id)
+		stations.append(board.position)
+		var books := LoreBooks.for_town(b.town_name)
+		if not books.is_empty():
+			var loot: Array[LootEntry] = []
+			for id in books:
+				var le := LootEntry.new()
+				le.item = LoreBooks.get_item(id)
+				loot.append(le)
+			var shelf := POIBuilder.make_chest("Bookshelf", loot, "building/%s/lore" % b.id, interior_seed | 1)
+			root.add_child(shelf)
+			shelf.position = at.call("Lore", Vector3(-hx + 0.8, 0, hz - 1.0)) + Vector3(0, 0.35, 0)
+			stations.append(shelf.position)
+			chests += 1
+	# the ways to spots behind walls or upstairs
+	var via := {}
+	for n: String in marks:
+		if not n.begins_with("Via_"):
+			continue
+		var spot := n.substr(4, n.rfind("_") - 4)
+		if not marks.has(spot):
+			continue
+		var key: Vector3 = (marks[spot] as Node3D).position
+		var list: Array = via.get(key, [])
+		list.append([int(n.substr(n.rfind("_") + 1)), (marks[n] as Node3D).position])
+		via[key] = list
+	for key: Vector3 in via:
+		var list: Array = via[key]
+		list.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
+		var pts := PackedVector3Array()
+		for e: Array in list:
+			pts.append(e[1])
+		via[key] = pts
+
+	var owner := b.id if b.kind != BuildingPlot.Kind.GUILD_HALL else "guild:" + b.guild
+	if Homes.owns(b.id):
+		owner = ""  # your own home: nothing here is stolen
+		var spare: Array = numbered.call("Spare")
+		var extras := ["alchemy_lab", "workbench", "planter", "planter"]
+		for i in mini(spare.size(), extras.size()):
+			var m: Node3D = spare[i]
+			if extras[i] == "planter":
+				Planter.place(root, m.position, "planter/%s/%d" % [b.id, i - 2])
+				stations.append(m.position)
+			else:
+				stations.append(_station(root, extras[i], m.position, m.rotation.y))
+		for c in root.get_children():
+			var cc := c.get_node_or_null("ContainerComponent") as ContainerComponent
+			if cc != null:
+				cc.owner_id = ""
+				cc.display_name = "Your Chest"
+	var clear: Array[Vector3] = [door, work]
+	clear.append_array(seats)
+	clear.append_array(beds)
+	clear.append_array(stations)
+	for k: Vector3 in via:
+		for p in via[k]:
+			if p.y < 1.0:
+				clear.append(p)
+	var theme := "rich_home" if path.get_file().begins_with("manor") else theme_for(b, rng)
+	if b.kind == BuildingPlot.Kind.HOUSE and theme == "rich_home" and not path.get_file().begins_with("manor"):
+		theme = "home"
+	var decor := RoomDecorator.decorate(root, Rect2(-hx + InteriorKit.WALL, -hz + InteriorKit.WALL, hx * 2.0 - InteriorKit.WALL * 2.0, hz * 2.0 - InteriorKit.WALL * 2.0),
+		theme, level, interior_seed ^ 0x5eed, owner, "building/%s" % b.id, clear, 3, today, h)
+	var start: Vector3 = at.call("Start", door + Vector3(0, 0, 1.9))
+	return {
+		"root": root,
+		"start": start + Vector3(0, 0.1, 0),
+		"start_yaw": PI,
+		"ambient": AMBIENT,
+		"chests": chests,
+		"decor": decor,
+		"spots": {"exit": at.call("ExitSpot", door + Vector3(0, 0, 1.0)) + Vector3(0, 0.1, 0), "beds": beds, "work": work, "seats": seats, "via": via},
+		"theme": room_theme,
 	}
 
 

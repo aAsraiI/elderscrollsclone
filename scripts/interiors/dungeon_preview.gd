@@ -62,21 +62,38 @@ func _generate() -> Node3D:
 
 
 func _bake() -> void:
-	var built := _generate()
-	if built == null:
+	if recipe == null:
+		push_warning("DungeonPreview: pick a Recipe first")
 		return
-	var copy := built.duplicate()
-	_own(copy, copy)
+	var err := bake_to(recipe, seed_value, level, bake_path)
+	if err == OK:
+		print("DungeonPreview: baked to ", bake_path)
+	else:
+		push_error("DungeonPreview: can't bake (%d)" % err)
+
+
+## Saves a planned interior as a scene of room modules: the rooms with their caps and spawn points
+## (not filled: the game fills them), and the joins, so doors, levers and the secret room still
+## work. Name the scene in a DungeonData's Handmade or in InteriorOverrides to use it.
+static func bake_to(r: DungeonRecipe, seed_value: int, lvl: int, path: String) -> Error:
+	ModuleLibrary.reload()
+	var plan := DungeonAssembler.plan(r, seed_value, lvl)
+	var built := plan.build("baked")
+	built.name = String(path.get_file().get_basename()).to_pascal_case()
+	_own(built, built)
 	var ps := PackedScene.new()
-	ps.pack(copy)
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(bake_path.get_base_dir()))
-	ResourceSaver.save(ps, bake_path)
-	copy.free()
-	print("DungeonPreview: baked to ", bake_path)
+	var err := ps.pack(built)
+	if err == OK:
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+		err = ResourceSaver.save(ps, path)
+	built.free()
+	return err
 
 
-func _own(n: Node, owner_node: Node) -> void:
+# Everything added to the rooms (the caps) belongs to the baked scene; what is inside each room's
+# own scene stays that scene's
+static func _own(n: Node, owner_node: Node) -> void:
 	for c in n.get_children():
-		c.owner = owner_node
-		if c.scene_file_path == "":
-			_own(c, owner_node)
+		if c.owner == null:
+			c.owner = owner_node
+		_own(c, owner_node)

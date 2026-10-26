@@ -3,7 +3,7 @@ class_name RoomFiller
 extends RefCounted
 ## Fills a built room from its spawn points (SpawnSocket), the same way every visit:
 ##   furniture, decorations, wall decorations, ceiling things and lights: a prop from PropLibrary
-##     that fits the socket's tags, the room's theme and wealth (two props never overlap)
+##     that fits the socket's tags, the room's theme and wealth (two props never overlap, unless a socket is tagged "set": placed by design right beside another)
 ##   chests: a chest with loot for the level (the boss room's is "dungeon/<id>/chest_boss", where
 ##     quests put their items); loot: a satchel with a little in it
 ##   enemies: a group from the dungeon's spawn table; boss: the dungeon's boss
@@ -82,8 +82,23 @@ static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 				var did := String(ctx.get("dungeon_id", ""))
 				boss.died.connect(func(_e: Enemy) -> void: DungeonBuilder._on_boss_died(did, lmax + 3))
 				out["enemies"] += 1
-			SpawnSocket.Kind.TRAP, SpawnSocket.Kind.NPC, SpawnSocket.Kind.QUEST_ITEM, SpawnSocket.Kind.PATROL:
-				pass  # filled by the features and quest systems (1.13.8, 1.13.13)
+			SpawnSocket.Kind.NPC:
+				# a prisoner in a dungeon's cells, now and then (not in a lord's cells: those are the law's)
+				if s.tags.has("captive") and data != null and String(ctx.get("dungeon_id", "")) != "":
+					if Captive.make(s, room, key, rng, lmax) != null:
+						out["captives"] = int(out.get("captives", 0)) + 1
+			SpawnSocket.Kind.QUEST_ITEM:
+				# a quest's item waiting here: the record "quest_item/<dungeon id>" {"item": path} puts it at
+				# the dungeon's first quest-item spot (hand-made rooms place these; else the boss chest holds it)
+				var want := WorldState.get_record("quest_item/%s" % ctx.get("dungeon_id", ""))
+				if not want.is_empty() and not bool(ctx.get("quest_item_done", false)) and not WorldState.has_record(WorldItem.taken_key(key)):
+					ctx["quest_item_done"] = true  # the first quest-item spot in the dungeon
+					var item := load(String(want["item"])) as ItemData if ResourceLoader.exists(String(want.get("item", ""))) else null
+					if item != null:
+						WorldItem.place(item, 1, room, s.position + Vector3(0, 0.4, 0), key, "")
+						out["quest_items"] = int(out.get("quest_items", 0)) + 1
+			SpawnSocket.Kind.TRAP, SpawnSocket.Kind.PATROL:
+				pass  # traps come from InteriorFeatures, patrols from InteriorNav
 			_:
 				var kind_name := String(SpawnSocket.Kind.keys()[s.kind])
 				var e := PropLibrary.pick(kind_name, s.tags, theme, room.wealth, rng)
@@ -92,7 +107,7 @@ static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 				if e == null:
 					continue
 				var at := s.position
-				if taken.any(func(t: Array) -> bool: return Vector2(at.x - t[0].x, at.z - t[0].z).length() < e.radius + float(t[1]) and absf(at.y - t[0].y) < 1.5):
+				if not s.tags.has("set") and taken.any(func(t: Array) -> bool: return Vector2(at.x - t[0].x, at.z - t[0].z).length() < e.radius + float(t[1]) and absf(at.y - t[0].y) < 1.5):
 					continue
 				var prop := (load(e.path) as PackedScene).instantiate() as Node3D
 				room.add_child(prop)

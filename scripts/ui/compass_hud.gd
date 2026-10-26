@@ -202,5 +202,34 @@ func draw_strip(c: Control) -> void:
 				var mw := font.get_string_size(mtext, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 				c.draw_string_outline(font, Vector2(mat.x - mw * 0.5, HEIGHT + 24), mtext, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color.BLACK)
 				c.draw_string(font, Vector2(mat.x - mw * 0.5, HEIGHT + 24), mtext, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, WorldDebugMap.MARKER_COLOR.lightened(0.4))
+	elif dm != null and dm.nav != null:
+		# inside a stitched dungeon: the way out (white), and the quest's room (gold) when a quest
+		# points at this place, by the doorways (the next doorway on the way, not through walls)
+		var root := dm.get_interior_root()
+		var exit := root.find_child("Exit", true, false) as Node3D if root != null else null
+		var marks: Array = []
+		if exit != null:
+			marks.append([exit.global_position, Color(0.95, 0.95, 0.95), "Exit"])
+		var boss := dm.nav.boss_room()
+		var poi := world.get_poi(dm.current_entrance_id)
+		if boss >= 0 and poi != null:
+			for t in QuestManager.compass_targets():
+				if (t["pos"] as Vector2).distance_to(Vector2(poi.position.x, poi.position.z)) < 60.0:
+					marks.append([dm.nav.room_center(boss), Color(1.0, 0.85, 0.2), ""])
+					break
+		for m: Array in marks:
+			var way := dm.nav.path(here, m[0])
+			var to: Vector3 = way[0] - here
+			var x := _strip_x(heading, to)
+			if x == INF:
+				continue
+			var at := Vector2(mid + x, HEIGHT * 0.5)
+			var dia := PackedVector2Array([at + Vector2(0, -7), at + Vector2(6, 0), at + Vector2(0, 7), at + Vector2(-6, 0)])
+			c.draw_colored_polygon(dia, m[1])
+			c.draw_polyline(PackedVector2Array([dia[0], dia[1], dia[2], dia[3], dia[0]]), Color.BLACK, 1.2)
+			if String(m[2]) != "" and absf(x) < 50.0:
+				var ew := font.get_string_size(m[2], HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+				c.draw_string_outline(font, Vector2(at.x - ew * 0.5, HEIGHT + 12), m[2], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color.BLACK)
+				c.draw_string(font, Vector2(at.x - ew * 0.5, HEIGHT + 12), m[2], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color.WHITE)
 	# the middle mark
 	c.draw_line(Vector2(mid, 0), Vector2(mid, 6), Color(1.0, 0.85, 0.35), 2.0)

@@ -124,3 +124,105 @@ static func _mergeable(mi: MeshInstance3D) -> bool:
 	if m == null or m.emission_enabled or m.albedo_color.a < 1.0 or m.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
 		return false
 	return String(mi.get_parent().name).begins_with("@")
+
+
+## Alpha 1.13 interiors: merges the static drawing of each room module (its shell, inner walls,
+## caps and props, all made by InteriorKit or prop scenes) into one mesh per room, so a room is
+## one draw call and can be hidden as one (InteriorAtmosphere). Glowing, see-through and hidden
+## parts stay, and so does anything in the group "interior_dynamic" (a secret wall that opens) or
+## under a script of its own (doors, levers, chests, people). Collision is left as it is. A root
+## with no room modules (a building interior) is merged as one room. Returns how many parts merged.
+static func merge_interior(root: Node3D) -> int:
+	var rooms: Array[Node3D] = []
+	for c in root.get_children():
+		if c is RoomModule:
+			rooms.append(c)
+	if rooms.is_empty():
+		rooms.append(root)
+	var total := 0
+	for room in rooms:
+		var found: Array = []
+		_collect_interior(room, Transform3D.IDENTITY, found, room == root)
+		if found.size() < 2:
+			continue
+		var verts := PackedVector3Array()
+		var normals := PackedVector3Array()
+		var colors := PackedColorArray()
+		var indices := PackedInt32Array()
+		for f in found:
+			var mi := f[0] as MeshInstance3D
+			var xf: Transform3D = f[1]
+			var src := (mi.mesh as PrimitiveMesh).get_mesh_arrays()
+			var v: PackedVector3Array = src[Mesh.ARRAY_VERTEX]
+			var n: PackedVector3Array = src[Mesh.ARRAY_NORMAL]
+			var idx: PackedInt32Array = src[Mesh.ARRAY_INDEX]
+			var color := (mi.material_override as StandardMaterial3D).albedo_color
+			var normal_basis := xf.basis.inverse().transposed()
+			var base := verts.size()
+			for i in v.size():
+				verts.append(xf * v[i])
+				normals.append((normal_basis * n[i]).normalized())
+				colors.append(color)
+			for i in idx:
+				indices.append(base + i)
+		var arrays := []
+		arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX] = verts
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		arrays[Mesh.ARRAY_COLOR] = colors
+		arrays[Mesh.ARRAY_INDEX] = indices
+		var mesh := ArrayMesh.new()
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		mesh.surface_set_material(0, material())
+		var merged := MeshInstance3D.new()
+		merged.name = "MergedRoom"
+		merged.mesh = mesh
+		room.add_child(merged)
+		# the big flat pieces (walls, floors, ceilings) hide what is behind them from the renderer
+		var occ := 0
+		for f in found:
+			var mi := f[0] as MeshInstance3D
+			var bm := mi.mesh as BoxMesh
+			if bm != null:
+				var s := bm.size
+				var dims := [s.x, s.y, s.z]
+				dims.sort()
+				if dims[0] >= 0.25 and dims[1] >= 2.0:
+					var oi := OccluderInstance3D.new()
+					oi.name = "Occluder%d" % occ
+					var bo := BoxOccluder3D.new()
+					bo.size = s
+					oi.occluder = bo
+					room.add_child(oi)
+					oi.transform = f[1]
+					occ += 1
+		for f in found:
+			var mi := f[0] as MeshInstance3D
+			mi.get_parent().remove_child(mi)
+			mi.free()
+		total += found.size()
+	return total
+
+
+static func _collect_interior(node: Node, xf: Transform3D, found: Array, flat: bool) -> void:
+	for child in node.get_children():
+		if not (child is Node3D) or child.is_in_group("interior_dynamic"):
+			continue
+		if child is RoomModule and not flat:
+			continue  # another room: merged on its own
+		if child.get_script() != null and not (child is RoomModule or child is InteriorProp or child is DoorwayMarker or child is SpawnSocket):
+			continue
+		var c := child as Node3D
+		if not c.visible:
+			continue
+		var cxf := xf * c.transform
+		if c is MeshInstance3D:
+			var mi := c as MeshInstance3D
+			var parent := mi.get_parent()
+			var m := mi.material_override as StandardMaterial3D
+			if mi.mesh is PrimitiveMesh and mi.get_child_count() == 0 and m != null and not m.emission_enabled \
+					and m.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED and m.albedo_color.a >= 1.0 \
+					and (parent.is_in_group("interior_geometry") or parent is InteriorProp):
+				found.append([mi, cxf])
+		else:
+			_collect_interior(c, cxf, found, flat)

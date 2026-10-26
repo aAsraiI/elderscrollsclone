@@ -636,7 +636,7 @@ func _place_inside(r: Resident, walk_in: bool) -> void:
 	r.node_inside = true
 	var pose := _inside_pose(r, bed)
 	if walk_in:
-		e.follow_route(PackedVector3Array([root.to_global(spot)]), false, WALK)
+		e.follow_route(_global_route(root, InteriorBuilder.route(spots, start, spot)), false, WALK)
 		if bed:
 			e.route_finished.connect(func() -> void: _lie_down(e, root.to_global(spot)), CONNECT_ONE_SHOT)
 		elif e.body != null:
@@ -716,8 +716,17 @@ func _walk_out_of_interior(r: Resident) -> void:
 	if root == null:
 		e.queue_free()
 		return
-	e.follow_route(PackedVector3Array([root.to_global(dm.current_spots.get("exit", Vector3.ZERO))]), false, WALK)
+	var here := root.to_local(e.global_position)
+	e.follow_route(_global_route(root, InteriorBuilder.route(dm.current_spots, here, dm.current_spots.get("exit", Vector3.ZERO))), false, WALK)
 	e.route_finished.connect(e.queue_free, CONNECT_ONE_SHOT)
+
+
+# A route indoors (local points, through doorways and up stairs) in world space
+func _global_route(root: Node3D, local: PackedVector3Array) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for p in local:
+		out.append(root.to_global(p))
+	return out
 
 
 func _lie_down(e: Enemy, bed: Vector3) -> void:

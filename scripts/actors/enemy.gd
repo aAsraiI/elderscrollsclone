@@ -174,6 +174,14 @@ var _route_check_time := 0.0
 ## Optional: func(from: Vector3, to: Vector3) -> PackedVector3Array, a walking route between two
 ## world positions (a town's streets, see TownLife). A chase that gets stuck on a wall uses it.
 var path_provider: Callable
+## Ask path_provider for the way every second of a chase, not only when stuck (a stitched
+## dungeon's doorways, InteriorNav)
+var path_always := false
+## Asleep (a dungeon's sleepers): sees nothing until you come close or hurt it
+var asleep := false
+## Waiting in ambush: sees nothing until InteriorNav springs it
+var lurking := false
+var _falling_back := false  # running back to a deeper room: it looks again when it gets there
 var _chase_path := PackedVector3Array()
 var _chase_check_pos := Vector3.ZERO
 var _chase_check_time := 0.0
@@ -584,6 +592,7 @@ func follow_route(points: PackedVector3Array, loop: bool = false, speed_mult: fl
 
 func stop_route() -> void:
 	route = PackedVector3Array()
+	_falling_back = false
 	if state == State.PATROL:
 		_enter_state(State.IDLE)
 
@@ -598,8 +607,29 @@ func set_home(pos: Vector3) -> void:
 	_home_set = true
 
 
+## Lies down asleep where it is (wakes when you come close or hurt it)
+func sleep() -> void:
+	asleep = true
+	wander_radius = 0.0
+	if body != null:
+		body.pose = &"sleep"
+
+
+func wake() -> void:
+	if not asleep:
+		return
+	asleep = false
+	if body != null:
+		body.pose = &""
+
+
+## Waits in ambush (or stops waiting)
+func lurk(on: bool) -> void:
+	lurking = on
+
+
 func _tick_patrol(delta: float) -> void:
-	if disposition == Disposition.HOSTILE and _can_see_target():
+	if disposition == Disposition.HOSTILE and not _falling_back and _can_see_target():
 		_alerted = true
 		animation.trigger(AnimationHooks.ALERT, animation_set)
 		_enter_state(State.CHASE)
@@ -633,6 +663,7 @@ func _tick_patrol(delta: float) -> void:
 
 
 func _end_route() -> void:
+	_falling_back = false
 	route = PackedVector3Array()
 	set_home(global_position)
 	_next_wander_at = _clock + randf_range(2.0, 6.0)
@@ -745,7 +776,7 @@ func _tick_chase(delta: float) -> void:
 	# Stuck behind a house for a second: take the streets (when there is a route to follow)
 	_chase_check_time += delta
 	if _chase_check_time >= 1.0:
-		if global_position.distance_to(_chase_check_pos) < 0.6 and path_provider.is_valid() and _chase_path.is_empty():
+		if (path_always or global_position.distance_to(_chase_check_pos) < 0.6) and path_provider.is_valid() and (_chase_path.is_empty() or path_always):
 			_chase_path = path_provider.call(global_position, _target.global_position)
 		_chase_check_pos = global_position
 		_chase_check_time = 0.0
@@ -1062,6 +1093,8 @@ func _try_cast(dist: float) -> bool:
 		return false
 	if _calm_until > _clock:
 		return false
+	if asleep or lurking:
+		return false
 	var pick: SpellData = null
 	var hurt := stats.health < stats.get_stat("max_health") * 0.4
 	for s in spells:
@@ -1330,6 +1363,12 @@ func _can_see_target() -> bool:
 		return false
 	if _calm_until > _clock:
 		return false
+	if asleep:
+		if _flat_to_target().length() > 3.5:
+			return false
+		wake()  # you came too close
+	if lurking:
+		return false
 	# The player's Stealth decides when an unalerted creature has really seen them (darkness,
 	# sneaking, Sneak skill). Once alerted it keeps track the simple way below.
 	if not _alerted and _target.has_meta("stealth"):
@@ -1418,6 +1457,8 @@ func _process(delta: float) -> void:
 
 func _on_damaged(info: DamageInfo, amount: float) -> void:
 	_flash()
+	wake()
+	lurking = false
 	var color := GOLD
 	var size := 48
 	if info.heavy or info.kind == &"slam":
@@ -1502,6 +1543,11 @@ func _maybe_retreat(info: DamageInfo) -> void:
 	_target = from  # flee_from() is for the peaceful; a hostile one runs, then idles and comes back
 	_flee_until = _clock + 4.0 + cunning * 3.0
 	_popup("Retreat!", global_position + Vector3.UP * 2.2, Color(0.9, 0.9, 0.9), 32)
+	if has_meta("fallback") and path_provider.is_valid():
+		# in a dungeon: back to a deeper room, where its friends are (InteriorNav), then it comes again
+		follow_route(path_provider.call(global_position, get_meta("fallback")), false, 1.15)
+		_falling_back = true
+		return
 	_enter_state(State.FLEE)
 
 

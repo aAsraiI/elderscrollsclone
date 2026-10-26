@@ -1,16 +1,16 @@
 [gd_resource type="Resource" script_class="DungeonRecipe" format=3]
 
 [ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_r"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/setpieces/glow_grotto.tscn" id="2_4u4gi"]
 
 [resource]
 script = ExtResource("1_r")
 themes = PackedStringArray("cave")
 mix = 0.0
 rooms_base = 7
-rooms_per_10_levels = 3
 required = PackedStringArray("cavern")
 branching = 0.45
 corridors = 0.65
-extra_floors = 0
 density = 0.9
 light = 0
+set_pieces = Array[PackedScene]([ExtResource("2_4u4gi")])

@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="InteriorOverrides" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_harrowford.tscn" id="1_xy4lo"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_merewater.tscn" id="2_u265j"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_reedholm.tscn" id="3_xrrml"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_saltmere.tscn" id="4_exlmk"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_gullhaven.tscn" id="5_w2eac"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_thornhaven.tscn" id="6_bvwh0"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_elmwick.tscn" id="7_1qwec"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_briarwatch.tscn" id="8_lvjdy"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_blackfen.tscn" id="9_707tw"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_gravenhold.tscn" id="10_0lr00"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_sunhold.tscn" id="11_c3iqn"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_dunes_rest.tscn" id="12_stq2s"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_cragmoor.tscn" id="13_f3r65"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_heathwick.tscn" id="14_7c6in"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_pinewatch.tscn" id="15_mn0xj"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_dustgate.tscn" id="16_d7g5e"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_frosthelm.tscn" id="17_0ixa7"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_wintergate.tscn" id="18_wfmk6"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_northwatch.tscn" id="19_sci3w"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_cinderhold.tscn" id="20_8b8qe"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/handmade/seat_emberwick.tscn" id="21_33kkn"]
+[ext_resource type="Script" path="res://scripts/interiors/interior_overrides.gd" id="22_lbi8v"]
+
+[resource]
+script = ExtResource("22_lbi8v")
+buildings = Dictionary[String, PackedScene]({
+"Blackfen/Mirehold Castle": ExtResource("9_707tw"),
+"Briarwatch/Briarwatch Tower": ExtResource("8_lvjdy"),
+"Cinderhold/The Obsidian Spire": ExtResource("20_8b8qe"),
+"Cragmoor/Brannoch Keep": ExtResource("13_f3r65"),
+"Dune's Rest/Dune's Rest Citadel": ExtResource("12_stq2s"),
+"Dustgate/Dustgate Fort": ExtResource("16_d7g5e"),
+"Elmwick/Elmwick Lodge": ExtResource("7_1qwec"),
+"Emberwick/Emberwick Bastion": ExtResource("21_33kkn"),
+"Frosthelm/Frosthelm Keep": ExtResource("17_0ixa7"),
+"Gravenhold/Gravenhold Citadel": ExtResource("10_0lr00"),
+"Gullhaven/Gullhaven Tower": ExtResource("5_w2eac"),
+"Harrowford/Harrowford Manor": ExtResource("1_xy4lo"),
+"Heathwick/Heathwick Hall": ExtResource("14_7c6in"),
+"Merewater/Castle Stillmere": ExtResource("2_u265j"),
+"Northwatch/Northwatch Longhall": ExtResource("19_sci3w"),
+"Pinewatch/Pinewatch Tower": ExtResource("15_mn0xj"),
+"Reedholm/Reedholm Keep": ExtResource("3_xrrml"),
+"Saltmere/Tidewell Keep": ExtResource("4_exlmk"),
+"Sunhold/The Palace of Mirrors": ExtResource("11_c3iqn"),
+"Thornhaven/Greenspire Keep": ExtResource("6_bvwh0"),
+"Wintergate/The White Hall": ExtResource("18_wfmk6")
+})

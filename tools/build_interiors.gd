@@ -286,7 +286,7 @@ func _room(theme: String, file: String, kind: String, role: RoomModule.Role, cel
 	if role == RoomModule.Role.ENTRANCE:
 		_marker(room, "PlayerStart", Vector3(0, 0.1, 0), PI)
 		_marker(room, "Exit", Vector3(RoomModule.CELL * 0.5, 0.0, -room.bounds().size.z * 0.5 + 0.6), PI)  # the way out, on the front wall
-	_save(room, MOD_DIR + theme + "/" + file + ".tscn")
+	_save(room, String(opts.get("path", MOD_DIR + theme + "/" + file + ".tscn")))
 
 
 func _marker(room: Node3D, name: String, at: Vector3, yaw: float) -> void:
@@ -545,3 +545,6 @@ func _gallery(room: RoomModule, theme: String) -> void:
 	for sx in [-1, 1]:
 		for sz in [-1, 1]:
 			InteriorKit.box(holder, "Post%d%d" % [sx + 1, sz + 1], Vector3(0.6, RoomModule.LEVEL, 0.6), Vector3(sx * (b.size.x * 0.5 - w), RoomModule.LEVEL * 0.5, sz * (b.size.z * 0.5 - w)), trim, room)
+	# up on the gallery: archers waiting to shoot down at whoever comes in (InteriorNav springs them)
+	for side: float in [-1.0, 1.0]:
+		_socket(room, S.ENEMY, ["ambush", "archer"], Vector3(side * (b.size.x * 0.5 - w * 0.5), RoomModule.LEVEL, 1.5), -side * PI * 0.5, 0.6, 1)

@@ -112,6 +112,7 @@ static func decorate(root: Node3D, room: Rect2, theme: String, level: int, room_
 	var tags := PackedStringArray(t["tags"])
 	var table := ItemCatalog.tag_loot(tags, level, 1.0)
 	var fill: float = t["fill"]
+	fill = maxf(fill, minf(0.85, 3.5 / maxf(slots.size(), 1.0)))  # a small room still has a few things about
 	var items := 0
 	for i in slots.size():
 		var slot: Array = slots[i]
@@ -160,7 +161,13 @@ static func _existing_surfaces(root: Node3D, room: Rect2) -> Array:
 		var b := ItemModels.get_bounds(c as Node3D)
 		b.position += (c as Node3D).position
 		var top := b.end.y
-		if top < 0.6 or top > 1.3 or b.size.x * b.size.z < 0.25 or b.size.x > room.size.x * 0.9 or b.size.z > room.size.y * 0.9:
+		if c is InteriorProp and (c as InteriorProp).tags.has("shelf"):
+			# a shelf prop (1.13 rooms): one thing on each plank, just in front of its back board
+			var fwd := (c as Node3D).basis * Vector3(0, 0, -0.05)
+			for y: float in [0.62, 1.22]:
+				out.append([Vector3(b.get_center().x, y + (c as Node3D).position.y, b.get_center().z) + fwd, Vector2(0.5, 0.3)])
+			continue
+		if top < 0.6 or top > 1.5 or b.size.x * b.size.z < 0.25 or b.size.x > room.size.x * 0.9 or b.size.z > room.size.y * 0.9:
 			continue
 		out.append([Vector3(b.get_center().x, top, b.get_center().z), Vector2(b.size.x, b.size.z)])
 		if b.size.x * b.size.z > 1.0:  # a long counter holds two things
@@ -402,7 +409,7 @@ class Occupancy:
 	## Everything already standing in the room (furniture, not walls, floor or ceiling)
 	func mark_existing(root: Node3D) -> void:
 		for c in root.get_children():
-			if not (c is Node3D) or c is Light3D or c is WorldItem:
+			if not (c is Node3D) or c is Light3D or c is WorldItem or c is Marker3D or c is SpawnSocket:
 				continue
 			var cp := (c as Node3D).position
 			if not rect.has_point(Vector2(cp.x, cp.z)):

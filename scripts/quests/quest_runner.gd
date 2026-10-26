@@ -476,7 +476,14 @@ func _tick_objectives(d: QuestData, rec: Dictionary, p: Node3D) -> void:
 				_set_count(d, si, oi, mini(inv.get_count(it), o.count) if it != null else 0)
 			QuestObjective.Type.REACH:
 				var pl := QuestTargets.place(world, o.place)
-				if not pl.is_empty():
+				if o.target.begins_with("room:"):
+					# a room inside the place's dungeon ("room:boss", "room:war_room")
+					var dm := world.dungeons
+					if dm != null and dm.nav != null and (pl.is_empty() or String(pl.get("poi", dm.current_entrance_id)) == dm.current_entrance_id):
+						var here := dm.nav.room_of(p)
+						if here >= 0 and dm.nav.room_is(here, o.target.substr(5)):
+							_set_count(d, si, oi, o.count)
+				elif not pl.is_empty():
 					var at: Vector3 = pl["pos"]
 					if Vector2(at.x - p.global_position.x, at.z - p.global_position.z).length() <= o.radius:
 						_set_count(d, si, oi, o.count)

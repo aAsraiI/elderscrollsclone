@@ -87,6 +87,7 @@ static func apply(plan: DungeonAssembler, root: Node3D, data: DungeonData, dunge
 			var d := near.doorways()[int(l[1])]
 			var wall := InteriorKit.cap(d, String(near.themes[0]))
 			wall.name = "SecretWall"
+			wall.add_to_group("interior_dynamic")  # it opens: never merged into the room
 			var stone := DungeonFeature.new()
 			stone.kind = DungeonFeature.Kind.SECRET
 			stone.save_id = "%s/secret" % near.get_meta("room_id")

@@ -102,7 +102,7 @@ func t_in_game() -> void:
 	await frames(10)
 	var interior := wm.dungeons.get_interior_root()
 	var items := _items(interior)
-	check("the house is furnished with things in it", items.size() >= 3, str(items.size()))
+	check("the house is furnished with things in it", items.size() >= 3, "%d in %s" % [items.size(), interior.get_meta("module", "")])
 	check("they are the family's", items.all(func(wi: WorldItem) -> bool: return wi.owner_id == house.id))
 	var w := items[0] as WorldItem
 	var thing := w.item

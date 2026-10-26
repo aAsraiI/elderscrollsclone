@@ -44,6 +44,8 @@ static func mark_cleared(poi_id: String) -> void:
 		DialogueState.system_entry("Place", "Cleared: %s." % _name_of(poi_id), "")
 		Rumors.on_cleared(poi_id)
 	rec["cleared"] = true
+	if not rec.has("cleared_day"):
+		rec["cleared_day"] = Rumors._day()  # new occupants may move in a while later (DungeonRefill)
 	WorldState.set_record("found/" + poi_id, rec)
 
 

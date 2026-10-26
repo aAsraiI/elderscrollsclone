@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="DungeonRecipe" format=3]
 
 [ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_r"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/setpieces/war_council.tscn" id="2_ompov"]
 
 [resource]
 script = ExtResource("1_r")
@@ -10,7 +11,5 @@ rooms_base = 6
 rooms_per_10_levels = 2
 required = PackedStringArray("den", "storeroom")
 branching = 0.3
-corridors = 0.55
-extra_floors = 0
 density = 1.1
-light = 1
+set_pieces = Array[PackedScene]([ExtResource("2_ompov")])

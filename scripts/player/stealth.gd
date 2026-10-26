@@ -349,6 +349,8 @@ func _measure_light() -> float:
 	var inside := dm != null and dm.is_inside()
 	if inside:
 		base = DARK_BUILDING if dm.is_in_building() else DARK_DUNGEON
+		if dm.current_darkness >= 0.0:
+			base = dm.current_darkness  # the place's own darkness (a crypt is darker than a fort)
 	else:
 		var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
 		if clock != null:

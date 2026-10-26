@@ -1,16 +1,13 @@
 [gd_resource type="Resource" script_class="DungeonRecipe" format=3]
 
 [ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_r"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/setpieces/war_council.tscn" id="2_74hl6"]
 
 [resource]
 script = ExtResource("1_r")
 themes = PackedStringArray("fort")
 mix = 0.0
-rooms_base = 8
-rooms_per_10_levels = 3
 required = PackedStringArray("barracks", "war_room", "kitchen", "armory")
-branching = 0.35
-corridors = 0.55
 extra_floors = 1
-density = 1.0
 light = 2
+set_pieces = Array[PackedScene]([ExtResource("2_74hl6")])

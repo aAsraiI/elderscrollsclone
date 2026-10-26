@@ -28,6 +28,9 @@ extends Resource
 @export_range(0.2, 2.0) var density := 1.0
 ## Light: 0 dark, 1 dim, 2 lit
 @export_range(0, 2) var light := 1
+## Hand-made rooms (RoomModule scenes, outside the module folders): one of them is set into the
+## dungeon about half way through, a unique set-piece among the random rooms
+@export var set_pieces: Array[PackedScene] = []
 
 
 ## Rooms for a dungeon of this level

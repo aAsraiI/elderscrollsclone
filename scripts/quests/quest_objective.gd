@@ -8,7 +8,8 @@ extends Resource
 ##   COLLECT    carry Count of item Target (res:// path or item id); handed over at turn-in
 ##   DELIVER    carry item Target to person Who and ask them about Topic (it is taken)
 ##   TALK       ask person Who about Topic; they answer Say
-##   REACH      come within Radius meters of Place
+##   REACH      come within Radius meters of Place; with Target "room:<kind>" (room:boss,
+##              room:war_room), walk into a room of that kind in Place's dungeon
 ##   STEAL      steal Count of item Target (from someone else's container)
 ##   PERSUADE   make person Who like you to at least Count (disposition)
 ##   USE_ITEM   use (eat, drink, read) item Target Count times

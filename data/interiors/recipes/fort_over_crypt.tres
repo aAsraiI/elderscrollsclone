@@ -1,16 +1,15 @@
 [gd_resource type="Resource" script_class="DungeonRecipe" format=3]
 
 [ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_r"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/setpieces/war_council.tscn" id="2_tkjyy"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/setpieces/kings_tomb.tscn" id="3_4l0lv"]
 
 [resource]
 script = ExtResource("1_r")
 themes = PackedStringArray("fort", "crypt")
 mix = 0.3
 rooms_base = 9
-rooms_per_10_levels = 3
 required = PackedStringArray("barracks", "kitchen", "burial_hall")
-branching = 0.35
 corridors = 0.5
 extra_floors = 1
-density = 1.0
-light = 1
+set_pieces = Array[PackedScene]([ExtResource("2_tkjyy"), ExtResource("3_4l0lv")])

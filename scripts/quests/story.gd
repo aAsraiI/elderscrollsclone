@@ -16,6 +16,8 @@ extends Node
 const ID := "story"
 const NAME := "The Ashen Eclipse"
 const TOPICS := {2: "the sealed letter", 3: "the eclipse codex", 5: "the eclipse"}
+## The hand-made vault the Codex lies in (tools/build_handmade.gd; finish it in the editor)
+const CODEX_VAULT := "res://scenes/interiors/handmade/codex_vault.tscn"
 
 var world: WorldManager
 var _timer := 3.0
@@ -148,6 +150,9 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 			s2["stage"] = 2
 			s2["pos"] = [dungeon.position.x, dungeon.position.z]
 			_store(s2)
+			# the Codex lies in a hand-made vault (if the place hasn't been entered yet)
+			if not WorldState.has_record("stitched/" + dungeon.id) and ResourceLoader.exists(CODEX_VAULT):
+				WorldState.set_record("handmade/" + dungeon.id, {"scene": CODEX_VAULT})
 			var where := DialogueEngine.poi_topic_name(world, dungeon)
 			return _say("The Ash Cult. They believe a ritual written in the Eclipse Codex can put out the sun, and give the night to their masters. Their scouts were seen at %s, %s of here. Find the Codex before they do: clear that place to its deepest room." % [where, DialogueEngine.compass(Vector2(dungeon.position.x - s.position.x, dungeon.position.z - s.position.z))])
 		3:

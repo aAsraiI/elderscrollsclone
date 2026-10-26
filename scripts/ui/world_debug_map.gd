@@ -151,8 +151,11 @@ func teleport_to(spot: Vector2) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _manager == null or not event.is_action_pressed(ACTION) or event.is_echo():
 		return
+	var dm := _manager.dungeons
 	if _open:
 		close()
+	elif not get_tree().paused and dm != null and dm.is_inside() and dm.nav != null:
+		DungeonMap.open_for(get_tree(), dm.nav)  # inside a stitched dungeon: its own map
 	elif not get_tree().paused:
 		open()
 	else:

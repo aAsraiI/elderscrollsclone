@@ -1,0 +1,324 @@
+[gd_scene format=3 uid="uid://ctlxx1ejoesrl"]
+
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/entrance.tscn" id="1_g01na"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/burial_hall_b.tscn" id="3_flh6h"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/corridor_corner.tscn" id="4_v7h2c"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="5_4lcdq"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/ossuary_b.tscn" id="6_31qic"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/corridor_long.tscn" id="7_3dpk2"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/dead_end.tscn" id="8_l2qfb"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/junction_cross.tscn" id="9_h8w3y"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/setpieces/kings_tomb.tscn" id="10_f1wbb"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/junction_t.tscn" id="11_j1xvd"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/sarcophagi_b.tscn" id="12_35cg0"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/ritual_circle.tscn" id="13_flh6h"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/modules/crypt/boss_tomb.tscn" id="13_r4hug"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/altar.tscn" id="14_v7h2c"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/candle_stand.tscn" id="15_4lcdq"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_s1654"]
+size = Vector3(3.3, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_n64gk"]
+size = Vector3(3.3, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jic10"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_s38pe"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_anjhm"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_m115b"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j8ih1"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mhb1s"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qwhrc"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tc5ed"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wcdph"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_l0q2s"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3klv5"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8p60c"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rvgey"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0bsv8"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h3fqd"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bh1ko"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tvl4u"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_l8qca"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7ma4o"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dknel"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j65pf"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_80s4g"]
+size = Vector3(2.5, 3.25, 0.45)
+
+[node name="CodexVault" type="Node3D" unique_id=521120507]
+metadata/links = [[0, 1, 1, 0], [1, 2, 2, 1], [1, 1, 3, 2], [3, 1, 4, 0], [4, 1, 5, 0], [3, 0, 6, 3], [6, 2, 7, 1], [0, 0, 8, 1], [8, 0, 9, 0], [7, 0, 10, 0], [10, 2, 11, 0], [11, 2, 12, 0], [11, 1, 13, 1], [7, 2, 14, 0], [10, 1, 15, 1], [9, 1, 16, 1], [16, 0, 17, 1], [6, 1, 18, 2], [13, 0, 19, 0]]
+metadata/secret_link = []
+
+[node name="R0_entrance" parent="." unique_id=2119255609 instance=ExtResource("1_g01na")]
+metadata/room_id = "baked/r0"
+metadata/depth = 0
+
+[node name="R1_burial_hall_b" parent="." unique_id=743061975 instance=ExtResource("3_flh6h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 8)
+metadata/room_id = "baked/r1"
+metadata/depth = 1
+
+[node name="R2_corridor_corner" parent="." unique_id=178602866 instance=ExtResource("4_v7h2c")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 14, 0, 10)
+metadata/room_id = "baked/r2"
+metadata/depth = 2
+
+[node name="Cap_Doorway0" type="StaticBody3D" parent="R2_corridor_corner" unique_id=84113113 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="R2_corridor_corner/Cap_Doorway0" unique_id=1938078601]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_s1654")
+
+[node name="Shape" type="CollisionShape3D" parent="R2_corridor_corner/Cap_Doorway0" unique_id=135601367]
+shape = SubResource("BoxShape3D_n64gk")
+
+[node name="R3_ossuary_b" parent="." unique_id=496540979 instance=ExtResource("6_31qic")]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, 6, 0, 16)
+metadata/room_id = "baked/r3"
+metadata/depth = 2
+
+[node name="R4_corridor_long" parent="." unique_id=1572483836 instance=ExtResource("7_3dpk2")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 18, 0, 14)
+metadata/room_id = "baked/r4"
+metadata/depth = 3
+
+[node name="R5_dead_end" parent="." unique_id=53363309 instance=ExtResource("8_l2qfb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 26, 0, 14)
+metadata/room_id = "baked/r5"
+metadata/depth = 4
+
+[node name="R6_junction_cross" parent="." unique_id=1539958091 instance=ExtResource("9_h8w3y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 18)
+metadata/room_id = "baked/r6"
+metadata/depth = 3
+
+[node name="Cap_Doorway0" type="StaticBody3D" parent="R6_junction_cross" unique_id=1596812194 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="R6_junction_cross/Cap_Doorway0" unique_id=1068562212]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_jic10")
+
+[node name="Shape" type="CollisionShape3D" parent="R6_junction_cross/Cap_Doorway0" unique_id=2107955872]
+shape = SubResource("BoxShape3D_s38pe")
+
+[node name="R7_burial_hall_b" parent="." unique_id=541312832 instance=ExtResource("3_flh6h")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 1.9999998, 0, 24)
+metadata/room_id = "baked/r7"
+metadata/depth = 4
+
+[node name="R8_corridor_corner" parent="." unique_id=1043651638 instance=ExtResource("4_v7h2c")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.9999999, 0, -6)
+metadata/room_id = "baked/r8"
+metadata/depth = 1
+
+[node name="R9_ossuary_b" parent="." unique_id=214054377 instance=ExtResource("6_31qic")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 6, 0, -8)
+metadata/room_id = "baked/r9"
+metadata/depth = 2
+
+[node name="Cap_Doorway2" type="StaticBody3D" parent="R9_ossuary_b" unique_id=396025152 groups=["interior_geometry"]]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.8, 1.6, 4)
+
+[node name="Mesh" type="MeshInstance3D" parent="R9_ossuary_b/Cap_Doorway2" unique_id=608986492]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_anjhm")
+
+[node name="Shape" type="CollisionShape3D" parent="R9_ossuary_b/Cap_Doorway2" unique_id=1774595063]
+shape = SubResource("BoxShape3D_m115b")
+
+[node name="R10_kings_tomb" parent="." unique_id=729034800 instance=ExtResource("10_f1wbb")]
+transform = Transform3D(1, 0, 1.7484555e-07, 0, 1, 0, -1.7484555e-07, 0, 1, 6.0000005, 0, 34)
+metadata/room_id = "baked/r10"
+metadata/depth = 5
+
+[node name="R11_junction_t" parent="." unique_id=197762699 instance=ExtResource("11_j1xvd")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 14, 0, 34)
+metadata/room_id = "baked/r11"
+metadata/depth = 6
+
+[node name="R12_dead_end" parent="." unique_id=1736494063 instance=ExtResource("8_l2qfb")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14, 0, 30)
+metadata/room_id = "baked/r12"
+metadata/depth = 7
+
+[node name="R13_burial_hall_b" parent="." unique_id=246849355 instance=ExtResource("3_flh6h")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 18, 0, 40)
+metadata/room_id = "baked/r13"
+metadata/depth = 7
+
+[node name="Cap_Doorway2" type="StaticBody3D" parent="R13_burial_hall_b" unique_id=1601899018 groups=["interior_geometry"]]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 5.8, 1.6, 2)
+
+[node name="Mesh" type="MeshInstance3D" parent="R13_burial_hall_b/Cap_Doorway2" unique_id=806844653]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_j8ih1")
+
+[node name="Shape" type="CollisionShape3D" parent="R13_burial_hall_b/Cap_Doorway2" unique_id=948081980]
+shape = SubResource("BoxShape3D_mhb1s")
+
+[node name="R14_burial_hall_b" parent="." unique_id=519354307 instance=ExtResource("3_flh6h")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, -8, 0, 26)
+metadata/room_id = "baked/r14"
+metadata/depth = 5
+
+[node name="Cap_Doorway1" type="StaticBody3D" parent="R14_burial_hall_b" unique_id=1821202710 groups=["interior_geometry"]]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4, 1.6, 3.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="R14_burial_hall_b/Cap_Doorway1" unique_id=1491294574]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_qwhrc")
+
+[node name="Shape" type="CollisionShape3D" parent="R14_burial_hall_b/Cap_Doorway1" unique_id=575478276]
+shape = SubResource("BoxShape3D_tc5ed")
+
+[node name="Cap_Doorway2" type="StaticBody3D" parent="R14_burial_hall_b" unique_id=794328220 groups=["interior_geometry"]]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 5.8, 1.6, 2)
+
+[node name="Mesh" type="MeshInstance3D" parent="R14_burial_hall_b/Cap_Doorway2" unique_id=2118209853]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_wcdph")
+
+[node name="Shape" type="CollisionShape3D" parent="R14_burial_hall_b/Cap_Doorway2" unique_id=945801322]
+shape = SubResource("BoxShape3D_l0q2s")
+
+[node name="R15_burial_hall_b" parent="." unique_id=62830401 instance=ExtResource("3_flh6h")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.9999993, 0, 38)
+metadata/room_id = "baked/r15"
+metadata/depth = 6
+
+[node name="Cap_Doorway0" type="StaticBody3D" parent="R15_burial_hall_b" unique_id=1439522342 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.6, -3.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="R15_burial_hall_b/Cap_Doorway0" unique_id=1069121550]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_3klv5")
+
+[node name="Shape" type="CollisionShape3D" parent="R15_burial_hall_b/Cap_Doorway0" unique_id=1361842479]
+shape = SubResource("BoxShape3D_8p60c")
+
+[node name="Cap_Doorway2" type="StaticBody3D" parent="R15_burial_hall_b" unique_id=917468222 groups=["interior_geometry"]]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 5.8, 1.6, 2)
+
+[node name="Mesh" type="MeshInstance3D" parent="R15_burial_hall_b/Cap_Doorway2" unique_id=580039996]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_rvgey")
+
+[node name="Shape" type="CollisionShape3D" parent="R15_burial_hall_b/Cap_Doorway2" unique_id=1551616434]
+shape = SubResource("BoxShape3D_0bsv8")
+
+[node name="R16_corridor_corner" parent="." unique_id=1125246379 instance=ExtResource("4_v7h2c")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 14, 0, -10)
+metadata/room_id = "baked/r16"
+metadata/depth = 3
+
+[node name="R17_sarcophagi_b" parent="." unique_id=728601894 instance=ExtResource("12_35cg0")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 18, 0, -2.0000005)
+metadata/room_id = "baked/r17"
+metadata/depth = 4
+
+[node name="Cap_Doorway0" type="StaticBody3D" parent="R17_sarcophagi_b" unique_id=986399582 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.6, -5.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="R17_sarcophagi_b/Cap_Doorway0" unique_id=1648493901]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_h3fqd")
+
+[node name="Shape" type="CollisionShape3D" parent="R17_sarcophagi_b/Cap_Doorway0" unique_id=1508439717]
+shape = SubResource("BoxShape3D_bh1ko")
+
+[node name="Cap_Doorway2" type="StaticBody3D" parent="R17_sarcophagi_b" unique_id=426823348 groups=["interior_geometry"]]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 5.8, 1.6, 4)
+
+[node name="Mesh" type="MeshInstance3D" parent="R17_sarcophagi_b/Cap_Doorway2" unique_id=78758891]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_tvl4u")
+
+[node name="Shape" type="CollisionShape3D" parent="R17_sarcophagi_b/Cap_Doorway2" unique_id=2109869028]
+shape = SubResource("BoxShape3D_l8qca")
+
+[node name="R18_sarcophagi_b" parent="." unique_id=1569769596 instance=ExtResource("12_35cg0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 14)
+metadata/room_id = "baked/r18"
+metadata/depth = 4
+
+[node name="Cap_Doorway0" type="StaticBody3D" parent="R18_sarcophagi_b" unique_id=300069213 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.6, -5.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="R18_sarcophagi_b/Cap_Doorway0" unique_id=1894500948]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_7ma4o")
+
+[node name="Shape" type="CollisionShape3D" parent="R18_sarcophagi_b/Cap_Doorway0" unique_id=729002807]
+shape = SubResource("BoxShape3D_dknel")
+
+[node name="Cap_Doorway1" type="StaticBody3D" parent="R18_sarcophagi_b" unique_id=590538767 groups=["interior_geometry"]]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4, 1.6, 5.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="R18_sarcophagi_b/Cap_Doorway1" unique_id=2027757559]
+material_override = ExtResource("5_4lcdq")
+mesh = SubResource("BoxMesh_j65pf")
+
+[node name="Shape" type="CollisionShape3D" parent="R18_sarcophagi_b/Cap_Doorway1" unique_id=991772237]
+shape = SubResource("BoxShape3D_80s4g")
+
+[node name="R19_boss_tomb" parent="." unique_id=1439281886 instance=ExtResource("13_r4hug")]
+transform = Transform3D(1, 0, 1.7484555e-07, 0, 1, 0, -1.7484555e-07, 0, 1, 24.000002, 0, 52)
+metadata/room_id = "baked/r19"
+metadata/depth = 8
+
+[node name="CultRitualCircle" parent="R19_boss_tomb" unique_id=334244995 instance=ExtResource("13_flh6h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+
+[node name="CodexAltar" parent="R19_boss_tomb" unique_id=1067768566 instance=ExtResource("14_v7h2c")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.4)
+
+[node name="CultCandleL" parent="R19_boss_tomb" unique_id=1168646860 instance=ExtResource("15_4lcdq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 0, 4.4)
+
+[node name="CultCandleR" parent="R19_boss_tomb" unique_id=1147042969 instance=ExtResource("15_4lcdq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 0, 4.4)

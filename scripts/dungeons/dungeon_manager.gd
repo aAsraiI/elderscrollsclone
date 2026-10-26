@@ -22,6 +22,11 @@ var current_entrance_id := ""
 ## Building interiors only: {"exit", "beds", "work", "seats"} positions inside the current interior
 ## (local to get_interior_root()), where the people living or working there go
 var current_spots := {}
+## How dark the place you are in is for sneaking (its InteriorAtmosphere preset), or -1
+var current_darkness := -1.0
+var atmosphere: InteriorAtmosphere
+## The doorway graph of the stitched dungeon you are in (paths for enemies and followers), or null
+var nav: InteriorNav
 
 var _world: WorldManager
 var _root: Node3D
@@ -123,6 +128,9 @@ func go_floor(n: int) -> void:
 	_root.queue_free()  # not free(): the stairs that called us are inside it
 	_root = null
 	_set_dark(false)
+	current_darkness = -1.0
+	atmosphere = null
+	nav = null
 	var world := _get_world()
 	if world != null:
 		world.rescue_fallen_player = _saved_rescue
@@ -163,6 +171,9 @@ func exit() -> void:
 	current_entrance_id = ""
 	current_spots = {}
 	_set_dark(false)
+	current_darkness = -1.0
+	atmosphere = null
+	nav = null
 	if world != null:
 		world.rescue_fallen_player = _saved_rescue
 		world.ensure_area_loaded(_return_position, 1)
@@ -237,8 +248,22 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 		current_spots = {}
 		_root = result["root"]
 		_root.position = Vector3(placed.position.x, DUNGEON_Y, placed.position.z)
+	var theme := String(result.get("theme", ""))
+	atmosphere = null
+	nav = null
+	current_darkness = -1.0
+	if theme != "":
+		StaticBatch.merge_interior(_root)  # one draw call per room (Alpha 1.13)
+		atmosphere = InteriorAtmosphere.make(_root, theme, result.get("plan"))
+		current_darkness = float(atmosphere.preset["dark"])
+		if not building:
+			ambient = atmosphere.preset["ambient"]
 	StaticBatch.merge(_root)  # one draw call for all its plain boxes
 	add_child(_root)
+	nav = null
+	if building == null and result.get("plan") != null:
+		nav = InteriorNav.make(_root, result["plan"], ("%d|nav|%s" % [world.world_seed, entrance_id]).hash())  # patrols, sleepers, ambushes, paths
+		nav.dungeon_id = entrance_id
 
 	current_entrance_id = entrance_id
 	_return_position = return_position
@@ -246,6 +271,8 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 	_saved_rescue = world.rescue_fallen_player
 	world.rescue_fallen_player = false
 	_set_dark(true, ambient)
+	if atmosphere != null and building == null and float(atmosphere.preset["density"]) > 0.0:
+		_set_fog(atmosphere.preset["fog"], float(atmosphere.preset["density"]))
 	if result.has("sky"):
 		_set_realm_sky(result["sky"], result["fog"])
 
@@ -350,3 +377,14 @@ func _get_world() -> WorldManager:
 	if _world == null or not is_instance_valid(_world):
 		_world = get_parent() as WorldManager
 	return _world
+
+
+# An interior's own haze (InteriorAtmosphere's preset; on top of _set_dark, which saved the world's)
+func _set_fog(color: Color, density: float) -> void:
+	var we := _find_first("WorldEnvironment") as WorldEnvironment
+	if we == null or we.environment == null:
+		return
+	var e := we.environment
+	e.fog_enabled = true
+	e.fog_light_color = color
+	e.fog_density = density

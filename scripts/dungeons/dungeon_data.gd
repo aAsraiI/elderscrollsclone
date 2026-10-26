@@ -61,6 +61,9 @@ extends Resource
 ## Build it from room modules with this recipe (data/interiors/recipes/) instead of the old
 ## generator. Empty = the old generator.
 @export var recipe: DungeonRecipe
+## A hand-made interior (a scene of room modules, e.g. one baked with DungeonPreview and finished
+## by hand) used for every dungeon of this kind instead of generating one
+@export var handmade: PackedScene
 
 
 ## Floors this dungeon has at this level

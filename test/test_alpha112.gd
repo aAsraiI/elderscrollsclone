@@ -98,6 +98,7 @@ func t_radiant() -> void:
 	await _lifecycle()
 	await _journal_ux()
 	await _hud()
+	await _radiant_v2()
 	await _across_a_load()
 
 
@@ -268,6 +269,192 @@ func _hud() -> void:
 	var marks := wm.get_node("QuestMarkers") as QuestMarkers
 	check("the leader gets a hand-in mark", marks.mark_for(_speaker(leaders["fighters"])) == "ready")
 	wm.quests.respond(_speaker(leaders["fighters"]), "report back")
+
+
+# ---------------------------------------------------------------- 1.12.10 radiant v2
+
+func _radiant_v2() -> void:
+	print("-- radiant quests v2")
+	var qm := wm.quests
+	var saved: Dictionary = WorldState.get_record(QuestManager.STATE).duplicate(true)
+	# soak: 100 jobs of every kind from every guild leader of several towns
+	var made := 0
+	var bad := PackedStringArray()
+	var types := ["retrieve", "kill", "hunt", "steal", "persuade", "deliver", "gather", "rescue", "escort", "investigate", "protect", "road"]
+	var towns: Array = wm.towns.slice(0, 12)
+	var i := 0
+	while made < 100 and i < 400:
+		var town: PlacedPOI = towns[i % towns.size()]
+		var type: String = types[i % types.size()]
+		i += 1
+		var giver := DialogueEngine.Speaker.new()
+		giver.id = "soak"
+		giver.name = "Soak Tester"
+		giver.town = town
+		_clear_jobs()
+		var q := qm.offer("fighters", giver, type)
+		if q.is_empty():
+			continue
+		made += 1
+		if Radiant.validate(qm, q) != "":
+			bad.append("%s: %s" % [q["type"], Radiant.validate(qm, q)])
+		if String(q["name"]).contains("{") or String(q["objective"]).contains("{") or String(q["name"]) == "":
+			bad.append("%s: bad wording '%s' / '%s'" % [q["type"], q["name"], q["objective"]])
+	check("100 generated jobs, none impossible (%d made)" % made, made >= 100 and bad.is_empty(), "\n".join(bad.slice(0, 5)))
+	check("every kind has a template with several wordings", types.all(func(t: String) -> bool: return Radiant.template(t) != null and Radiant.template(t).names.size() >= 2))
+	WorldState.set_record(QuestManager.STATE, saved)
+	# gather
+	_clear_jobs()
+	var g := _job("mages", "gather")
+	if not g.is_empty():
+		var it := load(String(g["item_path"])) as ItemData
+		(p.get_node("Inventory") as Inventory).add_item(it, int(g["count"]))
+		check("gather: carrying them, it's ready", qm.is_ready(g))
+		qm.complete(g)
+		check("gather: handing in takes them", (p.get_node("Inventory") as Inventory).get_count(it) == 0)
+	# investigate
+	_clear_jobs()
+	var inv_q := _job("mages", "investigate")
+	if not inv_q.is_empty():
+		await _go(Vector3(float(inv_q["at"][0]), 0, float(inv_q["at"][2])))
+		await secs(1.5)
+		check("investigate: going there finds the clue", qm.is_ready(QuestManager.get_quest(String(inv_q["id"]))))
+	# rescue
+	_clear_jobs()
+	var r := _job("fighters", "rescue")
+	if not r.is_empty():
+		var at := Vector3(float(r["at"][0]), 0, float(r["at"][2]))
+		await _go(at + Vector3(0, 0, 20))
+		await secs(1.5)
+		var guards := _spawned_of(String(r["id"]), "guard")
+		check("rescue: guards stand over the captive", guards.size() == int(r["count"]) and qm._radiant_spawned.has("quest/%s/captive" % r["id"]), "%d guards" % guards.size())
+		for e: Enemy in guards:
+			e.stats.modify_vital("health", -999999.0)
+		var cap: Enemy = qm._radiant_spawned.get("quest/%s/captive" % r["id"])
+		if cap != null:
+			p.global_position = cap.global_position + Vector3(1.5, 0.5, 0)
+		await secs(1.5)
+		check("rescue: guards dead and the captive reached, it's ready", qm.is_ready(QuestManager.get_quest(String(r["id"]))))
+	# protect and road
+	for kind in ["protect", "road"]:
+		_clear_jobs()
+		var pr := _job("fighters" if kind == "road" else "knights", kind)
+		if pr.is_empty():
+			continue
+		await _go(Vector3(float(pr["at"][0]), 0, float(pr["at"][2])) + Vector3(0, 0, 15))
+		await secs(1.5)
+		var raiders := _spawned_of(String(pr["id"]), "raider")
+		check("%s: raiders come" % kind, raiders.size() == int(pr["count"]))
+		for e: Enemy in raiders:
+			e.stats.modify_vital("health", -999999.0)
+		await secs(0.5)
+		check("%s: all dead, it's ready" % kind, qm.is_ready(QuestManager.get_quest(String(pr["id"]))))
+	# escort
+	_clear_jobs()
+	var es := _job("knights", "escort")
+	if not es.is_empty():
+		await _go(Vector3(float(es["at"][0]), 0, float(es["at"][2])))
+		await secs(1.5)
+		var walker: Enemy = qm._radiant_spawned.get("quest/%s/escort" % es["id"])
+		check("escort: they wait for you", walker != null)
+		var dest := wm.get_poi(String(es["target"]))
+		await _go(dest.position + Vector3(10, 0, 0))
+		if walker != null and is_instance_valid(walker):
+			walker.global_position = p.global_position + Vector3(2, 0.5, 0)
+		await secs(1.5)
+		check("escort: reaching the town together, it's ready", qm.is_ready(QuestManager.get_quest(String(es["id"]))))
+	# kill: escorts and the signet
+	_clear_jobs()
+	var k := _job("fighters", "kill")
+	if not k.is_empty():
+		var camp := wm.get_poi(String(k["target"]))
+		await _go(camp.position + Vector3(0, 0, 25))
+		var chief: Enemy = null
+		var escorts := 0
+		for e in wm.get_garrison(camp.id):
+			if is_instance_valid(e) and e.display_name == String(k["chief"]):
+				chief = e
+			if is_instance_valid(e) and String(e.spawn_key).begins_with("quest/%s/escort" % k["id"]):
+				escorts += 1
+		check("kill: the chief has an escort", escorts == 2, str(escorts))
+		var token := QuestItems.get_item(String(k["id"]) + "_proof", String(k["proof"]))
+		check("kill: the chief carries a signet", chief != null and chief.inventory.has_item(token))
+		(p.get_node("Inventory") as Inventory).add_item(token)
+		check("kill: the signet pays a bonus", Radiant.hand_over(qm, k, 100) == 20)
+	# the "already taken" twist
+	_clear_jobs()
+	var t := _job("fighters", "retrieve")
+	if not t.is_empty():
+		var tp := wm.get_poi(String(t["target"]))
+		t["twist"] = true
+		t["at"] = [tp.position.x + 8.0, tp.position.y, tp.position.z + 8.0]
+		QuestManager._update_quest(t)
+		await _go(tp.position + Vector3(0, 0, 20))
+		await secs(1.5)
+		var thief: Enemy = qm._radiant_spawned.get("quest/%s/thief0" % t["id"])
+		var item := QuestItems.get_item(String(t["id"]), String(t["item_name"]))
+		check("twist: a thief has the item", thief != null and thief.inventory.has_item(item))
+	# other ways through
+	_clear_jobs()
+	var pq := _job("mages", "persuade")
+	var target: TownLife.Resident = wm.life.get_resident(String(pq.get("target", "")))
+	if target != null:
+		var ts := _speaker(target)
+		DialogueState.learn(target.data.display_name)
+		var topics := qm.extra_topics(ts)
+		check("persuade: a favour, or what you know", topics.has("a favour") and topics.has("what I know"), str(topics))
+		qm.respond(ts, "what I know")
+		check("persuade: what you know works", qm.is_ready(QuestManager.get_quest(String(pq["id"]))))
+	_clear_jobs()
+	var st := _job("thieves", "steal")
+	var owner: TownLife.Resident = wm.life.get_resident("npc/" + String(st.get("target", "")))
+	if owner != null:
+		Currency.add_gold(p.get_node("Inventory") as Inventory, 1000)
+		var os := _speaker(owner)
+		var buy := "buy the " + String(st["item_name"]).to_lower()
+		check("steal: or buy it from the owner", qm.extra_topics(os).has(buy))
+		qm.respond(os, buy)
+		check("steal: bought, it's ready", qm.is_ready(QuestManager.get_quest(String(st["id"]))))
+	# the notice board
+	_clear_jobs()
+	var board := NoticeBoard.new()
+	board.town_id = city.id
+	wm.add_child(board)
+	var offers := board.offers()
+	check("a notice board posts offers", offers.size() >= 2, str(offers.size()))
+	check("the same offers all period", board.offers().map(func(o: Dictionary) -> String: return o["name"]) == offers.map(func(o: Dictionary) -> String: return o["name"]))
+	var job := board.take(0)
+	check("taking one makes a job", not job.is_empty() and qm.bounty_of(board.board_id()) == QuestManager.get_quest(String(job["id"])))
+	check("only one at a time", board.take(1).is_empty())
+	var late: Dictionary = (offers[1] as Dictionary).duplicate()
+	late["expires_day"] = wm.clock.day
+	check("an offer past its day can't be taken", qm.take_offer(late, "x", city).is_empty())
+	board.queue_free()
+	# limits per town
+	_clear_jobs()
+	WorldState.erase_record(QuestManager.COOLDOWN)
+	for n in Radiant.TOWN_LIMIT:
+		Radiant.count_town(city.id, wm.clock.day)
+	var said := qm.respond(_speaker(leaders["fighters"]), "duties")
+	check("a town gives out only so many jobs a day", String(said.get("text", "")).contains("all the work"), String(said.get("text", "")))
+	WorldState.erase_record("radiant_day/" + city.id)
+	_clear_jobs()
+
+
+func _clear_jobs() -> void:
+	var list := QuestManager.all_quests().duplicate(true)
+	for q: Dictionary in list:
+		if q["status"] == "active":
+			q["status"] = "abandoned"
+	WorldState.set_record(QuestManager.STATE, {"list": list, "counter": QuestManager._counter()})
+
+
+func _spawned_of(id: String, role: String) -> Array:
+	var out: Array = []
+	for key in wm.quests._radiant_spawned:
+		if String(key).begins_with("quest/%s/%s" % [id, role]) and is_instance_valid(wm.quests._radiant_spawned[key]):
+			out.append(wm.quests._radiant_spawned[key])
+	return out
 
 
 func _custom_body(d: CustomNpcData, spot: Vector3) -> Enemy:

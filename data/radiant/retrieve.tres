@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "retrieve"
+names = PackedStringArray("The {thing}", "Recover the {thing}", "Lost: the {thing}")
+objectives = PackedStringArray("Find the {thing} in the deepest chest of the {place} and bring it to {giver}.", "The {thing} lies at the bottom of the {place}. Bring it back to {giver}.", "Someone left the {thing} in the {place}, behind whatever lives there now. Fetch it for {giver}.")
+reward_base = 90
+reward_per_level = 7
+things = PackedStringArray("Silver Locket", "Old Family Sword", "Lost Journal", "Carved Amulet", "Map of the Old Roads")
+enemies = PackedStringArray("bandit_thug")
+count_min = 1
+count_max = 1
+days = 14

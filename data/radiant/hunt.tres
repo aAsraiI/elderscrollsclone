@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "hunt"
+names = PackedStringArray("The Hunt for {chief}", "Beast: {chief}", "Kill {chief}")
+objectives = PackedStringArray("Track down {chief}, seen near the {place}, and kill it. Then report to {giver}.", "{chief} has been taking livestock near the {place}. Put it down and tell {giver}.")
+reward_base = 110
+reward_per_level = 8
+things = PackedStringArray("the White Stag", "Old Gnasher", "the Ashen Wolf", "Greyback", "the Marsh Hag", "Ironhide")
+enemies = PackedStringArray("frost_bear", "forest=forest_troll", "desert=sand_scorpion", "swamp=bog_lurker", "highlands=cave_troll")
+count_min = 1
+count_max = 1
+days = 14

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "investigate"
+names = PackedStringArray("Strange Lights at the {place}", "What Happened at the {place}?", "Signs at the {place}")
+objectives = PackedStringArray("People have seen strange things at the {place}. Go and look, then tell {giver} what you found.", "Find out what is going on at the {place} and report to {giver}.")
+reward_base = 90
+reward_per_level = 7
+things = PackedStringArray("fresh tracks and a burnt-out fire", "a torn banner of the Ash Cult", "claw marks on the stones", "an empty coin purse and a broken lantern")
+enemies = PackedStringArray()
+count_min = 1
+count_max = 1
+days = 10

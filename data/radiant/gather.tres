@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "gather"
+names = PackedStringArray("Gathering: {thing}", "{count} {thing}, Please", "Supplies: {thing}")
+objectives = PackedStringArray("Gather {count} {thing} and bring them to {giver}.", "{giver} needs {count} {thing}. Find them in the wild or buy them, then bring them back.")
+reward_base = 50
+reward_per_level = 5
+things = PackedStringArray("res://data/ingredients/blue_mountain_flower.tres", "res://data/ingredients/wild_garlic.tres", "res://data/ingredients/lavender.tres", "res://data/ingredients/thistle.tres", "res://data/materials/iron_ore.tres", "res://data/materials/animal_hide.tres", "res://data/ingredients/juniper_berries.tres", "res://data/ingredients/snowberries.tres")
+enemies = PackedStringArray()
+count_min = 3
+count_max = 6
+days = 10

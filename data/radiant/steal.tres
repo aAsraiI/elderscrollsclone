@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "steal"
+names = PackedStringArray("A Quiet Job in {town}", "Light Fingers in {town}", "A Favour from {target}")
+objectives = PackedStringArray("Steal {thing} from the chest in {target}, in {town}. Don't get caught. Bring it to {giver}.", "{thing} sits in a chest in {target}, {town}. Lift it unseen, or buy it, or talk your way to it. Then see {giver}.")
+reward_base = 110
+reward_per_level = 8
+things = PackedStringArray("Ledger", "Silver Candlestick", "Jeweled Box", "Signet Ring", "Letters")
+enemies = PackedStringArray()
+count_min = 1
+count_max = 1
+days = 10

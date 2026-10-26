@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "escort"
+names = PackedStringArray("Escort to {destination}", "Safe Roads to {destination}", "A Guard for {target}")
+objectives = PackedStringArray("See {target} safely from {town} to {destination}. Stay close: they walk with you.", "{target} must reach {destination} alive. Walk with them from {town}.")
+reward_base = 120
+reward_per_level = 8
+things = PackedStringArray("a pilgrim", "a merchant's clerk", "a young scholar", "an old soldier")
+enemies = PackedStringArray()
+count_min = 1
+count_max = 1
+days = 6

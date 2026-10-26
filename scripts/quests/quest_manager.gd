@@ -44,6 +44,7 @@ var _stranger: Enemy
 var _stranger_time := 0.0
 var _extra_cache := {}
 var _extra_frame := -1
+var _radiant_spawned := {}
 
 
 func _ready() -> void:
@@ -175,7 +176,10 @@ func offer(faction: String, s: DialogueEngine.Speaker, only_type: String = "") -
 	for t in types:
 		q = _make(String(t), qid, town, s, rng)
 		if not q.is_empty():
-			break
+			q["type"] = String(t)
+			if Radiant.validate(self, q) == "":
+				break  # every target checked: no impossible jobs
+			q = {}
 	if q.is_empty():
 		return {}
 	q["id"] = qid
@@ -190,6 +194,7 @@ func offer(faction: String, s: DialogueEngine.Speaker, only_type: String = "") -
 	q["offered_day"] = world.clock.day if world.clock != null else 1
 	q["deadline_day"] = int(q["offered_day"]) + (5 if q["type"] == "deliver" else 14)
 	q["skill"] = String(SKILL_OF.get(q["type"], ""))
+	_finish_offer(q, s.name, rng)
 	var list := all_quests().duplicate(true)
 	list.append(q)
 	_save_list(list, counter + 1)
@@ -359,6 +364,8 @@ func _make(type: String, _qid: String, town: PlacedPOI, s: DialogueEngine.Speake
 					q["name"] = "Contract: %s" % r.data.display_name
 					q["objective"] = "Kill %s in %s. A bonus if no one sees it. Then return to %s." % [r.data.display_name, where, s.name]
 			return q
+	if Radiant.NEW_TYPES.has(type):
+		return Radiant.make(self, type, town, s, rng)
 	return {}
 
 
@@ -423,6 +430,9 @@ func _pick_person(town: PlacedPOI, rng: RandomNumberGenerator, friendly_check: b
 
 ## Has the job's task been done (ready to report)?
 func is_ready(q: Dictionary) -> bool:
+	var radiant: Variant = Radiant.is_ready(self, q)
+	if radiant != null:
+		return bool(radiant)
 	var inv := _player().get_node("Inventory") as Inventory
 	match String(q["type"]):
 		"retrieve", "steal", "excavate":
@@ -454,6 +464,7 @@ func complete(q: Dictionary) -> int:
 		gold += roundi(gold * 0.25)  # bonus: nobody saw a thing
 	if q["type"] == "retrieve" and Discovery.is_cleared(String(q.get("target", ""))):
 		gold += roundi(gold * 0.25)  # bonus: the place was cleared too
+	gold += Radiant.hand_over(self, q, gold)
 	Currency.add_gold(inv, gold)
 	Factions.add_quest_done(String(q["faction"]))
 	var skills := p.get_node_or_null("Skills") as Skills
@@ -490,6 +501,9 @@ func fail(q: Dictionary, why: String) -> void:
 ## Why an active job can no longer be done ("" = it still can): out of time, the person dead, the
 ## package lost, seen while stealing
 func failure(q: Dictionary) -> String:
+	var new_kind := Radiant.failure(q)
+	if new_kind != "":
+		return new_kind
 	var day := world.clock.day if world != null and world.clock != null else 1
 	if q.has("deadline_day") and day > int(q["deadline_day"]) and q["faction"] != "bounty":
 		return "You ran out of time."
@@ -607,6 +621,11 @@ func fill_container(c: ContainerComponent) -> void:
 		world.book.fill_container(c)
 	for q: Dictionary in all_quests():
 		if q["status"] == "active" and String(q.get("container", "")) == c.save_id and not bool(q.get("placed", false)):
+			if bool(q.get("twist", false)):
+				q["placed"] = true  # someone got here first: the chest is empty
+				_update_quest(q)
+				_journal(q, "The chest has been emptied. Fresh tracks lead back out of the %s: whoever took the %s is still near." % [q.get("target_name", "place"), q["item_name"]])
+				continue
 			c.inventory.add_item(QuestItems.get_item(String(q["id"]), String(q["item_name"])))
 			q["placed"] = true
 			_update_quest(q)
@@ -634,11 +653,26 @@ func on_garrison(placed: PlacedPOI, parent: Node3D) -> Array[Enemy]:
 		rng.seed = key.hash()
 		var at := placed.position + Vector3(2.0, 0.6, 2.0)
 		at.y = world.get_height_at(at.x, at.z) + 0.6
-		var kind := body if q["type"] == "kill" else load(BEAST_BODY) as EnemyData
-		var e := Population.spawn_enemy(kind, zone.y + 2, parent, at, rng, {"key": key, "persist_mode": Enemy.PersistMode.CORPSE_ONLY})
+		var kind := _biome_body(q, placed, body if q["type"] == "kill" else load(BEAST_BODY) as EnemyData)
+		# harder with the player: chief level follows the zone and the player's level
+		var lvl := maxi(zone.y + 2, _player_level() + int(q.get("tier", 0)))
+		var e := Population.spawn_enemy(kind, lvl, parent, at, rng, {"key": key, "persist_mode": Enemy.PersistMode.CORPSE_ONLY})
 		e.display_name = String(q["chief"])
 		e.set_meta("quest_id", q["id"])
+		e.set_meta("quest_critical", true)
+		if q.has("proof") and e.inventory != null:
+			e.inventory.add_item(QuestItems.get_item(String(q["id"]) + "_proof", String(q["proof"])))  # proof of the kill
 		out.append(e)
+		if q["type"] == "kill":
+			for n in 2:  # the chief's escort
+				var ekey := "quest/%s/escort%d" % [q["id"], n]
+				if WorldState.has_record("kill/" + ekey):
+					continue
+				var epos := at + Vector3(2.5 * (n * 2 - 1), 0.0, -2.0)
+				epos.y = world.get_height_at(epos.x, epos.z) + 0.6
+				var guard := Population.spawn_enemy(load("res://data/enemies/bandit_thug.tres") as EnemyData, lvl - 2, parent, epos, rng, {"key": ekey, "persist_mode": Enemy.PersistMode.CORPSE_ONLY})
+				guard.set_meta("quest_id", q["id"])
+				out.append(guard)
 	return out
 
 
@@ -699,6 +733,7 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 		out.append_array(world.book.topics_for(s))
 	if world != null and world.runner != null:
 		out.append_array(world.runner.topics_for(s))
+	out.append_array(Radiant.topics_for(self, s))
 	out.append_array(Marriage.topics_for(s))
 	out.append_array(Homestead.topics_for(s))
 	return out
@@ -737,6 +772,9 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 	var land := Homestead.respond(s, topic, _player(), world, world.clock.day if world != null and world.clock != null else 1)
 	if not land.is_empty():
 		return land
+	var other_way := Radiant.respond(self, s, topic)
+	if not other_way.is_empty():
+		return other_way
 	var leader := Factions.leader_of(s, world)
 	var p := _player()
 	if topic == "a delivery":
@@ -796,9 +834,14 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 			var wait := cooldown_left(leader, _hours())
 			if wait > 0.0:
 				return _say("Nothing yet. Come back in %d hour%s." % [ceili(wait), "" if ceili(wait) == 1 else "s"])
+			var day := world.clock.day if world.clock != null else 1
+			var home := s.town.id if s.town != null else ""
+			if Radiant.town_count(home, day) >= Radiant.TOWN_LIMIT:
+				return _say("That's all the work this town has today. Come back tomorrow.")
 			var nq := offer(leader, s)
 			if nq.is_empty():
 				return _say("Nothing for you right now. Come back later.")
+			Radiant.count_town(home, day)
 			return _say("I have a job for you. %s Pay is %d gold." % [nq["objective"], nq["reward"]], nq)
 		"clear bounty":
 			if leader != "thieves" or not Factions.is_member("thieves"):
@@ -838,6 +881,8 @@ func _process(delta: float) -> void:
 	_tick_stranger()
 	_check_ready()
 	_tend_chiefs()
+	Radiant.tend(self, _radiant_spawned)
+	_tend_thieves()
 
 
 # After a first murder, a hooded stranger walks up to you one night
@@ -936,3 +981,92 @@ func _tend_chiefs() -> void:
 		if not there:
 			for e in on_garrison(world.get_poi(id), world._garrison_root if world._garrison_root != null else world):
 				world.add_to_garrison(id, e)
+
+
+# The finishing touches of a new job: its wording from its RadiantTemplate, a reward on the
+# template's curve, the template's deadline, the "already taken" twist, a chief's signet
+func _finish_offer(q: Dictionary, giver_name: String, rng: RandomNumberGenerator) -> void:
+	if q.has("town_name") == false and q.has("target_town"):
+		q["town_name"] = q["target_town"]
+	if q["type"] == "steal" and world.get_building(String(q["target"])) != null:
+		q["town_name"] = world.get_building(String(q["target"])).town_name
+		q["target_house"] = world.get_building(String(q["target"])).display_name
+	if q["type"] in ["kill"]:
+		q["proof"] = "%s's Signet" % String(q["chief"]).get_slice(" the ", 0)
+	if q["type"] == "persuade":
+		q["count"] = PERSUADE_GOAL
+	if q["type"] in ["persuade", "deliver", "assassinate"] and world.life != null:
+		var r: TownLife.Resident = world.life.get_resident(String(q["target"]))
+		if r != null:
+			q["town_name"] = r.town.town.display_name
+	if q["type"] == "retrieve" and rng.randf() < Radiant.TWIST_CHANCE:
+		q["twist"] = true  # someone got there first: a thief near the entrance has it
+		var p := world.get_poi(String(q["target"]))
+		if p != null:
+			q["at"] = [p.position.x + 8.0, p.position.y, p.position.z + 8.0]
+	Radiant.word(q, giver_name, _player_level(), rng)
+	var t := Radiant.template(String(q["type"]))
+	if t != null:
+		q["reward"] = maxi(int(q.get("reward", 0)), int(q.get("template_reward", 0)) + rng.randi_range(0, 30))
+		if t.days > 0:
+			q["deadline_day"] = int(q.get("offered_day", 1)) + t.days
+
+
+# The kind of creature a kill or hunt job sends you after, by the land it is in (RadiantTemplate)
+func _biome_body(q: Dictionary, placed: PlacedPOI, fallback: EnemyData) -> EnemyData:
+	var t := Radiant.template(String(q["type"]))
+	var biome := world.get_biome_at(placed.position.x, placed.position.z) if world != null else null
+	if t == null or biome == null:
+		return fallback
+	var path := "res://data/enemies/%s.tres" % t.enemy_for(biome.get_key())
+	return load(path) as EnemyData if ResourceLoader.exists(path) else fallback
+
+
+# A retrieve job's "already taken" twist: the thief waits near the entrance with the item
+func _tend_thieves() -> void:
+	var p := _player()
+	if p == null or world == null or (world.dungeons != null and world.dungeons.is_inside()):
+		return
+	for q: Dictionary in all_quests():
+		if q["status"] != "active" or not bool(q.get("twist", false)) or not q.has("at") or is_ready(q):
+			continue
+		var at := Vector3(float(q["at"][0]), float(q["at"][1]), float(q["at"][2]))
+		if Vector2(at.x - p.global_position.x, at.z - p.global_position.z).length() > Radiant.SPAWN_NEAR:
+			continue
+		Radiant._want(self, _radiant_spawned, q, "thief", 1, "bandit_thug", at, true)
+		var e: Enemy = _radiant_spawned.get("quest/%s/thief0" % q["id"])
+		var item := QuestItems.get_item(String(q["id"]), String(q["item_name"]))
+		if e != null and is_instance_valid(e) and e.inventory != null and not e.inventory.has_item(item) and not e.is_dead():
+			e.display_name = "Thief"
+			e.inventory.add_item(item)
+
+
+## Takes a notice board offer (Radiant.board_offers): it becomes a job given by the board
+func take_offer(offer: Dictionary, board_id: String, town: PlacedPOI) -> Dictionary:
+	if world == null or offer.is_empty():
+		return {}
+	var day := world.clock.day if world.clock != null else 1
+	if day >= int(offer.get("expires_day", day + 1)):
+		return {}  # the notice came down
+	var counter := _counter()
+	var q := offer.duplicate(true)
+	q["id"] = "q%d" % counter
+	q["faction"] = "board"
+	q["giver"] = board_id
+	q["giver_name"] = "the notice board in %s" % town.town.display_name
+	q["giver_town"] = town.town.display_name
+	q["giver_pos"] = [town.position.x, town.position.z]
+	q["status"] = "active"
+	q["reward"] = int(offer.get("template_reward", 100))
+	q["offered_day"] = day
+	q["deadline_day"] = day + maxi(Radiant.template(String(q["type"])).days if Radiant.template(String(q["type"])) != null else 7, 3)
+	q["skill"] = String(SKILL_OF.get(q["type"], ""))
+	var list := all_quests().duplicate(true)
+	list.append(q)
+	_save_list(list, counter + 1)
+	Radiant.count_town(town.id, day)
+	log_quest(q, "taken from %s: %s" % [q["giver_name"], q["objective"]])
+	Notices.quest(get_tree(), "Quest started", String(q["name"]))
+	if q["type"] == "deliver":
+		(_player().get_node("Inventory") as Inventory).add_item(QuestItems.get_item(String(q["id"]), String(q["item_name"])))
+	return q

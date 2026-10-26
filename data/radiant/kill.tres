@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "kill"
+names = PackedStringArray("Bounty: {chief}", "Wanted: {chief}", "The Head of {chief}")
+objectives = PackedStringArray("Kill {chief}, who leads the bandits at the {place}, then report to {giver}.", "{chief} and their cutthroats hold the {place}. End them and report to {giver}.", "Bring down {chief} at the {place}. Their signet will prove it. Then see {giver}.")
+reward_base = 100
+reward_per_level = 8
+things = PackedStringArray()
+enemies = PackedStringArray("bandit_brute", "tundra=frost_raider", "snow_mountains=frost_raider", "frozen_crown=frost_raider", "desert=raider_marauder", "badlands=raider_marauder", "swamp=smuggler_chief", "coast=sea_raider", "deadlands=reaver", "ashlands=ash_cultist")
+count_min = 2
+count_max = 2
+days = 14

@@ -127,6 +127,7 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			beds.append(_bed(root, Vector3(w * 0.12 + 2.2, 0.0, d * 0.5 - 1.2)))
 			work = Vector3(-w * 0.5 + 1.05, 0.0, d * 0.05)
 			chests += _chest(root, b, 0, "Innkeeper's Chest", Vector3(-w * 0.5 + 0.9, 0.35, -d * 0.3), _shop_loot(), interior_seed)
+			NoticeBoard.make(root, Vector3(w * 0.5 - 0.15, 0.0, d * 0.3), -PI * 0.5, b.town_id)  # the townsfolk's jobs
 		BuildingPlot.Kind.SMITHY:
 			# The smith's workstations: forge, smelter, tanning rack, grindstone, workbench
 			stations.append(_station(root, "forge", Vector3(w * 0.5 - 1.2, 0.0, d * 0.5 - 1.2)))

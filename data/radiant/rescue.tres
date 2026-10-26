@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "rescue"
+names = PackedStringArray("Rescue {target}", "Taken: {target}", "Bring {target} Home")
+objectives = PackedStringArray("{target} was taken by bandits to the {place}. Kill the guards, free them, then tell {giver}.", "Bandits hold {target} at the {place}. Get them out alive and report to {giver}.")
+reward_base = 140
+reward_per_level = 9
+things = PackedStringArray("Ada", "Tomas", "Mirelle", "Bram", "Hesta", "Orrin")
+enemies = PackedStringArray("bandit", "tundra=frost_raider", "snow_mountains=frost_raider", "desert=raider", "coast=sea_raider", "deadlands=reaver")
+count_min = 2
+count_max = 3
+days = 7

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "persuade"
+names = PackedStringArray("Winning Over {target}", "A Friend in {town}", "Sweet Words for {target}")
+objectives = PackedStringArray("Make {target} in {town} like you (disposition {count}): talk, admire, joke, bribe, do them a favour, or use what you know. Then return to {giver}.")
+reward_base = 80
+reward_per_level = 7
+things = PackedStringArray()
+enemies = PackedStringArray()
+count_min = 70
+count_max = 70
+days = 10

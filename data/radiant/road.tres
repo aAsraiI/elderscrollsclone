@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "road"
+names = PackedStringArray("Highwaymen on the Road", "The {destination} Road", "Clear the Road")
+objectives = PackedStringArray("Highwaymen rob travellers on the road from {town} to {destination}. Clear them out and report to {giver}.", "Make the {destination} road safe again: kill the robbers waiting on it, then see {giver}.")
+reward_base = 110
+reward_per_level = 8
+things = PackedStringArray()
+enemies = PackedStringArray("cutthroat", "tundra=frost_raider", "snow_mountains=frost_raider", "desert=raider", "deadlands=reaver")
+count_min = 3
+count_max = 4
+days = 7

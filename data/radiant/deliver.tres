@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "deliver"
+names = PackedStringArray("Delivery to {town}", "A Package for {target}", "Sealed and Sent")
+objectives = PackedStringArray("Deliver the sealed package to {target} in {town}. Ask them about a delivery.", "Take this package to {target} in {town}, and don't open it.")
+reward_base = 60
+reward_per_level = 5
+things = PackedStringArray()
+enemies = PackedStringArray()
+count_min = 1
+count_max = 1
+days = 5

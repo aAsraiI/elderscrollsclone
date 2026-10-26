@@ -223,7 +223,7 @@ func t_world() -> void:
 	check("advancement is now a topic", DialogueEngine.topics_for(ui.speaker, wm).has("advancement"))
 	var r2 := ui.ask("duties")
 	var job := QuestManager.active_for("fighters")
-	check("asking about duties gives a job", not job.is_empty() and ["kill", "retrieve"].has(job["type"]), String(r2["text"]))
+	check("asking about duties gives a job", not job.is_empty() and ["kill", "retrieve", "protect", "rescue", "road"].has(job["type"]), String(r2["text"]))
 	check("the job is written in the journal under its name", not JournalUI.filter(DialogueState.journal(), "", "quest", job["id"]).is_empty())
 	check("its target shows on the map", QuestManager.active_targets().size() == 1)
 	var r3 := ui.ask("duties")

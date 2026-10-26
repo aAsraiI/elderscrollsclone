@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RadiantTemplate" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/radiant_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+type = "protect"
+names = PackedStringArray("Defend {target}", "Raiders at {target}", "Hold {target}")
+objectives = PackedStringArray("Raiders will strike {target}, near {town}. Be there and drive them off, then tell {giver}.", "Protect {target} from the raiders coming for it. Kill them all.")
+reward_base = 130
+reward_per_level = 9
+things = PackedStringArray()
+enemies = PackedStringArray("bandit_thug", "tundra=frost_raider", "snow_mountains=frost_raider", "desert=raider", "coast=sea_raider")
+count_min = 3
+count_max = 4
+days = 5

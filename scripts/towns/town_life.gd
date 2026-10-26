@@ -562,6 +562,7 @@ func _make_body(r: Resident, parent: Node3D, pos: Vector3) -> Enemy:
 
 func _on_died(_e: Enemy, r: Resident) -> void:
 	r.dead = true
+	Rumors.on_murder(r.data.display_name, r.town)
 	r.walking = false
 
 

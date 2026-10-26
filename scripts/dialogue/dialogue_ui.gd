@@ -154,6 +154,7 @@ func ask(topic: String) -> Dictionary:
 	QuestEvents.talk(get_tree(), speaker, topic)
 	var text := String(r["text"])
 	_say(speaker.name, text, topic)
+	Barks.voice(get_tree(), speaker.name, text)
 	var ix := DialogueEngine.index(_world)
 	for f in DialogueEngine.find_topics(text, ix):
 		DialogueState.learn(String(f["name"]))

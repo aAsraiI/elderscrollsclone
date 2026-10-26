@@ -291,6 +291,11 @@ func _make(type: String, _qid: String, town: PlacedPOI, s: DialogueEngine.Speake
 			if options.is_empty():
 				return {}
 			var p := options[rng.randi_range(0, mini(options.size(), 4) - 1)]
+			if s.id.begins_with("board:") and world.clock != null:  # the camp everyone talks about (Rumors)
+				var trouble := Rumors.trouble_near(from, world.clock.day)
+				for o in options:
+					if o.id == trouble:
+						p = o
 			var chief := "%s the %s" % [NameGen.FIRST[rng.randi_range(0, NameGen.FIRST.size() - 1)], ["Red", "Butcher", "Grim", "Knife", "Wolf", "Black", "Cruel"][rng.randi_range(0, 6)]]
 			var where := _place_name(p)
 			return {"type": type, "name": "Bounty: %s" % chief, "target": p.id, "chief": chief,
@@ -487,6 +492,7 @@ func complete(q: Dictionary) -> int:
 	q["status"] = "done"
 	_update_quest(q)
 	log_quest(q, "handed in: %d gold" % gold)
+	Rumors.on_job_done(q)
 	Notices.quest(get_tree(), "Quest completed", "%s: %d gold" % [q["name"], gold])
 	return gold
 
@@ -921,6 +927,8 @@ func _process(delta: float) -> void:
 	_check_ready()
 	_tend_chiefs()
 	Radiant.tend(self, _radiant_spawned)
+	if world.clock != null:
+		Rumors.daily(world, world.clock.day)
 	_tend_thieves()
 
 

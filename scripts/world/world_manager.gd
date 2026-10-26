@@ -158,6 +158,9 @@ func _ready() -> void:
 	var marks := QuestMarkers.new()  # marks over people to hand quests in to, glowing quest items
 	marks.name = "QuestMarkers"
 	add_child(marks)
+	var barks := Barks.new()  # people say things as you pass
+	barks.name = "Barks"
+	add_child(barks)
 	realms = RealmManager.new()
 	realms.name = "RealmManager"
 	add_child(realms)

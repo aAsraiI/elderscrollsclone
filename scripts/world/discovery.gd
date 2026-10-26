@@ -42,6 +42,7 @@ static func mark_cleared(poi_id: String) -> void:
 	var rec := WorldState.get_record("found/" + poi_id)
 	if not bool(rec.get("cleared", false)):
 		DialogueState.system_entry("Place", "Cleared: %s." % _name_of(poi_id), "")
+		Rumors.on_cleared(poi_id)
 	rec["cleared"] = true
 	WorldState.set_record("found/" + poi_id, rec)
 

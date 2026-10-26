@@ -544,7 +544,7 @@ static func respond(s: Speaker, topic: String, world: WorldManager) -> Dictionar
 			text = _about_poi(s, e["pois"])
 	if text == "":
 		return _say("I don't know anything about that.", false)
-	return _say(_voice(s, text, topic), true)
+	return _say(_voice(s, text, topic) + _about_you(s, topic), true)
 
 
 static func _say(text: String, journal: bool) -> Dictionary:
@@ -702,6 +702,11 @@ static func _generic(s: Speaker, topic: String, world: WorldManager) -> String:
 static func _rumor(s: Speaker, world: WorldManager) -> String:
 	if world == null:
 		return ""
+	# real news first: things that happened, spreading from where they happened (Rumors)
+	var day := world.clock.day if world.clock != null else 1
+	var heard := Rumors.heard_at(s.position, day)
+	if not heard.is_empty() and _pick(s, "real%d" % _week(s), 10) < 7:
+		return String(heard[_pick(s, "which%d" % _week(s), mini(heard.size(), 3))]["text"])
 	var near: Array[PlacedPOI] = []
 	for p in world.get_pois_near(s.position, RUMOR_RANGE):
 		if not p.poi is TownData and poi_topic_name(world, p) != "":
@@ -884,3 +889,21 @@ static func _weighted(s: Speaker, topic: String, world: WorldManager) -> float:
 	var e: Dictionary = index(world).entries.get(topic.to_lower(), {})
 	var w: float = {"place": 3.0, "person": 2.5, "poi": 2.0, "faction": 1.5, "town": 1.0}.get(String(e.get("kind", "")), 1.0)
 	return float(_stable(s, topic) % 100000) / w
+
+
+# A word about the player when it fits: what their town thinks of you, a fellow guild member, a
+# job you are doing for them (answers that change with reputation, guild and quest state)
+static func _about_you(s: Speaker, topic: String) -> String:
+	if topic != "background" and topic != "latest rumors":
+		return ""
+	var town := s.town.town.display_name if s.town != null and s.town.town != null else ""
+	if town != "" and Reputation.fame(town) >= 20:
+		return " And you, you're the one who helped %s, aren't you? Thank you." % town
+	if town != "" and Reputation.infamy(town) >= 20:
+		return " I know who you are. Keep your hands where I can see them."
+	if s.faction != "" and Factions.get_data(s.faction) != null and Factions.is_member(s.faction):
+		return " Good to see a fellow member of the %s." % Factions.display_name(s.faction)
+	for q: Dictionary in QuestManager.all_quests():
+		if q["status"] == "active" and String(q.get("target", "")) == s.id:
+			return " ...Why do you keep looking at me like that?"
+	return ""

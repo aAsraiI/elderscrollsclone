@@ -101,6 +101,7 @@ func t_radiant() -> void:
 	await _radiant_v2()
 	_guilds()
 	await _integration()
+	_rumors_and_barks()
 	await _across_a_load()
 
 
@@ -555,6 +556,50 @@ func _integration() -> void:
 	check("an old save's tracked quest carries over", QuestTracker.tracked() == ["q_old"])
 	WorldState.erase_record("tracked_quest")
 	_clear_jobs()
+
+
+# ---------------------------------------------------------------- 1.12.13 rumors and barks
+
+func _rumors_and_barks() -> void:
+	print("-- rumors and barks")
+	var day := wm.clock.day
+	var far: PlacedPOI = null
+	for t in wm.towns:
+		if t.position.distance_to(city.position) > 3000.0 and t.position.distance_to(city.position) < 4800.0 and far == null:
+			far = t
+	Rumors.add("deed", "Test: the old mill burned down.", city.position, day)
+	check("news is heard where it happened", Rumors.heard_at(city.position, day).any(func(r: Dictionary) -> bool: return r["text"] == "Test: the old mill burned down."))
+	if far != null:
+		check("but not yet far away", not Rumors.heard_at(far.position, day).any(func(r: Dictionary) -> bool: return r["text"] == "Test: the old mill burned down."))
+		check("it spreads there in a few days", Rumors.heard_at(far.position, day + 8).any(func(r: Dictionary) -> bool: return r["text"] == "Test: the old mill burned down."))
+	var told := false
+	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
+		var s := _speaker(r)
+		s.position = city.position
+		if String(DialogueEngine._rumor(s, wm)).begins_with("Test: the old mill"):
+			told = true
+	check("people pass on news that really happened", told)
+	var camp := QuestTargets.nearest_poi(wm, city.position, false)
+	Rumors.add("trouble", "Test: cutthroats at the camp.", camp.position, day, camp.id)
+	check("trouble talked about in town", Rumors.trouble_near(city.position, day) == camp.id)
+	var victim: TownLife.Resident = null
+	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
+		if r.data.role == NpcData.Role.COMMONER and victim == null and r != leaders.get("fighters"):
+			victim = r
+	wm.life._on_died(null, victim)
+	check("a murder becomes a rumor", Rumors.all().any(func(r: Dictionary) -> bool: return r["kind"] == "murder" and String(r["text"]).contains(victim.data.display_name)))
+	victim.dead = false
+	var barks := wm.get_node("Barks") as Barks
+	var guard: TownLife.Resident = null
+	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
+		if r.data.role == NpcData.Role.GUARD and guard == null:
+			guard = r
+	check("guards bark as you pass", guard != null and barks.bark_for(_speaker(guard)) != "")
+	Reputation.add_fame(city.town.display_name, 40)
+	check("people notice your fame", barks.bark_for(_speaker(guard)).length() > 0 and DialogueEngine._about_you(_speaker(guard), "background").contains("helped"))
+	Reputation.add_fame(city.town.display_name, -40)
+	Barks.voice(self, "Test", "A line.")
+	check("the voice hook is silent without audio", true)
 
 
 func _clear_jobs() -> void:

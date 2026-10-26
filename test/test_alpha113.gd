@@ -200,6 +200,80 @@ func t_in_game() -> void:
 	await wm.dungeons.exit()
 	await frames(20)
 	await t_climb(wm, p)
+	await t_features(wm, p)
+
+
+func t_features(wm: WorldManager, p: CharacterBody3D) -> void:
+	print("-- keys, gates, traps, secrets, puzzles")
+	var data := load("res://data/world/Dungeons/fort_ruin.tres") as DungeonData
+	var totals := {}
+	var tested := false
+	for s in 12:
+		var res := StitchedInterior.build(data, 900 + s, "feat%d" % s, 30, 34)
+		var root: Node3D = res["root"]
+		wm.add_child(root)
+		root.global_position = p.global_position + Vector3(0, 400 + s * 30, 0)
+		await frames(2)
+		for k in res["features"]:
+			totals[k] = int(totals.get(k, 0)) + int(res["features"][k])
+		if not tested and int(res["features"]["locked"]) > 0 and int(res["features"]["gates"]) > 0:
+			tested = true
+			var inv := p.get_node("Inventory") as Inventory
+			var door: InteriorDoor = null
+			var gate: InteriorDoor = null
+			for d in root.find_children("*", "", true, false):
+				if d is InteriorDoor:
+					if (d as InteriorDoor).is_gate and d.name == "Gate":
+						gate = d
+					elif not (d as InteriorDoor).is_gate:
+						door = d
+			check("a locked door before the boss", door != null)
+			var key := door.get_key()
+			var holder: ContainerComponent = null
+			for c in root.find_children("*", "ContainerComponent", true, false):
+				if (c as ContainerComponent).inventory.has_item(key):
+					holder = c
+			check("its key is in a chest", holder != null)
+			var boss_room := root.get_children().filter(func(n: Node) -> bool: return n is RoomModule and (n as RoomModule).role == RoomModule.Role.BOSS)
+			check("not behind the door it opens", holder != null and not boss_room.any(func(b: Node) -> bool: return b.is_ancestor_of(holder)))
+			var picks := 0
+			for st in inv.stacks:
+				if String(st.item.id) == "lockpick":
+					picks += st.count
+			inv.add_item(key)
+			door.interact(inv)
+			await frames(2)
+			check("the key opens it, and it stays open", not is_instance_valid(door) and WorldState.has_record("door/feat%d/door_boss" % s))
+			var lever: DungeonFeature = root.get_node_or_null("Lever")
+			check("a gate and its lever", gate != null and lever != null)
+			if lever != null:
+				lever.interact(inv)
+				await frames(2)
+				check("the lever opens the gate", not is_instance_valid(gate))
+		root.queue_free()
+		await frames(2)
+	check("traps at high levels (%d)" % totals.get("traps", 0), int(totals.get("traps", 0)) > 0)
+	check("secret rooms (%d in 12)" % totals.get("secret", 0), int(totals.get("secret", 0)) >= 3)
+	check("lever puzzles (%d)" % totals.get("puzzles", 0), int(totals.get("puzzles", 0)) >= 1)
+	check("a shortcut out of every boss room", int(totals.get("shortcut", 0)) == 12)
+	# a puzzle, solved
+	var puzzle := InteriorHazards.LeverPuzzle.new()
+	puzzle.save_id = "puzzle_test"
+	puzzle.order = [2, 0, 1]
+	puzzle.gate_name = "Vault"
+	var room := Node3D.new()
+	wm.add_child(room)
+	room.add_child(puzzle)
+	var vault := Node3D.new()
+	vault.name = "Vault"
+	room.add_child(vault)
+	puzzle.lever_pulled(0)
+	check("the wrong lever resets the puzzle", puzzle.pulled.is_empty())
+	for i in [2, 0, 1]:
+		puzzle.lever_pulled(i)
+	await frames(2)
+	check("the right order opens the vault", not is_instance_valid(vault) and WorldState.has_record("puzzle_test"))
+	room.queue_free()
 
 
 # The player can climb a ladder room and walk up a stair room

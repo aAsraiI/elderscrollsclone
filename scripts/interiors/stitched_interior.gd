@@ -37,6 +37,7 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 			for k in ["props", "chests", "enemies"]:
 				totals[k] += int(got[k])
 			totals["boss"] = bool(totals["boss"]) or bool(got["boss"])
+	var features := InteriorFeatures.apply(plan, root, data, dungeon_id, level_max, dungeon_seed)
 	var start := Vector3(0, 0.2, 0)
 	var start_yaw := 0.0
 	var first := root.get_child(0) as RoomModule if root.get_child_count() > 0 else null
@@ -58,4 +59,4 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 		door.position = (exit_mark.position if exit_mark != null else Vector3(0, 0, -first.bounds().size.z * 0.5 + 0.6)) + Vector3(0, 1.3, 0)
 	return {"root": root, "start": start, "start_yaw": start_yaw, "down_spot": null, "rooms": plan.placed.size(),
 		"chests": totals["chests"], "enemies": totals["enemies"], "boss": totals["boss"], "floor": 0, "floors": 1,
-		"props": totals["props"], "signature": plan.summary(), "plan": plan}
+		"props": totals["props"], "features": features, "signature": plan.summary(), "plan": plan}

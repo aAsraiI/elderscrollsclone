@@ -31,6 +31,8 @@ var placed: Array[Placed] = []
 var occupied := {}  # Vector3i -> room index
 var counts := {}    # module path -> times used
 var links: Array = []   # [room a, door a, room b, door b]
+## The join to a hidden room (InteriorFeatures walls it off behind a loose stone), or []
+var secret_link: Array = []
 
 
 ## Plans an interior. Returns the plan (no nodes yet): call build() to make the scene.
@@ -86,6 +88,8 @@ func _run() -> void:
 				floors_left -= 1
 	if recipe.boss:
 		_place_boss(theme)
+	if rng.randf() < 0.6:
+		_place_secret(theme)
 
 
 func _room_count() -> int:
@@ -275,3 +279,20 @@ func summary() -> String:
 	for c in occupied:
 		floors[(c as Vector3i).y] = true
 	return "%d rooms (%d counted), %d cells, %d links, floors %s" % [placed.size(), _room_count(), occupied.size(), links.size(), str(floors.keys())]
+
+
+# A small room off a far doorway that will be hidden behind a loose stone
+func _place_secret(theme: String) -> void:
+	var small := _pool(theme, RoomModule.Role.ROOM).filter(func(e) -> bool: return e.cells.x * e.cells.z <= 4)
+	small.append_array(_pool(theme, RoomModule.Role.DEAD_END))
+	if small.is_empty():
+		return
+	var open := _open_doors()
+	open.sort_custom(func(x: Array, y: Array) -> bool: return placed[x[0]].depth > placed[y[0]].depth)
+	for spot in open.slice(0, 8):
+		if placed[spot[0]].entry.role in [RoomModule.Role.BOSS, RoomModule.Role.ENTRANCE, RoomModule.Role.STAIRS]:
+			continue
+		var p := _try_join(spot, _pick(small))
+		if p != null:
+			secret_link = links[-1]
+			return

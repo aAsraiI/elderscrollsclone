@@ -118,11 +118,14 @@ static func _stain(tree: SceneTree, at: Vector3, amount: float) -> void:
 	tree.current_scene.add_child(d)
 	d.global_position = hit["position"]
 	d.rotation.y = randf() * TAU
+	# Stains from an earlier game are already gone (loading or quitting to the menu frees the scene),
+	# and reading a freed one into a typed variable is an error, so drop those first
+	for i in range(_stains.size() - 1, -1, -1):
+		if not is_instance_valid(_stains[i]):
+			_stains.remove_at(i)
 	_stains.append(d)
 	while _stains.size() > MAX_STAINS:
-		var old: Decal = _stains.pop_front()
-		if is_instance_valid(old):
-			old.queue_free()
+		_stains.pop_front().queue_free()
 	var t := d.create_tween()
 	t.tween_interval(STAIN_LIFE)
 	t.tween_property(d, "modulate:a", 0.0, 4.0)

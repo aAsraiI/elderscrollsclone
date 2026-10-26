@@ -68,7 +68,7 @@ static func _build_grid() -> void:
 	_grid_frame = frame
 	_grid.clear()
 	for i in range(_actors.size() - 1, -1, -1):
-		var e := _actors[i]
+		var e = _actors[i]  # untyped: a freed actor can't be read into an Enemy variable
 		if not is_instance_valid(e) or not e.is_inside_tree():
 			_actors.remove_at(i)
 			continue

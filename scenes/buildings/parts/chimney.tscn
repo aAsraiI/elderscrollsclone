@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="1_26hq8"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_iad81"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_4flqu"]
+size = Vector3(0.8, 3.4, 0.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qklyl"]
+size = Vector3(1, 0.2, 1)
+
+[node name="Chimney" type="Node3D" unique_id=133971912]
+
+[node name="Box0" type="Node3D" parent="." unique_id=1216183388 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box0" unique_id=332106136]
+material_override = ExtResource("1_26hq8")
+mesh = SubResource("BoxMesh_4flqu")
+
+[node name="Box1" type="Node3D" parent="." unique_id=373149990 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.45, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box1" unique_id=2115123964]
+material_override = ExtResource("2_iad81")
+mesh = SubResource("BoxMesh_qklyl")

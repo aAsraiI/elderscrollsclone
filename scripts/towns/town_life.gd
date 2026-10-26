@@ -282,6 +282,13 @@ func _leisure_goal(r: Resident, layout: TownLayout) -> Dictionary:
 		"inn": (3.5 if evening else 0.8), "temple": (4.0 if rest_day and h < 13.0 else 0.6), "errand": (2.0 if h >= 8.0 and h < 17.0 else 0.0),
 		"home": 1.0,
 	}
+	# the town's own things (Alpha 1.14): a bench to sit on, the well or fountain, the market stalls
+	var benches := layout.dress.filter(func(x: Dictionary) -> bool: return x["what"] == "bench")
+	var wells := layout.dress.filter(func(x: Dictionary) -> bool: return x["what"] in ["well", "fountain"])
+	var stalls := layout.dress.filter(func(x: Dictionary) -> bool: return x["what"] == "stall")
+	w["bench"] = 2.0 if not benches.is_empty() else 0.0
+	w["water"] = (1.6 if h < 11.0 else 0.5) if not wells.is_empty() else 0.0
+	w["stall"] = (2.5 if h >= 8.0 and h < 17.0 else 0.0) if not stalls.is_empty() else 0.0
 	if d.personality == NpcData.Personality.PIOUS:
 		w["temple"] *= 3.0
 	elif d.personality == NpcData.Personality.CHEERFUL or d.personality == NpcData.Personality.FRIENDLY:
@@ -294,7 +301,7 @@ func _leisure_goal(r: Resident, layout: TownLayout) -> Dictionary:
 		w["home"] *= 2.0
 		w["stroll"] *= 0.5
 	if raining:
-		for k in ["plaza", "chat", "stroll", "doorstep"]:
+		for k in ["plaza", "chat", "stroll", "doorstep", "bench", "water", "stall"]:
 			w[k] *= 0.15
 		w["inn"] *= 2.0
 		w["home"] *= 3.0
@@ -329,6 +336,18 @@ func _leisure_goal(r: Resident, layout: TownLayout) -> Dictionary:
 			if home != null:
 				var door := home.get_door_local()
 				return {"outside": door + (door - home.local_pos).normalized() * 1.5, "pose": &"sweep" if rng.randf() < 0.4 else &""}
+		"bench":
+			var bd: Dictionary = benches[rng.randi() % benches.size()]
+			return {"outside": Vector3(bd["pos"]) + Basis(Vector3.UP, float(bd["yaw"])) * Vector3(0, 0, -0.55), "pose": &"sit"}
+		"water":
+			var wd: Dictionary = wells[rng.randi() % wells.size()]
+			var wp: Vector3 = wd["pos"]
+			var to_mid := -Vector3(wp.x, 0, wp.z).normalized() if Vector3(wp.x, 0, wp.z).length() > 0.5 else Vector3(0, 0, -1)
+			return {"outside": wp + to_mid * 2.4 + Vector3(rng.randf_range(-0.8, 0.8), 0, 0), "pose": &"work"}
+		"stall":
+			var sd: Dictionary = stalls[rng.randi() % stalls.size()]
+			var sp: Vector3 = sd["pos"]
+			return {"outside": sp - Vector3(sp.x, 0, sp.z).normalized() * 1.8, "pose": &"talk"}
 		"chat":
 			# A few gathering spots on the square: whoever picks the same one ends up talking
 			var spot := layout.get_plaza_spot(((day * 7 + r.slot) * 13 + rng.randi_range(0, 3) * 211) & 0x7FFFFFFF)

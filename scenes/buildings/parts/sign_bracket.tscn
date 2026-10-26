@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="1_8jmcu"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_r0np7"]
+size = Vector3(0.08, 0.08, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nmtjw"]
+size = Vector3(0.06, 0.4, 0.06)
+
+[node name="SignBracket" type="Node3D" unique_id=485573853]
+
+[node name="Box0" type="Node3D" parent="." unique_id=351645506 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.55)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box0" unique_id=1171408592]
+material_override = ExtResource("1_8jmcu")
+mesh = SubResource("BoxMesh_r0np7")
+
+[node name="Box1" type="Node3D" parent="." unique_id=1353495657 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, -0.05)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box1" unique_id=991395341]
+material_override = ExtResource("1_8jmcu")
+mesh = SubResource("BoxMesh_nmtjw")

@@ -36,6 +36,8 @@ static func build(data: TownData, placed: PlacedPOI, map: WorldMap) -> Node3D:
 	_plaza(root, layout, placed, map)
 	for b in layout.buildings:
 		_building(root, b, layout, placed, map)
+	_lit_windows(root)
+	_dressing(root, layout, placed, map)
 	if layout.wall_kind != "":
 		_wall_ring(root, layout, placed, map)
 	elif layout.wall_half > 0.0:
@@ -69,36 +71,91 @@ static func _building(root: Node3D, b: BuildingPlot, layout: TownLayout, placed:
 	var gy := POIBuilder.ground_y(placed, map, b.local_pos.x, b.local_pos.z)
 	holder.position = Vector3(b.local_pos.x, gy, b.local_pos.z)
 	holder.rotation.y = b.local_yaw
-
 	var s := b.size
-	var wall := data.wall_color.darkened(rng.randf_range(0.0, 0.18))
-	var roof := data.roof_color.darkened(rng.randf_range(0.0, 0.2))
+	var front := -s.z * 0.5
+
+	# a hand-made building (InteriorOverrides "exteriors") stands in for the generated one
+	var ext := InteriorOverrides.exterior_scene(b)
+	if ext != "":
+		holder.add_child((load(ext) as PackedScene).instantiate())
+		_door(holder, b, front, 0.0)
+		return
+
+	var style := BuildingStyle.for_biome(layout.biome_key)
+	# the storeys match the inside it will have (manors and inns have an upper floor, Alpha 1.13)
+	if map != null and b.kind in [BuildingPlot.Kind.HOUSE, BuildingPlot.Kind.INN]:
+		var irng := RandomNumberGenerator.new()
+		irng.seed = ("%d|interior|%s" % [map.world_seed, b.id]).hash()
+		var module := InteriorBuilder.pick_module(b, irng).get_file()
+		if module.begins_with("manor") or module.begins_with("inn"):
+			s.y = maxf(s.y, 6.4)
+	var lift := 1.6 if style.base == "stilts" and b.kind in [BuildingPlot.Kind.HOUSE, BuildingPlot.Kind.FARM, BuildingPlot.Kind.SHOP, BuildingPlot.Kind.INN] else 0.0
+	var wall: Color
+	match style.walls:
+		"stone":
+			wall = data.stone_color.lightened(0.05)
+		"adobe":
+			wall = Color(0.72, 0.6, 0.43)
+		"planks":
+			wall = Color(0.43, 0.31, 0.2)
+		_:
+			wall = data.wall_color
+	wall = (wall * style.wall_tint).darkened(rng.randf_range(0.0, 0.16))
+	var roof := (data.roof_color * style.roof_tint).darkened(rng.randf_range(0.0, 0.2))
+	if b.district == "slums":
+		wall = wall.darkened(0.15)
+		roof = roof.darkened(0.15)
 	if b.kind == BuildingPlot.Kind.TEMPLE:
 		wall = data.stone_color.lightened(0.15)
 	elif b.kind == BuildingPlot.Kind.SEAT and b.seat_type != "reeve":
 		wall = data.stone_color.darkened(rng.randf_range(0.0, 0.1))
-	# Walls sunk a meter into the ground, so a slope never shows a gap underneath
-	POIBuilder.add_box(holder, Vector3(s.x, s.y + 1.0, s.z), Vector3(0.0, (s.y - 1.0) * 0.5, 0.0), wall)
-	if s.y > 5.0:  # a band between the floors
-		POIBuilder.add_box(holder, Vector3(s.x + 0.15, 0.3, s.z + 0.15), Vector3(0.0, s.y * 0.5, 0.0), wall.darkened(0.3), 0.0, Vector3.ZERO, false)
-	var roof_h := s.x * 0.42
+	# what it stands on: posts and steps up (stilts), or a stone plinth
+	if lift > 0.0:
+		for c in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
+			POIBuilder.add_box(holder, Vector3(0.35, lift + 1.0, 0.35), Vector3(c.x * (s.x * 0.5 - 0.3), (lift - 1.0) * 0.5, c.y * (s.z * 0.5 - 0.3)), style.beam_color)
+		for i in 4:
+			POIBuilder.add_box(holder, Vector3(1.6, lift * (i + 1) / 4.0, 0.5), Vector3(0.0, lift * (i + 1) / 8.0, front - 0.6 - (3 - i) * 0.5), DOOR_COLOR)
+	elif style.base == "stone" and b.kind != BuildingPlot.Kind.SEAT:
+		POIBuilder.add_box(holder, Vector3(s.x + 0.35, 1.5, s.z + 0.35), Vector3(0.0, -0.35, 0.0), data.stone_color.darkened(0.2), 0.0, Vector3.ZERO, false)
+	# the walls, sunk a meter into the ground (a slope never shows a gap); the floor bands and beams
+	POIBuilder.add_box(holder, Vector3(s.x, s.y + 1.0, s.z), Vector3(0.0, lift + (s.y - 1.0) * 0.5, 0.0), wall)
+	if s.y > 5.0:
+		POIBuilder.add_box(holder, Vector3(s.x + 0.15, 0.3, s.z + 0.15), Vector3(0.0, lift + s.y * 0.5, 0.0), wall.darkened(0.3), 0.0, Vector3.ZERO, false)
+	if style.walls == "timber" and b.kind in [BuildingPlot.Kind.HOUSE, BuildingPlot.Kind.FARM, BuildingPlot.Kind.SHOP, BuildingPlot.Kind.INN, BuildingPlot.Kind.SMITHY]:
+		_timber(holder, s, lift, style.beam_color)
+	var roof_h := s.x * (0.6 if style.roof == "steep" else 0.42)
 	if not (b.kind == BuildingPlot.Kind.SEAT and (b.seat_type == "castle" or b.seat_type == "tower")):  # those have battlements
-		_roof(holder, Vector3(s.x + 0.8, roof_h, s.z + 0.8), Vector3(0.0, s.y + roof_h * 0.5, 0.0), roof)
+		if style.roof == "flat" and b.kind != BuildingPlot.Kind.TEMPLE:
+			POIBuilder.add_box(holder, Vector3(s.x + 0.3, 0.35, s.z + 0.3), Vector3(0.0, lift + s.y + 0.17, 0.0), roof)
+			_battlements(holder, Vector3(s.x, lift + s.y - 0.4, s.z), wall.darkened(0.08))
+			roof_h = 0.6
+		else:
+			_roof(holder, Vector3(s.x + 0.8, roof_h, s.z + 0.8), Vector3(0.0, lift + s.y + roof_h * 0.5, 0.0), roof)
 
-	# Door and windows
-	var front := -s.z * 0.5
-	POIBuilder.add_box(holder, Vector3(1.4, 2.3, 0.12), Vector3(0.0, 1.15, front - 0.06), DOOR_COLOR, 0.0, Vector3.ZERO, false)
+	# the door, the windows (they light up at night: the town's lit-window mesh), shutters, a porch
+	_part(holder, "door", Vector3(0.0, lift, front))
+	var lit: Array = root.get_meta("lit_windows", [])
+	var shutters := rng.randf() < style.shutters
 	for side in [-1.0, 1.0]:
-		POIBuilder.add_box(holder, Vector3(0.08, 1.0, 1.0), Vector3(side * (s.x * 0.5 + 0.04), 1.7, 0.0), WINDOW_COLOR, 0.0, Vector3.ZERO, false)
+		lit.append([holder.transform * Transform3D(Basis(), Vector3(side * (s.x * 0.5 + 0.04), lift + 1.7, 0.0)), true])
 		if s.x >= 7.0:
-			POIBuilder.add_box(holder, Vector3(1.0, 1.0, 0.08), Vector3(side * s.x * 0.3, 1.7, front - 0.04), WINDOW_COLOR, 0.0, Vector3.ZERO, false)
+			lit.append([holder.transform * Transform3D(Basis(), Vector3(side * s.x * 0.3, lift + 1.7, front - 0.04)), false])
+			if shutters:
+				_part(holder, "shutters", Vector3(side * s.x * 0.3, lift + 1.7, front))
 		if s.y > 5.0:
-			POIBuilder.add_box(holder, Vector3(1.0, 1.0, 0.08), Vector3(side * s.x * 0.3, s.y * 0.75, front - 0.04), WINDOW_COLOR, 0.0, Vector3.ZERO, false)
+			lit.append([holder.transform * Transform3D(Basis(), Vector3(side * s.x * 0.3, lift + s.y * 0.75, front - 0.04)), false])
+			if shutters:
+				_part(holder, "shutters", Vector3(side * s.x * 0.3, lift + s.y * 0.75, front))
+	root.set_meta("lit_windows", lit)
+	if b.kind in [BuildingPlot.Kind.HOUSE, BuildingPlot.Kind.SHOP, BuildingPlot.Kind.INN] and rng.randf() < style.porch:
+		_part(holder, "porch", Vector3(0.0, lift, front))
+	if s.y > 5.0 and b.kind in [BuildingPlot.Kind.HOUSE, BuildingPlot.Kind.INN] and (rng.randf() < style.balcony or b.district == "noble"):
+		_part(holder, "balcony", Vector3(0.0, lift + s.y * 0.5 + 0.2, front))
 
 	match b.kind:
 		BuildingPlot.Kind.HOUSE, BuildingPlot.Kind.FARM, BuildingPlot.Kind.INN:
-			var ch := roof_h + 1.4
-			POIBuilder.add_box(holder, Vector3(0.8, ch, 0.8), Vector3(s.x * 0.25, s.y + ch * 0.5, s.z * 0.2), data.stone_color.darkened(0.2))
+			if style.chimneys and b.district != "slums":
+				_part(holder, "chimney", Vector3(s.x * 0.25, lift + s.y + roof_h * 0.35, s.z * 0.2))
 		BuildingPlot.Kind.SMITHY:
 			# An open forge beside the house
 			var fx := s.x * 0.5 + 2.0
@@ -120,29 +177,132 @@ static func _building(root: Node3D, b: BuildingPlot, layout: TownLayout, placed:
 
 	if b.kind == BuildingPlot.Kind.FARM:
 		_field(holder, b, rng)
+		# the farm's animals out in the field (Alpha 1.14)
+		for i in rng.randi_range(1, 3):
+			var kind := "sheep" if rng.randf() < 0.6 else "cow"
+			SiteLife.animal(holder, kind, Vector3(rng.randf_range(-3.0, 3.0), lift, s.z * 0.5 + b.field_size.y * 0.5 + rng.randf_range(-2.0, 2.0)), "%s/animal%d" % [b.id, i])
 	elif b.yard:
 		_yard(holder, b, rng)
 	if b.kind == BuildingPlot.Kind.HOUSE and b.trade != "":
 		_trade_props(holder, b, rng)
+	_sign(holder, b, front, lift)
+	_door(holder, b, front, lift)
 
-	# Name over the door
-	if b.is_public():
-		var board: Color = SIGN_COLORS.get(b.kind, GUILD_COLORS.get(b.guild, Color(0.5, 0.4, 0.3)))
-		if b.kind == BuildingPlot.Kind.SEAT:
-			board = NamedSettlements.house_color(b.house).darkened(0.25)
-		POIBuilder.add_box(holder, Vector3(2.4, 0.6, 0.1), Vector3(0.0, 2.85, front - 0.15), board, 0.0, Vector3.ZERO, false)
-		_label(holder, b.display_name, Vector3(0.0, 2.85, front - 0.22), PI, 40)
-	else:
-		_label(holder, b.display_name, Vector3(0.0, 2.55, front - 0.1), PI, 28)
 
+# The door you go in by
+static func _door(holder: Node3D, b: BuildingPlot, front: float, lift: float) -> void:
 	var door := BuildingDoor.new()
 	door.name = "Door"
 	door.building_id = b.id
 	door.building_name = b.display_name
 	door.lock_level = b.lock_level
 	door.default_locked = b.starts_locked
-	door.position = Vector3(0.0, 1.3, front - 0.45)
+	door.position = Vector3(0.0, lift + 1.3, front - 0.45)
 	holder.add_child(door)
+
+
+# A part from scenes/buildings/parts/ at a spot on the building
+static func _part(holder: Node3D, name: String, at: Vector3) -> Node3D:
+	var path := "res://scenes/buildings/parts/%s.tscn" % name
+	if not ResourceLoader.exists(path):
+		return null
+	var p := (load(path) as PackedScene).instantiate() as Node3D
+	p.name = "Part_" + name  # never "Door": the BuildingDoor has that name
+	holder.add_child(p)
+	p.position = at
+	return p
+
+
+# Timber framing: dark beams up the corners and across each wall at the floors and the top
+static func _timber(holder: Node3D, s: Vector3, lift: float, color: Color) -> void:
+	for side in 4:
+		var along_x := side % 2 == 0
+		var length := s.x if along_x else s.z
+		var sign := -1.0 if side < 2 else 1.0
+		var face := (s.z if along_x else s.x) * 0.5 + 0.04
+		var n := maxi(int(length / 1.8), 2)
+		for i in n + 1:
+			var t := -length * 0.5 + length * i / n
+			var at := Vector3(t, lift + s.y * 0.5, sign * face) if along_x else Vector3(sign * face, lift + s.y * 0.5, t)
+			POIBuilder.add_box(holder, Vector3(0.18, s.y, 0.08) if along_x else Vector3(0.08, s.y, 0.18), at, color, 0.0, Vector3.ZERO, false)
+		for y in [0.15, s.y * 0.5, s.y - 0.15]:
+			var at := Vector3(0.0, lift + y, sign * face) if along_x else Vector3(sign * face, lift + y, 0.0)
+			POIBuilder.add_box(holder, Vector3(length, 0.16, 0.08) if along_x else Vector3(0.08, 0.16, length), at, color, 0.0, Vector3.ZERO, false)
+
+
+# Alpha 1.14 signs: homes have none; a shop, inn, smithy, temple or guild hall hangs a small board
+# from a bracket beside the door with its trade's mark, and E on it reads the name
+const TRADE_MARKS := {
+	BuildingPlot.Kind.INN: ["tankard", Color(0.55, 0.32, 0.12)], BuildingPlot.Kind.SMITHY: ["anvil", Color(0.25, 0.25, 0.28)],
+	BuildingPlot.Kind.TEMPLE: ["sun", Color(0.85, 0.7, 0.3)], BuildingPlot.Kind.SHOP: ["coin", Color(0.75, 0.6, 0.2)],
+	BuildingPlot.Kind.GUILD_HALL: ["banner", Color(0.5, 0.2, 0.2)],
+}
+
+static func _sign(holder: Node3D, b: BuildingPlot, front: float, lift: float) -> void:
+	if not b.is_public() or b.kind == BuildingPlot.Kind.SEAT:
+		return  # homes have no sign; a lord's hall shows its banners
+	var mark: Array = TRADE_MARKS.get(b.kind, ["coin", Color(0.5, 0.4, 0.3)])
+	var board_color: Color = GUILD_COLORS.get(b.guild, mark[1]) if b.kind == BuildingPlot.Kind.GUILD_HALL else Color(0.42, 0.3, 0.18)
+	var at := Vector3(1.5, lift + 3.0, front)
+	_part(holder, "sign_bracket", at)
+	var board := Readable.make(holder, at + Vector3(0, -0.55, -1.0), PI, b.display_name, "%s\n\n(%s)" % [b.display_name, BuildingPlot.kind_name(b.kind).to_lower()], "none")
+	board.name = "Sign"
+	POIBuilder.add_box(board, Vector3(0.75, 0.5, 0.05), Vector3(0, 0.25, 0), board_color, 0.0, Vector3.ZERO, false)
+	# the trade's mark painted on it
+	var ink: Color = mark[1].lightened(0.35)
+	match String(mark[0]):
+		"tankard":
+			POIBuilder.add_box(board, Vector3(0.2, 0.26, 0.02), Vector3(-0.03, 0.25, -0.035), ink, 0.0, Vector3.ZERO, false)
+			POIBuilder.add_box(board, Vector3(0.06, 0.14, 0.02), Vector3(0.11, 0.25, -0.035), ink, 0.0, Vector3.ZERO, false)
+		"anvil":
+			POIBuilder.add_box(board, Vector3(0.36, 0.08, 0.02), Vector3(0, 0.3, -0.035), ink, 0.0, Vector3.ZERO, false)
+			POIBuilder.add_box(board, Vector3(0.12, 0.16, 0.02), Vector3(0, 0.18, -0.035), ink, 0.0, Vector3.ZERO, false)
+		"sun":
+			POIBuilder.add_box(board, Vector3(0.22, 0.22, 0.02), Vector3(0, 0.25, -0.035), ink, 0.785, Vector3.ZERO, false)
+		"banner":
+			POIBuilder.add_box(board, Vector3(0.16, 0.32, 0.02), Vector3(0, 0.25, -0.035), ink, 0.0, Vector3.ZERO, false)
+		_:
+			POIBuilder.add_box(board, Vector3(0.2, 0.2, 0.02), Vector3(0, 0.25, -0.035), ink, 0.0, Vector3.ZERO, false)
+
+
+# Every lit window of the town as one mesh with one shared material that glows at night
+# (window_material; WorldManager turns it up as the light goes)
+static var _window_mat: StandardMaterial3D
+
+static func window_material() -> StandardMaterial3D:
+	if _window_mat == null:
+		_window_mat = StandardMaterial3D.new()
+		_window_mat.albedo_color = WINDOW_COLOR
+		_window_mat.emission_enabled = true
+		_window_mat.emission = Color(1.0, 0.72, 0.4)
+		_window_mat.emission_energy_multiplier = 0.0
+	return _window_mat
+
+
+## How lit the windows are: 0 by day, up to full in the dark (daylight 1 = noon)
+static func set_daylight(daylight: float) -> void:
+	window_material().emission_energy_multiplier = clampf(1.0 - daylight * 1.6, 0.0, 1.0) * 1.8
+
+
+static func _lit_windows(root: Node3D) -> void:
+	var list: Array = root.get_meta("lit_windows", [])
+	root.remove_meta("lit_windows")
+	if list.is_empty():
+		return
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var pane := BoxMesh.new()
+	pane.size = Vector3(1.0, 1.0, 1.0)
+	for w: Array in list:
+		var xf: Transform3D = w[0]
+		var thin := Vector3(0.08, 1.0, 1.0) if bool(w[1]) else Vector3(1.0, 1.0, 0.08)
+		st.append_from(pane, 0, xf * Transform3D(Basis.from_scale(thin)))
+	var mi := MeshInstance3D.new()
+	mi.name = "LitWindows"
+	mi.mesh = st.commit()
+	mi.material_override = window_material()
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(mi)
 
 
 # A lord's seat: a castle gets four corner towers, battlements and a gatehouse; a keep one great
@@ -279,14 +439,20 @@ static func _walls(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: Wor
 		POIBuilder.add_box(root, Vector3(4.0, h + 5.0, 4.0), Vector3(c.x, gy + (h + 5.0) * 0.5 - 1.0, c.y), stone.darkened(0.15))
 
 
+# The town's name carved on a stone beside the road at each gate (Alpha 1.14: no big boards); E on
+# it reads the name
 static func _gate_signs(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: WorldMap) -> void:
+	var kind: String = ["village", "town", "city"][clampi(int(layout.data.kind), 0, 2)]
 	for g in layout.gates:
 		var out := signf(g.x)
-		var at := Vector3(g.x + out * 4.0, 0.0, 6.0)  # just outside the town, beside the road
+		var at := Vector3(g.x + out * 5.0, 0.0, 6.5)
 		at.y = POIBuilder.ground_y(placed, map, at.x, at.z)
-		POIBuilder.add_box(root, Vector3(0.2, 2.4, 0.2), at + Vector3(0.0, 1.2, 0.0), DOOR_COLOR)
-		POIBuilder.add_box(root, Vector3(0.1, 0.7, 2.4), at + Vector3(0.0, 2.2, 0.0), Color(0.5, 0.38, 0.22), 0.0, Vector3.ZERO, false)
-		_label(root, layout.display_name, at + Vector3(out * 0.07, 2.2, 0.0), out * PI * 0.5, 56).visibility_range_end = 80.0
+		POIBuilder.add_box(root, Vector3(0.6, 1.5, 1.7), at + Vector3(0.0, 0.6, 0.0), layout.data.stone_color.darkened(0.12), 0.0, Vector3(0.0, 0.0, out * 0.06))
+		var carved := _label(root, layout.display_name, at + Vector3(out * 0.31, 0.95, 0.0), out * PI * 0.5, 30)
+		carved.visibility_range_end = 22.0
+		carved.outline_size = 0
+		carved.modulate = Color(0.25, 0.23, 0.2)
+		Readable.make(root, at + Vector3(out * 0.5, 0.0, 0.0), out * PI * 0.5, "the stone", "%s\n\n(a %s)" % [layout.display_name, kind], "none")
 
 
 # ---------------------------------------------------------------- tradesmen
@@ -450,3 +616,58 @@ static func _wall_slope(root: Node3D, placed: PlacedPOI, map: WorldMap, gate: Ve
 	body.add_child(mi)
 	root.add_child(body)
 	body.transform = Transform3D(Basis.looking_at(b - a, Vector3.UP), (a + b) * 0.5)
+
+
+# ---------------------------------------------------------------- Alpha 1.14 town dressing
+
+## What each dressing spot gets (a prop scene in scenes/interiors/props/)
+const DRESS_PROPS := {
+	"lamp": "lamp_post", "stall": "market_stall", "fountain": "fountain", "well": "well", "bench": "stone_bench",
+	"tree": "street_tree", "flowers": "flower_box", "barrel": "barrel", "crates": "crates", "cart": "cart",
+	"hay": "hay_bale", "sacks": "sacks", "statue": "statue", "banner": "banner_pole", "broken_cart": "broken_cart",
+}
+
+# The town's things on their spots (TownLayout.dress); street lamps light up at night
+static func _dressing(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: WorldMap) -> void:
+	for d: Dictionary in layout.dress:
+		var at: Vector3 = d["pos"]
+		at.y = POIBuilder.ground_y(placed, map, at.x, at.z)
+		var what := String(d["what"])
+		match what:
+			"notice":
+				NoticeBoard.make(root, at, float(d["yaw"]), placed.id)
+			"watchtower":
+				_watchtower(root, at, layout.data.stone_color)
+			_:
+				var path := "res://scenes/interiors/props/%s.tscn" % DRESS_PROPS.get(what, what)
+				if not ResourceLoader.exists(path):
+					continue
+				var p := (load(path) as PackedScene).instantiate() as Node3D
+				p.name = "Dress_" + what
+				root.add_child(p)
+				p.position = at
+				p.rotation.y = float(d["yaw"])
+				for l in p.find_children("*", "OmniLight3D", true, false):
+					var light := l as OmniLight3D
+					light.add_to_group("town_lamps")
+					light.distance_fade_enabled = true
+					light.distance_fade_begin = 45.0
+					light.distance_fade_length = 15.0
+
+
+# A village's wooden watchtower: four posts, a platform with a rail, a roof, a slope up
+static func _watchtower(root: Node3D, at: Vector3, stone: Color) -> void:
+	var wood := Color(0.38, 0.27, 0.16)
+	for c in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
+		POIBuilder.add_box(root, Vector3(0.3, 6.5, 0.3), at + Vector3(c.x * 1.4, 3.0, c.y * 1.4), wood)
+	POIBuilder.add_box(root, Vector3(3.4, 0.25, 3.4), at + Vector3(0, 5.0, 0), wood.darkened(0.1))
+	for side in 4:
+		var along := side % 2 == 0
+		var sg := -1.0 if side < 2 else 1.0
+		POIBuilder.add_box(root, Vector3(3.4, 0.9, 0.12) if along else Vector3(0.12, 0.9, 3.4), at + (Vector3(0, 5.6, sg * 1.65) if along else Vector3(sg * 1.65, 5.6, 0)), wood, 0.0, Vector3.ZERO, false)
+	_roof(root, Vector3(4.0, 1.4, 4.0), at + Vector3(0, 7.2, 0), Color(0.35, 0.24, 0.16))
+
+
+## Street lamps on at night, off by day (WorldManager calls this as the light changes)
+static func set_lamps(tree: SceneTree, night: bool) -> void:
+	tree.call_group("town_lamps", "set_visible", night)

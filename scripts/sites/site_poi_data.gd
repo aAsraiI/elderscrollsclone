@@ -49,6 +49,15 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 			link.make_door(placed.id)
 			break
 	_markers(site, placed, map)
+	SiteLife.attach(site)
+	# the animals the place keeps (near its middle, not when bandits have taken it)
+	var herd: Array = SiteLife.ANIMALS.get(String(site.site_kind), [])
+	if not WorldState.has_record("site_owners/" + placed.id):
+		for i in herd.size():
+			var a := Vector3(cos(i * 2.1) * 6.0, 0, sin(i * 2.1) * 6.0 - 4.0)
+			if map != null:
+				a.y = POIBuilder.ground_y(placed, map, a.x, a.z)
+			SiteLife.animal(site, herd[i], a, "%s/animal%d" % [placed.id, i])
 	StaticBatch.merge_interior(root)
 	return root
 

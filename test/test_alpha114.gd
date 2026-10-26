@@ -146,6 +146,8 @@ func t_in_game() -> void:
 	await t_placement(wm, p)
 	t_towns(wm)
 	t_walls(wm)
+	t_buildings(wm)
+	await t_dressing(wm)
 
 
 # ---------------------------------------------------------------- 1.14.5 small places
@@ -223,11 +225,11 @@ func t_placement(wm: WorldManager, p: CharacterBody3D) -> void:
 			break
 	if farm != null:
 		var before := (farm.poi as SitePOIData).build(farm, map)
-		var calm := before.find_children("*", "Enemy", true, false).size()
+		var calm := before.find_children("*", "Enemy", true, false).filter(func(e: Node) -> bool: return not e.has_meta("animal")).size()
 		before.free()
 		SiteChanges._new_owners(wm, farm, 5, RandomNumberGenerator.new(), "taken")
 		var after := (farm.poi as SitePOIData).build(farm, map)
-		var now := after.find_children("*", "Enemy", true, false).size()
+		var now := after.find_children("*", "Enemy", true, false).filter(func(e: Node) -> bool: return not e.has_meta("animal")).size()
 		after.free()
 		check("bandits can take a farm (%d people before, %d after)" % [calm, now], calm == 0 and now > 0)
 		check("...and folk talk about it", Rumors.all().any(func(r: Dictionary) -> bool: return String(r.get("poi", r.get("poi_id", ""))) == farm.id or String(r.get("text", "")).contains("taken")))
@@ -343,3 +345,136 @@ func t_walls(wm: WorldManager) -> void:
 		var stairs := root.find_children("WallStairs*", "", true, false).size()
 		check("a slope up to the walkway at each gate (%d)" % stairs, stairs == 2)
 		root.free()
+
+
+# ---------------------------------------------------------------- 1.14.8-9 buildings and signs
+
+func t_buildings(wm: WorldManager) -> void:
+	print("-- buildings and signs")
+	var styles := {}
+	for t in wm.towns:
+		styles[BuildingStyle.for_biome(t.town.biome_key if t.town != null else "").resource_path] = true
+	check("towns in different lands build differently (%d styles)" % styles.size(), styles.size() >= 3)
+	var city: PlacedPOI = null
+	for t in wm.towns:
+		if t.town != null and (t.poi as TownData).kind == TownData.Kind.CITY:
+			city = t
+			break
+	var root := TownBuilder.build(city.poi as TownData, city, wm.map)
+	var parts := root.find_children("Part_*", "", true, false)
+	var kinds := {}
+	for p in parts:
+		kinds[String(p.name).trim_prefix("Part_").get_slice("@", 0).rstrip("0123456789")] = true
+	check("buildings are put together from part scenes (%s)" % ", ".join(kinds.keys()), kinds.has("door") and kinds.has("sign_bracket") and parts.size() > 50)
+	var doors_ok := true
+	for holder in root.get_children():
+		if holder.has_meta("building_id") and (holder.get_node_or_null("Door") as BuildingDoor) == null:
+			doors_ok = false
+	check("every building keeps its door", doors_ok)
+	var lit := root.get_node_or_null("LitWindows") as MeshInstance3D
+	check("the town's windows are one mesh", lit != null and lit.mesh != null)
+	TownBuilder.set_daylight(0.0)
+	var night := TownBuilder.window_material().emission_energy_multiplier
+	TownBuilder.set_daylight(1.0)
+	var noon := TownBuilder.window_material().emission_energy_multiplier
+	check("...lit at night, dark at noon", night > 1.0 and noon == 0.0)
+	# signs: none on homes, a small board you can read on the trades, the name on a stone at the gates
+	var home_signs := 0
+	var trade_signs := 0
+	var trades := 0
+	for b in city.town.buildings:
+		var holder := root.find_children("*", "", false, false).filter(func(n: Node) -> bool: return n.get_meta("building_id", "") == b.id)
+		if holder.is_empty():
+			continue
+		var h: Node = holder[0]
+		var labels := h.find_children("*", "Label3D", true, false).size()
+		var sign := h.get_node_or_null("Sign") as Readable
+		if b.kind in [BuildingPlot.Kind.HOUSE, BuildingPlot.Kind.FARM]:
+			home_signs += labels + (1 if sign != null else 0)
+		elif b.kind in [BuildingPlot.Kind.SHOP, BuildingPlot.Kind.INN, BuildingPlot.Kind.SMITHY, BuildingPlot.Kind.TEMPLE]:
+			trades += 1
+			if sign != null and sign.title == b.display_name and labels == 0:
+				trade_signs += 1
+	check("homes have no signs", home_signs == 0, str(home_signs))
+	check("shops, inns, smithies and temples hang a small sign that reads their name (%d of %d)" % [trade_signs, trades], trades > 0 and trade_signs == trades)
+	var stones := root.find_children("*", "Readable", true, false).filter(func(r: Node) -> bool: return (r as Readable).title == "the stone")
+	check("the town's name is carved on a stone at each gate", stones.size() == city.town.gates.size() and (stones[0] as Readable).text.contains(city.town.display_name))
+	root.free()
+	# stilts in the swamp, flat roofs in the desert
+	for want: Array in [["swamp", "stilts"], ["desert", "flat"]]:
+		var st := BuildingStyle.for_biome(want[0])
+		check("%s towns: %s" % want, st.base == want[1] or st.roof == want[1])
+	# a hand-made building stands in for a generated one
+	var b0: BuildingPlot = city.town.buildings[0]
+	var o := InteriorOverrides.get_all()
+	o.exteriors["%s/%s" % [b0.town_name, b0.display_name]] = load("res://scenes/buildings/parts/porch.tscn") as PackedScene
+	var root2 := TownBuilder.build(city.poi as TownData, city, wm.map)
+	var h0 := root2.find_children("*", "", false, false).filter(func(n: Node) -> bool: return n.get_meta("building_id", "") == b0.id)[0] as Node3D
+	check("a hand-made building scene can replace a generated one", h0.get_node_or_null("Porch") != null and h0.get_node_or_null("Door") is BuildingDoor)
+	o.exteriors.clear()
+	root2.free()
+
+
+# ---------------------------------------------------------------- 1.14.10-11 dressing and life
+
+func t_dressing(wm: WorldManager) -> void:
+	print("-- town dressing and life")
+	var city: PlacedPOI = null
+	for t in wm.towns:
+		if t.town != null and (t.poi as TownData).kind == TownData.Kind.CITY:
+			city = t
+			break
+	var counts := {}
+	for d in city.town.dress:
+		counts[d["what"]] = int(counts.get(d["what"], 0)) + 1
+	check("a city's square and streets are dressed (%s)" % str(counts), counts.get("fountain", 0) == 1 and counts.get("stall", 0) >= 4 and counts.get("lamp", 0) >= 6 and counts.get("bench", 0) >= 1 and counts.get("notice", 0) == 1)
+	var blocking := 0
+	for d in city.town.dress:
+		if String(d["what"]) == "flowers":
+			continue  # under the windows, against the wall
+		var q := Vector2(d["pos"].x, d["pos"].z)
+		for s in city.town.streets:
+			if s.get_rect().has_point(q):
+				blocking += 1
+		for b in city.town.buildings:
+			var front := Basis(Vector3.UP, b.local_yaw) * Vector3(0, 0, -1)
+			var door := b.local_pos + front * (b.size.z * 0.5 + 1.0)
+			if Vector2(door.x, door.z).distance_to(q) < 1.2:
+				blocking += 1
+	check("nothing stands on a street or in a doorway", blocking == 0, str(blocking))
+	var root := TownBuilder.build(city.poi as TownData, city, wm.map)
+	get_root().add_child(root)
+	await process_frame
+	var lamps := get_nodes_in_group("town_lamps")
+	check("street lamps with lights (%d)" % lamps.size(), lamps.size() >= 6)
+	TownBuilder.set_lamps(self, true)
+	var on := lamps.all(func(l: Node) -> bool: return (l as Node3D).visible)
+	TownBuilder.set_lamps(self, false)
+	var off := lamps.all(func(l: Node) -> bool: return not (l as Node3D).visible)
+	check("...lit at night, out by day", on and off)
+	check("a notice board on the square", not root.find_children("*", "NoticeBoard", true, false).is_empty())
+	var animals := root.find_children("*", "Enemy", true, false).filter(func(e: Node) -> bool: return e.has_meta("animal"))
+	var farms := city.town.buildings.filter(func(b: BuildingPlot) -> bool: return b.kind == BuildingPlot.Kind.FARM).size()
+	check("farm animals in the fields (%d for %d farms)" % [animals.size(), farms], farms == 0 or animals.size() >= farms)
+	root.queue_free()
+	await process_frame
+	# a camp's people get on with things
+	var camp := load("res://data/world/Sites/bandit_hold.tres") as SitePOIData
+	var placed := PlacedPOI.new()
+	placed.id = "test/camp_life"
+	placed.poi = camp
+	var croot := camp.build(placed, null)
+	croot.position = Vector3(0, -300, 0)
+	get_root().add_child(croot)
+	await frames(5)
+	var people := croot.find_children("*", "Enemy", true, false).filter(func(e: Node) -> bool: return not e.has_meta("animal"))
+	var busy := people.filter(func(e: Node) -> bool: return (e as Enemy).asleep or ((e as Enemy).body != null and (e as Enemy).body.pose == &"sit") or (e as Enemy).wander_radius == 0.0)
+	check("in a camp some sleep, some sit by the fire, some keep watch (%d of %d)" % [busy.size(), people.size()], people.size() > 0 and busy.size() >= 2)
+	croot.queue_free()
+	var farm := load("res://data/world/Sites/farmstead.tres") as SitePOIData
+	var fp := PlacedPOI.new()
+	fp.id = "test/farm_life"
+	fp.poi = farm
+	var froot := farm.build(fp, null)
+	check("a farmstead keeps animals", froot.find_children("*", "Enemy", true, false).any(func(e: Node) -> bool: return e.has_meta("animal") and (e as Enemy).talk_name == ""))
+	froot.free()

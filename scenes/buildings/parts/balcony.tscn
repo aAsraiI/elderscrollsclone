@@ -1,0 +1,66 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="1_wqn3g"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_qq3es"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ib60s"]
+size = Vector3(2.4, 0.15, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nuxd0"]
+size = Vector3(2.4, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hlfq8"]
+size = Vector3(0.08, 0.9, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_recc6"]
+size = Vector3(0.08, 0.9, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sphtn"]
+size = Vector3(0.12, 0.12, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wd35q"]
+size = Vector3(0.12, 0.12, 1)
+
+[node name="Balcony" type="Node3D" unique_id=2083496455]
+
+[node name="Box0" type="Node3D" parent="." unique_id=256189563 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.55)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box0" unique_id=1413478084]
+material_override = ExtResource("1_wqn3g")
+mesh = SubResource("BoxMesh_ib60s")
+
+[node name="Box1" type="Node3D" parent="." unique_id=113773977 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1.05)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box1" unique_id=438013228]
+material_override = ExtResource("2_qq3es")
+mesh = SubResource("BoxMesh_nuxd0")
+
+[node name="Box2" type="Node3D" parent="." unique_id=688085884 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.16, 0.5, -0.55)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box2" unique_id=1841342120]
+material_override = ExtResource("2_qq3es")
+mesh = SubResource("BoxMesh_hlfq8")
+
+[node name="Box3" type="Node3D" parent="." unique_id=1433057559 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.16, 0.5, -0.55)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box3" unique_id=1403419112]
+material_override = ExtResource("2_qq3es")
+mesh = SubResource("BoxMesh_recc6")
+
+[node name="Box4" type="Node3D" parent="." unique_id=1198036882 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.4, -0.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box4" unique_id=2114877427]
+material_override = ExtResource("1_wqn3g")
+mesh = SubResource("BoxMesh_sphtn")
+
+[node name="Box5" type="Node3D" parent="." unique_id=73239871 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.4, -0.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box5" unique_id=1780505786]
+material_override = ExtResource("1_wqn3g")
+mesh = SubResource("BoxMesh_wd35q")

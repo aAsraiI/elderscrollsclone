@@ -1,0 +1,46 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_w7dsi"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_s6fg6"]
+[ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="3_sr7h0"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_7my3n"]
+top_radius = 0.175
+bottom_radius = 0.175
+height = 3.0
+radial_segments = 10
+
+[sub_resource type="BoxMesh" id="BoxMesh_ofhgl"]
+size = Vector3(2.4, 2.2, 2.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qinw6"]
+size = Vector3(1.8, 1.6, 1.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ryapu"]
+size = Vector3(2.4, 5.7000003, 2.4)
+
+[node name="StreetTree" type="StaticBody3D" unique_id=270093601]
+script = ExtResource("1_w7dsi")
+tags = PackedStringArray("tree", "garden")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("house", "camp", "fort", "ruin")
+radius = 1.2
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=850737900]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+material_override = ExtResource("2_s6fg6")
+mesh = SubResource("CylinderMesh_7my3n")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1672164030]
+transform = Transform3D(0.9553365, 0, 0.29552022, 0, 1, 0, -0.29552022, 0, 0.9553365, 0, 3.8, 0)
+material_override = ExtResource("3_sr7h0")
+mesh = SubResource("BoxMesh_ofhgl")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1245966873]
+transform = Transform3D(0.6967067, 0, 0.7173561, 0, 1, 0, -0.7173561, 0, 0.6967067, 0.3, 4.9, -0.2)
+material_override = ExtResource("3_sr7h0")
+mesh = SubResource("BoxMesh_qinw6")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1116397831]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8500001, 0)
+shape = SubResource("BoxShape3D_ryapu")

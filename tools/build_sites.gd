@@ -100,6 +100,17 @@ func _outdoor_props() -> void:
 	_prop("well", ["well", "water"], ["FURNITURE"], F, [["cyl", Vector3(1.6, 0.9, 1.6), Vector3(0, 0.45, 0), "stone"], ["box", Vector3(0.1, 1.8, 0.1), Vector3(-0.7, 1.4, 0), "wood_dark"], ["box", Vector3(0.1, 1.8, 0.1), Vector3(0.7, 1.4, 0), "wood_dark"], ["box", Vector3(1.6, 0.1, 0.1), Vector3(0, 2.3, 0), "wood_dark"], ["cyl", Vector3(1.3, 0.04, 1.3), Vector3(0, 0.8, 0), "water"]], {"themes": ["house", "ruin", "camp"]})
 	_prop("crop_row", ["crops", "field"], ["DECORATION"], F, [["box", Vector3(0.6, 0.15, 3.6), Vector3(0, 0.07, 0), "ash"], ["box", Vector3(0.4, 0.6, 3.4), Vector3(0, 0.45, 0), "moss_stone"]], {"themes": ["house"], "ghost": true, "weight": 2.0})
 	_prop("rowboat", ["boat"], ["DECORATION", "FURNITURE"], F, [["box", Vector3(1.3, 0.5, 3.2), Vector3(0, 0.25, 0), "wood_dark"], ["box", Vector3(1.1, 0.08, 0.3), Vector3(0, 0.45, 0.2), "wood"]], {"themes": ["house"]})
+	# town dressing (Alpha 1.14.10)
+	var town := ["house", "camp", "fort", "ruin"]
+	_prop("lamp_post", ["lamp", "light", "street"], ["LIGHT", "DECORATION"], F, [["box", Vector3(0.14, 3.2, 0.14), Vector3(0, 1.6, 0), "iron"], ["box", Vector3(0.5, 0.08, 0.08), Vector3(0.22, 3.1, 0), "iron"], ["box", Vector3(0.24, 0.32, 0.24), Vector3(0.42, 2.85, 0), "glow"]],
+		{"themes": town, "light": fire, "range": 9.0, "energy": 1.3, "light_at": Vector3(0.42, 2.7, 0)})
+	_prop("market_stall", ["stall", "market"], ["FURNITURE"], F, [["box", Vector3(2.4, 0.9, 1.1), Vector3(0, 0.45, 0), "wood"], ["box", Vector3(2.6, 0.06, 1.6), Vector3(0, 2.3, 0.1), "cloth_red", 0.0], ["box", Vector3(0.1, 2.3, 0.1), Vector3(-1.2, 1.15, -0.6), "wood_dark"], ["box", Vector3(0.1, 2.3, 0.1), Vector3(1.2, 1.15, -0.6), "wood_dark"], ["box", Vector3(0.1, 2.3, 0.1), Vector3(-1.2, 1.15, 0.6), "wood_dark"], ["box", Vector3(0.1, 2.3, 0.1), Vector3(1.2, 1.15, 0.6), "wood_dark"], ["box", Vector3(0.5, 0.25, 0.4), Vector3(-0.6, 1.02, 0), "straw"], ["box", Vector3(0.4, 0.3, 0.4), Vector3(0.5, 1.05, 0.1), "cloth"]],
+		{"themes": town})
+	_prop("fountain", ["fountain", "water"], ["FURNITURE"], F, [["cyl", Vector3(4.0, 0.7, 4.0), Vector3(0, 0.35, 0), "stone"], ["cyl", Vector3(3.4, 0.06, 3.4), Vector3(0, 0.62, 0), "water"], ["cyl", Vector3(0.6, 1.8, 0.6), Vector3(0, 1.2, 0), "stone"], ["cyl", Vector3(1.4, 0.3, 1.4), Vector3(0, 2.1, 0), "stone"]], {"themes": town})
+	_prop("flower_box", ["flowers", "garden"], ["DECORATION"], F, [["box", Vector3(1.2, 0.35, 0.4), Vector3(0, 0.17, 0), "wood_dark"], ["box", Vector3(1.1, 0.25, 0.3), Vector3(0, 0.45, 0), "cloth_red"], ["box", Vector3(0.6, 0.2, 0.25), Vector3(0.2, 0.55, 0), "moss_stone"]], {"themes": town, "ghost": true})
+	_prop("stone_bench", ["bench", "seat", "street"], ["FURNITURE", "DECORATION"], F, [["box", Vector3(1.8, 0.12, 0.5), Vector3(0, 0.45, 0), "stone"], ["box", Vector3(0.3, 0.4, 0.45), Vector3(-0.7, 0.2, 0), "stone_dark"], ["box", Vector3(0.3, 0.4, 0.45), Vector3(0.7, 0.2, 0), "stone_dark"]], {"themes": town})
+	_prop("street_tree", ["tree", "garden"], ["DECORATION"], F, [["cyl", Vector3(0.35, 3.0, 0.35), Vector3(0, 1.5, 0), "wood_dark"], ["box", Vector3(2.4, 2.2, 2.4), Vector3(0, 3.8, 0), "moss_stone", 0.3], ["box", Vector3(1.8, 1.6, 1.8), Vector3(0.3, 4.9, -0.2), "moss_stone", 0.8]], {"themes": town})
+	_prop("hay_bale", ["hay", "storage"], ["DECORATION"], F, [["cyl", Vector3(1.2, 1.1, 1.2), Vector3(0, 0.55, 0), "straw", 0.0]], {"themes": town})
 
 
 # ---------------------------------------------------------------- the pieces

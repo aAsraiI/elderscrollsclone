@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="1_prh8a"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_x4ov5"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="3_3gqy8"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_3xcko"]
+size = Vector3(1.4, 2.3, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_41dwj"]
+size = Vector3(1.6, 0.18, 0.16)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qjo6u"]
+size = Vector3(1.2, 0.08, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ln3tu"]
+size = Vector3(1.2, 0.08, 0.12)
+
+[node name="Door" type="Node3D" unique_id=625112950]
+
+[node name="Box0" type="Node3D" parent="." unique_id=559995271 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, -0.06)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box0" unique_id=773443011]
+material_override = ExtResource("1_prh8a")
+mesh = SubResource("BoxMesh_3xcko")
+
+[node name="Box1" type="Node3D" parent="." unique_id=2140876908 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.38, -0.08)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box1" unique_id=1398894884]
+material_override = ExtResource("2_x4ov5")
+mesh = SubResource("BoxMesh_41dwj")
+
+[node name="Box2" type="Node3D" parent="." unique_id=581011651 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -0.12)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box2" unique_id=112729665]
+material_override = ExtResource("3_3gqy8")
+mesh = SubResource("BoxMesh_qjo6u")
+
+[node name="Box3" type="Node3D" parent="." unique_id=667388314 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -0.12)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box3" unique_id=1168607888]
+material_override = ExtResource("3_3gqy8")
+mesh = SubResource("BoxMesh_ln3tu")

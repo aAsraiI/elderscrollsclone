@@ -1,0 +1,49 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_r3gnh"]
+[ext_resource type="Material" path="res://data/interiors/materials/iron.tres" id="2_5w63x"]
+[ext_resource type="Material" path="res://data/interiors/materials/glow.tres" id="3_chhcl"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_k0sue"]
+size = Vector3(0.14, 3.2, 0.14)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6304n"]
+size = Vector3(0.5, 0.08, 0.08)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jcrvw"]
+size = Vector3(0.24, 0.32, 0.24)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dtviq"]
+size = Vector3(0.60999995, 3.2, 0.5)
+
+[node name="LampPost" type="StaticBody3D" unique_id=850385062]
+script = ExtResource("1_r3gnh")
+tags = PackedStringArray("lamp", "light", "street")
+socket_kinds = PackedStringArray("LIGHT", "DECORATION")
+themes = PackedStringArray("house", "camp", "fort", "ruin")
+radius = 0.3049999810755253
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=2071294300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+material_override = ExtResource("2_5w63x")
+mesh = SubResource("BoxMesh_k0sue")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=583169098]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 3.1, 0)
+material_override = ExtResource("2_5w63x")
+mesh = SubResource("BoxMesh_6304n")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1482578372]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 2.85, 0)
+material_override = ExtResource("3_chhcl")
+mesh = SubResource("BoxMesh_jcrvw")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=331691642]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.23499998, 1.6, 0)
+shape = SubResource("BoxShape3D_dtviq")
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=2065307502]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 2.7, 0)
+light_color = Color(1, 0.6, 0.3, 1)
+light_energy = 1.3
+omni_range = 9.0

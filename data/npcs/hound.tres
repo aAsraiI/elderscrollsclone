@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="1_ed"]
+
+[resource]
+script = ExtResource("1_ed")
+id = &"hound"
+display_name = "Hound"
+disposition = 2
+color = Color(0.42, 0.3, 0.2, 1)
+body_scale = 0.7
+health_mult = 0.6
+damage_mult = 0.2
+poise_mult = 0.5
+loot_quality = 0.0
+weapon_tier_offset = 0
+armor_tier_offset = -9
+kit = 0
+move_speed = 4.5
+detection_range = 6.0
+telegraph_time = 0.12
+heavy_chance = 0.0
+chain_chance = 0.6
+attack_pause_min = 0.2
+attack_pause_max = 0.7
+knockback_resistance = 0.0
+wander_radius = 6.0
+talk_name = ""

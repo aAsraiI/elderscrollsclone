@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_3fni2"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_kjkha"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth_red.tres" id="3_yadun"]
+[ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="4_8f5ak"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_oquhl"]
+size = Vector3(1.2, 0.35, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fwl5f"]
+size = Vector3(1.1, 0.25, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vrntq"]
+size = Vector3(0.6, 0.2, 0.25)
+
+[node name="FlowerBox" type="StaticBody3D" unique_id=301264185]
+collision_layer = 0
+script = ExtResource("1_3fni2")
+tags = PackedStringArray("flowers", "garden")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("house", "camp", "fort", "ruin")
+radius = 0.6
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1475540989]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17, 0)
+material_override = ExtResource("2_kjkha")
+mesh = SubResource("BoxMesh_oquhl")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1167555771]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+material_override = ExtResource("3_yadun")
+mesh = SubResource("BoxMesh_fwl5f")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=819788506]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.55, 0)
+material_override = ExtResource("4_8f5ak")
+mesh = SubResource("BoxMesh_vrntq")

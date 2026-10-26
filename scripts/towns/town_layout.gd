@@ -67,6 +67,10 @@ var gates: Array[Vector3] = []
 ## is made of: "stone", "thick" (a city's, with a ditch), "palisade" (a village's), or "" (none)
 var wall_poly := PackedVector2Array()
 var wall_kind := ""
+## Alpha 1.14: what stands about the streets and the square ({"pos": local, "yaw", "what"}): a
+## fountain or well, market stalls, benches, lamps, trees, carts, barrels, flower boxes, statues...
+## TownBuilder puts them up; festivals and TownLife use the same spots
+var dress: Array[Dictionary] = []
 ## The biome the town stands in (its id), and a spot on the nearest shore (town local; INF = no
 ## water nearby). Tradesmen are picked from these: fishermen only where there is water.
 var biome_key := ""
@@ -96,6 +100,7 @@ static func generate(p_data: TownData, placed: PlacedPOI, town_name: String, map
 	t._place_buildings(rng)
 	t._districts()
 	t._wall_outline(rng)
+	t._dress(rng)
 	if not t.named.is_empty():
 		t._assign_cast(QuestBook.cast_for(town_name))
 	for b in t.buildings:
@@ -832,3 +837,106 @@ func wall_pieces(step: float, gate_gap: float) -> Array:
 				continue
 			out.append([p, q])
 	return out
+
+
+# Where the town's things stand (Alpha 1.14): by the rules of the street and the quarter, never on
+# a street, in a doorway, against a gate or on top of each other
+func _dress(rng: RandomNumberGenerator) -> void:
+	if not compact:
+		return
+	var blocked: Array[Rect2] = []
+	for b in buildings:
+		blocked.append(b.get_local_rect().grow(0.4))
+		var front := Basis(Vector3.UP, b.local_yaw) * Vector3(0, 0, -1)
+		var door := b.local_pos + front * (b.size.z * 0.5 + 1.6)
+		blocked.append(Rect2(door.x - 1.8, door.z - 1.8, 3.6, 3.6))
+	for s in streets:
+		blocked.append(s.get_rect().grow(0.3))
+	var put := func(p: Vector3, yaw: float, what: String, r: float) -> bool:
+		var q := Vector2(p.x, p.z)
+		if gates.any(func(g: Vector3) -> bool: return Vector2(g.x, g.z).distance_to(q) < 13.0):
+			return false
+		if wall_poly.size() > 2 and not Geometry2D.is_point_in_polygon(q * 1.06, wall_poly):
+			return false
+		if blocked.any(func(rc: Rect2) -> bool: return rc.grow(r).has_point(q)):
+			return false
+		if dress.any(func(d: Dictionary) -> bool: return Vector2(d["pos"].x, d["pos"].z).distance_to(q) < r + 1.0):
+			return false
+		dress.append({"pos": p, "yaw": yaw, "what": what})
+		return true
+	var town_kind := data.kind
+	# the square: a fountain (a well in a village), stalls round it, benches, the notice board
+	for i in 12:  # the first free spot on the square, between the streets
+		var a := PI * 0.5 + TAU * i / 12.0 + PI / 12.0
+		if put.call(Vector3(cos(a), 0, sin(a)) * plaza_radius * 0.78, 0.0, "fountain" if town_kind != TownData.Kind.VILLAGE else "well", 1.3):
+			break
+	var stalls: int = {TownData.Kind.CITY: 8, TownData.Kind.TOWN: 5}.get(town_kind, 2)
+	for i in 16:
+		if stalls <= 0:
+			break
+		var a := TAU * i / 16.0 + 0.2
+		if put.call(Vector3(cos(a), 0, sin(a)) * (plaza_radius + 2.5), -a + PI * 0.5, "stall", 1.4):
+			stalls -= 1
+	for a: float in [PI * 0.25, PI * 0.75, PI * 1.25]:
+		put.call(Vector3(cos(a), 0, sin(a)) * (plaza_radius - 1.5), -a, "bench", 0.9)
+	for i in 16:
+		var a := TAU * i / 16.0 + 0.1
+		if put.call(Vector3(cos(a), 0, sin(a)) * (plaza_radius + 1.2), -a + PI * 0.5, "notice", 0.8):
+			break
+	# along the streets: lamps on the main street, the rest by what stands nearby
+	for s in streets:
+		var length := s.a.distance_to(s.b)
+		var dir := (s.b - s.a) / maxf(length, 0.01)
+		var normal := Vector3(-dir.z, 0.0, dir.x)
+		var step := 11.0 if s.main else 15.0
+		var t := 6.0
+		var k := 0
+		while t < length - 6.0:
+			for side: float in [-1.0, 1.0]:
+				var p := s.a + dir * t + normal * side * (s.half_width + 0.9)
+				var what := "lamp" if s.main and (k + int(side > 0)) % 2 == 0 else _street_thing(p, rng, s.main)
+				if what != "":
+					put.call(p, atan2(normal.x * side, normal.z * side), what, 0.6)
+			t += step
+			k += 1
+	# flower boxes under the front windows of homes in towns and the better quarters
+	for b in buildings:
+		if b.kind != BuildingPlot.Kind.HOUSE or b.district == "slums" or rng.randf() > 0.45:
+			continue
+		var basis := Basis(Vector3.UP, b.local_yaw)
+		for side: float in [-1.0, 1.0]:
+			if b.size.x >= 7.0:
+				dress.append({"pos": b.local_pos + basis * Vector3(side * b.size.x * 0.3, 0, -b.size.z * 0.5 - 0.3), "yaw": b.local_yaw, "what": "flowers"})
+	# a village with no stone wall keeps watch from a wooden tower by a gate
+	if town_kind == TownData.Kind.VILLAGE and not gates.is_empty():
+		var g := gates[0]
+		put.call(g - g.normalized() * 14.0 + Vector3(0, 0, 9.0), 0.0, "watchtower", 2.5)
+
+
+# What stands by a street here: a lamp or bench in the better quarters, barrels, crates and carts by
+# the trades, sacks and junk in the slums, a tree now and then; "" = nothing
+func _street_thing(p: Vector3, rng: RandomNumberGenerator, main: bool) -> String:
+	var near: BuildingPlot = null
+	var best := 14.0
+	for b in buildings:
+		var d := b.local_pos.distance_to(p)
+		if d < best:
+			best = d
+			near = b
+	var roll := rng.randf()
+	if near == null:
+		return "tree" if roll < 0.35 else ""
+	if near.kind in [BuildingPlot.Kind.SHOP, BuildingPlot.Kind.INN, BuildingPlot.Kind.SMITHY]:
+		return ["barrel", "crates", "cart", "sacks", ""][rng.randi_range(0, 4)]
+	match near.district:
+		"noble":
+			return ["lamp", "statue", "banner", "tree"][rng.randi_range(0, 3)] if roll < 0.8 else ""
+		"slums":
+			return ["sacks", "broken_cart", "barrel", ""][rng.randi_range(0, 3)]
+		"market":
+			return ["stall", "hay", "cart", "barrel"][rng.randi_range(0, 3)] if roll < 0.7 else ""
+		"docks":
+			return ["crates", "barrel", "sacks"][rng.randi_range(0, 2)]
+	if near.kind == BuildingPlot.Kind.FARM:
+		return ["hay", "cart", ""][rng.randi_range(0, 2)]
+	return ["bench", "tree", "flowers", "", ""][rng.randi_range(0, 4)] if not main else ["bench", "tree", ""][rng.randi_range(0, 2)]

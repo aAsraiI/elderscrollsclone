@@ -12,6 +12,9 @@ const PATH := "res://data/interiors/overrides.tres"
 
 @export var buildings: Dictionary[String, PackedScene] = {}
 @export var dungeons: Dictionary[String, PackedScene] = {}
+## "<town>/<building name>" (or a building id) -> a scene that stands in for the building outside
+## (origin at the middle of its floor, front door on the -Z side; the door is added for you)
+@export var exteriors: Dictionary[String, PackedScene] = {}
 
 static var _cached: InteriorOverrides
 
@@ -36,3 +39,13 @@ static func building_scene(b: BuildingPlot) -> String:
 static func dungeon_scene(dungeon_id: String) -> String:
 	var ps: PackedScene = get_all().dungeons.get(dungeon_id)
 	return ps.resource_path if ps != null else ""
+
+
+## The hand-made outside of a town building ("" = generated)
+static func exterior_scene(b: BuildingPlot) -> String:
+	var all := get_all()
+	for key in ["%s/%s" % [b.town_name, b.display_name], b.id]:
+		var ps: PackedScene = all.exteriors.get(key)
+		if ps != null:
+			return ps.resource_path
+	return ""

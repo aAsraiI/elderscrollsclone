@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="1_lmqsg"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_8jtl1"]
+size = Vector3(0.5, 1.05, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_65m0u"]
+size = Vector3(0.5, 1.05, 0.06)
+
+[node name="Shutters" type="Node3D" unique_id=1553874679]
+
+[node name="Box0" type="Node3D" parent="." unique_id=434397722 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.78, 0, -0.04)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box0" unique_id=671236931]
+material_override = ExtResource("1_lmqsg")
+mesh = SubResource("BoxMesh_8jtl1")
+
+[node name="Box1" type="Node3D" parent="." unique_id=1950808179 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.78, 0, -0.04)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box1" unique_id=33109156]
+material_override = ExtResource("1_lmqsg")
+mesh = SubResource("BoxMesh_65m0u")

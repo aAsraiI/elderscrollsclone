@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_1owtx"]
+[ext_resource type="Material" path="res://data/interiors/materials/straw.tres" id="2_frtsi"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_a5gbe"]
+top_radius = 0.6
+bottom_radius = 0.6
+height = 1.1
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jee1x"]
+size = Vector3(1.2, 1.1, 1.2)
+
+[node name="HayBale" type="StaticBody3D" unique_id=111561030]
+script = ExtResource("1_1owtx")
+tags = PackedStringArray("hay", "storage")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("house", "camp", "fort", "ruin")
+radius = 0.6
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=350335069]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+material_override = ExtResource("2_frtsi")
+mesh = SubResource("CylinderMesh_a5gbe")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=799857544]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("BoxShape3D_jee1x")

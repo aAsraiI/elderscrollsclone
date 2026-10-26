@@ -1,0 +1,63 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_mmgkx"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_qe522"]
+[ext_resource type="Material" path="res://data/interiors/materials/water.tres" id="3_e7s1p"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_oo7q0"]
+top_radius = 2.0
+bottom_radius = 2.0
+height = 0.7
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_a6ixp"]
+top_radius = 1.7
+bottom_radius = 1.7
+height = 0.06
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_80def"]
+top_radius = 0.3
+bottom_radius = 0.3
+height = 1.8
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_nok35"]
+top_radius = 0.7
+bottom_radius = 0.7
+height = 0.3
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_atsi3"]
+size = Vector3(4, 2.25, 4)
+
+[node name="Fountain" type="StaticBody3D" unique_id=459370315]
+script = ExtResource("1_mmgkx")
+tags = PackedStringArray("fountain", "water")
+socket_kinds = PackedStringArray("FURNITURE")
+themes = PackedStringArray("house", "camp", "fort", "ruin")
+radius = 2.0
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=996337478]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+material_override = ExtResource("2_qe522")
+mesh = SubResource("CylinderMesh_oo7q0")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=2116354525]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.62, 0)
+material_override = ExtResource("3_e7s1p")
+mesh = SubResource("CylinderMesh_a6ixp")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=929014993]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+material_override = ExtResource("2_qe522")
+mesh = SubResource("CylinderMesh_80def")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=1819067854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+material_override = ExtResource("2_qe522")
+mesh = SubResource("CylinderMesh_nok35")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1126520143]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.125, 0)
+shape = SubResource("BoxShape3D_atsi3")

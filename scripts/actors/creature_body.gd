@@ -88,7 +88,7 @@ static func build_for(e: Node3D, p_kind: Kind, seed_value: int) -> CreatureBody:
 ## Which kind of body an enemy type gets (by its EnemyData id)
 static func kind_for(id: String) -> Kind:
 	match id:
-		"wolf", "giant_rat", "frost_bear", "dune_stalker", "bog_lurker", "ash_hound", "harpy", "grave_ghoul", "dragon":
+		"wolf", "giant_rat", "frost_bear", "dune_stalker", "bog_lurker", "ash_hound", "harpy", "grave_ghoul", "dragon", "sheep", "cow", "hound":
 			return Kind.BEAST
 		"deep_crawler", "crawler_queen", "giant_spider", "sand_scorpion":
 			return Kind.CRAWLER

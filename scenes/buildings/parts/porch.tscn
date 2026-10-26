@@ -1,0 +1,53 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="1_7w5h6"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_c77ux"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_floor.tres" id="3_4fjrg"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ghmjr"]
+size = Vector3(2.6, 0.12, 1.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gyk2c"]
+size = Vector3(0.14, 2.7, 0.14)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s108g"]
+size = Vector3(0.14, 2.7, 0.14)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ekxg5"]
+size = Vector3(2.6, 0.12, 1.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_c6t6q"]
+size = Vector3(2.6, 0.12, 1.6)
+
+[node name="Porch" type="Node3D" unique_id=814087597]
+
+[node name="Box0" type="Node3D" parent="." unique_id=1497192157 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, -0.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box0" unique_id=323797942]
+material_override = ExtResource("1_7w5h6")
+mesh = SubResource("BoxMesh_ghmjr")
+
+[node name="Box1" type="Node3D" parent="." unique_id=1879430714 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 1.35, -1.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box1" unique_id=1500109634]
+material_override = ExtResource("2_c77ux")
+mesh = SubResource("BoxMesh_gyk2c")
+
+[node name="Box2" type="Node3D" parent="." unique_id=2084863616 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 1.35, -1.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box2" unique_id=784071567]
+material_override = ExtResource("2_c77ux")
+mesh = SubResource("BoxMesh_s108g")
+
+[node name="Box3" type="StaticBody3D" parent="." unique_id=2002137995 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, -0.8)
+
+[node name="Mesh" type="MeshInstance3D" parent="Box3" unique_id=686892943]
+material_override = ExtResource("3_4fjrg")
+mesh = SubResource("BoxMesh_ekxg5")
+
+[node name="Shape" type="CollisionShape3D" parent="Box3" unique_id=768401795]
+shape = SubResource("BoxShape3D_c6t6q")

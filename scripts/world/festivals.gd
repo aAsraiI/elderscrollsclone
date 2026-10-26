@@ -113,16 +113,28 @@ func _decorate(t: PlacedPOI, node: Node3D, f: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = t.id.hash()
 	var radius := 9.0
+	# the town's own dressing spots near the square, when it has them (Alpha 1.14): the banners go up
+	# beside its lamps, benches and trees, and the festival stall takes a market stall's place
+	var spots: Array[Vector3] = []
+	var stall_spot := Vector3.INF
+	if t.town != null and not t.town.dress.is_empty():
+		var near := t.town.dress.duplicate()
+		near.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return Vector3(x["pos"]).length() < Vector3(y["pos"]).length())
+		for d: Dictionary in near:
+			if String(d["what"]) == "stall" and stall_spot == Vector3.INF:
+				stall_spot = Vector3(d["pos"]) + Vector3(0, 0, 2.0)
+			elif String(d["what"]) in ["lamp", "bench", "tree", "flowers", "banner"] and spots.size() < 8:
+				spots.append(Vector3(d["pos"]) + Vector3(0.8, 0, 0))
 	for i in 8:
 		var a := float(i) / 8.0 * TAU
-		var at := Vector3(cos(a) * radius, 0.0, sin(a) * radius)
+		var at := spots[i] if i < spots.size() else Vector3(cos(a) * radius, 0.0, sin(a) * radius)
 		at.y = POIBuilder.ground_y(t, world.map, at.x, at.z)
 		POIBuilder.add_box(decor, Vector3(0.12, 3.4, 0.12), at + Vector3(0, 1.7, 0), Color(0.35, 0.25, 0.15), 0.0, Vector3.ZERO, false)
 		POIBuilder.add_box(decor, Vector3(0.7, 1.4, 0.04), at + Vector3(0.36, 2.6, 0), col.darkened(0.15 * (i % 2)), -a, Vector3.ZERO, false)
 		if i % 2 == 0:
 			POIBuilder.add_box(decor, Vector3(0.22, 0.28, 0.22), at + Vector3(0, 3.5, 0), Color(1.0, 0.8, 0.45), 0.0, Vector3.ZERO, false, true)
 	# The stall: a table under an awning, and its keeper
-	var stall_at := Vector3(4.5, 0.0, -4.5)
+	var stall_at := Vector3(4.5, 0.0, -4.5) if stall_spot == Vector3.INF else stall_spot
 	stall_at.y = POIBuilder.ground_y(t, world.map, stall_at.x, stall_at.z)
 	POIBuilder.add_box(decor, Vector3(2.2, 0.9, 0.9), stall_at + Vector3(0, 0.45, 0), Color(0.45, 0.32, 0.2))
 	POIBuilder.add_box(decor, Vector3(2.6, 0.08, 1.6), stall_at + Vector3(0, 2.3, 0.3), col, 0.0, Vector3.ZERO, false)

@@ -384,6 +384,7 @@ func _spawn_pois_for_chunk(c: Vector2i) -> void:
 			continue
 		node.name = "POI_%s" % p.poi.get_key()
 		node.set_meta("poi_id", p.id)
+		StaticBatch.merge_interior(node)  # the building parts and props (Alpha 1.14)
 		StaticBatch.merge(node)  # one draw call for all its plain boxes
 		_poi_root.add_child(node)
 		node.position = p.position
@@ -562,6 +563,9 @@ func _make_water() -> void:
 func _process(_delta: float) -> void:
 	if map == null:
 		return
+	if clock != null and Engine.get_process_frames() % 60 == 0:
+		TownBuilder.set_daylight(clock.get_daylight())  # windows light up as the day goes (Alpha 1.14)
+		TownBuilder.set_lamps(get_tree(), clock.get_daylight() < 0.35)
 	if _water != null and player != null and is_instance_valid(player):
 		_water.position = Vector3(snappedf(player.global_position.x, 32.0), settings.sea_level, snappedf(player.global_position.z, 32.0))
 	if player == null or not is_instance_valid(player):

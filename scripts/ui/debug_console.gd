@@ -26,6 +26,7 @@ quest.check               look for quests that can never be finished
 quest.overlay             show or hide the quest overlay
 dialogue.audit, dialogue.report   who talks about what (the person near you, or the whole town)
 dialogue.lint, dialogue.dupes     problems and near-identical lines in the dialogue
+talk <name>               start a conversation with anyone (they appear in front of you)
 clear                     empty this window"""
 
 var _root: Control
@@ -171,6 +172,8 @@ func run(text: String) -> String:
 		return "Quest overlay %s." % ("on" if _overlay != null else "off")
 	if cmd.begins_with("quest."):
 		return QuestDebug.run(cmd.trim_prefix("quest."), args, world)
+	if cmd == "talk":
+		return _talk(" ".join(args), p, world)
 	if cmd.begins_with("dialogue."):
 		return DialogueTools.run(cmd.trim_prefix("dialogue."), world, p) if world != null else "No world."
 	match cmd:
@@ -323,3 +326,39 @@ static func _find_item(want: String) -> ItemData:
 		if String(item.id) == key or item.display_name.to_lower() == want.to_lower():
 			return item
 	return null
+
+
+# Test mode: talk to anyone in the world by name, wherever they are (a stand-in appears in front of
+# you, with their own sheet, so every topic and quest of theirs works)
+func _talk(name: String, p: Node3D, world: WorldManager) -> String:
+	if name == "" or world == null or world.life == null:
+		return "talk <name>"
+	var found: TownLife.Resident = null
+	for t in world.towns:
+		for r: TownLife.Resident in world.life.get_town_residents(t.id):
+			if r.data.display_name.to_lower() == name.to_lower() and found == null:
+				found = r
+	var at := p.global_position - p.global_transform.basis.z * 2.0
+	var e: Enemy = null
+	if found != null:
+		e = Enemy.create()
+		found.data.body.apply(e, found.data.level, RandomNumberGenerator.new())
+		e.display_name = found.data.display_name
+		e.talk_name = found.data.display_name
+		e.talk_lines = found.data.talk_lines
+		e.persist_mode = Enemy.PersistMode.NEVER
+		e.set_meta("npc_id", found.data.id)
+		e.position = at
+		world.add_child(e)
+	else:
+		for c in CustomNpcs.all():
+			if c.display_name.to_lower() == name.to_lower():
+				e = CustomNpcs.spawn(c, world, at)
+	if e == null:
+		return "Nobody called '%s'." % name
+	_set_open(false)
+	var ui := get_tree().get_first_node_in_group("dialogue_ui") as DialogueUI
+	if ui != null:
+		ui.closed.connect(e.queue_free, CONNECT_ONE_SHOT)
+		ui.open_with.call_deferred(e)
+	return "Talking to %s." % e.display_name

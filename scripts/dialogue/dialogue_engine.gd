@@ -47,6 +47,8 @@ class Speaker:
 	var lines: PackedStringArray = []
 	## A hand-made person (CustomNpcData) who only talks about their own topics
 	var own_topics_only := false
+	## The hand-made person this is (null for everyone else)
+	var custom: CustomNpcData
 
 
 ## The searchable list of every topic name in this world
@@ -83,6 +85,7 @@ static func speaker_for(e: Enemy, world: WorldManager) -> Speaker:
 		s.faction = custom.faction
 		s.base_disposition = custom.base_disposition
 		s.own_topics_only = not custom.generated_topics
+		s.custom = custom
 		if world != null:
 			s.town = world.get_nearest_town(s.position)
 		return s
@@ -230,6 +233,7 @@ static func _is_word_char(c: String) -> bool:
 static func _custom_data() -> Array[DialogueData]:
 	if not _custom_loaded:
 		_custom_loaded = true
+		_custom.append_array(DialogueImport.load_dir(DIALOGUE_DIR))  # rows from spreadsheets (.csv, .json)
 		var names := PackedStringArray()
 		for f in DirAccess.get_files_at(DIALOGUE_DIR):
 			var file := f.trim_suffix(".remap")
@@ -297,6 +301,8 @@ static func profile_for(s: Speaker, world: WorldManager = null) -> DialogueProfi
 			NpcData.Role.FARMER, NpcData.Role.WOODCUTTER, NpcData.Role.FISHERMAN, NpcData.Role.HUNTER, NpcData.Role.MINER, NpcData.Role.HERBALIST:
 				file = "worker"
 	var prof := profile_named(file)
+	if s.custom != null and s.custom.profile != null:
+		prof = s.custom.profile  # a hand-made person's own profile
 	if Factions.leader_of(s, world) != "":
 		prof = prof.merged(profile_named("guild_officer"))  # roles stack
 	return prof

@@ -703,7 +703,7 @@ func _build_ui() -> void:
 	top.add_child(UITheme.heading("Journal"))
 	_tabs = TabBar.new()
 	for t in TABS:
-		_tabs.add_tab(t)
+		_tabs.add_tab(tr(t))  # text keys: ready for translation
 	_tabs.focus_mode = Control.FOCUS_NONE
 	_tabs.tab_changed.connect(func(_i: int) -> void:
 		_filter_kind = "notes" if _tabs.current_tab == TAB_NOTES else "all"

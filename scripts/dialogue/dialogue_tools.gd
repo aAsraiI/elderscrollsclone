@@ -104,6 +104,8 @@ static func lint() -> PackedStringArray:
 					continue
 				for l in r.learn_topics:
 					reachable[String(l).to_lower()] = true
+				for l in r.choices:
+					reachable[String(l).to_lower()] = true
 				for t2 in d.topics:
 					if t2 != null and r.text.to_lower().contains(t2.topic.to_lower()):
 						reachable[t2.topic.to_lower()] = true

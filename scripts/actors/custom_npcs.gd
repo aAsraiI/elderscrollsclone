@@ -36,16 +36,28 @@ static func all() -> Array[CustomNpcData]:
 
 func _ready() -> void:
 	world = get_parent() as WorldManager
+	for d in all():  # the quests they give
+		for q in d.quests:
+			if q != null:
+				if q.giver == "":
+					q.giver = d.save_id()
+				QuestRunner.register(q)
 
 
-## Where this person stands in the world (Vector3.INF if their town doesn't exist)
+## Where this person stands in the world now (Vector3.INF if their place doesn't exist): their
+## spot during work hours, their home spot outside them
 func spot_of(d: CustomNpcData) -> Vector3:
 	var at := d.world_position
-	if d.town != "":
+	if d.place != "":
+		var pl := QuestTargets.place(world, d.place)
+		at = pl.get("pos", Vector3.INF) + d.offset if not pl.is_empty() else Vector3.INF
+	elif d.town != "":
 		at = Vector3.INF
 		for t in world.towns:
 			if t.town != null and t.town.display_name == d.town:
 				at = t.position + d.offset
+	if at.is_finite() and world != null and world.clock != null and not WorldClock.hour_in_range(world.clock.hour, d.work_start, d.work_end) and d.work_end - d.work_start < 24.0:
+		at += d.home_offset - d.offset  # off work: home
 	if at.is_finite() and world != null:
 		at.y = world.get_height_at(at.x, at.z)
 	return at
@@ -74,6 +86,8 @@ func _process(delta: float) -> void:
 		elif e != null and dist > FAR and not e.is_dead():
 			e.queue_free()
 			_spawned.erase(key)
+		elif e != null and not e.is_dead() and e.global_position.distance_to(at) > 4.0:
+			e.follow_route(PackedVector3Array([at]), false, 0.5)  # off to work, or home
 
 
 ## Makes the person's body at a world position under `parent` (CustomNpcSpot uses this too)
@@ -83,6 +97,8 @@ static func spawn(d: CustomNpcData, parent: Node, at: Vector3) -> Enemy:
 	rng.seed = d.save_id().hash()
 	var e := Enemy.create()
 	body.apply(e, d.level, rng)
+	if not d.equipment.is_empty():
+		e.starting_weapon = null
 	e.display_name = d.display_name
 	e.talk_name = d.display_name
 	e.talk_lines = PackedStringArray([d.greeting]) if d.greeting != "" else PackedStringArray(["..."])
@@ -98,4 +114,11 @@ static func spawn(d: CustomNpcData, parent: Node, at: Vector3) -> Enemy:
 	e.position = host.to_local(at + Vector3.UP * 0.6) if host != null and host.is_inside_tree() else at + Vector3.UP * 0.6
 	e.rotation.y = rng.randf() * TAU
 	parent.add_child(e)
+	for it in d.inventory:
+		if it != null and e.inventory != null:
+			e.inventory.add_item(it)
+	for it in d.equipment:
+		if it != null and e.inventory != null and e.equipment != null:
+			e.inventory.add_item(it)
+			e.equipment.equip(it)
 	return e

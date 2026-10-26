@@ -93,7 +93,7 @@ func _process(delta: float) -> void:
 		return
 	var n: Dictionary = _queue.pop_front()
 	var size := float(GameSettings.get_value("text_size"))
-	_title.text = String(n["title"]).to_upper()
+	_title.text = tr(String(n["title"])).to_upper()  # text keys: ready for translation
 	_title.add_theme_font_size_override("font_size", roundi(15 * size))
 	_text.text = String(n["text"])
 	_text.add_theme_font_size_override("font_size", roundi(19 * size))

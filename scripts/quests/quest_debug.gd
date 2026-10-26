@@ -34,6 +34,13 @@ static func run(cmd: String, args: Array, world: WorldManager) -> String:
 		"start":
 			if args.is_empty():
 				return "quest.start <id>  or  quest.start <guild> <kind>"
+			if QuestRunner.get_data(String(args[0])) != null:
+				var rid := String(args[0])
+				QuestRunner._store(rid, {})  # test mode: from the start, whatever it needs
+				QuestRunner._store(rid, {"state": "available", "stage": 0, "done": {}, "flags": [], "t0": world.runner._hours()})
+				world.runner.set_state(rid, "active")
+				world.runner._begin_stage(rid, 0)
+				return "%s: %s" % [rid, world.runner.status(rid)]
 			var id := String(args[0]).to_upper()
 			if not QuestBook.get_def(id).is_empty():
 				book.start(id)
@@ -52,6 +59,15 @@ static func run(cmd: String, args: Array, world: WorldManager) -> String:
 			var q := qm.offer(faction, giver, String(args[1]) if args.size() > 1 else "")
 			return "Nothing fits here." if q.is_empty() else "%s: %s" % [q["id"], q["objective"]]
 		"setstage":
+			if args.size() >= 2 and QuestRunner.get_data(String(args[0])) != null:
+				var rid := String(args[0])
+				if not (world.runner.status(rid) in ["active", "ready"]):
+					run("start", [rid], world)
+				var rec := QuestRunner.record(rid).duplicate(true)
+				rec["state"] = "active"
+				QuestRunner._store(rid, rec)
+				world.runner._begin_stage(rid, int(args[1]) - 1)
+				return "%s: %s, stage %d" % [rid, world.runner.status(rid), int(QuestRunner.record(rid).get("stage", 0)) + 1]
 			if args.size() < 2 or QuestBook.get_def(String(args[0]).to_upper()).is_empty():
 				return "quest.setstage <book quest id> <step>"
 			var id := String(args[0]).to_upper()

@@ -49,6 +49,8 @@ static func problems(world: WorldManager) -> PackedStringArray:
 				out.append("%s reward: no base item %s" % [id, n["base"]])
 	for l in DialogueTools.lint():
 		out.append("dialogue: " + l)
+	for d in QuestRunner.all():
+		out.append_array(check_quest_data(world, d))
 	for c in CustomNpcs.all():
 		if c.town != "" and not towns.has(c.town):
 			out.append("custom NPC %s: no town %s" % [c.display_name, c.town])
@@ -139,3 +141,64 @@ class BiomeKeys:
 			for biome: String in NamedSettlements.LIST:
 				_keys[biome] = true
 		return _keys.has(key)
+
+
+## Problems in one handmade quest (QuestData): people and places that don't exist, items and
+## enemies that aren't there, stages that can never be reached, typos in quest ids
+static func check_quest_data(world: WorldManager, d: QuestData) -> PackedStringArray:
+	var out := PackedStringArray()
+	var id := d.id if d.id != "" else "(a quest with no id)"
+	if d.id == "":
+		out.append("%s: no id" % id)
+	if d.stages.is_empty():
+		out.append("%s: no stages" % id)
+	for who in [d.giver, d.turn_in]:
+		if who != "" and not _person_exists(world, who):
+			out.append("%s: nobody called %s" % [id, who])
+	for a in d.after:
+		if QuestRunner.get_data(a) == null and QuestBook.get_def(a).is_empty() and a != "story":
+			out.append("%s: needs unknown quest %s" % [id, a])
+	if d.follow_up != "" and QuestRunner.get_data(d.follow_up) == null:
+		out.append("%s: follow-up %s doesn't exist" % [id, d.follow_up])
+	var reached := {0: true}
+	for si in d.stages.size():
+		var st := d.stages[si]
+		if st == null:
+			out.append("%s stage %d: empty slot" % [id, si + 1])
+			continue
+		reached[st.next if st.next >= 0 else si + 1] = true
+		for c in st.choices:
+			if c != null:
+				reached[c.next if c.next >= 0 else d.stages.size()] = true
+				if c.who != "" and not _person_exists(world, c.who):
+					out.append("%s stage %d: nobody called %s" % [id, si + 1, c.who])
+		for o in st.objectives:
+			if o == null:
+				out.append("%s stage %d: empty objective slot" % [id, si + 1])
+				continue
+			var where := "%s stage %d (%s)" % [id, si + 1, QuestObjective.Type.keys()[o.type]]
+			if o.who != "" and not _person_exists(world, o.who):
+				out.append("%s: nobody called %s" % [where, o.who])
+			if o.place != "" and QuestTargets.place(world, o.place).is_empty():
+				out.append("%s: no place called %s" % [where, o.place])
+			if o.spawn != "" and not ResourceLoader.exists(o.spawn):
+				out.append("%s: no enemy file %s" % [where, o.spawn])
+			if o.type in [QuestObjective.Type.COLLECT, QuestObjective.Type.DELIVER] and QuestRunner._item(o.target) == null:
+				out.append("%s: no item %s" % [where, o.target])
+			if o.type in [QuestObjective.Type.TALK, QuestObjective.Type.DELIVER] and o.topic == "":
+				out.append("%s: no topic to ask about" % where)
+			if o.count < 1:
+				out.append("%s: count is %d" % [where, o.count])
+	for si in d.stages.size():
+		if not reached.has(si):
+			out.append("%s: stage %d can never be reached" % [id, si + 1])
+	for it in d.reward_items + d.reward_choice:
+		if it == null:
+			out.append("%s: an empty reward slot" % id)
+	return out
+
+
+static func _person_exists(world: WorldManager, who: String) -> bool:
+	if who.begins_with("custom/"):
+		return CustomNpcs.all().any(func(c: CustomNpcData) -> bool: return c.save_id() == who)
+	return QuestTargets.resident(world, who) != null

@@ -102,6 +102,7 @@ func t_radiant() -> void:
 	_guilds()
 	await _integration()
 	_rumors_and_barks()
+	await _authoring()
 	await _across_a_load()
 
 
@@ -600,6 +601,74 @@ func _rumors_and_barks() -> void:
 	Reputation.add_fame(city.town.display_name, -40)
 	Barks.voice(self, "Test", "A line.")
 	check("the voice hook is silent without audio", true)
+
+
+# ---------------------------------------------------------------- 1.12.14 authoring tools
+
+func _authoring() -> void:
+	print("-- authoring: validator, imports, test mode, custom people")
+	check("the example quest passes the validator", QuestCheck.check_quest_data(wm, QuestRunner.get_data("maudrey_old_kings")).is_empty(), str(QuestCheck.check_quest_data(wm, QuestRunner.get_data("maudrey_old_kings"))))
+	var bad := QuestData.new()
+	bad.id = "broken"
+	bad.giver = "Nobody Atall@Nowhere"
+	bad.after = PackedStringArray(["no_such_quest"])
+	var s1 := QuestStage.new()
+	var o := QuestObjective.new()
+	o.type = QuestObjective.Type.COLLECT
+	o.target = "res://data/no/such_item.tres"
+	o.place = "Atlantis"
+	s1.objectives = [o]
+	s1.next = 5
+	var s2 := QuestStage.new()
+	bad.stages = [s1, s2]
+	var probs := QuestCheck.check_quest_data(wm, bad)
+	check("the validator catches a deliberately broken quest (%d problems)" % probs.size(), probs.size() >= 5, "\n".join(probs))
+	# dialogue written in a spreadsheet
+	var imported := DialogueImport.load_dir(DialogueEngine.DIALOGUE_DIR)
+	check("dialogue rows load from a .csv", imported.any(func(d: DialogueData) -> bool: return d.get_topic("the old mill") != null))
+	var keeper: TownLife.Resident = null
+	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
+		if r.data.role == NpcData.Role.INNKEEPER and keeper == null:
+			keeper = r
+	if keeper != null:
+		var said := DialogueEngine.respond(_speaker(keeper), "the old mill", wm)
+		check("and are spoken", String(said["text"]).contains("Burned down"))
+		var resp := said.get("response") as DialogueResponse
+		check("with branching choices", resp != null and resp.choices.has("who burned it"))
+	# test mode: talk to anyone, start any quest at any stage
+	var dc: DebugConsole = null
+	for n in p.find_children("*", "DebugConsole", true, false):
+		dc = n
+	var name := (leaders["fighters"] as TownLife.Resident).data.display_name
+	var out := dc.run("talk " + name)
+	await frames(3)
+	check("talk <name> opens a conversation with them", ui.is_open() and ui.speaker != null and ui.speaker.name == name, out)
+	ui.close()
+	await frames(2)
+	WorldState.erase_record(QuestRunner.STATE + "maudrey_old_kings")
+	dc.run("quest.setstage maudrey_old_kings 2")
+	check("a handmade quest can be put at any stage", wm.runner.status("maudrey_old_kings") == "active" and int(QuestRunner.record("maudrey_old_kings").get("stage", 0)) == 1)
+	# a custom person with gear, a schedule and a quest
+	var c := CustomNpcData.new()
+	c.id = "test_smith"
+	c.display_name = "Test Smith"
+	c.town = city.town.display_name
+	c.offset = Vector3(5, 0, 5)
+	c.home_offset = Vector3(-5, 0, -5)
+	c.work_start = 8.0
+	c.work_end = 18.0
+	c.inventory = [load("res://data/ingredients/bloodmoss.tres")]
+	var cn := wm.get_node("CustomNpcs") as CustomNpcs
+	wm.clock.set_time(12.0)
+	var work := cn.spot_of(c)
+	wm.clock.set_time(22.0)
+	var home := cn.spot_of(c)
+	check("a custom person keeps hours: work by day, home at night", work.distance_to(home) > 10.0)
+	wm.clock.set_time(12.0)
+	var body := CustomNpcs.spawn(c, wm, p.global_position + Vector3(3, 0, 0))
+	check("and carries what they were given", body.inventory.get_count(load("res://data/ingredients/bloodmoss.tres")) == 1)
+	body.queue_free()
+	check("text keys are ready for translation", tr("Quests") == "Quests")
 
 
 func _clear_jobs() -> void:

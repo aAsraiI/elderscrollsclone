@@ -21,6 +21,9 @@ extends Resource
 @export var give_count := 1
 ## Extra topics the player learns (on top of any topic names in the text)
 @export var learn_topics: PackedStringArray = []
+## Branching: what the player can say next (topics of the same DialogueData), offered right under
+## this answer as choices. Each choice's own answers can set flags and offer choices again.
+@export var choices: PackedStringArray = []
 @export_group("Journal")
 ## Files the line under a quest in the journal (its Quests filter)
 @export var quest_id := ""

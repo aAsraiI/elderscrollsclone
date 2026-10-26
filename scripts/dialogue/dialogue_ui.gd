@@ -162,6 +162,9 @@ func ask(topic: String) -> Dictionary:
 		DialogueState.learn(String(t))
 	var resp := r.get("response") as DialogueResponse
 	if resp != null:
+		for c in resp.choices:  # branching: the player's possible replies, right here
+			DialogueState.learn(c)
+			_log.append_text("   [url=%s][color=%s]> %s[/color][/url]\n" % [String(c).uri_encode(), LINK, _esc(c)])
 		if resp.set_flag != "":
 			DialogueState.set_flag(resp.set_flag)
 		if resp.give_item != null:
@@ -325,7 +328,7 @@ func _refresh() -> void:
 		if sv["id"] == "trade":
 			continue  # the Barter button above
 		var sb := Button.new()
-		sb.text = String(sv["label"]) if sv["why"] == "" else "%s (%s)" % [sv["label"], sv["why"]]
+		sb.text = tr(String(sv["label"])) if sv["why"] == "" else "%s (%s)" % [tr(String(sv["label"])), sv["why"]]
 		sb.disabled = sv["why"] != ""
 		sb.custom_minimum_size = Vector2(110, 32)
 		sb.pressed.connect(use_service.bind(String(sv["id"])))

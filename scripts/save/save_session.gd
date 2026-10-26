@@ -54,6 +54,8 @@ static func begin_load(data: Dictionary, slot: String) -> void:
 	_has_start = player.has("pos")
 	_start = SaveUtil.array_to_vec3(player.get("pos"))
 	WorldState.from_dict(data.get("world_state", {}))
+	# a game saved before Alpha 1.14 keeps its old towns (its homes and chests are by building)
+	TownLayout.compact = int(data.get("town_layout", 0)) >= 2 or WorldState.has_record("town_layout")
 	GameRules.from_dict(data.get("rules", {}))
 	GameSettings.get_value("difficulty")
 	GameSettings._values["difficulty"] = int(GameRules.get_rule("difficulty"))  # the Settings screen shows this game's

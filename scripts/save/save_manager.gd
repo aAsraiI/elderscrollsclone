@@ -329,6 +329,7 @@ func build_save_data() -> Dictionary:
 	if dungeons != null:
 		data["dungeon"] = dungeons.to_dict()
 	data["world_state"] = WorldState.to_save_dict()
+	data["town_layout"] = 2 if TownLayout.compact else 1  # Alpha 1.14 towns, or the older ones
 	var clock := _get_clock()
 	if clock != null:
 		data["clock"] = clock.to_dict()

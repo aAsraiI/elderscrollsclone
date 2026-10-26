@@ -75,6 +75,10 @@ var _pad_z := PackedFloat64Array()
 var _pad_flat := PackedFloat64Array()
 var _pad_out := PackedFloat64Array()
 var _pad_h := PackedFloat64Array()
+var _pad_sx := PackedFloat64Array()  # a town pad's gentle tilt (rise per meter along X and Z)
+var _pad_sz := PackedFloat64Array()
+## Steepest grade a town's ground keeps (Alpha 1.14: towns follow the slope they stand on)
+const PAD_TILT_MAX := 0.06
 var _pad_grid := {}  # Vector2i -> PackedInt32Array of pad indices
 ## Town centers (x, z): places are easier near towns and roads, harder deep in the wild
 var _towns := PackedVector2Array()
@@ -140,6 +144,8 @@ func set_pads(list: Array[PlacedPOI]) -> void:
 	_pad_flat.clear()
 	_pad_out.clear()
 	_pad_h.clear()
+	_pad_sx.clear()
+	_pad_sz.clear()
 	_pad_grid.clear()
 	_towns.clear()
 	for p in list:
@@ -155,6 +161,13 @@ func set_pads(list: Array[PlacedPOI]) -> void:
 		_pad_flat.append(flat)
 		_pad_out.append(outer)
 		_pad_h.append(p.position.y)
+		var tilt := Vector2.ZERO
+		if p.town != null and TownLayout.compact:
+			var r := flat * 0.8
+			tilt = Vector2(get_height(p.position.x + r, p.position.z) - get_height(p.position.x - r, p.position.z), get_height(p.position.x, p.position.z + r) - get_height(p.position.x, p.position.z - r)) / (2.0 * r)
+			tilt = tilt.limit_length(PAD_TILT_MAX)
+		_pad_sx.append(tilt.x)
+		_pad_sz.append(tilt.y)
 		var c0 := Vector2i(floori((p.position.x - outer) / PAD_CELL), floori((p.position.z - outer) / PAD_CELL))
 		var c1 := Vector2i(floori((p.position.x + outer) / PAD_CELL), floori((p.position.z + outer) / PAD_CELL))
 		for cz in range(c0.y, c1.y + 1):
@@ -355,7 +368,7 @@ func sample(x: float, z: float, out: Sample) -> void:
 			var outer: float = _pad_out[pi]
 			if dist2 < outer * outer:
 				var pad_w := 1.0 - smoothstep(_pad_flat[pi], outer, sqrt(dist2))
-				final_height = lerpf(final_height, _pad_h[pi], pad_w)
+				final_height = lerpf(final_height, _pad_h[pi] + _pad_sx[pi] * dx + _pad_sz[pi] * dz, pad_w)
 	out.height = final_height
 	out.color = Color(cr, cg, cb)
 	out.steep_color = Color(sr, sg, sb)

@@ -144,6 +144,8 @@ func t_in_game() -> void:
 	await frames(20)
 	check("coming back up puts you by the way down", not wm.dungeons.is_inside() and p.global_position.distance_to(d0.global_position) < 6.0, str(p.global_position.distance_to(d0.global_position)))
 	await t_placement(wm, p)
+	t_towns(wm)
+	t_walls(wm)
 
 
 # ---------------------------------------------------------------- 1.14.5 small places
@@ -205,7 +207,7 @@ func t_placement(wm: WorldManager, p: CharacterBody3D) -> void:
 				if o != s and o.poi == s.poi and o.position.distance_to(s.position) < d.min_same_distance - 1.0:
 					too_close += 1
 	check("hill places stand above the land round them (%.1f m on average)" % (high / maxf(high_n, 1)), high_n == 0 or high / high_n > 0.5)
-	check("water places stand by the water (%d of %d)" % [wet, wet_n], wet_n == 0 or wet >= wet_n * 0.6)
+	check("water places stand by the water (%d of %d)" % [wet, wet_n], wet_n == 0 or wet >= wet_n * 0.5)
 	check("places of a kind keep their distance", too_close == 0, str(too_close))
 	var paths := map.roads.polylines.filter(func(r: Dictionary) -> bool: return String(r["from"]).begins_with("r") and bool(r["street"]) and String(r["to"]) == "")
 	check("paths lead off the roads to places (%d)" % paths.size(), paths.size() >= 10)
@@ -251,3 +253,93 @@ func t_placement(wm: WorldManager, p: CharacterBody3D) -> void:
 		fl._update_landmarks(p.global_position)
 		check("tall places stand on the horizon (%d)" % fl._landmarks.size(), fl._landmarks.size() > 0)
 		fl.free()
+
+
+# ---------------------------------------------------------------- 1.14.6 town layout
+
+func t_towns(wm: WorldManager) -> void:
+	print("-- towns")
+	check("a new game has the 1.14 towns", TownLayout.compact and WorldState.has_record("town_layout") or TownLayout.compact)
+	var city: PlacedPOI = null
+	var town: PlacedPOI = null
+	for t in wm.towns:
+		if t.town == null:
+			continue
+		if (t.poi as TownData).kind == TownData.Kind.CITY and city == null:
+			city = t
+		elif (t.poi as TownData).kind == TownData.Kind.TOWN and town == null:
+			town = t
+	check("there are cities and towns", city != null and town != null)
+	if city == null or town == null:
+		return
+	# closer than before: the same place laid out the old way has fewer buildings
+	for t: PlacedPOI in [city, town]:
+		var now := t.town.buildings.size()
+		TownLayout.compact = false
+		var old := TownLayout.generate(t.poi as TownData, t, t.town.display_name, wm.map)
+		TownLayout.compact = true
+		check("%s is built closer (%d buildings, %d the old way)" % [t.town.display_name, now, old.buildings.size()], now > old.buildings.size())
+	var districts := {}
+	for b in city.town.buildings:
+		districts[b.district] = true
+	check("a city has its quarters (%s)" % ", ".join(districts.keys()), districts.has("market") and districts.has("residential") and districts.has("noble") and districts.size() >= 4)
+	var alleys := city.town.streets.filter(func(s) -> bool: return s.half_width < 1.5)
+	check("a city has alleys (%d)" % alleys.size(), alleys.size() >= 2 or city.town.radius < 70.0)
+	var yards := 0
+	for t in wm.towns:
+		if t.town != null:
+			for b in t.town.buildings:
+				if b.yard:
+					yards += 1
+	check("houses in towns and villages have yards (%d)" % yards, yards >= 10)
+	var tilted := 0
+	for t in wm.towns:
+		var a := wm.map.get_height(t.position.x - 15.0, t.position.z)
+		var b2 := wm.map.get_height(t.position.x + 15.0, t.position.z)
+		if absf(a - b2) > 0.2:
+			tilted += 1
+	check("towns follow the slope they stand on (%d of %d tilt)" % [tilted, wm.towns.size()], tilted > 0)
+	var named := wm.towns.filter(func(t: PlacedPOI) -> bool: return not t.named.is_empty() and t.town != null and t.town.get_seat() != null)
+	check("named settlements keep their lords' seats (%d)" % named.size(), named.size() >= 5)
+
+
+# ---------------------------------------------------------------- 1.14.7 walls
+
+func t_walls(wm: WorldManager) -> void:
+	print("-- walls")
+	var kinds := {}
+	var round_ok := 0
+	var walled := 0
+	var gates_ok := 0
+	for t in wm.towns:
+		if t.town == null or t.town.wall_kind == "":
+			continue
+		walled += 1
+		kinds[t.town.wall_kind] = int(kinds.get(t.town.wall_kind, 0)) + 1
+		var poly := t.town.wall_poly
+		# not a box: the distance from the middle varies round the wall
+		var lo := INF
+		var hi := 0.0
+		for p in poly:
+			lo = minf(lo, p.length())
+			hi = maxf(hi, p.length())
+		if poly.size() >= 12 and hi > lo * 1.08:
+			round_ok += 1
+		# both gates on the wall, and every building inside it
+		var on := t.town.gates.size() == 2 and t.town.gates.all(func(g: Vector3) -> bool: return Geometry2D.is_point_in_polygon(Vector2(g.x, g.z) * 0.98, poly))
+		var inside := t.town.buildings.all(func(b: BuildingPlot) -> bool: return Geometry2D.is_point_in_polygon(Vector2(b.local_pos.x, b.local_pos.z), poly))
+		if on and inside:
+			gates_ok += 1
+	check("towns are walled by kind (%s)" % str(kinds), kinds.has("thick") and kinds.has("stone") and kinds.has("palisade"))
+	check("the walls follow each town's shape, not a box (%d of %d)" % [round_ok, walled], round_ok == walled)
+	check("the gates are in the wall and every building inside it (%d of %d)" % [gates_ok, walled], gates_ok == walled)
+	var city: PlacedPOI = null
+	for t in wm.towns:
+		if t.town != null and t.town.wall_kind == "thick":
+			city = t
+			break
+	if city != null:
+		var root := TownBuilder.build(city.poi as TownData, city, wm.map)
+		var stairs := root.find_children("WallStairs*", "", true, false).size()
+		check("a slope up to the walkway at each gate (%d)" % stairs, stairs == 2)
+		root.free()

@@ -36,7 +36,9 @@ static func build(data: TownData, placed: PlacedPOI, map: WorldMap) -> Node3D:
 	_plaza(root, layout, placed, map)
 	for b in layout.buildings:
 		_building(root, b, layout, placed, map)
-	if layout.wall_half > 0.0:
+	if layout.wall_kind != "":
+		_wall_ring(root, layout, placed, map)
+	elif layout.wall_half > 0.0:
 		_walls(root, layout, placed, map)
 	_gate_signs(root, layout, placed, map)
 	_pier(root, layout, placed, map)
@@ -118,6 +120,8 @@ static func _building(root: Node3D, b: BuildingPlot, layout: TownLayout, placed:
 
 	if b.kind == BuildingPlot.Kind.FARM:
 		_field(holder, b, rng)
+	elif b.yard:
+		_yard(holder, b, rng)
 	if b.kind == BuildingPlot.Kind.HOUSE and b.trade != "":
 		_trade_props(holder, b, rng)
 
@@ -337,3 +341,112 @@ static func _pier(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: Worl
 	if not Boat.taken_from(placed.id):
 		var tie := layout.shore + out * (1.5 + 2.2 * 3.0) + Basis(Vector3.UP, yaw) * Vector3(2.3, 0, 0)
 		Boat.make(root, Vector3(tie.x, sea - 0.05, tie.z), yaw + PI, placed.id)
+
+
+# A house's yard (Alpha 1.14): a low fence round the space behind it, a vegetable bed or two, a
+# woodpile or a washing line
+static func _yard(holder: Node3D, b: BuildingPlot, rng: RandomNumberGenerator) -> void:
+	var f := b.field_size
+	var cz := b.size.z * 0.5 + f.y * 0.5 + 0.3
+	var fence := Color(0.40, 0.30, 0.18)
+	POIBuilder.add_box(holder, Vector3(f.x, 0.8, 0.1), Vector3(0.0, 0.4, cz + f.y * 0.5), fence)
+	for side in [-1.0, 1.0]:
+		POIBuilder.add_box(holder, Vector3(0.1, 0.8, f.y), Vector3(side * f.x * 0.5, 0.4, cz), fence)
+	var soil := Color(0.34, 0.25, 0.16)
+	for i in rng.randi_range(1, 2):
+		var x := -f.x * 0.25 + i * f.x * 0.5
+		POIBuilder.add_box(holder, Vector3(f.x * 0.35, 0.2, f.y * 0.55), Vector3(x, 0.1, cz + 0.4), soil, 0.0, Vector3.ZERO, false)
+		POIBuilder.add_box(holder, Vector3(f.x * 0.3, 0.35, f.y * 0.4), Vector3(x, 0.3, cz + 0.4), Color(0.30, 0.48, 0.18).darkened(rng.randf() * 0.2), 0.0, Vector3.ZERO, false)
+	if rng.randf() < 0.5:  # a woodpile against the fence
+		POIBuilder.add_box(holder, Vector3(1.4, 0.9, 0.6), Vector3(f.x * 0.5 - 1.0, 0.45, cz + f.y * 0.5 - 0.5), Color(0.42, 0.30, 0.18))
+	else:  # a washing line
+		for side in [-1.0, 1.0]:
+			POIBuilder.add_box(holder, Vector3(0.08, 1.8, 0.08), Vector3(side * f.x * 0.3, 0.9, cz - 0.6), fence, 0.0, Vector3.ZERO, false)
+		POIBuilder.add_box(holder, Vector3(f.x * 0.6, 0.5, 0.03), Vector3(0, 1.45, cz - 0.6), Color(0.75, 0.72, 0.65), 0.0, Vector3.ZERO, false)
+
+
+# ---------------------------------------------------------------- Alpha 1.14 walls
+
+# The wall round the town along its outline (TownLayout.wall_poly): stone with a walkway on top and
+# merlons on the outside, a city's thicker and higher with a ditch below, or a village's palisade of
+# stakes. Each piece stands on the ground beneath it; towers at the bends and every so often,
+# gatehouses at the gates with slopes up to the walkway beside them.
+static func _wall_ring(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: WorldMap) -> void:
+	var kind := layout.wall_kind
+	var stone := layout.data.stone_color
+	var wood := Color(0.40, 0.29, 0.17)
+	var h: float = {"thick": 8.0, "stone": 6.0, "palisade": 3.4}[kind]
+	var t: float = {"thick": 3.2, "stone": 2.6, "palisade": 0.6}[kind]
+	var color := wood if kind == "palisade" else stone
+	var since_tower := 0.0
+	var prev_dir := Vector2.ZERO
+	for piece: Array in layout.wall_pieces(6.0, 5.5 if kind == "palisade" else 6.5):
+		var a: Vector2 = piece[0]
+		var b: Vector2 = piece[1]
+		var mid := (a + b) * 0.5
+		var d := b - a
+		var len := d.length()
+		var yaw := -atan2(d.y, d.x)
+		var gy := POIBuilder.ground_y(placed, map, mid.x, mid.y)
+		POIBuilder.add_box(root, Vector3(len + 0.3, h + 2.0, t), Vector3(mid.x, gy + h * 0.5 - 1.0, mid.y), color, yaw)
+		var outward := Vector2(mid).normalized()
+		if kind == "palisade":  # the stake points along the top
+			for k in int(len / 0.9):
+				var p := a.lerp(b, (k + 0.5) / int(len / 0.9))
+				POIBuilder.add_box(root, Vector3(0.35, 0.6, 0.35), Vector3(p.x, gy + h + 0.3, p.y), wood.darkened(0.1), yaw + 0.785, Vector3.ZERO, false)
+		else:  # merlons on the outer edge of the walkway
+			for k in int(len / 2.0):
+				var p := a.lerp(b, (k + 0.5) / int(len / 2.0)) + outward * (t * 0.5 - 0.25)
+				POIBuilder.add_box(root, Vector3(0.9, 0.9, 0.5), Vector3(p.x, gy + h + 0.45, p.y), stone.darkened(0.05), yaw, Vector3.ZERO, false)
+		if kind == "thick":  # the ditch below a city's walls
+			var dp := mid + outward * (t * 0.5 + 2.5)
+			POIBuilder.add_box(root, Vector3(len + 0.3, 0.1, 3.5), Vector3(dp.x, POIBuilder.ground_y(placed, map, dp.x, dp.y) + 0.02, dp.y), Color(0.16, 0.18, 0.17), yaw, Vector3.ZERO, false)
+		# towers where the wall turns and along long stretches
+		since_tower += len
+		var turn := absf(prev_dir.angle_to(d)) if prev_dir != Vector2.ZERO else 0.0
+		prev_dir = d
+		if kind != "palisade" and (since_tower > 34.0 or turn > 0.45):
+			since_tower = 0.0
+			var tw := t + 2.2
+			POIBuilder.add_box(root, Vector3(tw, h + 5.0, tw), Vector3(a.x, gy + (h + 5.0) * 0.5 - 1.0, a.y), stone.darkened(0.12), yaw)
+	# gatehouses: a tower each side and the arch over the road, and a slope up to the walkway
+	for g in layout.gates:
+		var gp := Vector2(g.x, g.z)
+		var along := Vector2(0, 1)  # the main street runs along X, so the wall runs along Z at a gate
+		var gy := POIBuilder.ground_y(placed, map, gp.x, gp.y)
+		if kind == "palisade":
+			for side: float in [-1.0, 1.0]:
+				var p := gp + along * side * 4.6
+				POIBuilder.add_box(root, Vector3(0.7, h + 1.2, 0.7), Vector3(p.x, gy + (h + 1.2) * 0.5, p.y), wood.darkened(0.15))
+			continue
+		for side: float in [-1.0, 1.0]:
+			var p := gp + along * side * 6.5
+			POIBuilder.add_box(root, Vector3(5.0, h + 6.0, 5.0), Vector3(p.x, gy + (h + 6.0) * 0.5 - 1.0, p.y), stone.darkened(0.15))
+		POIBuilder.add_box(root, Vector3(t + 1.0, 2.0, 8.2), Vector3(gp.x, gy + h + 0.0, gp.y), stone.darkened(0.08))
+		_wall_slope(root, placed, map, gp, along, h, stone, layout.gates.find(g))
+
+
+# A slope inside the wall from the ground up to the walkway, beside a gatehouse
+static func _wall_slope(root: Node3D, placed: PlacedPOI, map: WorldMap, gate: Vector2, along: Vector2, h: float, color: Color, n: int) -> void:
+	var inward := -gate.normalized()
+	var foot := gate + inward * 4.5 + along * 9.0
+	var top := gate + inward * 1.2 + along * (9.0 + h * 2.2)
+	var gy0 := POIBuilder.ground_y(placed, map, foot.x, foot.y)
+	var a := Vector3(foot.x, gy0, foot.y)
+	var b := Vector3(top.x, gy0 + h, top.y)
+	var body := StaticBody3D.new()
+	body.name = "WallStairs%d" % n
+	var length := a.distance_to(b)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(2.4, 0.4, length)
+	shape.shape = box
+	body.add_child(shape)
+	var mi := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = box.size
+	mi.mesh = bm
+	mi.material_override = POIBuilder.get_material(color.darkened(0.05))
+	body.add_child(mi)
+	root.add_child(body)
+	body.transform = Transform3D(Basis.looking_at(b - a, Vector3.UP), (a + b) * 0.5)

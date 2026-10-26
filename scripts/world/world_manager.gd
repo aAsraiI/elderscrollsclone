@@ -344,6 +344,11 @@ func _rebuild_map() -> void:
 # keeps away from both.
 func _plan_pois() -> void:
 	var t0 := Time.get_ticks_msec()
+	# 1.14 towns are built closer; a game saved before then keeps its old towns (homes, chests, people)
+	if not SaveSession.has_pending():
+		TownLayout.compact = true  # a new game (a loaded one was set by SaveSession.begin_load)
+	if TownLayout.compact:
+		WorldState.set_record("town_layout", {"v": 2})
 	towns = SettlementPlanner.plan(map)
 	map.set_pads(towns)
 	SettlementPlanner.lay_out(map, towns)

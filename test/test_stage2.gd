@@ -284,9 +284,10 @@ func t_plan() -> void:
 	# everything else keeps out of the way
 	var clear := true
 	for p in a["pois"]:
-		if p.poi is TownData:
-			continue
-		if net.distance_to(p.position.x, p.position.z, p.poi.footprint_radius) < p.poi.footprint_radius:
+		if p.poi is TownData or p.poi is SignpostPOIData:
+			continue  # signposts and milestones stand by the road on purpose (Alpha 1.14)
+		var own_path := net.polylines.any(func(r: Dictionary) -> bool: return String(r["from"]) == p.id)
+		if not own_path and net.distance_to(p.position.x, p.position.z, p.poi.footprint_radius) < p.poi.footprint_radius:
 			clear = false
 		for t in towns:
 			if p.position.distance_to(t.position) < p.poi.footprint_radius + t.poi.footprint_radius:

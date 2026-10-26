@@ -387,7 +387,7 @@ static func house_modules() -> Array:
 
 
 ## Which interior scene a building uses ("" = none fits; it is built the old way): one of its kind
-## close to its size outside. One house in five is a manor.
+## close to its size outside. One house in five is a manor (most in a city's noble quarter, none in its slums).
 static func pick_module(b: BuildingPlot, rng: RandomNumberGenerator) -> String:
 	if not MODULE_KINDS.has(b.kind):
 		return ""
@@ -396,7 +396,7 @@ static func pick_module(b: BuildingPlot, rng: RandomNumberGenerator) -> String:
 		return ""  # the Fighters' hall is the arena (built the old way, sized for the pit)
 	if kind == "seat" and b.seat_type == "reeve":
 		kind = "manor"  # a reeve lives in a manor
-	if kind == "house" and rng.randf() < 0.2:
+	if kind == "house" and rng.randf() < {"noble": 0.6, "slums": 0.0, "market": 0.3}.get(b.district, 0.2):
 		kind = "manor"
 	var area := (b.size.x + 1.5) * (b.size.z + 1.5)
 	var fits := house_modules().filter(func(m: Array) -> bool: return m[1] == kind)

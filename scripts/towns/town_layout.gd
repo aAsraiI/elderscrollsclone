@@ -42,6 +42,10 @@ const BIOME_TRADES := {
 const SETBACK := 1.5     # meters between a street's edge and a building's front
 const GAP := 2.5         # meters kept free between two buildings
 const ANCHOR_STEP := 2.5
+## Alpha 1.14: towns are built closer (smaller gaps, more houses, alleys, districts, yards). A game
+## saved before 1.14 keeps the old layout, so its homes, chests and people stay where they were
+## (WorldManager sets this from the "town_layout" record before the world is planned).
+static var compact := true
 
 var town_id := ""
 var display_name := ""
@@ -59,6 +63,10 @@ var buildings: Array[BuildingPlot] = []
 var streets: Array[Street] = []
 ## Local points at the ends of the main street, where roads join the town
 var gates: Array[Vector3] = []
+## Alpha 1.14: the wall round the town, following its shape (local x, z points, closed), and what it
+## is made of: "stone", "thick" (a city's, with a ditch), "palisade" (a village's), or "" (none)
+var wall_poly := PackedVector2Array()
+var wall_kind := ""
 ## The biome the town stands in (its id), and a spot on the nearest shore (town local; INF = no
 ## water nearby). Tradesmen are picked from these: fishermen only where there is water.
 var biome_key := ""
@@ -86,6 +94,8 @@ static func generate(p_data: TownData, placed: PlacedPOI, town_name: String, map
 	t._make_streets()
 	t._survey(map)
 	t._place_buildings(rng)
+	t._districts()
+	t._wall_outline(rng)
 	if not t.named.is_empty():
 		t._assign_cast(QuestBook.cast_for(town_name))
 	for b in t.buildings:
@@ -304,6 +314,7 @@ func _make_streets() -> void:
 				_add_street(Vector3(-l, 0, l * k), Vector3(l, 0, l * k), 2.5)
 	if data.walls and wall_half <= 0.0:
 		wall_half = r * 0.9
+	_alleys()
 
 
 # What land the town stands in, and the nearest shore within reach (for fishermen)
@@ -394,13 +405,14 @@ func _make_anchors() -> Array[Dictionary]:
 		var length := s.a.distance_to(s.b)
 		var dir := (s.b - s.a) / length
 		var normal := Vector3(-dir.z, 0.0, dir.x)
-		var t := ANCHOR_STEP
+		var t := ANCHOR_STEP if not compact else 1.5
+		var step := ANCHOR_STEP if not compact else 1.5
 		while t < length - ANCHOR_STEP:
 			var p := s.a + dir * t
 			for side in [-1.0, 1.0]:
 				var away: Vector3 = normal * side
 				out.append({"pos": p + away * (s.half_width + SETBACK), "out": away, "dist": p.length(), "dead": false})
-			t += ANCHOR_STEP
+			t += step
 	return out
 
 
@@ -431,7 +443,10 @@ func _place_buildings(rng: RandomNumberGenerator) -> void:
 		wanted.append({"kind": BuildingPlot.Kind.SHOP, "trade": trade})
 	for i in d.roll_count(rng, d.smithies_min, d.smithies_max):
 		wanted.append({"kind": BuildingPlot.Kind.SMITHY})
-	for i in d.roll_count(rng, d.houses_min, d.houses_max):
+	var houses := d.roll_count(rng, d.houses_min, d.houses_max)
+	if compact and d.kind != TownData.Kind.VILLAGE:
+		houses = int(houses * 1.35)  # more homes in the space the closer rows free up
+	for i in houses:
 		wanted.append({"kind": BuildingPlot.Kind.HOUSE})
 	for i in d.roll_count(rng, d.farms_min, d.farms_max):
 		wanted.append({"kind": BuildingPlot.Kind.FARM})
@@ -447,6 +462,15 @@ func _place_buildings(rng: RandomNumberGenerator) -> void:
 		var order: Array[int] = orders[_order_kind(plot.kind)]
 		# The seat must be built: if it fits nowhere, it shrinks and tries again
 		var tries := 4 if plot.kind == BuildingPlot.Kind.SEAT else 1
+		# a house in a town or village gets a yard behind it when there is room for one
+		if compact and plot.kind == BuildingPlot.Kind.HOUSE and d.kind != TownData.Kind.CITY:
+			plot.yard = true
+			plot.field_size = Vector2(plot.size.x + 1.0, 5.0)
+			if not _try_place(plot, order, anchors):
+				plot.yard = false
+				plot.field_size = Vector2.ZERO
+			else:
+				continue
 		for attempt in tries:
 			if attempt > 0:
 				plot.size = Vector3(plot.size.x * 0.8, plot.size.y, plot.size.z * 0.8)
@@ -470,7 +494,7 @@ func _try_place(plot: BuildingPlot, order: Array[int], anchors: Array[Dictionary
 			plot.index = buildings.size()
 			plot.id = "%s/b%d" % [town_id, plot.index]
 			buildings.append(plot)
-			var dead_zone := rect.grow(GAP + 1.0)
+			var dead_zone := rect.grow(_gap() + 1.0)
 			for other in anchors:
 				var p: Vector3 = other["pos"]
 				if dead_zone.has_point(Vector2(p.x, p.z)):
@@ -532,7 +556,7 @@ func _fits(rect: Rect2) -> bool:
 		if s.get_rect().grow(0.5).intersects(rect):
 			return false
 	# not touching another building
-	var grown := rect.grow(GAP)
+	var grown := rect.grow(_gap())
 	for other in _rects:
 		if grown.intersects(other):
 			return false
@@ -680,3 +704,131 @@ static func short_name(full: String) -> String:
 	while words.size() > 1 and NAME_TITLES.has(words[0]):
 		words.remove_at(0)
 	return " ".join(words)
+
+
+# ---------------------------------------------------------------- Alpha 1.14: closer towns
+
+# Meters kept between two buildings: cities in near-terraced rows, towns close, villages roomier
+func _gap() -> float:
+	if not compact:
+		return GAP
+	match data.kind:
+		TownData.Kind.CITY:
+			return 0.8
+		TownData.Kind.TOWN:
+			return 1.4
+	return 2.2
+
+
+# Narrow alleys in a city, between the main street and the back rows
+func _alleys() -> void:
+	if not compact or data.kind != TownData.Kind.CITY or radius < 70.0:
+		return
+	for z in [-radius * 0.24, radius * 0.24]:
+		_add_street(Vector3(-radius * 0.62, 0, z), Vector3(radius * 0.62, 0, z), 1.3)
+
+
+# Which part of the city each building stands in (wealth of houses and the dressing go by it)
+func _districts() -> void:
+	if not compact or data.kind != TownData.Kind.CITY:
+		return
+	var seat := get_seat()
+	var shore_local := to_local(shore) if shore != Vector3.INF else Vector3.INF
+	for b in buildings:
+		var d := b.local_pos.length() / maxf(radius, 1.0)
+		if b.kind == BuildingPlot.Kind.SEAT or (seat != null and b.local_pos.distance_to(seat.local_pos) < 28.0):
+			b.district = "noble"
+		elif shore_local != Vector3.INF and b.local_pos.distance_to(shore_local) < radius * 0.45:
+			b.district = "docks"
+		elif d < 0.35:
+			b.district = "market"
+		elif b.kind in [BuildingPlot.Kind.SMITHY, BuildingPlot.Kind.SHOP]:
+			b.district = "crafts"
+		elif d > 0.78:
+			b.district = "slums"
+		else:
+			b.district = "residential"
+
+
+# The wall follows the town's shape (Alpha 1.14): the hull of everything built, a little way out,
+# rounded off; the gates are where the main street meets it. Towns and cities get stone (a city's
+# thick, with a ditch), half the villages a wooden palisade.
+func _wall_outline(rng: RandomNumberGenerator) -> void:
+	if not compact:
+		return
+	match data.kind:
+		TownData.Kind.CITY:
+			wall_kind = "thick"
+		TownData.Kind.TOWN:
+			wall_kind = "stone"
+		_:
+			if rng.randf() >= 0.5:
+				return
+			wall_kind = "palisade"
+	var pts := PackedVector2Array()
+	for b in buildings:
+		var r := b.get_local_rect().grow(1.0)
+		pts.append_array([r.position, r.end, Vector2(r.position.x, r.end.y), Vector2(r.end.x, r.position.y)])
+	for s in streets:
+		pts.append(Vector2(s.a.x, s.a.z))
+		pts.append(Vector2(s.b.x, s.b.z))
+	var hull := Geometry2D.convex_hull(pts)
+	if hull.size() < 4:
+		wall_kind = ""
+		return
+	hull.remove_at(hull.size() - 1)  # convex_hull closes the loop; we keep it open
+	# out a little way from the middle, then rounded (two rounds of corner cutting)
+	var center := Vector2.ZERO
+	for p in hull:
+		center += p
+	center /= hull.size()
+	var out := 6.0 if wall_kind != "palisade" else 4.0
+	for i in hull.size():
+		hull[i] += (hull[i] - center).normalized() * out
+	for round_i in 2:
+		var cut := PackedVector2Array()
+		for i in hull.size():
+			var a := hull[i]
+			var b := hull[(i + 1) % hull.size()]
+			cut.append(a.lerp(b, 0.25))
+			cut.append(a.lerp(b, 0.75))
+		hull = cut
+	wall_poly = hull
+	# the gates: where the main street's line crosses the wall, each side; the street runs out to them
+	var new_gates: Array[Vector3] = []
+	for dir in [-1.0, 1.0]:
+		var best := INF
+		for i in hull.size():
+			var a := hull[i]
+			var b := hull[(i + 1) % hull.size()]
+			if (a.y > 0.0) == (b.y > 0.0):
+				continue
+			var x := a.x + (b.x - a.x) * (0.0 - a.y) / (b.y - a.y)
+			if signf(x) == dir and absf(x) < best:
+				best = absf(x)
+		if best != INF:
+			new_gates.append(Vector3(dir * best, 0, 0))
+	if new_gates.size() == 2:
+		gates = new_gates
+		for s in streets:
+			if s.main:
+				s.a = gates[0]
+				s.b = gates[1]
+		_build_street_graph()
+
+
+## The wall's pieces between the gates: [from, to] local points, each no longer than `step`
+func wall_pieces(step: float, gate_gap: float) -> Array:
+	var out: Array = []
+	for i in wall_poly.size():
+		var a := wall_poly[i]
+		var b := wall_poly[(i + 1) % wall_poly.size()]
+		var n := maxi(int(ceil(a.distance_to(b) / step)), 1)
+		for k in n:
+			var p := a.lerp(b, float(k) / n)
+			var q := a.lerp(b, float(k + 1) / n)
+			var mid := (p + q) * 0.5
+			if gates.any(func(g: Vector3) -> bool: return Vector2(g.x, g.z).distance_to(mid) < gate_gap):
+				continue
+			out.append([p, q])
+	return out

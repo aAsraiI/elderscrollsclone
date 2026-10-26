@@ -22,7 +22,7 @@ const MAX_FILL := 0.3
 static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
 	var net := RoadNetwork.new()
 	for t in towns:
-		add_streets(net, t)
+		add_streets(net, t, map)
 	var settings := map.settings
 	if not settings.roads_enabled or towns.size() < 2:
 		return net
@@ -131,7 +131,7 @@ static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
 
 
 ## The streets of a town, leveled at the town's height
-static func add_streets(net: RoadNetwork, t: PlacedPOI) -> void:
+static func add_streets(net: RoadNetwork, t: PlacedPOI, map: WorldMap = null) -> void:
 	if t.town == null:
 		return
 	var layout := t.town
@@ -140,7 +140,16 @@ static func add_streets(net: RoadNetwork, t: PlacedPOI) -> void:
 		var b := layout.to_world(st.b)
 		a.y = layout.origin.y
 		b.y = layout.origin.y
-		net.add_polyline(PackedVector3Array([a, b]), st.half_width, layout.data.street_color, true, t.id, t.id)
+		var pts := PackedVector3Array([a, b])
+		if TownLayout.compact and not st.main and a.distance_to(b) > 30.0:
+			# a side street wanders a little (Alpha 1.14): two bends, inside its own strip of ground
+			var side := Vector3(-(b - a).normalized().z, 0, (b - a).normalized().x)
+			var wob := 0.9 * (1.0 if (t.id.hash() + int(st.a.x)) % 2 == 0 else -1.0)
+			pts = PackedVector3Array([a, a.lerp(b, 0.33) + side * wob, a.lerp(b, 0.66) - side * wob, b])
+		if TownLayout.compact and map != null:
+			for i in pts.size():  # the streets follow the town's tilted ground
+				pts[i].y = map.get_height(pts[i].x, pts[i].z)
+		net.add_polyline(pts, st.half_width, layout.data.street_color, true, t.id, t.id)
 
 
 # ---------------------------------------------------------------- which towns are joined

@@ -28,6 +28,10 @@ var house := ""
 var size := Vector3(7.0, 3.4, 6.0)
 ## Farms: the field behind the house (width along the street, depth behind the house)
 var field_size := Vector2.ZERO
+## Houses in 1.14 towns: the space behind is a fenced yard with a garden, not a field
+var yard := false
+## Which part of a city it stands in: market, crafts, residential, noble, docks, slums ("" outside cities)
+var district := ""
 ## Lock level 1..100 (100 = key only), 0 = the door has no lock
 var lock_level := 0
 ## Whether the door is locked until someone (the player, or later its owner) changes that

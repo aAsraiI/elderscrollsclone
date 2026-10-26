@@ -67,50 +67,59 @@ static func plan(map: WorldMap, already: Array[PlacedPOI] = []) -> Array[PlacedP
 			if rule != null and rule.poi != null:
 				max_radius = maxf(max_radius, rule.poi.footprint_radius)
 
-	for region in map.placements.size():
-		var placement := map.placements[region]
-		var rect := map.get_placement_rect(region)
-		var area_km2 := rect.size.x * rect.size.y / 1.0e6
+	for sites_pass in [false, true]:  # the older kinds of place everywhere first, then the 1.14 sites
+		for region in map.placements.size():
+			var placement := map.placements[region]
+			var rect := map.get_placement_rect(region)
+			var area_km2 := rect.size.x * rect.size.y / 1.0e6
 
-		# Rules that can actually be placed, biggest footprint first
-		var rules: Array[POIRule] = []
-		for r in placement.biome.poi_rules:
-			if r != null and r.poi != null:
-				rules.append(r)
-		rules.sort_custom(func(a: POIRule, b: POIRule) -> bool:
-			return a.poi.footprint_radius > b.poi.footprint_radius)
+			# Rules that can actually be placed, biggest footprint first
+			var rules: Array[POIRule] = []
+			for r in placement.biome.poi_rules:
+				if r != null and r.poi != null:
+					rules.append(r)
+			# the places a world had before Alpha 1.14 first (an old save finds them where they were), then
+			# the 1.14 sites; biggest first within each
+			rules.sort_custom(func(a: POIRule, b: POIRule) -> bool:
+				var sa := a.poi is SitePOIData
+				var sb := b.poi is SitePOIData
+				if sa != sb:
+					return sb
+				return a.poi.footprint_radius > b.poi.footprint_radius)
 
-		for rule in rules:
-			var poi := rule.poi
-			var key := "%s|%d,%d|%s" % [placement.biome.get_key(), placement.cell.x, placement.cell.y, poi.get_key()]
-			var rng := RandomNumberGenerator.new()
-			rng.seed = ("%d|poi|%s" % [map.world_seed, key]).hash()
+			for rule in rules:
+				if (rule.poi is SitePOIData) != sites_pass:
+					continue
+				var poi := rule.poi
+				var key := "%s|%d,%d|%s" % [placement.biome.get_key(), placement.cell.x, placement.cell.y, poi.get_key()]
+				var rng := RandomNumberGenerator.new()
+				rng.seed = ("%d|poi|%s" % [map.world_seed, key]).hash()
 
-			var amount := rng.randf_range(minf(rule.count_min, rule.count_max), maxf(rule.count_min, rule.count_max))
-			if rule.count_mode == POIRule.CountMode.PER_SQUARE_KM:
-				amount *= area_km2
-			var count := int(floor(amount))
-			if rng.randf() < amount - float(count):
-				count += 1
+				var amount := rng.randf_range(minf(rule.count_min, rule.count_max), maxf(rule.count_min, rule.count_max))
+				if rule.count_mode == POIRule.CountMode.PER_SQUARE_KM:
+					amount *= area_km2
+				var count := int(floor(amount))
+				if rng.randf() < amount - float(count):
+					count += 1
 
-			var margin := rule.border_margin + poi.footprint_radius
-			var area := rect.grow(-margin)
-			if area.size.x <= 0.0 or area.size.y <= 0.0:
-				continue  # the region is too small for this POI
+				var margin := rule.border_margin + poi.footprint_radius
+				var area := rect.grow(-margin)
+				if area.size.x <= 0.0 or area.size.y <= 0.0:
+					continue  # the region is too small for this POI
 
-			for k in count:
-				var spot := find_spot(map, rng, area, region, rule, grid, max_radius, settings.poi_attempts if poi.footprint_radius >= 8.0 else maxi(settings.poi_attempts / 3, 6))  # small things: fewer tries
-				if spot == Vector3.INF:
-					continue  # nowhere fits; that POI is simply skipped
-				var placed := PlacedPOI.new()
-				placed.poi = poi
-				placed.position = spot
-				placed.region = region
-				placed.id = "r%d_%d/%s/%d" % [placement.cell.x, placement.cell.y, poi.get_key(), k]
-				placed.yaw = rng.randf_range(0.0, TAU) if poi.random_rotation else 0.0
-				placed.seed_value = ("%d|%s" % [map.world_seed, placed.id]).hash()
-				out.append(placed)
-				grid.add(placed)
+				for k in count:
+					var spot := find_spot(map, rng, area, region, rule, grid, max_radius, settings.poi_attempts if poi.footprint_radius >= 8.0 else maxi(settings.poi_attempts / 3, 6))  # small things: fewer tries
+					if spot == Vector3.INF:
+						continue  # nowhere fits; that POI is simply skipped
+					var placed := PlacedPOI.new()
+					placed.poi = poi
+					placed.position = spot
+					placed.region = region
+					placed.id = "r%d_%d/%s/%d" % [placement.cell.x, placement.cell.y, poi.get_key(), k]
+					placed.yaw = rng.randf_range(0.0, TAU) if poi.random_rotation else 0.0
+					placed.seed_value = ("%d|%s" % [map.world_seed, placed.id]).hash()
+					out.append(placed)
+					grid.add(placed)
 	_lay_paths(map, out)
 	_signposts(map, out, already)
 	return out

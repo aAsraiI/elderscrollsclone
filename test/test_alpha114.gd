@@ -144,10 +144,13 @@ func t_in_game() -> void:
 	await frames(20)
 	check("coming back up puts you by the way down", not wm.dungeons.is_inside() and p.global_position.distance_to(d0.global_position) < 6.0, str(p.global_position.distance_to(d0.global_position)))
 	await t_placement(wm, p)
+	t_integration(wm, p)
+	t_qa(wm)
 	t_towns(wm)
 	t_walls(wm)
 	t_buildings(wm)
 	await t_dressing(wm)
+	t_speed(wm)
 
 
 # ---------------------------------------------------------------- 1.14.5 small places
@@ -478,3 +481,177 @@ func t_dressing(wm: WorldManager) -> void:
 	var froot := farm.build(fp, null)
 	check("a farmstead keeps animals", froot.find_children("*", "Enemy", true, false).any(func(e: Node) -> bool: return e.has_meta("animal") and (e as Enemy).talk_name == ""))
 	froot.free()
+
+
+# ---------------------------------------------------------------- 1.14.12 speed
+
+func t_speed(wm: WorldManager) -> void:
+	print("-- speed")
+	var city: PlacedPOI = null
+	for t in wm.towns:
+		if t.town != null and (city == null or t.town.buildings.size() > city.town.buildings.size()):
+			city = t
+	var t0 := Time.get_ticks_usec()
+	var root := TownBuilder.build(city.poi as TownData, city, wm.map)
+	StaticBatch.merge_interior(root)
+	StaticBatch.merge(root)
+	var ms := (Time.get_ticks_usec() - t0) / 1000.0
+	var meshes := root.find_children("*", "MeshInstance3D", true, false).size()
+	var multis := root.find_children("Many_*", "MultiMeshInstance3D", true, false)
+	check("the biggest town (%d buildings) is built in %.0f ms" % [city.town.buildings.size(), ms], ms < 2500.0)
+	check("...and drawn in few pieces (%d meshes, %d multimeshes)" % [meshes, multis.size()], meshes < city.town.buildings.size() * 4 and multis.size() >= 3)
+	check("repeated things fade out with distance", multis.all(func(m: Node) -> bool: return (m as GeometryInstance3D).visibility_range_end > 0.0))
+	root.free()
+	# every kind of site, built within a chunk's budget
+	var worst := 0.0
+	var worst_kind := ""
+	for f in DirAccess.get_files_at("res://data/world/Sites/"):
+		if not f.ends_with(".tres"):
+			continue
+		var d := load("res://data/world/Sites/" + f) as SitePOIData
+		var placed := PlacedPOI.new()
+		placed.id = "test/speed_" + f
+		placed.poi = d
+		var t1 := Time.get_ticks_usec()
+		var s := d.build(placed, wm.map)
+		var sm := (Time.get_ticks_usec() - t1) / 1000.0
+		if sm > worst:
+			worst = sm
+			worst_kind = f
+		s.free()
+	check("every site builds within budget (slowest %s, %.0f ms)" % [worst_kind, worst], worst < 400.0)
+
+
+# ---------------------------------------------------------------- 1.14.13 integration
+
+func t_integration(wm: WorldManager, p: CharacterBody3D) -> void:
+	print("-- integration")
+	# quests and jobs can send you to the new places
+	var picks := {}
+	for i in 40:
+		var at := p.global_position + Vector3(cos(i * 0.7) * 600.0 * (1 + i % 4), 0, sin(i * 0.7) * 600.0 * (1 + i % 4))
+		var c := QuestTargets.nearest_poi(wm, at, false)
+		if c != null:
+			picks[c.poi.get_class() + ":" + String(c.poi.get_script().get_global_name())] = true
+	check("jobs and rumors pick the new sites as camps (%s)" % ", ".join(picks.keys()), picks.keys().any(func(k: String) -> bool: return k.ends_with("SitePOIData")))
+	# a site's folk are its garrison while it is loaded
+	var near: PlacedPOI = null
+	for s in wm.pois:
+		if s.poi is SitePOIData and s.poi.is_camp() and wm.get_poi_node(s.id) != null:
+			near = s
+			break
+	if near != null:
+		wm._garrisons.erase(near.id)
+		wm._spawn_garrison(near)
+		check("a loaded site's folk count as its garrison (%d)" % wm.get_garrison(near.id).size(), wm.get_garrison(near.id).size() > 0)
+	# stable ids: the same place gives the same chests every time
+	var site_poi: PlacedPOI = null
+	for s in wm.pois:
+		if s.poi is SitePOIData and s.poi.get_key() == "site_bandit_camp":
+			site_poi = s
+			break
+	var ids := []
+	for k in 2:
+		var root := (site_poi.poi as SitePOIData).build(site_poi, wm.map)
+		var these := root.find_children("*", "ContainerComponent", true, false).map(func(c: Node) -> String: return (c as ContainerComponent).save_id)
+		these.sort()
+		ids.append(these)
+		root.free()
+	check("a site's chests have the same ids every visit (%d)" % ids[0].size(), ids[0] == ids[1] and not ids[0].is_empty() and ids[0].all(func(x: String) -> bool: return x.begins_with(site_poi.id)))
+	# the places an old save knows stay where they were when the 1.14 sites are added
+	var with_sites := _fresh_plan(wm).filter(func(x: PlacedPOI) -> bool: return not (x.poi is SitePOIData) and not (x.poi is SignpostPOIData))
+	var saved := {}
+	for pl in wm.map.placements:
+		saved[pl] = pl.biome.poi_rules.duplicate()
+		pl.biome.poi_rules = pl.biome.poi_rules.filter(func(r: POIRule) -> bool: return r != null and not (r.poi is SitePOIData))
+	var without := _fresh_plan(wm).filter(func(x: PlacedPOI) -> bool: return not (x.poi is SignpostPOIData))
+	for pl in wm.map.placements:
+		pl.biome.poi_rules = saved[pl]
+	var moved := 0
+	var by_id := {}
+	for x in without:
+		by_id[x.id] = x.position
+	for x in with_sites:
+		if not by_id.has(x.id) or (by_id[x.id] as Vector3).distance_to(x.position) > 0.01:
+			moved += 1
+	check("an old save's camps and dungeons stay where they were (%d of %d moved)" % [moved, with_sites.size()], moved == 0 and with_sites.size() == without.size())
+	check("each kind of site has its own map symbol", (load("res://data/world/Sites/fort.tres") as SitePOIData).map_icon == "fort")
+
+
+# The places of this world planned again on a fresh map, the way a game being loaded plans them
+func _fresh_plan(wm: WorldManager) -> Array[PlacedPOI]:
+	var m := WorldMap.new(wm.settings, wm.world_seed)
+	var towns := SettlementPlanner.plan(m)
+	m.set_pads(towns)
+	SettlementPlanner.lay_out(m, towns)
+	m.set_roads(RoadPlanner.plan(m, towns))
+	return POIPlanner.plan(m, towns)
+
+
+# ---------------------------------------------------------------- 1.14.14 QA
+
+func t_qa(wm: WorldManager) -> void:
+	print("-- QA: the whole world")
+	var places := wm.pois.filter(func(x: PlacedPOI) -> bool: return not (x.poi is SignpostPOIData))
+	# no two places on top of each other
+	var grid := {}
+	var overlaps := 0
+	for x: PlacedPOI in places:
+		var c := Vector2i(floori(x.position.x / 200.0), floori(x.position.z / 200.0))
+		for dz in range(-1, 2):
+			for dx in range(-1, 2):
+				for o: PlacedPOI in grid.get(c + Vector2i(dx, dz), []):
+					var need := x.poi.footprint_radius + o.poi.footprint_radius - 0.5
+					if Vector2(x.position.x - o.position.x, x.position.z - o.position.z).length() < need:
+						overlaps += 1
+		if not grid.has(c):
+			grid[c] = []
+		grid[c].append(x)
+	check("no two places overlap (%d places)" % places.size(), overlaps == 0, str(overlaps))
+	# nothing buried or hanging: a levelled site's middle sits on the ground
+	var buried := 0
+	for x: PlacedPOI in places:
+		if x.poi is SitePOIData and x.poi.flatten_radius > 0.0:
+			if absf(wm.map.get_height(x.position.x, x.position.z) - x.position.y) > 1.2:
+				buried += 1
+	check("no site is buried or hanging", buried == 0, str(buried))
+	# no door blocked: in front of every building there is room to stand
+	var blocked := 0
+	var doors := 0
+	for t in wm.towns:
+		if t.town == null:
+			continue
+		var rects: Array[Rect2] = []
+		for b in t.town.buildings:
+			rects.append(b.get_local_rect())
+		for b in t.town.buildings:
+			doors += 1
+			var front := Basis(Vector3.UP, b.local_yaw) * Vector3(0, 0, -1)
+			var door := b.local_pos + front * (b.size.z * 0.5 + 1.2)
+			var q := Vector2(door.x, door.z)
+			if rects.any(func(r: Rect2) -> bool: return r.has_point(q)):
+				blocked += 1
+			elif t.town.dress.any(func(d: Dictionary) -> bool: return String(d["what"]) != "flowers" and Vector2(d["pos"].x, d["pos"].z).distance_to(q) < 0.9):
+				blocked += 1
+	check("no door is blocked (%d doors)" % doors, blocked == 0, str(blocked))
+	# the densest land: everything near the busiest spot built within budget
+	var best: PlacedPOI = null
+	var best_n := 0
+	for x: PlacedPOI in places:
+		var n := 0
+		for o: PlacedPOI in places:
+			if o.position.distance_to(x.position) < 600.0:
+				n += 1
+		if n > best_n:
+			best_n = n
+			best = x
+	var t0 := Time.get_ticks_msec()
+	var built := 0
+	for o: PlacedPOI in places:
+		if o.position.distance_to(best.position) < 600.0 and not (o.poi is TownData):
+			var n := o.poi.build(o, wm.map)
+			if n != null:
+				built += 1
+				n.free()
+	var ms := Time.get_ticks_msec() - t0
+	check("the densest land (%d places within 600 m) builds in %d ms" % [built, ms], ms < built * 60 + 500)

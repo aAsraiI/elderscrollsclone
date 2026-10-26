@@ -406,13 +406,19 @@ func _free_pois_for_chunk(c: Vector2i) -> void:
 
 # The creatures of a point of interest, made when its chunk loads
 func _spawn_garrison(p: PlacedPOI) -> void:
-	if not populate_pois or p.poi.garrison == null or _garrisons.has(p.id):
+	if not populate_pois or _garrisons.has(p.id):
+		return
+	if p.poi.garrison == null and not p.poi.is_camp():
 		return
 	if _garrison_root == null or not is_instance_valid(_garrison_root):
 		_garrison_root = Node3D.new()
 		_garrison_root.name = "Garrisons"
 		add_child(_garrison_root)
-	_garrisons[p.id] = Population.spawn_garrison(p, map, _garrison_root)
+	_garrisons[p.id] = Population.spawn_garrison(p, map, _garrison_root) if p.poi.garrison != null else []
+	if p.poi is SitePOIData and _poi_nodes.has(p.id):  # a site's folk stand at its spawn points (Alpha 1.14)
+		for e in (_poi_nodes[p.id] as Node3D).find_children("*", "Enemy", true, false):
+			if not e.has_meta("animal") and (e as Enemy).disposition == Enemy.Disposition.HOSTILE:
+				_garrisons[p.id].append(e)
 	if quests != null:
 		for e in quests.on_garrison(p, _garrison_root):  # bandit chiefs wanted by guild jobs
 			_garrisons[p.id].append(e)

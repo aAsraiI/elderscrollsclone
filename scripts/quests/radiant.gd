@@ -130,7 +130,7 @@ static func make(qm: QuestManager, type: String, town: PlacedPOI, s: DialogueEng
 static func _camp_near(qm: QuestManager, from: Vector3, rng: RandomNumberGenerator) -> PlacedPOI:
 	var options: Array[PlacedPOI] = []
 	for p in qm._pois_near(from, 2200.0):
-		if p.poi is SimplePOIData and p.poi.garrison != null and p.poi.id != &"dragon_lair":
+		if p.poi.is_camp():
 			options.append(p)
 	return options[rng.randi_range(0, mini(options.size(), 4) - 1)] if not options.is_empty() else null
 

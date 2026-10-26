@@ -286,7 +286,7 @@ func _make(type: String, _qid: String, town: PlacedPOI, s: DialogueEngine.Speake
 		"kill":
 			var options: Array[PlacedPOI] = []
 			for p in _pois_near(from, 2200.0):
-				if p.poi is SimplePOIData and p.poi.garrison != null and p.poi.id != &"dragon_lair":
+				if p.poi.is_camp():
 					options.append(p)
 			if options.is_empty():
 				return {}
@@ -313,7 +313,7 @@ func _make(type: String, _qid: String, town: PlacedPOI, s: DialogueEngine.Speake
 			# a ruin or other old place nearby; the artifact is buried there (a DigSpot appears)
 			var options: Array[PlacedPOI] = []
 			for p in _pois_near(from, 2800.0):
-				if p.poi is SimplePOIData and p.poi.garrison != null and p.poi.id != &"dragon_lair":
+				if p.poi.is_camp():
 					options.append(p)
 			if options.is_empty():
 				return {}
@@ -340,7 +340,7 @@ func _make(type: String, _qid: String, town: PlacedPOI, s: DialogueEngine.Speake
 			# a named beast, met at a place out in the wild
 			var options: Array[PlacedPOI] = []
 			for p in _pois_near(from, 2400.0):
-				if p.poi is SimplePOIData and p.poi.garrison != null and p.poi.id != &"dragon_lair":
+				if p.poi.is_camp():
 					options.append(p)
 			if options.is_empty():
 				return {}

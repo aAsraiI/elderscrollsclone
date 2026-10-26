@@ -109,7 +109,7 @@ static func nearest_poi(world: WorldManager, from: Vector3, dungeon: bool) -> Pl
 			var e := p.poi as DungeonEntrancePOIData
 			ok = e != null and e.dungeon != null and e.dungeon.boss != null
 		else:
-			ok = p.poi is SimplePOIData and p.poi.garrison != null and p.poi.id != &"dragon_lair"
+			ok = p.poi.is_camp()
 		var d := p.position.distance_squared_to(from)
 		if ok and d < best_d:
 			best_d = d

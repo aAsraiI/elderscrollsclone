@@ -629,10 +629,16 @@ const DRESS_PROPS := {
 
 # The town's things on their spots (TownLayout.dress); street lamps light up at night
 static func _dressing(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: WorldMap) -> void:
+	var many := {}  # the repeated things, drawn as one MultiMesh each (Alpha 1.14.12)
 	for d: Dictionary in layout.dress:
 		var at: Vector3 = d["pos"]
 		at.y = POIBuilder.ground_y(placed, map, at.x, at.z)
 		var what := String(d["what"])
+		if MULTI.has(what):
+			if not many.has(what):
+				many[what] = []
+			many[what].append(Transform3D(Basis(Vector3.UP, float(d["yaw"])), at))
+			continue
 		match what:
 			"notice":
 				NoticeBoard.make(root, at, float(d["yaw"]), placed.id)
@@ -653,6 +659,7 @@ static func _dressing(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: 
 					light.distance_fade_enabled = true
 					light.distance_fade_begin = 45.0
 					light.distance_fade_length = 15.0
+	_multi(root, many)
 
 
 # A village's wooden watchtower: four posts, a platform with a rail, a roof, a slope up
@@ -671,3 +678,86 @@ static func _watchtower(root: Node3D, at: Vector3, stone: Color) -> void:
 ## Street lamps on at night, off by day (WorldManager calls this as the light changes)
 static func set_lamps(tree: SceneTree, night: bool) -> void:
 	tree.call_group("town_lamps", "set_visible", night)
+
+
+## Town things that come by the dozen: one MultiMesh (and one shared collision body) per kind,
+## each seen out to its distance
+const MULTI := {"flowers": 60.0, "tree": 180.0, "barrel": 90.0, "crates": 90.0, "sacks": 70.0, "hay": 90.0}
+
+static var _prop_meshes := {}  # prop file -> [ArrayMesh, Array of [Shape3D, Transform3D]]
+
+
+static func _multi(root: Node3D, many: Dictionary) -> void:
+	for what: String in many:
+		var file: String = DRESS_PROPS.get(what, what)
+		var got := _prop_mesh(file)
+		if got.is_empty():
+			continue
+		var list: Array = many[what]
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = got[0]
+		mm.instance_count = list.size()
+		var body := StaticBody3D.new()
+		body.name = "Many_%s_Collision" % what
+		for i in list.size():
+			mm.set_instance_transform(i, list[i])
+			for sh: Array in got[1]:
+				var owner := body.create_shape_owner(body)
+				body.shape_owner_add_shape(owner, sh[0])
+				body.shape_owner_set_transform(owner, (list[i] as Transform3D) * (sh[1] as Transform3D))
+		var mmi := MultiMeshInstance3D.new()
+		mmi.name = "Many_" + what
+		mmi.multimesh = mm
+		mmi.visibility_range_end = float(MULTI[what])
+		mmi.visibility_range_end_margin = 10.0
+		root.add_child(mmi)
+		if not got[1].is_empty():
+			root.add_child(body)
+		else:
+			body.free()
+
+
+# A prop scene as one mesh (its parts' colours kept, glowing parts left out) and its collision shapes
+static func _prop_mesh(file: String) -> Array:
+	if _prop_meshes.has(file):
+		return _prop_meshes[file]
+	var path := "res://scenes/interiors/props/%s.tscn" % file
+	if not ResourceLoader.exists(path):
+		return []
+	var p := (load(path) as PackedScene).instantiate() as Node3D
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var shapes: Array = []
+	for n in p.find_children("*", "", true, false):
+		if n is MeshInstance3D and (n as MeshInstance3D).mesh is PrimitiveMesh:
+			var mi := n as MeshInstance3D
+			var m := mi.material_override as StandardMaterial3D
+			if m != null and m.emission_enabled:
+				continue
+			var xf := p.global_transform.affine_inverse() * mi.global_transform if mi.is_inside_tree() else _local_xf(p, mi)
+			var arrays := (mi.mesh as PrimitiveMesh).get_mesh_arrays()
+			var colors := PackedColorArray()
+			colors.resize((arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size())
+			colors.fill(m.albedo_color if m != null else Color.WHITE)
+			arrays[Mesh.ARRAY_COLOR] = colors
+			var part := ArrayMesh.new()
+			part.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+			st.append_from(part, 0, xf)
+		elif n is CollisionShape3D and (n as CollisionShape3D).shape != null:
+			shapes.append([(n as CollisionShape3D).shape, _local_xf(p, n as Node3D)])
+	var mesh := st.commit()
+	mesh.surface_set_material(0, StaticBatch.material())
+	p.free()
+	_prop_meshes[file] = [mesh, shapes]
+	return _prop_meshes[file]
+
+
+static func _local_xf(root: Node3D, n: Node3D) -> Transform3D:
+	var xf := Transform3D.IDENTITY
+	var cur: Node = n
+	while cur != null and cur != root:
+		if cur is Node3D:
+			xf = (cur as Node3D).transform * xf
+		cur = cur.get_parent()
+	return xf

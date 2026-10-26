@@ -58,3 +58,9 @@ func get_key() -> String:
 ## pieces on the ground: map.get_height(x, z) - placed.position.y is the local height of a spot.
 func build(_placed: PlacedPOI, _map: WorldMap) -> Node3D:
 	return null
+
+
+## A place with folk to fight out in the open (a camp, a fort, a tower...): quests and jobs send you
+## to clear these
+func is_camp() -> bool:
+	return false

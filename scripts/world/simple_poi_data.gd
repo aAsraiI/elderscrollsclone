@@ -24,3 +24,7 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 		POIBuilder.build_shape(root, int(shape), shape_scale, color, placed, map)
 	POIBuilder.add_containers(root, containers, placed, map)
 	return root
+
+
+func is_camp() -> bool:
+	return garrison != null and id != &"dragon_lair"

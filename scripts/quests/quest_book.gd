@@ -729,7 +729,7 @@ func _resolve(place: Dictionary, qid: String) -> Dictionary:
 				var e := p.poi as DungeonEntrancePOIData
 				if e == null or e.dungeon == null or e.dungeon.boss == null:
 					continue
-			elif not (p.poi is SimplePOIData and p.poi.garrison != null):
+			elif not p.poi.is_camp():
 				continue
 			any.append(p)
 			if not used.has(p.id) and not Discovery.is_cleared(p.id):

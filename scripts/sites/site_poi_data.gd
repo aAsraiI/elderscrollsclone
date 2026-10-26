@@ -115,3 +115,8 @@ func _keeper(site: ExteriorSite, at: Vector3, placed: PlacedPOI) -> void:
 	e.set_meta("greeting", "Welcome, traveller. Warm yourself.")
 	site.add_child(e)
 	e.position = at + Vector3(0, 0.3, 0)
+
+
+## Who lives here makes it a place for quests to send you (Alpha 1.14): any site with occupants
+func is_camp() -> bool:
+	return occupants != null and discoverable

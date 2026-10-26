@@ -101,6 +101,10 @@ func spawn_group(kind: String) -> Array:
 # A road point out at the right distance, and the road ahead of it (toward the end further away)
 func _find_road_spot(from: Vector3) -> Dictionary:
 	var roads := world.map.roads.get_roads()
+	# the paths off the roads to places count too (Alpha 1.14): pilgrims to a shrine, folk to a farm
+	for r in world.map.roads.polylines:
+		if bool(r["street"]) and String(r["to"]) == "" and String(r["from"]).begins_with("r"):
+			roads.append(r)
 	var options: Array = []
 	for r in roads:
 		var road_pts: PackedVector3Array = r["points"]

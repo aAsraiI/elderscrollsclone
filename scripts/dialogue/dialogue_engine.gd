@@ -718,7 +718,7 @@ static func _generic(s: Speaker, topic: String, world: WorldManager) -> String:
 		"local threats":
 			if world != null:
 				for p in world.get_pois_near(s.position, RUMOR_RANGE):
-					if p.poi.garrison != null and not Discovery.is_cleared(p.id) and poi_topic_name(world, p) != "":
+					if (p.poi.garrison != null or p.poi.is_camp()) and not Discovery.is_cleared(p.id) and poi_topic_name(world, p) != "":
 						return "Watch the %s. Bandits or worse. We've lost two patrols out that way." % poi_topic_name(world, p)
 			return "Quiet, for now. Wolves on the roads at night, nothing more. Keep it that way."
 		"the law":
@@ -749,8 +749,16 @@ static func _rumor(s: Speaker, world: WorldManager) -> String:
 	if not near.is_empty() and k < 7:
 		var p := near[_pick(s, "rumor_poi%d" % _week(s), near.size())]
 		var name := poi_topic_name(world, p)
-		if p.poi.garrison != null:
+		if p.poi.garrison != null or p.poi.is_camp():
 			return "They say there's trouble at the %s. Folk have seen armed strangers about." % name
+		if p.poi is SitePOIData:  # the peaceful places out in the land (Alpha 1.14)
+			match (p.poi as SitePOIData).map_icon:
+				"farm", "mill":
+					return "The folk at the %s sell eggs and flour cheaper than the market. Worth the walk." % name
+				"shrine", "stones":
+					return "Pilgrims stop at the %s on their way through. They say it brings luck on the road." % name
+				"dock", "bridge", "lighthouse":
+					return "Boats still put in at the %s now and then, when the weather is kind." % name
 		if p.poi is DungeonEntrancePOIData:
 			return "A hunter swore he heard voices from the %s. Nobody has gone to look." % name
 		return "Have you been to the %s? Odd place. Quiet." % name
@@ -867,7 +875,7 @@ static func _about_poi(s: Speaker, list: Array) -> String:
 		return ""
 	var d := Vector2(p.position.x - s.position.x, p.position.z - s.position.z)
 	var text := "It's %s to the %s." % [distance_words(d.length()), compass(d)]
-	if p.poi.garrison != null:
+	if p.poi.garrison != null or p.poi.is_camp():
 		text += " Bandits or worse hole up there. Go armed, or don't go."
 	elif p.poi is DungeonEntrancePOIData:
 		text += " It goes deep underground. Nobody who goes down comes back quite the same."

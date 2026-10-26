@@ -328,8 +328,11 @@ func draw_map(canvas: Control) -> void:
 		if not Rect2(Vector2.ZERO, canvas.size).grow(10).has_point(dot):
 			continue
 		var big := poi.poi is DungeonEntrancePOIData
-		canvas.draw_circle(dot, 5.0 if big else 4.0, Color.BLACK)
-		canvas.draw_circle(dot, 4.0 if big else 3.0, poi.poi.map_color)
+		if poi.poi is SitePOIData:
+			site_icon(canvas, dot, (poi.poi as SitePOIData).map_icon, poi.poi.map_color)
+		else:
+			canvas.draw_circle(dot, 5.0 if big else 4.0, Color.BLACK)
+			canvas.draw_circle(dot, 4.0 if big else 3.0, poi.poi.map_color)
 		if big and Discovery.is_cleared(poi.id):
 			canvas.draw_polyline(PackedVector2Array([dot + Vector2(-3, 0), dot + Vector2(-1, 3), dot + Vector2(4, -3)]), Color.WHITE, 1.5)
 		if poi.id == _pending_travel:
@@ -610,3 +613,57 @@ func _build_ui() -> void:
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tooltip.visible = false
 	_root.add_child(_tooltip)
+
+
+## A site's symbol on the map (Alpha 1.14): a tent for a camp, a tower, a broken wall for a ruin, a
+## walled square for a fort, a little house for a farm, a cross for a grave...
+static func site_icon(c: Control, at: Vector2, icon: String, color: Color) -> void:
+	var ink := Color.BLACK
+	var s := 5.0
+	match icon:
+		"camp":
+			var tri := PackedVector2Array([at + Vector2(0, -s), at + Vector2(s, s * 0.8), at + Vector2(-s, s * 0.8)])
+			c.draw_colored_polygon(tri, color)
+			c.draw_polyline(tri + PackedVector2Array([tri[0]]), ink, 1.2)
+		"tower", "lighthouse":
+			c.draw_rect(Rect2(at + Vector2(-s * 0.45, -s * 1.1), Vector2(s * 0.9, s * 2.1)), color)
+			c.draw_rect(Rect2(at + Vector2(-s * 0.45, -s * 1.1), Vector2(s * 0.9, s * 2.1)), ink, false, 1.2)
+			if icon == "lighthouse":
+				c.draw_circle(at + Vector2(0, -s * 1.4), 2.0, Color(1.0, 0.85, 0.3))
+		"fort":
+			c.draw_rect(Rect2(at - Vector2(s, s), Vector2(s * 2, s * 2)), color)
+			c.draw_rect(Rect2(at - Vector2(s, s), Vector2(s * 2, s * 2)), ink, false, 1.5)
+			for k in [Vector2(-s, -s), Vector2(s, -s), Vector2(-s, s), Vector2(s, s)]:
+				c.draw_rect(Rect2(at + k - Vector2(1.5, 1.5), Vector2(3, 3)), ink)
+		"ruin":
+			c.draw_polyline(PackedVector2Array([at + Vector2(-s, s), at + Vector2(-s, -s), at + Vector2(s * 0.2, -s)]), ink, 2.5)
+			c.draw_polyline(PackedVector2Array([at + Vector2(-s, s), at + Vector2(-s, -s), at + Vector2(s * 0.2, -s)]), color, 1.2)
+			c.draw_rect(Rect2(at + Vector2(s * 0.3, s * 0.2), Vector2(s * 0.7, s * 0.8)), color)
+		"farm", "mill", "dock":
+			var house := PackedVector2Array([at + Vector2(-s, s), at + Vector2(-s, -s * 0.2), at + Vector2(0, -s), at + Vector2(s, -s * 0.2), at + Vector2(s, s)])
+			c.draw_colored_polygon(house, color)
+			c.draw_polyline(house + PackedVector2Array([house[0]]), ink, 1.2)
+		"grave", "shrine":
+			c.draw_line(at + Vector2(0, -s), at + Vector2(0, s), ink, 3.0)
+			c.draw_line(at + Vector2(-s * 0.6, -s * 0.3), at + Vector2(s * 0.6, -s * 0.3), ink, 3.0)
+			c.draw_line(at + Vector2(0, -s), at + Vector2(0, s), color, 1.5)
+			c.draw_line(at + Vector2(-s * 0.6, -s * 0.3), at + Vector2(s * 0.6, -s * 0.3), color, 1.5)
+		"battle":
+			c.draw_line(at + Vector2(-s, -s), at + Vector2(s, s), ink, 3.0)
+			c.draw_line(at + Vector2(-s, s), at + Vector2(s, -s), ink, 3.0)
+			c.draw_line(at + Vector2(-s, -s), at + Vector2(s, s), color, 1.5)
+			c.draw_line(at + Vector2(-s, s), at + Vector2(s, -s), color, 1.5)
+		"mine":
+			var m := PackedVector2Array([at + Vector2(-s, -s * 0.6), at + Vector2(s, -s * 0.6), at + Vector2(0, s)])
+			c.draw_colored_polygon(m, color)
+			c.draw_polyline(m + PackedVector2Array([m[0]]), ink, 1.2)
+		"stones":
+			for k in 3:
+				c.draw_circle(at + Vector2(cos(k * TAU / 3.0), sin(k * TAU / 3.0)) * s * 0.7, 2.2, ink)
+				c.draw_circle(at + Vector2(cos(k * TAU / 3.0), sin(k * TAU / 3.0)) * s * 0.7, 1.4, color)
+		"wreck", "bridge":
+			c.draw_arc(at + Vector2(0, s * 0.4), s, PI, TAU, 10, ink, 3.0)
+			c.draw_arc(at + Vector2(0, s * 0.4), s, PI, TAU, 10, color, 1.5)
+		_:
+			c.draw_circle(at, 4.0, ink)
+			c.draw_circle(at, 3.0, color)

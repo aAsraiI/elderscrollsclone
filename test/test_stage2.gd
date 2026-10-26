@@ -387,7 +387,8 @@ func t_world() -> void:
 		return
 	var doors := node.find_children("*", "BuildingDoor", true, false)
 	check("every building has a door", doors.size() == town.town.buildings.size(), "%d doors, %d buildings" % [doors.size(), town.town.buildings.size()])
-	check("buildings have name signs", node.find_children("*", "Label3D", true, false).size() >= town.town.buildings.size())
+	var public := town.town.buildings.filter(func(b: BuildingPlot) -> bool: return b.is_public() and b.kind != BuildingPlot.Kind.SEAT).size()
+	check("businesses hang a sign with their name (homes have none, Alpha 1.14)", node.find_children("Sign", "Readable", true, false).size() == public, "%d signs, %d businesses" % [node.find_children("Sign", "Readable", true, false).size(), public])
 	# Walls are merged into one body per town (StaticBatch), so count collision shapes, not bodies
 	var shapes := 0
 	for b in node.find_children("*", "StaticBody3D", true, false):

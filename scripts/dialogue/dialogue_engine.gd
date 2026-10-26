@@ -6,7 +6,7 @@ extends RefCounted
 ##
 ## Topics, Morrowind style: the player starts knowing a few general ones. Every topic name that
 ## appears in something said (a town, a person, a shop, a cave nearby) becomes a link and is
-## learned. Each speaker only lists the known topics that fit who they are (PROFILES: a guard
+## learned. Each speaker only lists the known topics that fit who they are (DialogueProfile: a guard
 ## talks about the law and nearby dangers, a merchant about trade and the towns on the road...),
 ## at most a few named ones, always the same for the same person. "duties" and the other guild
 ## topics only show for the guild leaders who have them (QuestManager.extra_topics).
@@ -23,7 +23,7 @@ const FACTIONS := {
 	"Thieves Guild": "thieves",
 	"Assassins Cult": "assassins",
 }
-const GENERIC := ["background", "my trade", "latest rumors", "little advice", "duties", "membership", "advancement", "clear bounty", "a delivery", "the law"]
+const GENERIC := ["background", "my trade", "small talk", "the weather", "local business", "rooms", "food and drink", "directions", "local threats", "latest rumors", "little advice", "duties", "report back", "membership", "advancement", "leave the guild", "clear bounty", "a delivery", "the law"]
 
 
 ## Who is talking: built from an Enemy body (and its NpcData, for townspeople)
@@ -263,44 +263,52 @@ static func greeting_topics(s: Speaker) -> PackedStringArray:
 
 # ---------------------------------------------------------------- what they know
 
-## What each kind of person talks about (Alpha 1.12): their general topics, the kinds of named
-## topic they know, how many other towns they talk about (the nearest), and the most named topics
-## they list. Quest, guild and hand-written topics are always listed on top of these.
-##   home: their own town   towns: other towns   place / person: buildings and people of their
-##   town   poi: places in the wild nearby   guilds: every guild   own_guild: only their own
-const PROFILES := {
-	"commoner": {"generic": ["background", "my trade", "latest rumors", "little advice"], "kinds": ["home", "towns", "place", "person", "poi"], "towns": 2, "cap": 6},
-	"worker": {"generic": ["background", "my trade", "latest rumors", "little advice"], "kinds": ["home", "towns", "person", "poi"], "towns": 1, "cap": 5},
-	"merchant": {"generic": ["background", "my trade", "latest rumors"], "kinds": ["home", "towns", "place", "person"], "towns": 3, "cap": 6},
-	"innkeeper": {"generic": ["background", "my trade", "latest rumors", "little advice"], "kinds": ["home", "towns", "place", "poi", "guilds"], "towns": 5, "cap": 8},
-	"guard": {"generic": ["background", "my trade", "the law", "latest rumors"], "kinds": ["home", "towns", "place", "poi"], "towns": 3, "cap": 8},
-	"priest": {"generic": ["background", "my trade", "little advice"], "kinds": ["home", "place", "person"], "towns": 0, "cap": 5},
-	"guild": {"generic": ["background", "my trade", "latest rumors"], "kinds": ["home", "towns", "place", "own_guild"], "towns": 2, "cap": 6},
-	"lord": {"generic": ["background", "my trade", "the law", "latest rumors"], "kinds": ["home", "towns", "place", "poi", "guilds"], "towns": 6, "cap": 10},
-	"traveler": {"generic": ["background", "latest rumors", "little advice"], "kinds": ["towns", "poi"], "towns": 3, "cap": 5},
-}
+## What each kind of person talks about, and their buttons: DialogueProfile files in
+## data/dialogue/profiles/. Quest, guild and hand-written topics are always listed on top.
+const PROFILE_DIR := "res://data/dialogue/profiles/"
+
+static var _profiles := {}
 
 
-## The PROFILES entry for this speaker
-static func profile_for(s: Speaker) -> Dictionary:
+## A profile by its file name ("commoner", "guard"...), or an empty one
+static func profile_named(file: String) -> DialogueProfile:
+	if not _profiles.has(file):
+		var path := PROFILE_DIR + file + ".tres"
+		_profiles[file] = load(path) as DialogueProfile if ResourceLoader.exists(path) else DialogueProfile.new()
+	return _profiles[file]
+
+
+## The profile for this speaker: their job's, stacked with a guild officer's when they lead a guild
+static func profile_for(s: Speaker, world: WorldManager = null) -> DialogueProfile:
+	var file := "commoner"
 	if s.data == null:
-		return PROFILES["traveler"]
-	match s.role:
-		NpcData.Role.MERCHANT, NpcData.Role.SMITH:
-			return PROFILES["merchant"]
-		NpcData.Role.INNKEEPER:
-			return PROFILES["innkeeper"]
-		NpcData.Role.GUARD:
-			return PROFILES["guard"]
-		NpcData.Role.PRIEST:
-			return PROFILES["priest"]
-		NpcData.Role.GUILD_MEMBER:
-			return PROFILES["guild"]
-		NpcData.Role.LORD:
-			return PROFILES["lord"]
-		NpcData.Role.FARMER, NpcData.Role.WOODCUTTER, NpcData.Role.FISHERMAN, NpcData.Role.HUNTER, NpcData.Role.MINER, NpcData.Role.HERBALIST:
-			return PROFILES["worker"]
-	return PROFILES["commoner"]
+		file = "traveler"
+	else:
+		match s.role:
+			NpcData.Role.MERCHANT: file = "merchant"
+			NpcData.Role.SMITH: file = "smith"
+			NpcData.Role.INNKEEPER: file = "innkeeper"
+			NpcData.Role.GUARD: file = "guard"
+			NpcData.Role.PRIEST: file = "priest"
+			NpcData.Role.GUILD_MEMBER: file = "guild_member"
+			NpcData.Role.LORD: file = "lord"
+			NpcData.Role.FARMER, NpcData.Role.WOODCUTTER, NpcData.Role.FISHERMAN, NpcData.Role.HUNTER, NpcData.Role.MINER, NpcData.Role.HERBALIST:
+				file = "worker"
+	var prof := profile_named(file)
+	if Factions.leader_of(s, world) != "":
+		prof = prof.merged(profile_named("guild_officer"))  # roles stack
+	return prof
+
+
+# Named topics shown at most: fewer out of doors at night, and none to someone who dislikes you
+static func _cap(prof: DialogueProfile, s: Speaker, world: WorldManager) -> int:
+	if get_disposition(s) < TALK_MIN:
+		return 0
+	var night := world != null and world.clock != null and world.clock.is_night()
+	var indoors := s.enemy != null and is_instance_valid(s.enemy) and world != null and world.dungeons != null and world.dungeons.is_inside()
+	if night and not indoors and prof.night_cap > 0:
+		return prof.night_cap
+	return prof.cap
 
 
 ## The known topics this speaker can talk about, sorted (general ones first, then quest and
@@ -319,8 +327,8 @@ static func topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
 		if world.quests != null:
 			for t in world.quests.extra_topics(s):  # a choice or a reward that just became possible
 				DialogueState.learn(t)
-	var prof := profile_for(s)
-	var near := _near_towns(s, world, int(prof["towns"]))
+	var prof := profile_for(s, world)
+	var near := _near_towns(s, world, prof.towns)
 	for t in DialogueState.known_topics():
 		var why := _reason(s, t, world, prof, near)
 		match why:
@@ -336,8 +344,8 @@ static func topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
 		var pb := _priority(s, b)
 		if pa != pb:
 			return pa < pb
-		return _stable(s, a) < _stable(s, b))
-	named = named.slice(0, int(prof["cap"]))
+		return _weighted(s, a, world) < _weighted(s, b, world))
+	named = named.slice(0, _cap(prof, s, world))
 	named.sort()
 	special.sort()
 	var ordered := PackedStringArray()
@@ -351,14 +359,14 @@ static func topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
 
 ## Would this speaker list the topic (if the player knew it)? Named topics also have to make the cap.
 static func can_discuss(s: Speaker, topic: String, world: WorldManager) -> bool:
-	var prof := profile_for(s)
-	var why := _reason(s, topic, world, prof, _near_towns(s, world, int(prof["towns"])))
+	var prof := profile_for(s, world)
+	var why := _reason(s, topic, world, prof, _near_towns(s, world, prof.towns))
 	return why != "" and (why != "named" or topics_for(s, world).has(topic))
 
 
 # Why this speaker lists a topic: "generic", "special" (quest, guild, hand-written: never cut),
 # "named" (counts toward the cap) or "" (not theirs to talk about)
-static func _reason(s: Speaker, topic: String, world: WorldManager, prof: Dictionary, near: Array) -> String:
+static func _reason(s: Speaker, topic: String, world: WorldManager, prof: DialogueProfile, near: Array) -> String:
 	for d in _custom_for(s):
 		var t := d.get_topic(topic)
 		if t != null and t.pick(get_disposition(s)) != null:
@@ -375,10 +383,10 @@ static func _reason(s: Speaker, topic: String, world: WorldManager, prof: Dictio
 	if s.own_topics_only:
 		return ""
 	var e: Dictionary = index(world).entries.get(topic.to_lower(), {})
-	var kinds: Array = prof["kinds"]
+	var kinds := prof.kinds
 	match String(e.get("kind", "")):
 		"generic":
-			return "generic" if (prof["generic"] as Array).has(topic) else ""
+			return "generic" if prof.generic.has(topic) else ""
 		"faction":
 			if kinds.has("guilds") or (kinds.has("own_guild") and s.faction == String(e["faction"])):
 				return "named"
@@ -448,6 +456,17 @@ static func greeting(s: Speaker, world: WorldManager) -> String:
 	if disp < TALK_MIN:
 		return ["What do you want?", "Make it quick.", "I've nothing to say to you."][_pick(s, "greet", 3)]
 	var where := s.town.town.display_name if s.town != null and s.town.town != null else "these parts"
+	var night := clock != null and clock.is_night()
+	match s.role:
+		NpcData.Role.GUARD:
+			return ["Halt. ...Ah, just a traveler. What is it?", "Out late. State your business.", "Keep your hands where I can see them."][_pick(s, "greet guard", 3)] if night else ["Citizen. Keep the peace and we'll get along.", "Stay out of trouble in %s." % where, "Move along, unless you need something."][_pick(s, "greet guard", 3)]
+		NpcData.Role.INNKEEPER:
+			return "%s! Come in, sit down. A drink, a meal, a bed?" % time_word
+		NpcData.Role.MERCHANT, NpcData.Role.SMITH:
+			if disp >= 70:
+				return "%s, friend! Back again? I've something put aside you might like." % time_word
+		NpcData.Role.LORD:
+			return "You stand before the lord of %s. Speak, and be brief." % where
 	match s.personality:
 		NpcData.Personality.GRUMPY:
 			return "Hmph. %s, I suppose. What is it?" % time_word
@@ -460,6 +479,26 @@ static func greeting(s: Speaker, world: WorldManager) -> String:
 		NpcData.Personality.CHEERFUL:
 			return "%s! Lovely to see a new face in %s!" % [time_word, where]
 	return "%s, traveler. Welcome to %s." % [time_word, where]
+
+
+## Their goodbye, by job, how much they like you and the time of day
+static func farewell(s: Speaker, world: WorldManager) -> String:
+	var disp := get_disposition(s)
+	var night := world != null and world.clock != null and world.clock.is_night()
+	if disp < TALK_MIN:
+		return ["Good riddance.", "Finally.", "Don't come back."][_pick(s, "bye", 3)]
+	match s.role:
+		NpcData.Role.GUARD:
+			return "Stay out of trouble."
+		NpcData.Role.INNKEEPER:
+			return "Come back any time. There's always a fire lit."
+		NpcData.Role.MERCHANT, NpcData.Role.SMITH:
+			return "Come back when your purse is heavier!"
+		NpcData.Role.PRIEST:
+			return "Go with the gods."
+	if night:
+		return ["Good night.", "Mind the dark.", "Sleep well, traveler."][_pick(s, "bye night", 3)]
+	return ["Farewell.", "Safe roads.", "Until next time." if disp >= 60 else "Goodbye."][_pick(s, "bye", 3)]
 
 
 # ---------------------------------------------------------------- answers
@@ -476,7 +515,7 @@ static func respond(s: Speaker, topic: String, world: WorldManager) -> Dictionar
 		var t := d.get_topic(topic)
 		var r: DialogueResponse = t.pick(disp) if t != null else null
 		if r != null:
-			return {"text": _fill(r.text, s), "journal": true, "quest_id": r.quest_id, "quest_name": r.quest_name,
+			return {"text": _fill(r.text, s, world), "journal": true, "quest_id": r.quest_id, "quest_name": r.quest_name,
 				"learn": r.learn_topics, "response": r}
 	if s.asleep and not ["background", "my trade"].has(topic):
 		return _say("Mmh... ask me tomorrow. I'm trying to sleep.", false)
@@ -523,9 +562,29 @@ static func _voice(s: Speaker, text: String, topic: String) -> String:
 	return text
 
 
-static func _fill(text: String, s: Speaker) -> String:
+## Placeholders in hand-written lines, filled from the real world:
+##   {name} {npc_name}  the speaker      {town}  their town      {guild}  their guild
+##   {nearest_poi}  the nearest place in the wild      {nearest_town}  the nearest other town
+const PLACEHOLDERS := ["{name}", "{npc_name}", "{town}", "{guild}", "{nearest_poi}", "{nearest_town}"]
+
+
+static func _fill(text: String, s: Speaker, world: WorldManager = null) -> String:
+	if not text.contains("{"):
+		return text
 	var town := s.town.town.display_name if s.town != null and s.town.town != null else "town"
-	return text.replace("{name}", s.name).replace("{town}", town)
+	var guild := _faction_name(s.faction) if _faction_name(s.faction) != "" else "the guild"
+	var out := text.replace("{name}", s.name).replace("{npc_name}", s.name).replace("{town}", town).replace("{guild}", guild)
+	if world != null and (out.contains("{nearest_poi}") or out.contains("{nearest_town}")):
+		var poi := "the hills"
+		var best := INF
+		for p in world.get_pois_near(s.position, RUMOR_RANGE):
+			var n := poi_topic_name(world, p)
+			if not p.poi is TownData and n != "" and p.position.distance_to(s.position) < best:
+				best = p.position.distance_to(s.position)
+				poi = n
+		var near := _near_towns(s, world, 1)
+		out = out.replace("{nearest_poi}", poi).replace("{nearest_town}", (near[0] as PlacedPOI).town.display_name if not near.is_empty() else town)
+	return out
 
 
 static func _generic(s: Speaker, topic: String, world: WorldManager) -> String:
@@ -588,10 +647,40 @@ static func _generic(s: Speaker, topic: String, world: WorldManager) -> String:
 				"Save your strength for a heavy swing when an enemy is staggered.",
 			]
 			return tips[_pick(s, "advice", tips.size())]
-		"duties":
-			if s.role == NpcData.Role.GUILD_MEMBER and s.faction != "":
-				return "The %s may have work for you before long. Not yet, though." % _faction_name(s.faction)
-			return "I've no work for you. Maybe another time."
+		"small talk":
+			var clock: WorldClock = world.clock if world != null else null
+			if clock != null and clock.is_night():
+				return ["Late to be wandering about, isn't it?", "Can't sleep either? The nights are long this time of year.", "Mind the dark lanes. Not everyone out at this hour is friendly."][_pick(s, "small talk night", 3)]
+			return ["Fine day for it, whatever it is you're doing.", "My cousin swears the harvest will be poor again. She says that every year.", "You look like you've walked a long way. Sit, if you like.", "Have you tried the bread here? Best in the land, they say. They say a lot of things."][_pick(s, "small talk", 4)]
+		"the weather":
+			var w := Weather.get_instance(world.get_tree()) if world != null and world.is_inside_tree() else null
+			var now := w.get_name_text().to_lower() if w != null else "fair"
+			return ["%s today. The crops will have their say about it." % now.capitalize(), "%s. My knees told me so this morning." % now.capitalize(), "%s, and worse to come, if the birds are right." % now.capitalize()][_pick(s, "weather", 3)]
+		"local business":
+			var shops := PackedStringArray()
+			if s.town != null and s.town.town != null:
+				for b in s.town.town.buildings:
+					if b.kind == BuildingPlot.Kind.SHOP and b != s.home and shops.size() < 2:
+						shops.append(b.display_name)
+			var rivals := (" %s sells too, but don't tell them I sent you." % _list(shops)) if not shops.is_empty() else ""
+			return ["Trade is steady. The roads bring buyers, the roads bring thieves.", "Prices go up when the caravans don't come. They didn't come last week.", "Coin's tight. Everyone wants a bargain and nobody wants to pay for one."][_pick(s, "business", 3)] + rivals
+		"rooms":
+			return "A bed's %d gold for the night. Clean straw, a lock on the door, and breakfast if you're up in time. Ask and I'll have one made up." % RestSpot.INN_PRICE
+		"food and drink":
+			return ["Stew, bread and ale. The stew changes; the ale doesn't, thank the gods.", "We've a fish pie today, and mead from the hills. Sit anywhere.", "Ale's cheap, wine's dear, and the cook's in a mood. The bread's good, though."][_pick(s, "food", 3)]
+		"directions":
+			var public := PackedStringArray()
+			if s.town != null and s.town.town != null:
+				for b in s.town.town.buildings:
+					if b.is_public() and public.size() < 4:
+						public.append(b.display_name)
+			return "Lost? %s. Ask me about any of them and I'll point the way." % ("You'll find " + _list(public) + " here" if not public.is_empty() else "There's not much here")
+		"local threats":
+			if world != null:
+				for p in world.get_pois_near(s.position, RUMOR_RANGE):
+					if p.poi.garrison != null and not Discovery.is_cleared(p.id) and poi_topic_name(world, p) != "":
+						return "Watch the %s. Bandits or worse. We've lost two patrols out that way." % poi_topic_name(world, p)
+			return "Quiet, for now. Wolves on the roads at night, nothing more. Keep it that way."
 		"the law":
 			if s.role == NpcData.Role.GUARD:
 				return "Steal or kill in %s and you'll answer to us. We see more than you think." % town
@@ -611,9 +700,9 @@ static func _rumor(s: Speaker, world: WorldManager) -> String:
 	for p in world.get_pois_near(s.position, RUMOR_RANGE):
 		if not p.poi is TownData and poi_topic_name(world, p) != "":
 			near.append(p)
-	var k := _pick(s, "rumor", 10)
+	var k := _pick(s, "rumor%d" % _week(s), 10)
 	if not near.is_empty() and k < 7:
-		var p := near[_pick(s, "rumor_poi", near.size())]
+		var p := near[_pick(s, "rumor_poi%d" % _week(s), near.size())]
 		var name := poi_topic_name(world, p)
 		if p.poi.garrison != null:
 			return "They say there's trouble at the %s. Folk have seen armed strangers about." % name
@@ -772,10 +861,20 @@ static func _list(items: PackedStringArray) -> String:
 	return ", ".join(items.slice(0, items.size() - 1)) + " and " + items[items.size() - 1]
 
 
-# A stable choice for this speaker, topic and day
+# A stable choice for this speaker and topic: the same person always gives the same answer
 static func _pick(s: Speaker, what: String, count: int) -> int:
-	var day := 1
+	return absi(("%s|%s|%s" % [s.id, s.name, what]).hash()) % maxi(count, 1)
+
+
+# The week number, for news that changes (rumors)
+static func _week(s: Speaker) -> int:
 	var clock: WorldClock = s.enemy.get_tree().get_first_node_in_group("world_clock") as WorldClock if s.enemy != null and s.enemy.is_inside_tree() else null
-	if clock != null:
-		day = clock.day
-	return absi(("%s|%s|%s|%d" % [s.id, s.name, what, day]).hash()) % maxi(count, 1)
+	return clock.day / 7 if clock != null else 0
+
+
+# Weighted choice of named topics: places and people of their own town come up more than far
+# towns; the order never changes for the same person (stable across visits, no repeats)
+static func _weighted(s: Speaker, topic: String, world: WorldManager) -> float:
+	var e: Dictionary = index(world).entries.get(topic.to_lower(), {})
+	var w: float = {"place": 3.0, "person": 2.5, "poi": 2.0, "faction": 1.5, "town": 1.0}.get(String(e.get("kind", "")), 1.0)
+	return float(_stable(s, topic) % 100000) / w

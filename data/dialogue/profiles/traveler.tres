@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="DialogueProfile" format=3]
+
+[ext_resource type="Script" path="res://scripts/dialogue/dialogue_profile.gd" id="1_p"]
+
+[resource]
+script = ExtResource("1_p")
+roles = PackedStringArray("traveler")
+generic = PackedStringArray("background", "latest rumors", "little advice")
+kinds = PackedStringArray("towns", "poi")
+towns = 3
+cap = 5
+night_cap = 5
+services = PackedStringArray()
+trains = PackedStringArray()
+train_max = 0

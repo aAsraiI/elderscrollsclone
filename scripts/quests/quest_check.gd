@@ -47,6 +47,8 @@ static func problems(world: WorldManager) -> PackedStringArray:
 		for n: Dictionary in r.get("named", []):
 			if not ResourceLoader.exists(String(n["base"])):
 				out.append("%s reward: no base item %s" % [id, n["base"]])
+	for l in DialogueTools.lint():
+		out.append("dialogue: " + l)
 	for c in CustomNpcs.all():
 		if c.town != "" and not towns.has(c.town):
 			out.append("custom NPC %s: no town %s" % [c.display_name, c.town])

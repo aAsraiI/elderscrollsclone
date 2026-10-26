@@ -17,6 +17,8 @@ signal answered(topic: String, result: Dictionary)
 const GOLD := Color(1.0, 0.85, 0.35)
 const LINK := "#e8c46a"
 const TOPIC_COLOR := "#9fc7ff"
+## Letters a second, for typewriter text
+const TYPE_SPEED := 90.0
 
 var speaker: DialogueEngine.Speaker
 
@@ -33,6 +35,11 @@ var _topics: VBoxContainer
 var _persuade_row: HBoxContainer
 var _persuade_buttons: Array[Button] = []
 var _barter_button: Button
+var _services: HBoxContainer
+var _last_answer := ""
+var _fov_before := 0.0
+## Typewriter text (Settings): characters still to reveal
+var _typing := false
 var _rng := RandomNumberGenerator.new()
 
 
@@ -71,10 +78,52 @@ func open_with(e: Enemy) -> bool:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_persuade_row.visible = false
 	_log.clear()
+	_last_answer = ""
+	_apply_text_size()
+	_face_player(e)
+	_camera_in(true)
 	_say(speaker.name, DialogueEngine.greeting(speaker, _world), "")
 	_refresh()
 	opened.emit()
 	return true
+
+
+# The person turns to look at you (and plays a "talk" animation once animations exist)
+func _face_player(e: Enemy) -> void:
+	var p := _player as Node3D
+	if p == null or not e.is_inside_tree():
+		return
+	var d := p.global_position - e.global_position
+	d.y = 0.0
+	if d.length() > 0.1:
+		e.rotation.y = atan2(-d.x, -d.z)
+	var hooks := e.get_node_or_null("AnimationHooks") as AnimationHooks
+	if hooks != null:
+		hooks.trigger(&"talk")
+
+
+# Settings > Interface > Camera in conversations: "Ease in" narrows the view a little
+func _camera_in(on: bool) -> void:
+	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if cam == null or int(GameSettings.get_value("dialogue_camera")) != 1:
+		return
+	if on:
+		_fov_before = cam.fov
+		var tw := create_tween()
+		tw.tween_property(cam, "fov", _fov_before * 0.82, 0.35)
+	elif _fov_before > 0.0:
+		var tw := create_tween()
+		tw.tween_property(cam, "fov", _fov_before, 0.25)
+		_fov_before = 0.0
+
+
+func _apply_text_size() -> void:
+	var size := float(GameSettings.get_value("text_size"))
+	_log.add_theme_font_size_override("normal_font_size", roundi(17 * size))
+	_log.add_theme_font_size_override("bold_font_size", roundi(17 * size))
+	_log.add_theme_font_size_override("italics_font_size", roundi(17 * size))
+	var contrast := bool(GameSettings.get_value("high_contrast"))
+	_log.add_theme_color_override("default_color", Color(1, 1, 1) if contrast else Color(0.92, 0.9, 0.85))
 
 
 func close() -> void:
@@ -82,6 +131,11 @@ func close() -> void:
 		return
 	_open = false
 	_root.visible = false
+	_camera_in(false)
+	if speaker != null and speaker.enemy != null and is_instance_valid(speaker.enemy) and not speaker.enemy.is_dead():
+		var talk := speaker.enemy.get_node_or_null("NpcTalk") as NpcTalk
+		if talk != null:
+			talk.say(DialogueEngine.farewell(speaker, _world))  # their goodbye, over their head
 	var journal := get_tree().get_first_node_in_group("journal_ui") as JournalUI
 	var barter := get_tree().get_first_node_in_group("barter_ui") as BarterUI
 	if barter != null and barter.is_open():
@@ -114,11 +168,16 @@ func ask(topic: String) -> Dictionary:
 			if inv != null:
 				inv.add_item(resp.give_item, maxi(resp.give_count, 1))
 				_note("You received %s." % resp.give_item.display_name)
-	if bool(r.get("journal", false)):
+	_last_answer = text
+	DialogueState.mark_asked(topic)
+	var kind := DialogueState.entry_type(topic, String(r.get("quest_id", "")), String(DialogueEngine.index(_world).entries.get(topic.to_lower(), {}).get("kind", "")))
+	if bool(r.get("journal", false)) and kind != "":
 		var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
 		var added := DialogueState.add_journal({
 			"text": text,
 			"speaker": speaker.name,
+			"npc_id": speaker.id,
+			"type": kind,
 			"topic": topic,
 			"place": speaker.town.town.display_name if speaker.town != null and speaker.town.town != null else "",
 			"day": clock.day if clock != null else 1,
@@ -137,9 +196,14 @@ func ask(topic: String) -> Dictionary:
 func persuade(kind: Persuasion.Kind) -> Dictionary:
 	if not _open or speaker == null:
 		return {}
+	if Persuasion.locked(kind, speaker, _hours()):
+		_note("They won't fall for that again so soon.")
+		return {"success": false, "change": 0, "text": ""}
 	var res := Persuasion.attempt(kind, speaker, _player, _rng)
 	if res["success"]:
 		QuestEvents.persuade(get_tree(), speaker, int(res.get("disposition", 0)))
+	else:
+		Persuasion.lock(kind, speaker, _hours())  # failing has a cost: that approach is closed for a while
 	_log.append_text("\n[i]You try: %s.[/i]  %s\n" % [Persuasion.LABELS[kind], "[color=#8fd18f]It works.[/color]" if res["success"] else "[color=#e07a6f]It doesn't work.[/color]"])
 	_say(speaker.name, String(res["text"]), "")
 	_refresh()
@@ -172,11 +236,35 @@ func _input(event: InputEvent) -> void:
 # ---------------------------------------------------------------- showing things
 
 func _say(who: String, text: String, topic: String) -> void:
+	var shown_before := _log.get_total_character_count()
 	if topic != "":
 		_log.append_text("\n[color=%s][b]%s[/b][/color]\n" % [TOPIC_COLOR, _esc(topic)])
 	else:
 		_log.append_text("\n")
 	_log.append_text("[color=#d9cfbf]%s:[/color] %s\n" % [_esc(who), linkify(text, DialogueEngine.index(_world))])
+	if bool(GameSettings.get_value("dialogue_typewriter")) and _open:
+		_log.visible_characters = shown_before  # then revealed letter by letter (_process)
+		_typing = true
+
+
+## Shows the whole answer at once (a click on the text)
+func skip_typing() -> void:
+	_typing = false
+	_log.visible_characters = -1
+
+
+func _process(delta: float) -> void:
+	if not _open:
+		return
+	if _typing:
+		_log.visible_characters += maxi(1, roundi(delta * TYPE_SPEED))
+		if _log.visible_characters >= _log.get_total_character_count():
+			skip_typing()
+	# the person died, turned on you, or a save is loading: the conversation is over
+	var e := speaker.enemy if speaker != null else null
+	var sm := SaveManager.of(get_tree())
+	if (e != null and (not is_instance_valid(e) or e.is_dead() or e.disposition == Enemy.Disposition.HOSTILE)) or (sm != null and sm.is_loading()):
+		close()
 
 
 func _note(text: String) -> void:
@@ -216,19 +304,122 @@ func _refresh() -> void:
 		b.text = t
 		b.flat = true
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0) if not DialogueEngine.GENERIC.has(t) else Color(1, 1, 1))
+		# new topics stand out (Morrowind style), ones already asked about are dimmed
+		var c := Color(0.85, 0.9, 1.0) if not DialogueEngine.GENERIC.has(t) else Color(1, 1, 1)
+		if not DialogueState.was_asked(t):
+			c = Color(1.0, 0.85, 0.45)
+			b.text = t + "  •"
+		elif not QuestManager.TOPICS.has(t):
+			c = c.darkened(0.35)
+		b.add_theme_color_override("font_color", c)
 		b.pressed.connect(ask.bind(t))
 		_topics.add_child(b)
 	var trade := Barter.trade_status(speaker, _world)
 	_barter_button.visible = trade["merchant"] != null
 	_barter_button.disabled = not trade["open"]
 	_barter_button.text = "Barter" if trade["open"] else "Barter (%s)" % trade["why"]
+	for c in _services.get_children():
+		c.queue_free()
+	for sv: Dictionary in Services.for_speaker(speaker, _world, _player):
+		if sv["id"] == "trade":
+			continue  # the Barter button above
+		var sb := Button.new()
+		sb.text = String(sv["label"]) if sv["why"] == "" else "%s (%s)" % [sv["label"], sv["why"]]
+		sb.disabled = sv["why"] != ""
+		sb.custom_minimum_size = Vector2(110, 32)
+		sb.pressed.connect(use_service.bind(String(sv["id"])))
+		_services.add_child(sb)
 	for i in _persuade_buttons.size():
 		var kind := i as Persuasion.Kind
 		var why := Persuasion.blocked(kind, _player)
+		if why == "" and Persuasion.locked(kind, speaker, _hours()):
+			why = "not again yet"
 		var btn := _persuade_buttons[i]
 		btn.disabled = why != ""
 		btn.text = "%s  %d%%" % [Persuasion.LABELS[i], roundi(Persuasion.chance_for(kind, speaker, _player) * 100.0)] if why == "" else "%s  (%s)" % [Persuasion.LABELS[i], why]
+		btn.tooltip_text = "A %s check, helped by %s" % [Persuasion.SKILL, String(Persuasion.STAT_OF[kind]).capitalize()]
+
+
+## A service button (Services): Train, Rent Room, Duties, Travel, Repair, Enchant
+func use_service(id: String) -> void:
+	if not _open or speaker == null:
+		return
+	match id:
+		"duties":
+			ask("duties")
+		"train":
+			var sk := _player.get_node("Skills") as Skills
+			_log.append_text("\n[i]Training (%d left at this level):[/i]\n" % Services.trainings_left(_player))
+			for skill in Services.trains(speaker, _world):
+				var lvl := sk.get_level(StringName(skill))
+				var line := "%s %d" % [String(skill).capitalize(), lvl]
+				if lvl >= Services.train_max(speaker, _world):
+					_log.append_text("   %s  (can't teach you more)\n" % line)
+				else:
+					_log.append_text("   [url=train:%s][color=%s]%s → %d   %d gold[/color][/url]\n" % [skill, LINK, line, lvl + 1, Services.train_cost(lvl, speaker)])
+		"rent":
+			var text := Services.rent(speaker, _player)
+			close()
+			Locks.toast(get_tree(), text)
+		"travel":
+			close()
+			Services.travel(speaker, _world, _player)
+		"repair", "enchant":
+			var text := Services.repair(_player) if id == "repair" else Services.enchant(_player)
+			if Currency.get_gold(_player.get_node("Inventory") as Inventory) >= 0 and (text.begins_with("Use") or text.begins_with("The table is yours")):
+				close()
+			else:
+				_say(speaker.name, text, "")
+	_refresh()
+
+
+## Gives the person a small gift from your pack (food, flowers, jewelry): they like you more
+func give_gift() -> void:
+	if not _open or speaker == null:
+		return
+	var inv := _player.get_node("Inventory") as Inventory
+	var best: ItemData = null
+	for s in inv.stacks:
+		var it := s.item
+		if QuestItems.is_quest_item(it) or it.item_type in [ItemData.ItemType.WEAPON, ItemData.ItemType.ARMOR, ItemData.ItemType.KEY] or it.id == &"gold":
+			continue
+		if best == null or it.value > best.value:
+			best = it
+	if best == null:
+		_note("You have nothing to give.")
+		return
+	inv.remove_item(best, 1)
+	var gain := clampi(2 + best.value / 10, 2, 15)
+	DialogueState.change_disposition(speaker.id, speaker.base_disposition, gain)
+	var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
+	NpcMemory.remember(speaker.name, speaker.town.town.display_name if speaker.town != null and speaker.town.town != null else "", "gift", best.display_name, clock.day if clock != null else 1)
+	_note("You give %s %s." % [speaker.name, best.display_name])
+	_say(speaker.name, ["For me? Thank you.", "How kind. I won't forget it.", "Oh! You shouldn't have."][_rng.randi_range(0, 2)], "")
+	_refresh()
+
+
+## Copies what was just said into a new note in the journal
+func note_last() -> void:
+	var j := get_tree().get_first_node_in_group("journal_ui") as JournalUI
+	if j == null or _last_answer == "":
+		return
+	j.open()
+	j.edit_note(0, "%s: %s" % [speaker.name if speaker != null else "", _last_answer])
+
+
+func _on_meta(meta: Variant) -> void:
+	var m := String(meta)
+	if m.begins_with("train:"):
+		var said := Services.train(m.trim_prefix("train:"), speaker, _world, _player)
+		_say(speaker.name, said, "")
+		_refresh()
+		return
+	ask(m.uri_decode())
+
+
+func _hours() -> float:
+	var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
+	return float(clock.day) * 24.0 + clock.hour if clock != null else 0.0
 
 
 # ---------------------------------------------------------------- building
@@ -290,7 +481,10 @@ func _build_ui() -> void:
 	_log.scroll_following = true
 	_log.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_log.size_flags_stretch_ratio = 2.6
-	_log.meta_clicked.connect(func(meta: Variant) -> void: ask(String(meta).uri_decode()))
+	_log.meta_clicked.connect(_on_meta)
+	_log.gui_input.connect(func(ev: InputEvent) -> void:
+		if ev is InputEventMouseButton and ev.pressed:
+			skip_typing())
 	_log.add_theme_font_size_override("normal_font_size", 17)
 	_log.add_theme_font_size_override("bold_font_size", 17)
 	split.add_child(_log)
@@ -334,6 +528,21 @@ func _build_ui() -> void:
 	_barter_button.custom_minimum_size = Vector2(140, 36)
 	_barter_button.pressed.connect(open_barter)
 	buttons.add_child(_barter_button)
+	_services = HBoxContainer.new()
+	_services.add_theme_constant_override("separation", 6)
+	buttons.add_child(_services)
+	var gift := Button.new()
+	gift.text = "Gift"
+	gift.tooltip_text = "Give them something from your pack: they will like you more"
+	gift.custom_minimum_size = Vector2(80, 36)
+	gift.pressed.connect(give_gift)
+	buttons.add_child(gift)
+	var note := Button.new()
+	note.text = "Add to notes"
+	note.tooltip_text = "Copy what was just said into a new note in your journal"
+	note.custom_minimum_size = Vector2(120, 36)
+	note.pressed.connect(note_last)
+	buttons.add_child(note)
 	var journal_btn := Button.new()
 	journal_btn.text = "Journal"
 	journal_btn.custom_minimum_size = Vector2(140, 36)

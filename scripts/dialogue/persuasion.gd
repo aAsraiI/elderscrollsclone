@@ -14,6 +14,11 @@ const BRIBES := {Kind.BRIBE_10: 10, Kind.BRIBE_100: 100, Kind.BRIBE_1000: 1000}
 ## Disposition change on success / failure
 const GAIN := {Kind.ADMIRE: 7, Kind.INTIMIDATE: 6, Kind.JOKE: 6, Kind.BRIBE_10: 4, Kind.BRIBE_100: 9, Kind.BRIBE_1000: 18}
 const LOSS := {Kind.ADMIRE: -3, Kind.INTIMIDATE: -8, Kind.JOKE: -4, Kind.BRIBE_10: -4, Kind.BRIBE_100: -4, Kind.BRIBE_1000: -4}
+## The attribute each approach uses, and the skill it trains
+const STAT_OF := {Kind.ADMIRE: "charisma", Kind.INTIMIDATE: "strength", Kind.JOKE: "charisma", Kind.BRIBE_10: "charisma", Kind.BRIBE_100: "charisma", Kind.BRIBE_1000: "charisma"}
+const SKILL := "Speech"
+## Hours an approach is closed after it fails on someone
+const LOCK_HOURS := 1.0
 
 
 static func chance(kind: Kind, speech: int, disposition: int, personality: NpcData.Personality, role: NpcData.Role, level_gap: int = 0) -> float:
@@ -41,7 +46,22 @@ static func chance_for(kind: Kind, s: DialogueEngine.Speaker, player: Node) -> f
 	var skills := player.get_node_or_null("Skills") as Skills if player != null else null
 	var speech := skills.get_level(&"speech") if skills != null else SkillDatabase.START_LEVEL
 	var gap := (skills.get_player_level() if skills != null else 1) - s.level
-	return chance(kind, speech, DialogueEngine.get_disposition(s), s.personality, s.role, gap)
+	# each approach leans on its own attribute: charm for admiring and jokes, strength for threats
+	var stats := player.get_node_or_null("Stats") as Stats if player != null else null
+	var attr := 10.0
+	if stats != null:
+		attr = stats.get_stat(STAT_OF.get(kind, "charisma"))
+	return clampf(chance(kind, speech, DialogueEngine.get_disposition(s), s.personality, s.role, gap) + (attr - 10.0) * 0.01, 0.05, 0.95)
+
+
+## Can the player try this on this person now? A failed try locks that approach for LOCK_HOURS.
+static func locked(kind: Kind, s: DialogueEngine.Speaker, now_hours: float) -> bool:
+	return float(WorldState.get_record("plock/%s/%d" % [s.id, int(kind)]).get("until", 0.0)) > now_hours
+
+
+static func lock(kind: Kind, s: DialogueEngine.Speaker, now_hours: float) -> void:
+	if s.id != "":
+		WorldState.set_record("plock/%s/%d" % [s.id, int(kind)], {"until": now_hours + LOCK_HOURS})
 
 
 ## Can the player try this at all? ("" = yes, else why not)

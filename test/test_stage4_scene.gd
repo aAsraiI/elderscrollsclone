@@ -48,6 +48,8 @@ func _run() -> void:
 	DialogueState.change_disposition(who.data.id, who.data.base_disposition, 40)  # someone who dislikes you keeps rumors to themselves
 	ui.ask("background")
 	ui.ask("latest rumors")
+	if who.town != null:
+		ui.ask(who.town.town.display_name)  # places are written down (small talk is not)
 	var entries := DialogueState.journal().size()
 	var known := DialogueState.known_topics().size()
 	DialogueState.change_disposition(who.data.id, who.data.base_disposition, 9)

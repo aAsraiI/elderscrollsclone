@@ -247,8 +247,11 @@ func t_world() -> void:
 	check("asking about background gives an answer", String(r1.get("text", "")).length() > 10, String(r1.get("text", "")))
 	check("which mentions their home, and you learn it as a topic", DialogueState.knows(s.home.display_name), s.home.display_name)
 	check("and the town", DialogueState.knows(town.town.display_name))
-	check("the answer is written in the journal", DialogueState.journal().size() == 1 and DialogueState.journal()[0]["speaker"] == talker.data.display_name and DialogueState.journal()[0]["topic"] == "background")
+	check("small talk like background is not written in the journal (Alpha 1.12)", DialogueState.journal().is_empty())
 	ui.ask("background")
+	ui.ask(town.town.display_name)
+	check("what they say about a place is written in the journal", DialogueState.journal().size() == 1 and DialogueState.journal()[0]["speaker"] == talker.data.display_name and DialogueState.journal()[0]["topic"] == town.town.display_name)
+	ui.ask(town.town.display_name)
 	check("asking again adds nothing new", DialogueState.journal().size() == 1)
 	check("the new topics show up in the list", DialogueEngine.topics_for(s, wm).has(town.town.display_name))
 	var rt := ui.ask(town.town.display_name)
@@ -291,6 +294,7 @@ func t_world() -> void:
 	while tries < 40:
 		tries += 1
 		var gold_before := Currency.get_gold(inv)
+		_unlock(s)  # (a failed try locks the approach for an hour: Alpha 1.12)
 		res = ui.persuade(Persuasion.Kind.BRIBE_1000)
 		if res["success"]:
 			check("a bribe that works takes the gold", Currency.get_gold(inv) == gold_before - 1000)
@@ -300,9 +304,12 @@ func t_world() -> void:
 	check("persuading trains Speech", skills.get_xp(&"speech") + skills.get_level(&"speech") * 1000.0 > xp_before)
 	var admire_ok := 0
 	for i in 30:
+		_unlock(s)
 		admire_ok += 1 if ui.persuade(Persuasion.Kind.ADMIRE)["success"] else 0
 	check("admiring sometimes works", admire_ok > 0)
 	check("disposition changed and is shown", DialogueEngine.get_disposition(s) != before_disp and ui._disp_bar.value == DialogueEngine.get_disposition(s))
+	_unlock(s)
+	ui._refresh()
 	check("persuasion buttons show the chance", ui._persuade_buttons[0].text.contains("%"))
 
 	# the journal, opened from the dialogue
@@ -385,3 +392,9 @@ func t_world() -> void:
 	await wm.dungeons.exit()
 	holder.queue_free()
 	await frames(2)
+
+
+# Clears the persuasion locks a failed try leaves on someone
+func _unlock(s: DialogueEngine.Speaker) -> void:
+	for k in Persuasion.Kind.size():
+		WorldState.erase_record("plock/%s/%d" % [s.id, k])

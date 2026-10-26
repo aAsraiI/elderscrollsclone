@@ -89,6 +89,7 @@ func t_radiant() -> void:
 	_console()
 	await _job_rules()
 	_dialogue_roles()
+	await _dialogue_services()
 	await _main_story()
 	_journal_cleanup()
 	await _notes()
@@ -289,6 +290,65 @@ func _dialogue_roles() -> void:
 			if town.town.display_name == t and town.position.distance_to(city.position) > 6000.0:
 				far += 1
 	check("a commoner doesn't talk about towns far away", far == 0)
+
+
+# ---------------------------------------------------------------- 1.12.4 / 1.12.5 buttons and lines
+
+func _dialogue_services() -> void:
+	print("-- service buttons, training, persuasion, lines")
+	var by_role := {}
+	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
+		var sp := _speaker(r)
+		if not by_role.has(r.data.role) and Factions.leader_of(sp, wm) == "" and wm.book.topics_for(sp).is_empty():
+			by_role[r.data.role] = r
+	var ids := func(r: TownLife.Resident) -> Array:
+		return Services.for_speaker(_speaker(r), wm, p).map(func(x: Dictionary) -> String: return x["id"])
+	var commoner: TownLife.Resident = by_role.get(NpcData.Role.COMMONER, by_role.get(NpcData.Role.FARMER))
+	check("a commoner has no service buttons", commoner != null and not ids.call(commoner).has("duties") and not ids.call(commoner).has("train"), str(ids.call(commoner)))
+	check("a guild leader has Duties", ids.call(leaders["fighters"]).has("duties"))
+	check("a Mages Guild leader can enchant", ids.call(leaders["mages"]).has("enchant"))
+	var keeper: TownLife.Resident = by_role.get(NpcData.Role.INNKEEPER)
+	if keeper != null:
+		check("an innkeeper rents rooms", ids.call(keeper).has("rent"), str(ids.call(keeper)))
+		check("and talks about rooms", DialogueEngine.profile_for(_speaker(keeper), wm).generic.has("rooms"))
+	var smith: TownLife.Resident = by_role.get(NpcData.Role.SMITH)
+	if smith != null:
+		var sp := _speaker(smith)
+		check("a smith trains and repairs", ids.call(smith).has("train") and ids.call(smith).has("repair"), str(ids.call(smith)))
+		var sk := p.get_node("Skills") as Skills
+		var inv := p.get_node("Inventory") as Inventory
+		Currency.add_gold(inv, 5000)
+		var before := sk.get_level(&"smithing")
+		var gold := Currency.get_gold(inv)
+		var left := Services.trainings_left(p)
+		var said := Services.train("smithing", sp, wm, p)
+		check("training raises the skill for gold", sk.get_level(&"smithing") == before + 1 and Currency.get_gold(inv) < gold, said)
+		check("and counts toward the limit per level", Services.trainings_left(p) == left - 1)
+		check("trainers stop at their limit", Services.train_max(sp, wm) > 0)
+	var cs := _speaker(commoner)
+	check("the same person gives the same answer", String(DialogueEngine.respond(cs, "small talk", wm)["text"]) == String(DialogueEngine.respond(cs, "small talk", wm)["text"]))
+	check("small talk is not written in the journal", DialogueState.entry_type("small talk", "", "generic") == "")
+	check("a farewell", DialogueEngine.farewell(cs, wm) != "")
+	check("placeholders are filled from the world", not DialogueEngine._fill("{town} {guild} {nearest_poi} {nearest_town}", cs, wm).contains("{"))
+	check("the hand-written dialogue has no problems", DialogueTools.lint().is_empty(), str(DialogueTools.lint()))
+	check("the duplicate finder runs", DialogueTools.duplicates(wm) is PackedStringArray)
+	check("near-identical lines are spotted", DialogueTools.similarity("The bridge is down to the north.", "The bridge is down to the north!") >= 0.8)
+	check("a dialogue audit lists topics and buttons", DialogueTools.audit(cs, wm, p).size() > 2)
+	# persuasion: a failure closes that approach for a while
+	Persuasion.lock(Persuasion.Kind.JOKE, cs, wm.quests._hours())
+	check("a failed approach is locked", Persuasion.locked(Persuasion.Kind.JOKE, cs, wm.quests._hours()))
+	check("and opens again later", not Persuasion.locked(Persuasion.Kind.JOKE, cs, wm.quests._hours() + 2.0))
+	# in the window: asked topics, typewriter
+	if commoner.node != null and is_instance_valid(commoner.node) and ui.open_with(commoner.node):
+		ui.ask("small talk")
+		check("asked topics are remembered (dimmed)", DialogueState.was_asked("small talk"))
+		GameSettings.set_value("dialogue_typewriter", true)
+		ui.ask("background")
+		check("typewriter text appears letter by letter", ui._typing and ui._log.visible_characters < ui._log.get_total_character_count())
+		ui.skip_typing()
+		check("a click shows it all", ui._log.visible_characters == -1)
+		GameSettings.set_value("dialogue_typewriter", false)
+		ui.close()
 
 
 # ---------------------------------------------------------------- the main quest's priest

@@ -24,6 +24,8 @@ quest.setstage <id> <n>   jump a book quest to step n
 quest.complete / quest.fail / quest.reset <id>   finish, fail or forget a quest (S-KR01, q3...)
 quest.check               look for quests that can never be finished
 quest.overlay             show or hide the quest overlay
+dialogue.audit, dialogue.report   who talks about what (the person near you, or the whole town)
+dialogue.lint, dialogue.dupes     problems and near-identical lines in the dialogue
 clear                     empty this window"""
 
 var _root: Control
@@ -169,6 +171,8 @@ func run(text: String) -> String:
 		return "Quest overlay %s." % ("on" if _overlay != null else "off")
 	if cmd.begins_with("quest."):
 		return QuestDebug.run(cmd.trim_prefix("quest."), args, world)
+	if cmd.begins_with("dialogue."):
+		return DialogueTools.run(cmd.trim_prefix("dialogue."), world, p) if world != null else "No world."
 	match cmd:
 		"help":
 			return HELP

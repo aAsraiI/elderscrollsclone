@@ -144,12 +144,13 @@ func is_editing() -> bool:
 	return _editor != null and _editor.visible
 
 
-## Opens the editor: a new note (id 0), or an existing one
-func edit_note(id: int = 0) -> void:
+## Opens the editor: a new note (id 0), or an existing one. body: words to start a new note with
+## ("Add to notes" in a conversation or on an entry).
+func edit_note(id: int = 0, body: String = "") -> void:
 	var n := DialogueState.get_note(id) if id != 0 else {}
 	_editing = int(n.get("id", 0))
 	_note_title.text = String(n.get("title", ""))
-	_note_body.text = String(n.get("text", ""))
+	_note_body.text = String(n.get("text", body))
 	_confirm_delete = false
 	_note_delete.visible = _editing != 0
 	_note_delete.text = "Delete"

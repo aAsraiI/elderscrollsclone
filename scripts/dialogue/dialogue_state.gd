@@ -119,6 +119,10 @@ static func add_journal(entry: Dictionary) -> bool:
 		"time": String(entry.get("time", "")),
 		"quest_id": String(entry.get("quest_id", "")),
 		"quest_name": String(entry.get("quest_name", "")),
+		"id": _next_entry_id(),
+		"type": String(entry.get("type", "Quest" if String(entry.get("quest_id", "")) != "" else ("System" if String(entry.get("topic", "")) == "" else "Knowledge"))),
+		"npc_id": String(entry.get("npc_id", "")),
+		"read": false,
 	}
 	if keyed:
 		var who := String(entry.get("speaker", ""))
@@ -126,6 +130,7 @@ static func add_journal(entry: Dictionary) -> bool:
 			heard.append(who)
 		clean["heard"] = heard.filter(func(h: Variant) -> bool: return String(h) != "")
 	entries.append(clean)
+	entries = _prune(entries)
 	WorldState.set_record(JOURNAL, {"entries": entries})
 	return true
 
@@ -212,3 +217,84 @@ static func _note_title(title: String, text: String) -> String:
 		return title.left(60)
 	var first := text.strip_edges().get_slice("\n", 0)
 	return first.left(40) + ("..." if first.length() > 40 else "") if first != "" else "Note"
+
+
+# ---------------------------------------------------------------- what gets written down
+
+## Journal entry types (JournalUI tabs): Quest, Rumor, Place, Person, Knowledge, Note, System
+const ENTRY_TYPES := ["Quest", "Rumor", "Place", "Person", "Knowledge", "Note", "System"]
+## Small talk is never written down: greetings, chatter, shop talk, the weather
+const NOT_JOURNALED := ["background", "my trade", "small talk", "the weather", "local business", "rooms",
+	"food and drink", "little advice", "directions", "duties", "membership", "advancement", "report back"]
+## The journal keeps at most this many entries: past it, the oldest rumors and knowledge go first
+const JOURNAL_MAX := 600
+
+
+## The type an answer is written down as, or "" when it isn't worth writing down at all.
+## index_kind: the topic's kind in DialogueEngine's index (town, place, person, poi, faction, generic)
+static func entry_type(topic: String, quest_id: String, index_kind: String) -> String:
+	if quest_id != "":
+		return "Quest"
+	if NOT_JOURNALED.has(topic):
+		return ""
+	match index_kind:
+		"town", "place", "poi":
+			return "Place"
+		"person":
+			return "Person"
+		"generic":
+			return "Rumor"
+	return "Knowledge"
+
+
+static func _next_entry_id() -> int:
+	var rec := WorldState.get_record("journal_next")
+	var n := int(rec.get("n", 1))
+	WorldState.set_record("journal_next", {"n": n + 1})
+	return n
+
+
+# Past JOURNAL_MAX: drop the oldest rumors and knowledge (quests, places, notes stay)
+static func _prune(entries: Array) -> Array:
+	var over := entries.size() - JOURNAL_MAX
+	if over <= 0:
+		return entries
+	var out: Array = []
+	for e: Dictionary in entries:
+		if over > 0 and String(e.get("type", "")) in ["Rumor", "Knowledge"]:
+			over -= 1
+			continue
+		out.append(e)
+	return out
+
+
+## Marks every entry read (the journal's "Mark all read"), or one by id
+static func mark_read(id: int = -1) -> void:
+	var entries := journal().duplicate(true)
+	for e: Dictionary in entries:
+		if id < 0 or int(e.get("id", 0)) == id:
+			e["read"] = true
+	WorldState.set_record(JOURNAL, {"entries": entries})
+
+
+static func unread_count() -> int:
+	var n := 0
+	for e: Dictionary in journal():
+		if not bool(e.get("read", true)):
+			n += 1
+	return n
+
+
+# ---------------------------------------------------------------- topics already asked about
+
+static func mark_asked(topic: String) -> void:
+	var rec := WorldState.get_record("dialogue/asked")
+	var list: Array = rec.get("topics", [])
+	if not list.has(topic):
+		list = list.duplicate()
+		list.append(topic)
+		WorldState.set_record("dialogue/asked", {"topics": list})
+
+
+static func was_asked(topic: String) -> bool:
+	return (WorldState.get_record("dialogue/asked").get("topics", []) as Array).has(topic)

@@ -13,6 +13,7 @@ var _menu: CanvasLayer
 
 
 func _ready() -> void:
+	add_to_group("carriage")
 	collision_layer = 1 | 4
 	collision_mask = 0
 	var shape := CollisionShape3D.new()

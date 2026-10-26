@@ -193,6 +193,7 @@ func _ready() -> void:
 	if follow_video_settings:
 		apply_settings()
 	LoadingScreen.close(get_tree())
+	QuestTargets.index(self)  # quest targets: every town, place and building, looked up by id
 	if OS.is_debug_build():
 		# quests that could never be finished in this world (QuestCheck)
 		for line in QuestCheck.problems(self):

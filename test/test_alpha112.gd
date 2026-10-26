@@ -100,6 +100,7 @@ func t_radiant() -> void:
 	await _hud()
 	await _radiant_v2()
 	_guilds()
+	await _integration()
 	await _across_a_load()
 
 
@@ -476,6 +477,84 @@ func _guilds() -> void:
 	Reputation.add("fighters", -100)
 	check("a guild that distrusts you gives no work", String(wm.quests.respond(s, "duties")["text"]).contains("trust"))
 	Reputation.add("fighters", 100)
+
+
+# ---------------------------------------------------------------- 1.12.12 everything together
+
+func _integration() -> void:
+	print("-- quests with the other systems")
+	var qm := wm.quests
+	_clear_jobs()
+	# Speech opens an option
+	var pq := _job("mages", "persuade")
+	var target: TownLife.Resident = wm.life.get_resident(String(pq.get("target", "")))
+	var sk := p.get_node("Skills") as Skills
+	while sk.get_level(&"speech") < Radiant.SPEECH_CHECK:
+		sk.debug_level_up(&"speech")
+	if target != null:
+		var ts := _speaker(target)
+		check("high Speech: \"talk them round\"", qm.extra_topics(ts).has("talk them round"))
+		var said := String(qm.respond(ts, "talk them round")["text"])
+		check("the Speech check is marked with the skill", said.begins_with("[Speech"), said)
+		check("and it works", qm.is_ready(QuestManager.get_quest(String(pq["id"]))))
+	_clear_jobs()
+	# a shopkeeper's errand
+	var merchant: TownLife.Resident = null
+	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
+		if r.data.role == NpcData.Role.MERCHANT and Factions.leader_of(_speaker(r), wm) == "" and merchant == null:
+			merchant = r
+	if merchant != null:
+		var ms := _speaker(merchant)
+		check("merchants give errands", qm.extra_topics(ms).has("supplies"))
+		qm.respond(ms, "supplies")
+		var job := qm._job_given_by(ms)
+		check("a gather job from the shop", not job.is_empty() and job["type"] == "gather")
+		if not job.is_empty():
+			(p.get_node("Inventory") as Inventory).add_item(load(String(job["item_path"])), int(job["count"]))
+			check("and they take it back", qm.extra_topics(ms).has("report back"))
+			var gold := Currency.get_gold(p.get_node("Inventory") as Inventory)
+			qm.respond(ms, "report back")
+			check("and pay for it", Currency.get_gold(p.get_node("Inventory") as Inventory) > gold)
+	# rewards from the loot tables
+	var loot := 0
+	for n in 20:
+		if qm._loot_reward({"id": "loot%d" % n}) != null:
+			loot += 1
+	check("some jobs pay in loot too (%d of 20)" % loot, loot > 0 and loot < 20)
+	# a building is a place: walking in counts
+	var house: BuildingPlot = null
+	for b in city.town.buildings:
+		if b.kind == BuildingPlot.Kind.HOUSE and house == null:
+			house = b
+	var q := QuestData.new()
+	q.id = "test_enter"
+	q.title = "Test Enter"
+	q.completion = QuestData.Completion.AUTO
+	var st := QuestStage.new()
+	var o := QuestObjective.new()
+	o.type = QuestObjective.Type.REACH
+	o.place = house.id
+	o.radius = 0.5
+	st.objectives = [o]
+	q.stages = [st]
+	QuestRunner.register(q)
+	wm.runner.start("test_enter")
+	check("a building is a quest place", not QuestTargets.place(wm, house.id).is_empty())
+	QuestEvents.enter(self, house.id)
+	check("going inside completes it", wm.runner.status("test_enter") == "completed")
+	# old saves: entries and jobs from before 1.12
+	var old_entry := {"text": "An old line.", "speaker": "Old", "topic": "Kingsreach", "place": "", "day": 3, "time": "", "quest_id": "", "quest_name": ""}
+	check("old journal entries get a type", JournalUI.type_of(old_entry) != "")
+	var list := QuestManager.all_quests().duplicate(true)
+	list.append({"id": "q_old", "type": "kill", "name": "Old Job", "status": "active", "target": "nowhere", "chief": "Nobody the Old", "faction": "fighters", "reward": 50, "pos": [0, 0], "objective": "Old."})
+	WorldState.set_record(QuestManager.STATE, {"list": list, "counter": QuestManager._counter()})
+	check("old jobs show in the quest list", QuestLog.find(wm, "q_old").get("name", "") == "Old Job")
+	check("old jobs that can't be done are flagged", QuestCheck.job_problem(wm, list[-1]) != "")
+	WorldState.erase_record(QuestTracker.KEY)
+	WorldState.set_record("tracked_quest", {"id": "q_old"})
+	check("an old save's tracked quest carries over", QuestTracker.tracked() == ["q_old"])
+	WorldState.erase_record("tracked_quest")
+	_clear_jobs()
 
 
 func _clear_jobs() -> void:

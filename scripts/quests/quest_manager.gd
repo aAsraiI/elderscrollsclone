@@ -22,7 +22,7 @@ extends Node
 ## Saved in WorldState: "quests" (every job, and the counter) and "assassins/invited".
 
 const STATE := "quests"
-const TOPICS: Array[String] = ["membership", "duties", "report back", "advancement", "leave the guild", "clear bounty", "a delivery", "the territory war", "marriage", "our shop", "land for sale"]
+const TOPICS: Array[String] = ["membership", "duties", "report back", "advancement", "leave the guild", "supplies", "clear bounty", "a delivery", "the territory war", "marriage", "our shop", "land for sale"]
 const REPORT := "report back"
 ## The skill a kind of job trains when it is handed in
 const SKILL_OF := {"retrieve": "athletics", "kill": "one_handed", "hunt": "archery", "steal": "security", "persuade": "speech",
@@ -467,6 +467,10 @@ func complete(q: Dictionary) -> int:
 		gold += roundi(gold * 0.25)  # bonus: the place was cleared too
 	gold += Radiant.hand_over(self, q, gold)
 	Currency.add_gold(inv, gold)
+	var loot := _loot_reward(q)
+	if loot != null:
+		inv.add_item(loot, 1)
+		q["loot"] = loot.display_name
 	Factions.add_quest_done(String(q["faction"]))
 	var skills := p.get_node_or_null("Skills") as Skills
 	if skills != null:
@@ -742,6 +746,12 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 	if world != null and world.runner != null:
 		out.append_array(world.runner.topics_for(s))
 	out.append_array(Radiant.topics_for(self, s))
+	if s.data != null and s.role == NpcData.Role.MERCHANT and leader == "":
+		var own := _job_given_by(s)
+		if own.is_empty():
+			out.append("supplies")  # shopkeepers have errands too
+		elif is_ready(own):
+			out.append(REPORT)
 	out.append_array(Marriage.topics_for(s))
 	out.append_array(Homestead.topics_for(s))
 	return out
@@ -783,6 +793,16 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 	var other_way := Radiant.respond(self, s, topic)
 	if not other_way.is_empty():
 		return other_way
+	if topic == "supplies" and s.role == NpcData.Role.MERCHANT and _job_given_by(s).is_empty():
+		var sq := offer("merchants", s, "gather")
+		if sq.is_empty():
+			return _say("Nothing I need just now.")
+		return _say("I'm running short. %s I'll pay %d gold." % [sq["objective"], sq["reward"]], sq)
+	if topic == REPORT and Factions.leader_of(s, world) == "":
+		var mine := _job_given_by(s)
+		if not mine.is_empty() and is_ready(mine):
+			var paid := complete(mine)
+			return _say("Just what I needed. Here: %d gold.%s" % [paid, (" And take this %s." % mine["loot"]) if mine.has("loot") else ""], mine)
 	var leader := Factions.leader_of(s, world)
 	var p := _player()
 	if topic == "a delivery":
@@ -1091,3 +1111,25 @@ func take_offer(offer: Dictionary, board_id: String, town: PlacedPOI) -> Diction
 	if q["type"] == "deliver":
 		(_player().get_node("Inventory") as Inventory).add_item(QuestItems.get_item(String(q["id"]), String(q["item_name"])))
 	return q
+
+
+## The active job this person gave (a shopkeeper's errand), or {}
+func _job_given_by(s: DialogueEngine.Speaker) -> Dictionary:
+	for q: Dictionary in all_quests():
+		if q["status"] == "active" and String(q.get("giver", "")) == s.id and s.id != "":
+			return q
+	return {}
+
+
+# A job's pay sometimes includes something from the loot tables, around your level
+func _loot_reward(q: Dictionary) -> ItemData:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = ("%s|loot" % q["id"]).hash()
+	if rng.randf() > 0.35:
+		return null
+	var lvl := _player_level()
+	var table := ItemCatalog.curve_loot(lvl, lvl + 3, 1.0)
+	if table.is_empty():
+		return null
+	var e: LootEntry = table[rng.randi_range(0, table.size() - 1)]
+	return e.item if e != null else null

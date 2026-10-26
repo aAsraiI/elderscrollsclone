@@ -76,6 +76,9 @@ func interact(actor: Inventory) -> void:
 		return
 	if manager.is_busy() or manager.is_inside():
 		return
+	if is_locked() and _knock():
+		manager.enter(building_id, to_global(return_offset), global_rotation.y)
+		return
 	if is_locked() and not try_unlock(actor):
 		return
 	manager.enter(building_id, to_global(return_offset), global_rotation.y)
@@ -118,4 +121,22 @@ func magic_unlock(level: int) -> bool:
 	var crime := get_tree().get_first_node_in_group("crime") as CrimeManager
 	if crime != null:
 		crime.on_lock_attempt(building_id)
+	return true
+
+
+# At night the house is locked. If its owner has quest business with you (a quest to hand in, or
+# the next step of one), you knock and they let you in; otherwise it waits for morning (or a pick).
+func _knock() -> bool:
+	var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if world == null or world.life == null or world.quests == null:
+		return false
+	var r := world.life.get_owner_of(building_id)
+	if r == null or r.dead:
+		return false
+	var s := QuestTargets.speaker_of(world, r)
+	var markers := world.get_node_or_null("QuestMarkers") as QuestMarkers
+	if markers == null or markers.mark_for(s) != "ready":
+		return false
+	set_locked(false)
+	Locks.toast(get_tree(), "You knock. %s opens the door: \"At this hour? Come in, quickly.\"" % r.data.display_name)
 	return true

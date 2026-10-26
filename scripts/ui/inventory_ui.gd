@@ -29,6 +29,7 @@ const GOOD := Color(0.5, 0.85, 0.5)
 const BAD := Color(0.9, 0.45, 0.4)
 
 var _root: Control
+var _drop_warned: ItemData  # a quest item you were warned about dropping
 var _tabs: TabBar
 var _search: LineEdit
 var _tree: Tree
@@ -350,7 +351,7 @@ func _refresh() -> void:
 		var worn := equipment.equipped_count(item)
 		row.set_text(0, ("E" if worn < 2 else "E%d" % worn) if show_e else "")
 		row.set_custom_color(0, UITheme.GOLD)
-		row.set_text(1, item.display_name + (" (%d)" % s.count if s.count > 1 else ""))
+		row.set_text(1, item.display_name + (" (%d)" % s.count if s.count > 1 else "") + ("  (quest)" if QuestItems.is_quest_item(item) else ""))
 		row.set_custom_color(1, ItemCatalog.rarity_color(item, player_level))
 		row.set_text(2, "%.1f" % item.weight)
 		row.set_text(3, str(item.value))
@@ -566,6 +567,11 @@ func _drop_selected(whole_stack: bool = false) -> void:
 	var item := _selected_item()
 	if item == null:
 		return
+	if QuestItems.is_quest_item(item) and _drop_warned != item:
+		_drop_warned = item  # a quest needs it: warn once, the second drop goes through
+		Locks.toast(get_tree(), "%s is needed for a quest. Drop it again to drop it anyway." % item.display_name, true)
+		return
+	_drop_warned = null
 	var amount := inventory.get_count(item) if whole_stack else 1
 	if amount <= 0 or not inventory.remove_item(item, amount):
 		return

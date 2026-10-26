@@ -71,6 +71,12 @@ static func person_town(world: WorldManager, who: String) -> PlacedPOI:
 static func place(world: WorldManager, where: String) -> Dictionary:
 	if world == null or where == "":
 		return {}
+	var ix := index(world)
+	if ix.has(where):
+		var hit: Variant = ix[where]
+		if hit is BuildingPlot:
+			return {"pos": (hit as BuildingPlot).world_pos, "poi": (hit as BuildingPlot).id}  # a building: its interior counts too (the "enter" event)
+		return {"pos": (hit as PlacedPOI).position, "poi": (hit as PlacedPOI).id}
 	if where.contains(",") and where.get_slice(",", 0).is_valid_float():
 		var x := float(where.get_slice(",", 0))
 		var z := float(where.get_slice(",", 1))
@@ -137,3 +143,42 @@ static func enemy_matches(e: Enemy, target: String) -> bool:
 ## Quest-critical creatures and people: road traffic and unloading leave them alone
 static func is_critical(n: Node) -> bool:
 	return n != null and n.has_meta("quest_critical")
+
+
+## A townsperson as someone to talk to (for checks made without their body at hand)
+static func speaker_of(world: WorldManager, r: TownLife.Resident) -> DialogueEngine.Speaker:
+	var s := DialogueEngine.Speaker.new()
+	s.data = r.data
+	s.id = r.data.id
+	s.name = r.data.display_name
+	s.role = r.data.role
+	s.personality = r.data.personality
+	s.faction = r.data.faction
+	s.base_disposition = r.data.base_disposition
+	s.town = r.town
+	s.home = world.get_building(r.data.home_id)
+	s.position = s.home.world_pos if s.home != null else r.town.position
+	return s
+
+
+static var _index := {}
+static var _index_key := -1
+
+
+## Every town (by name and id), place (by id) and building (by id) of the world, worked out once
+## when the world is made: what quest targets are looked up in
+static func index(world: WorldManager) -> Dictionary:
+	if world == null:
+		return {}
+	if _index_key == world.get_instance_id() and not _index.is_empty():
+		return _index
+	_index.clear()
+	_index_key = world.get_instance_id()
+	for p in world.pois:
+		_index[p.id] = p
+	for t in world.towns:
+		if t.town != null:
+			_index[t.town.display_name] = t
+			for b in t.town.buildings:
+				_index[b.id] = b
+	return _index

@@ -26,6 +26,8 @@ const BOARD_OFFERS := 3
 const TOWN_LIMIT := 3
 ## The chance a retrieve job's item was already taken by someone else
 const TWIST_CHANCE := 0.25
+## Speech needed for the "talk them round" option on persuade jobs
+const SPEECH_CHECK := 50
 
 static var _templates := {}
 
@@ -328,6 +330,8 @@ static func topics_for(qm: QuestManager, s: DialogueEngine.Speaker) -> PackedStr
 			out.append("a favour")
 			if DialogueState.knows(s.name):  # you have heard about them: leverage
 				out.append("what I know")
+			if _speech(qm) >= SPEECH_CHECK:  # a skilled tongue: a Speech option
+				out.append("talk them round")
 		if q["type"] == "steal" and "npc/" + String(q["target"]) == s.id and not qm.is_ready(q):
 			out.append("buy the " + String(q["item_name"]).to_lower())
 			if DialogueEngine.get_disposition(s) >= 80:
@@ -343,9 +347,14 @@ static func respond(qm: QuestManager, s: DialogueEngine.Speaker, topic: String) 
 		if q["status"] != "active":
 			continue
 		if q["type"] == "persuade" and q["target"] == s.id:
+			if topic == "talk them round":
+				DialogueState.change_disposition(s.id, s.base_disposition, QuestManager.PERSUADE_GOAL - DialogueEngine.get_disposition(s))
+				_creative(qm, &"speech")
+				return qm._say("[Speech %d] ...You know, you're right. I've been unfair. Consider me a friend." % _speech(qm), q)
 			if topic == "what I know":
 				DialogueState.change_disposition(s.id, s.base_disposition, QuestManager.PERSUADE_GOAL - DialogueEngine.get_disposition(s))
 				NpcMemory.remember(s.name, s.town.town.display_name if s.town != null and s.town.town != null else "", "threat", "leverage", 1)
+				_creative(qm, &"speech")
 				return qm._say("...How do you know that? Fine. Fine! Whatever you want. Just keep it quiet.", q)
 			if topic == "a favour":
 				var bread := load("res://data/consumables/bread.tres") as ItemData if ResourceLoader.exists("res://data/consumables/bread.tres") else null
@@ -357,6 +366,7 @@ static func respond(qm: QuestManager, s: DialogueEngine.Speaker, topic: String) 
 				if want != null and inv.has_item(want):
 					inv.remove_item(want, 1)
 					DialogueState.change_disposition(s.id, s.base_disposition, QuestManager.PERSUADE_GOAL - DialogueEngine.get_disposition(s))
+					_creative(qm, &"speech")
 					return qm._say("You brought %s? You remembered! You're a good sort, you know that." % want.display_name, q)
 				return qm._say("A favour? I could do with %s, if you have one. Bring it and we'll talk." % (want.display_name if want != null else "something to eat"), q)
 		if q["type"] == "steal" and "npc/" + String(q["target"]) == s.id:
@@ -369,6 +379,7 @@ static func respond(qm: QuestManager, s: DialogueEngine.Speaker, topic: String) 
 				q["placed"] = true
 				q["bought"] = true
 				QuestManager._update_quest(q)
+				_creative(qm, &"speech")
 				return qm._say("Done. It's yours. Odd thing to want, but your gold is good.", q)
 			if topic.begins_with("ask for the "):
 				inv.add_item(thing, 1)
@@ -436,3 +447,15 @@ static func board_offers(qm: QuestManager, town: PlacedPOI, day: int) -> Array:
 		q["expires_day"] = (period + 1) * BOARD_DAYS
 		out.append(q)
 	return out
+
+
+static func _speech(qm: QuestManager) -> int:
+	var sk := qm._player().get_node_or_null("Skills") as Skills
+	return sk.get_level(&"speech") if sk != null else 0
+
+
+# Another way through than the obvious one trains a skill
+static func _creative(qm: QuestManager, skill: StringName) -> void:
+	var sk := qm._player().get_node_or_null("Skills") as Skills
+	if sk != null:
+		sk.add_xp(skill, 20.0)

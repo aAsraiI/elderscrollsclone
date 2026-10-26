@@ -363,3 +363,9 @@ func _update_sky(elevation: float, day_factor: float, w: Dictionary) -> void:
 func _in_dungeon() -> bool:
 	var d := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
 	return d != null and d.is_inside()
+
+
+## "14 Seedfall" for any day number of the game (the journal dates its entries with it)
+static func short_date_of(game_day: int) -> String:
+	var doy := (game_day - 1 + START_MONTH * DAYS_PER_MONTH) % DAYS_PER_YEAR
+	return "%d %s" % [doy % DAYS_PER_MONTH + 1, MONTHS[doy / DAYS_PER_MONTH]]

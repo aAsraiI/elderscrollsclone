@@ -143,6 +143,7 @@ func _build_ui() -> void:
 
 	_resume = _make_button("Resume", close)
 	vbox.add_child(_resume)
+	vbox.add_child(_make_button("Journal", _on_journal))
 	_save = _make_button("Save Game", _on_save)
 	vbox.add_child(_save)
 	_load = _make_button("Load Game", _on_load)
@@ -164,6 +165,13 @@ func _build_ui() -> void:
 	vbox.add_child(hint)
 
 
+func _on_journal() -> void:
+	close()
+	var j := get_tree().get_first_node_in_group("journal_ui") as JournalUI
+	if j != null:
+		j.open()
+
+
 func _make_button(text: String, handler: Callable) -> Button:
 	var b := Button.new()
 	b.text = text
@@ -178,6 +186,17 @@ func _refresh_info() -> void:
 	if clock != null:
 		text = "Day %d   %s" % [clock.day, clock.get_time_text()]
 	text += ("    " if text != "" else "") + "Played " + SaveUtil.format_duration(SaveSession.playtime)
+	# the quests in hand
+	var wm := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if wm != null:
+		var active := QuestLog.all(wm).filter(func(q: Dictionary) -> bool: return q["status"] == "active")
+		if not active.is_empty():
+			text += "\n%d quest%s in hand" % [active.size(), "" if active.size() == 1 else "s"]
+			var first: Dictionary = active[0]
+			for q: Dictionary in active:
+				if QuestTracker.is_tracked(String(q["id"])):
+					first = q
+			text += ": %s - %s" % [first["name"], first["next"]]
 	# Where you are wanted
 	var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
 	var wanted := PackedStringArray()

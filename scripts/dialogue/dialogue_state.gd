@@ -298,3 +298,55 @@ static func mark_asked(topic: String) -> void:
 
 static func was_asked(topic: String) -> bool:
 	return (WorldState.get_record("dialogue/asked").get("topics", []) as Array).has(topic)
+
+
+## Writes a short entry the game itself makes (a place found, a guild joined...), dated now.
+## topic: files it under a topic too ("" = none)
+static func system_entry(type: String, text: String, topic: String) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var clock := tree.get_first_node_in_group("world_clock") as WorldClock if tree != null else null
+	add_journal({"text": text, "speaker": "", "topic": topic, "type": type, "day": clock.day if clock != null else 1,
+		"time": clock.get_time_text() if clock != null else ""})
+
+
+## Sets a note's extras: "pinned" (bool), "link" ("quest:<id>", "place:<name>", "npc:<name>"),
+## "color" (0 = none, 1.. = Notes colours)
+static func set_note_fields(id: int, fields: Dictionary) -> void:
+	var rec := WorldState.get_record(NOTES)
+	var list: Array = rec.get("list", []).duplicate(true)
+	for n: Dictionary in list:
+		if int(n["id"]) == id:
+			n.merge(fields, true)
+	WorldState.set_record(NOTES, {"list": list, "next": int(rec.get("next", 1))})
+
+
+## The notes linked to something ("quest:q3"), for its journal page
+static func notes_linked(link: String) -> Array:
+	return notes().filter(func(n: Dictionary) -> bool: return String(n.get("link", "")) == link)
+
+
+## Writes every note to a text file. Returns the file's full path ("" if it failed).
+static func export_notes(path: String = "user://journal_notes.txt") -> String:
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		return ""
+	for n: Dictionary in notes():
+		f.store_line("%s  (day %d, %s%s)" % [n["title"], int(n.get("day", 1)), n.get("time", ""), (", " + String(n["place"])) if String(n.get("place", "")) != "" else ""])
+		f.store_line(String(n["text"]))
+		f.store_line("")
+	f.close()
+	return ProjectSettings.globalize_path(path)
+
+
+## Places marked in the journal for quick return: ["quest:q3", "topic:Kingsreach", ...]
+static func bookmarks() -> Array:
+	return WorldState.get_record("journal_bookmarks").get("list", [])
+
+
+static func toggle_bookmark(key: String) -> void:
+	var list := bookmarks().duplicate()
+	if list.has(key):
+		list.erase(key)
+	else:
+		list.append(key)
+	WorldState.set_record("journal_bookmarks", {"list": list})

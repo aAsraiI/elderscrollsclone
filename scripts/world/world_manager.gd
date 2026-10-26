@@ -152,6 +152,12 @@ func _ready() -> void:
 	runner = QuestRunner.new()
 	runner.name = "QuestRunner"
 	add_child(runner)
+	var tracker := QuestTracker.new()  # the tracked quests on screen (when switched on)
+	tracker.name = "QuestTracker"
+	add_child(tracker)
+	var marks := QuestMarkers.new()  # marks over people to hand quests in to, glowing quest items
+	marks.name = "QuestMarkers"
+	add_child(marks)
 	realms = RealmManager.new()
 	realms.name = "RealmManager"
 	add_child(realms)

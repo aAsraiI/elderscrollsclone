@@ -61,6 +61,7 @@ static func may_take(owner_key: String) -> bool:
 
 
 func _ready() -> void:
+	add_to_group("world_items")
 	if slot_id == "":
 		add_to_group("persistent")  # SaveManager saves everything in this group
 	if start_frozen:

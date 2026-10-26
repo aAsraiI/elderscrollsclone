@@ -98,6 +98,7 @@ static func join(id: String, player: Node) -> bool:
 		WorldState.set_record("fgroup/" + d.exclusive_group, {"id": id})
 	_store(id, start, quests_done(id))
 	apply_perks(player)
+	DialogueState.system_entry("System", "Joined the %s." % display_name(id), "")
 	return true
 
 
@@ -170,6 +171,7 @@ static func promote(id: String, player: Node) -> String:
 	if not bool(n.get("ok", false)):
 		return ""
 	_store(id, int(n["rank"]), quests_done(id))
+	DialogueState.system_entry("System", "Promoted: %s of the %s." % [n["name"], display_name(id)], "")
 	apply_perks(player)
 	return String(n["name"])
 

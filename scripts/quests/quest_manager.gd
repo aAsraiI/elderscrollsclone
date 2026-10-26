@@ -131,21 +131,22 @@ const TRACKED := "tracked_quest"
 
 ## The quest pinned from the journal ("" = none): the compass then shows only its target
 static func tracked_id() -> String:
-	return String(WorldState.get_record(TRACKED).get("id", ""))
+	var list := QuestTracker.tracked()
+	return String(list[0]) if not list.is_empty() else ""
 
 
 ## Pins a quest to the compass, or unpins it if it is already the pinned one
 static func toggle_tracked(id: String) -> void:
-	WorldState.set_record(TRACKED, {"id": "" if tracked_id() == id else id})
+	QuestTracker.toggle(id)
 
 
 ## What the compass shows: the tracked quest's targets if it has any right now, else all of them
 static func compass_targets() -> Array:
 	var all := active_targets()
-	var id := tracked_id()
-	if id == "":
+	var ids := QuestTracker.tracked()
+	if ids.is_empty():
 		return all
-	var mine := all.filter(func(t: Dictionary) -> bool: return String(t.get("id", "")) == id)
+	var mine := all.filter(func(t: Dictionary) -> bool: return ids.has(String(t.get("id", ""))))
 	return mine if not mine.is_empty() else all
 
 
@@ -836,6 +837,7 @@ func _process(delta: float) -> void:
 	_timer = 0.0
 	_tick_stranger()
 	_check_ready()
+	_tend_chiefs()
 
 
 # After a first murder, a hooded stranger walks up to you one night
@@ -915,3 +917,22 @@ func _player() -> Node3D:
 func _listen_crime() -> void:
 	if world != null and world.crime != null and not world.crime.crime_reported.is_connected(_on_crime):
 		world.crime.crime_reported.connect(_on_crime)
+
+
+# A kill or hunt job's chief belongs at its camp whenever the camp is loaded. After loading a save
+# the camp may have been built before the jobs came back: put the chief there now.
+func _tend_chiefs() -> void:
+	if world == null:
+		return
+	for q: Dictionary in all_quests():
+		if q["status"] != "active" or not (q["type"] in ["kill", "hunt"]):
+			continue
+		var id := String(q["target"])
+		if not world._garrisons.has(id) or WorldState.has_record("kill/quest/%s/chief" % q["id"]):
+			continue
+		var there := false
+		for e in world.get_garrison(id):
+			there = there or (is_instance_valid(e) and String(e.spawn_key) == "quest/%s/chief" % q["id"])
+		if not there:
+			for e in on_garrison(world.get_poi(id), world._garrison_root if world._garrison_root != null else world):
+				world.add_to_garrison(id, e)

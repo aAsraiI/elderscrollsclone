@@ -40,6 +40,8 @@ static func is_cleared(poi_id: String) -> bool:
 
 static func mark_cleared(poi_id: String) -> void:
 	var rec := WorldState.get_record("found/" + poi_id)
+	if not bool(rec.get("cleared", false)):
+		DialogueState.system_entry("Place", "Cleared: %s." % _name_of(poi_id), "")
 	rec["cleared"] = true
 	WorldState.set_record("found/" + poi_id, rec)
 
@@ -59,6 +61,7 @@ func mark_found(poi: PlacedPOI) -> bool:
 		if hud != null and poi.town == null:
 			hud.show_banner("Discovered: %s" % place_name(_manager, poi), "Level %d" % LevelCurve.place_level(_manager.map, poi.position))
 	QuestEvents.discover(get_tree(), poi.id)
+	DialogueState.system_entry("Place", "Discovered: %s." % place_name(_manager, poi), "")
 	discovered.emit(poi)
 	return true
 
@@ -144,3 +147,10 @@ func travel_to(poi: PlacedPOI) -> String:
 		clock.advance_hours(hours)
 	travelled.emit(poi, hours)
 	return ""
+
+
+# A place's name from its id (for the journal), without a node at hand
+static func _name_of(poi_id: String) -> String:
+	var w := (Engine.get_main_loop() as SceneTree).get_first_node_in_group("world_manager") as WorldManager
+	var p := w.get_poi(poi_id) if w != null else null
+	return place_name(w, p) if p != null else poi_id

@@ -96,9 +96,19 @@ func _find_bodies(parent: Node) -> Array[CollisionObject3D]:
 
 
 func get_prompt() -> String:
+	var mark := "  (quest item inside)" if _holds_quest_item() else ""
 	if owner_id != "":
-		return "Steal from %s" % display_name
-	return "%s %s" % [open_verb, display_name]
+		return "Steal from %s%s" % [display_name, mark]
+	return "%s %s%s" % [open_verb, display_name, mark]
+
+
+func _holds_quest_item() -> bool:
+	if inventory == null or not bool(GameSettings.get_value("quest_item_glow")):
+		return false
+	for s in inventory.stacks:
+		if QuestItems.is_quest_item(s.item):
+			return true
+	return false
 
 
 func interact(_actor: Inventory) -> void:

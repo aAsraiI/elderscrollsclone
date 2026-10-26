@@ -96,6 +96,8 @@ func t_radiant() -> void:
 	await _custom_npc()
 	await _handmade_quest()
 	await _lifecycle()
+	await _journal_ux()
+	await _hud()
 	await _across_a_load()
 
 
@@ -162,6 +164,110 @@ func _handmade_quest() -> void:
 	check("the turn-in says what you handed over", answer.contains("You hand over 2 Blue Mountain Flower"), answer)
 	check("and Kingsreach thinks better of you", Reputation.get_rep("Kingsreach") > 0)
 	check("the flag is set", DialogueState.has_flag("maudrey_barrow_done"))
+
+
+# ---------------------------------------------------------------- 1.12.6 - 1.12.8 the journal
+
+func _journal_ux() -> void:
+	print("-- the journal, notes and quest pages")
+	var entries := DialogueState.journal()
+	check("entries have ids, types and a read flag", entries.any(func(e: Dictionary) -> bool: return e.has("id") and e.has("type") and e.has("read")))
+	check("joining a guild was written down", entries.any(func(e: Dictionary) -> bool: return String(e["text"]).begins_with("Joined the")))
+	check("there is something unread", DialogueState.unread_count() > 0)
+	DialogueState.mark_read()
+	check("mark all read", DialogueState.unread_count() == 0)
+	var big := DialogueState.journal().duplicate(true)
+	for i in DialogueState.JOURNAL_MAX + 20:
+		big.append({"text": "filler %d" % i, "topic": "", "type": "Rumor", "quest_id": "", "day": 1})
+	WorldState.set_record(DialogueState.JOURNAL, {"entries": big})
+	DialogueState.add_journal({"text": "one more", "topic": "", "type": "Rumor"})
+	check("the journal keeps to its size cap, dropping old rumors", DialogueState.journal().size() <= DialogueState.JOURNAL_MAX)
+	check("quests stay when pruning", DialogueState.journal().any(func(e: Dictionary) -> bool: return String(e.get("quest_id", "")) != ""))
+	var quests := QuestLog.all(wm)
+	var sources := {}
+	for q: Dictionary in quests:
+		sources[q["source"]] = true
+	check("the quest list has jobs, written quests, handmade quests and the story", sources.has("job") and sources.has("runner") and sources.has("story"), str(sources.keys()))
+	check("each with a status from the four", quests.all(func(q: Dictionary) -> bool: return q["status"] in ["active", "completed", "failed", "abandoned"]))
+	var ju := get_first_node_in_group("journal_ui") as JournalUI
+	ju.open()
+	ju.show_quest("maudrey_old_kings")
+	var page := ju._text.get_parsed_text()
+	check("a quest page shows its objectives, ticked", page.contains("Objectives") and page.contains("[x]"), page.left(300))
+	check("and its reward", page.contains("Reward"))
+	ju._tabs.current_tab = JournalUI.TAB_PLACES
+	check("the Places tab lists places", ju._list.get_root().get_child_count() > 0)
+	DialogueState.toggle_bookmark("quest:maudrey_old_kings")
+	ju._tabs.current_tab = JournalUI.TAB_QUESTS
+	check("bookmarks come first", ju._list.get_root().get_first_child().get_text(0) == "Bookmarks")
+	ju.edit_note(0, "Wolves at the barrow.")
+	ju._note_pin.button_pressed = true
+	ju._note_color.selected = 2
+	ju._note_link.selected = maxi(ju._link_values.find("quest:" + String(QuestManager.all_quests()[-1]["id"])), 0)
+	var nid := ju.save_note()
+	var n := DialogueState.get_note(nid)
+	check("a note can be pinned and coloured", bool(n.get("pinned", false)) and int(n.get("color", 0)) == 2)
+	ju.edit_note(nid)
+	ju._note_body.text = "Changed my mind."
+	ju.cancel_note()
+	check("Esc with unsaved words asks first", ju.is_editing() and ju._status.text.contains("Unsaved"))
+	ju.cancel_note()
+	check("a second Esc throws them away", not ju.is_editing() and DialogueState.get_note(nid)["text"] == "Wolves at the barrow.")
+	var path := DialogueState.export_notes()
+	check("notes export to a text file", path != "" and FileAccess.file_exists(path), path)
+	ju.close()
+	JournalUI._last_tab = JournalUI.TAB_NOTES
+	ju.open()
+	check("the journal reopens where you left it", ju._tabs.current_tab == JournalUI.TAB_NOTES)
+	ju.close()
+	var key := InputEventKey.new()
+	key.physical_keycode = KEY_J
+	key.keycode = KEY_J
+	key.shift_pressed = true
+	key.pressed = true
+	root.push_input(key)
+	await process_frame
+	check("Shift+J writes a new note from anywhere", ju.is_open() and ju.is_editing())
+	ju.cancel_note()
+	ju.close()
+
+
+# ---------------------------------------------------------------- 1.12.9 tracking and notices
+
+func _hud() -> void:
+	print("-- tracking, notices, markers")
+	WorldState.erase_record(QuestTracker.KEY)
+	for id in ["a", "b", "c", "d"]:
+		QuestTracker.toggle(id)
+	check("at most three tracked quests", QuestTracker.tracked() == ["b", "c", "d"])
+	WorldState.erase_record(QuestTracker.KEY)
+	var q := _job("fighters", "kill")
+	QuestTracker.toggle(String(q["id"]))
+	check("the compass shows only tracked quests", QuestManager.compass_targets().all(func(t: Dictionary) -> bool: return t["id"] == q["id"]))
+	GameSettings.set_value("quest_tracker", true)
+	await secs(1.0)
+	var tracker := wm.get_node("QuestTracker") as QuestTracker
+	check("the tracker shows the tracked quest", tracker._box.get_child_count() >= 2)
+	GameSettings.set_value("quest_tracker", false)
+	var notices := Notices.of(self)
+	notices._queue.clear()
+	notices.push("Quest started", "A")
+	notices.push("Quest started", "A")
+	notices.push("Objective updated", "B")
+	check("notices queue up, repeats dropped", notices.pending().size() == 2)
+	GameSettings.set_value("quest_popups", false)
+	notices.push("Quest started", "C")
+	check("notices can be turned off", notices.pending().size() == 2)
+	GameSettings.set_value("quest_popups", true)
+	var camp := wm.get_poi(String(q["target"]))
+	await _go(camp.position + Vector3(0, 0, 25))
+	for e in wm.get_garrison(camp.id):
+		if is_instance_valid(e) and e.display_name == String(q["chief"]):
+			e.stats.modify_vital("health", -999999.0)
+	await secs(1.5)
+	var marks := wm.get_node("QuestMarkers") as QuestMarkers
+	check("the leader gets a hand-in mark", marks.mark_for(_speaker(leaders["fighters"])) == "ready")
+	wm.quests.respond(_speaker(leaders["fighters"]), "report back")
 
 
 func _custom_body(d: CustomNpcData, spot: Vector3) -> Enemy:

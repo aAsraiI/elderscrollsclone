@@ -122,6 +122,7 @@ func _update_towns(p: Vector3) -> void:
 			_towns[t.id] = _outline(t)
 		if _towns.has(t.id):
 			(_towns[t.id] as Node3D).visible = want
+	_update_landmarks(p)
 
 
 # A town's buildings as plain boxes on the ground, one mesh, sunk like the far land
@@ -144,3 +145,40 @@ func _outline(t: PlacedPOI) -> MeshInstance3D:
 	mi.material_override = mat
 	add_child(mi)
 	return mi
+
+
+## Outdoor places tall enough to see from far away (Alpha 1.14): their kind -> [width, height] of
+## the block that stands for them out there
+const LANDMARKS := {"site_watchtower": [8.0, 16.0], "site_mage_tower": [8.0, 22.0], "site_lighthouse": [7.0, 22.0],
+	"site_fort": [48.0, 9.0], "site_ruined_keep": [26.0, 8.0], "site_monument": [5.0, 12.0], "site_mill": [7.0, 14.0],
+	"site_ruined_bastion": [20.0, 13.0], "site_aqueduct": [40.0, 11.0]}
+const LANDMARK_REACH := 2400.0
+
+var _landmarks := {}  # place id -> MeshInstance3D
+
+
+# Tall places out past the loaded land stand as plain blocks (the real place hides its block)
+func _update_landmarks(p: Vector3) -> void:
+	for s: PlacedPOI in world.pois:
+		if not LANDMARKS.has(String(s.poi.get_key())):
+			continue
+		var d := Vector2(s.position.x - p.x, s.position.z - p.z).length()
+		var want := d < LANDMARK_REACH and world.get_poi_node(s.id) == null
+		if want and not _landmarks.has(s.id):
+			var wh: Array = LANDMARKS[String(s.poi.get_key())]
+			var mi := MeshInstance3D.new()
+			mi.name = "FarLandmark_" + s.id.replace("/", "_")
+			var bm := BoxMesh.new()
+			bm.size = Vector3(wh[0], wh[1], float(wh[0]) if float(wh[0]) < 20.0 else float(wh[0]) * 0.8)
+			mi.mesh = bm
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			var mat := StandardMaterial3D.new()
+			mat.albedo_color = Color(0.46, 0.44, 0.42)
+			mat.roughness = 1.0
+			mi.material_override = mat
+			add_child(mi)
+			mi.global_position = Vector3(s.position.x, s.position.y + float(wh[1]) * 0.5 - SINK, s.position.z)
+			mi.rotation.y = s.yaw
+			_landmarks[s.id] = mi
+		if _landmarks.has(s.id):
+			(_landmarks[s.id] as Node3D).visible = want

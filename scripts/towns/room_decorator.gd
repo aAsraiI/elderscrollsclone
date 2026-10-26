@@ -114,28 +114,40 @@ static func decorate(root: Node3D, room: Rect2, theme: String, level: int, room_
 	var fill: float = t["fill"]
 	fill = maxf(fill, minf(0.85, 3.5 / maxf(slots.size(), 1.0)))  # a small room still has a few things about
 	var items := 0
-	for i in slots.size():
+	var place := func(i: int) -> bool:
 		var slot: Array = slots[i]
 		var key := "%s/slot_%d" % [save_prefix, i]
-		if rng.randf() > fill or table.is_empty():
-			continue
 		var taken := WorldState.get_record(WorldItem.taken_key(key))
 		if not taken.is_empty():
 			if restock_days <= 0 or today - int(taken.get("day", today)) < restock_days:
-				continue
+				return false
 			WorldState.erase_record(WorldItem.taken_key(key))  # restocked
 		var item := _pick(table, rng)
 		if item == null:
-			continue
+			return false
 		var at: Vector3 = slot[0]
 		var w := WorldItem.place(item, 1, root, at, key, owner)
 		var room_for: Vector2 = slot[1]
 		if maxf(w.size.x, w.size.z) > maxf(room_for.x, room_for.y) * 1.6 + 0.2:
 			root.remove_child(w)
 			w.free()  # a greatsword does not fit on a shelf
-			continue
+			return false
 		w.rotation.y = rng.randf() * TAU
-		items += 1
+		return true
+	var skipped: Array[int] = []
+	for i in slots.size():
+		if rng.randf() > fill or table.is_empty():
+			if not table.is_empty():
+				skipped.append(i)
+			continue
+		if place.call(i):
+			items += 1
+	# a room that ended up nearly bare gets a few things after all, where there is room for them
+	for i in skipped:
+		if items >= 3:
+			break
+		if place.call(i):
+			items += 1
 	return {"pieces": pieces, "slots": slots.size(), "items": items, "containers": containers}
 
 

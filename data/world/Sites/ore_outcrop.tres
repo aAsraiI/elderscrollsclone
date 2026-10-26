@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_1iahy"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ore_outcrop_a.tscn" id="2_4looy"]
+
+[resource]
+script = ExtResource("1_1iahy")
+sites = Array[PackedScene]([ExtResource("2_4looy")])
+map_icon = "mine"
+enter_name = "Ore Outcrop"
+id = &"site_ore_outcrop"
+display_name = "Ore Outcrop"
+map_color = Color(0.55, 0.45, 0.35, 1)
+footprint_radius = 6.0
+max_slope_deg = 20.0
+prefer = "high"
+min_same_distance = 400.0
+discoverable = false

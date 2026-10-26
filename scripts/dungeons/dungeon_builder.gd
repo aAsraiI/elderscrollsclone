@@ -385,8 +385,9 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 
 ## The boss is dead: the place is cleared on the map, and that is worth player XP (a deed)
 static func _on_boss_died(dungeon_id: String, level: int) -> void:
-	Discovery.mark_cleared(dungeon_id)
-	ClanTerritory.on_cleared(Engine.get_main_loop() as SceneTree, dungeon_id)
+	if not dungeon_id.ends_with("/site"):  # an outdoor site over a dungeon is cleared by the dungeon's boss
+		Discovery.mark_cleared(dungeon_id)
+		ClanTerritory.on_cleared(Engine.get_main_loop() as SceneTree, dungeon_id)
 	var tree := Engine.get_main_loop() as SceneTree
 	var p := tree.get_first_node_in_group("player") if tree != null else null
 	var skills := p.get_node_or_null("Skills") as Skills if p != null else null

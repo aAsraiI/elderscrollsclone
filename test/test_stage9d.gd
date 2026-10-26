@@ -155,13 +155,15 @@ func t_in_game() -> void:
 	var target: PlacedPOI = null
 	for poi in wm.pois:
 		var ent := poi.poi as DungeonEntrancePOIData
-		if ent != null and ent.dungeon != null and LevelCurve.place_level(wm.map, poi.position) + ent.dungeon.level_offset >= 25:
+		if ent != null and not (ent is SitePOIData) and ent.dungeon != null and LevelCurve.place_level(wm.map, poi.position) + ent.dungeon.level_offset >= 25:
 			target = poi
 			break
 	check("the realm has a dungeon of level 25+", target != null)
 	if target == null:
 		return
 	wm.dungeons.fade_time = 0.0
+	# a dungeon from an old save keeps the old many-floored layout (new ones are stitched, Alpha 1.13)
+	WorldState.set_record("dungeon/%s/opened" % target.id, {"old": true})
 	await wm.dungeons.enter(target.id, target.position, 0.0)
 	await frames(5)
 	check("you are on floor 1 of several", wm.dungeons.current_floor == 0 and wm.dungeons.floor_count >= 2, str(wm.dungeons.floor_count))

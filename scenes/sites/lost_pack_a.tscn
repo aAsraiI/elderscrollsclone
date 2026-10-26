@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_2iqdn"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_b64it"]
+
+[node name="LostPackA" type="Node3D" unique_id=1519727833]
+script = ExtResource("1_2iqdn")
+site_kind = "lost_pack"
+biomes = PackedStringArray()
+size_class = 0
+themes = PackedStringArray("camp")
+cells = Vector3i(1, 1, 1)
+
+[node name="Loot0" type="Marker3D" parent="." unique_id=2106028824]
+script = ExtResource("2_b64it")
+kind = 4
+tags = PackedStringArray("pack")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Decoration1" type="Marker3D" parent="." unique_id=767433664]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0, 0.6)
+script = ExtResource("2_b64it")
+tags = PackedStringArray("bucket", "rope")
+chance = 0.7
+pool = PackedStringArray()

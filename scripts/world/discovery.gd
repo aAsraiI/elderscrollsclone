@@ -86,6 +86,8 @@ func _process(delta: float) -> void:
 		return
 	var at := _manager.player.global_position
 	for poi in _manager.pois:
+		if not poi.poi.discoverable:
+			continue  # a signpost or a campfire is not a place on the map
 		var reach := FIND_RADIUS + poi.poi.footprint_radius
 		if absf(poi.position.x - at.x) > reach or absf(poi.position.z - at.z) > reach:
 			continue

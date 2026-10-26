@@ -396,7 +396,7 @@ func _inn(room: RoomModule, hx: float, hz: float) -> void:
 	for zc: float in [-hz + 2.0, 0.0, hz - 2.0]:
 		_bed(room, Vector3(-hx + 1.4, top, zc), -PI * 0.5, [Vector3(sx, 0, z0 - 0.4), Vector3(sx, top, hz - 1.0), Vector3(hx - 3.6, top, hz - 1.0), Vector3(wx + 1.0, top, zc), Vector3(wx - 1.0, top, zc)])
 		_socket(room, S.LIGHT, ["candle"], Vector3(-hx + 0.7, top, zc + 1.3), 0.0, 0.8, 1)
-	_table(room, Vector3(0.6, top, -1.5), 2, ["table"])
+	_table(room, Vector3(1.6, top, -hz + 1.6), 2, ["table"])  # by the front wall, clear of the way to the rooms
 	_socket(room, S.FURNITURE, ["shelf", "storage"], Vector3(0.0, top, -hz + 0.45), PI, 0.8, 1)
 
 

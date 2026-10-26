@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_forest_spiders.tres" id="1_sg82v"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_h4jsy"]
+[ext_resource type="PackedScene" path="res://scenes/sites/nest_a.tscn" id="3_hy5ln"]
+
+[resource]
+script = ExtResource("2_h4jsy")
+sites = Array[PackedScene]([ExtResource("3_hy5ln")])
+occupants = ExtResource("1_sg82v")
+map_icon = "camp"
+enter_name = "Nest"
+id = &"site_nest"
+display_name = "Nest"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 7.0
+max_slope_deg = 20.0
+prefer = "low"
+min_same_distance = 500.0
+discoverable = false

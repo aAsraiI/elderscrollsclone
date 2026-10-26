@@ -13,35 +13,52 @@ const ENEMIES := "res://data/enemies/"
 const SPAWNS := "res://data/spawns/"
 const DUNGEONS := "res://data/world/Dungeons/"
 const L := RoomModule.LEVEL
+## Alpha 1.14.4: places about three times as close as before
+const DENSITY := 3.0
+## Small things: not discovered, not on the map
+const SMALL := ["roadside_camp", "wrecked_cart", "dead_traveller", "lost_pack", "fishing_spot", "herb_patch", "ore_outcrop", "nest"]
 
-## kind -> [display name, theme, icon, occupants table, boss, dungeon ("" = none), footprint, flatten, biomes ([] = all), per km2, min distance]
+## kind -> [display name, theme, icon, occupants table, boss, dungeon ("" = none), footprint, flatten,
+##          biomes ([] = all), per km2 (times DENSITY), min distance, prefers, path to a road (m)]
 const KINDS := {
-	"bandit_camp": ["Bandit Camp", "camp", "camp", "garrison_camp", "bandit_brute", "", 20.0, 16.0, [], 0.10, 500.0],
-	"bandit_hold": ["Bandit Hold", "camp", "camp", "garrison_camp", "deserter_captain", "fort_ruin", 30.0, 26.0, [], 0.04, 900.0],
-	"hunters_camp": ["Hunters' Camp", "camp", "camp", "enc_hunter", "", "", 14.0, 10.0, ["forest", "tundra", "snow_mountains", "highlands", "lakeland", "swamp"], 0.06, 500.0],
-	"giant_camp": ["Giant Camp", "camp", "camp", "enc_forest_troll", "frost_giant", "", 24.0, 18.0, ["highlands", "tundra", "snow_mountains", "frozen_crown", "badlands"], 0.03, 1200.0],
-	"watchtower": ["Watchtower", "fort", "tower", "garrison_tower", "deserter_captain", "", 14.0, 10.0, [], 0.07, 600.0],
-	"mage_tower": ["Mage Tower", "fort", "tower", "garrison_ruins", "ashen_priest", "crypt", 16.0, 12.0, [], 0.02, 1500.0],
-	"lighthouse": ["Lighthouse", "fort", "lighthouse", "enc_coast_raiders", "", "", 14.0, 10.0, ["coast"], 0.04, 1200.0],
-	"ruined_keep": ["Ruined Keep", "ruin", "ruin", "garrison_ruins", "skeleton_knight", "crypt", 26.0, 20.0, [], 0.05, 700.0],
-	"ruined_temple": ["Ruined Temple", "ruin", "ruin", "garrison_shrine", "wight_lord", "", 20.0, 16.0, [], 0.04, 800.0],
-	"ruined_village": ["Ruined Village", "ruin", "ruin", "enc_dead_ghouls", "", "", 30.0, 24.0, ["plains", "lakeland", "forest", "deadlands", "ashlands", "swamp"], 0.03, 1000.0],
-	"aqueduct": ["Old Aqueduct", "ruin", "ruin", "", "", "", 26.0, 0.0, ["plains", "desert", "badlands", "lakeland"], 0.02, 1500.0],
-	"fort": ["Fort", "fort", "fort", "dungeon_fort", "deserter_captain", "fort_ruin", 36.0, 32.0, [], 0.025, 1400.0],
-	"farmstead": ["Farmstead", "house", "farm", "", "", "", 24.0, 20.0, ["plains", "lakeland", "forest", "highlands", "coast"], 0.08, 450.0],
-	"mill": ["Mill", "house", "mill", "", "", "", 16.0, 12.0, ["plains", "lakeland", "forest", "coast"], 0.04, 700.0],
-	"lumber_camp": ["Lumber Camp", "house", "camp", "", "", "", 18.0, 14.0, ["forest", "tundra", "swamp", "highlands"], 0.05, 600.0],
-	"mine_entrance": ["Mine", "mine", "mine", "enc_prospector", "", "abandoned_mine", 18.0, 12.0, ["highlands", "snow_mountains", "badlands", "tundra", "ashlands"], 0.05, 700.0],
-	"quarry": ["Quarry", "mine", "mine", "", "", "", 22.0, 16.0, ["highlands", "badlands", "plains", "desert"], 0.03, 900.0],
-	"wayside_shrine": ["Shrine", "crypt", "shrine", "", "", "", 10.0, 8.0, [], 0.06, 500.0],
-	"stone_circle": ["Standing Stones", "ruin", "stones", "garrison_stones", "", "", 16.0, 0.0, [], 0.03, 1000.0],
-	"graveyard": ["Graveyard", "crypt", "grave", "enc_dead_ghouls", "grave_ghoul", "barrow", 22.0, 18.0, [], 0.04, 800.0],
-	"battlefield": ["Old Battlefield", "ruin", "battle", "enc_dead_ghouls", "skeleton_knight", "", 30.0, 0.0, ["plains", "highlands", "deadlands", "ashlands", "badlands", "tundra"], 0.02, 1500.0],
-	"monument": ["Monument", "ruin", "stones", "", "", "", 14.0, 10.0, [], 0.02, 1500.0],
-	"shipwreck": ["Shipwreck", "house", "wreck", "enc_coast_drowned", "drowned_sailor", "", 18.0, 0.0, ["coast", "swamp", "lakeland"], 0.04, 900.0],
-	"dock": ["Dock", "house", "dock", "", "", "", 18.0, 12.0, ["coast", "lakeland"], 0.04, 800.0],
-	"ferry": ["Ferry", "house", "dock", "", "", "", 16.0, 10.0, ["lakeland", "swamp", "coast"], 0.02, 1500.0],
-	"bridge": ["Old Bridge", "ruin", "bridge", "", "", "", 20.0, 0.0, ["lakeland", "forest", "highlands", "swamp", "plains"], 0.02, 1200.0],
+	"bandit_camp": ["Bandit Camp", "camp", "camp", "garrison_camp", "bandit_brute", "", 20.0, 16.0, [], 0.10, 500.0, "any", 0.0],
+	"bandit_hold": ["Bandit Hold", "camp", "camp", "garrison_camp", "deserter_captain", "fort_ruin", 30.0, 26.0, [], 0.04, 900.0, "high", 0.0],
+	"hunters_camp": ["Hunters' Camp", "camp", "camp", "enc_hunter", "", "", 14.0, 10.0, ["forest", "tundra", "snow_mountains", "highlands", "lakeland", "swamp"], 0.06, 500.0, "any", 0.0],
+	"giant_camp": ["Giant Camp", "camp", "camp", "enc_forest_troll", "frost_giant", "", 24.0, 18.0, ["highlands", "tundra", "snow_mountains", "frozen_crown", "badlands"], 0.03, 1200.0, "high", 0.0],
+	"watchtower": ["Watchtower", "fort", "tower", "garrison_tower", "deserter_captain", "", 14.0, 10.0, [], 0.07, 600.0, "high", 200.0],
+	"mage_tower": ["Mage Tower", "fort", "tower", "garrison_ruins", "ashen_priest", "crypt", 16.0, 12.0, [], 0.02, 1500.0, "high", 0.0],
+	"lighthouse": ["Lighthouse", "fort", "lighthouse", "enc_coast_raiders", "", "", 14.0, 10.0, ["coast"], 0.04, 1200.0, "water", 250.0],
+	"ruined_keep": ["Ruined Keep", "ruin", "ruin", "garrison_ruins", "skeleton_knight", "crypt", 26.0, 20.0, [], 0.05, 700.0, "high", 200.0],
+	"ruined_temple": ["Ruined Temple", "ruin", "ruin", "garrison_shrine", "wight_lord", "", 20.0, 16.0, [], 0.04, 800.0, "any", 150.0],
+	"ruined_village": ["Ruined Village", "ruin", "ruin", "enc_dead_ghouls", "", "", 30.0, 24.0, ["plains", "lakeland", "forest", "deadlands", "ashlands", "swamp"], 0.03, 1000.0, "any", 200.0],
+	"aqueduct": ["Old Aqueduct", "ruin", "ruin", "", "", "", 26.0, 0.0, ["plains", "desert", "badlands", "lakeland"], 0.02, 1500.0, "any", 0.0],
+	"fort": ["Fort", "fort", "fort", "dungeon_fort", "deserter_captain", "fort_ruin", 36.0, 32.0, [], 0.025, 1400.0, "high", 300.0],
+	"farmstead": ["Farmstead", "house", "farm", "", "", "", 24.0, 20.0, ["plains", "lakeland", "forest", "highlands", "coast"], 0.08, 450.0, "road", 250.0],
+	"mill": ["Mill", "house", "mill", "", "", "", 16.0, 12.0, ["plains", "lakeland", "forest", "coast"], 0.04, 700.0, "water", 250.0],
+	"lumber_camp": ["Lumber Camp", "house", "camp", "", "", "", 18.0, 14.0, ["forest", "tundra", "swamp", "highlands"], 0.05, 600.0, "road", 200.0],
+	"mine_entrance": ["Mine", "mine", "mine", "enc_prospector", "", "abandoned_mine", 18.0, 12.0, ["highlands", "snow_mountains", "badlands", "tundra", "ashlands"], 0.05, 700.0, "high", 250.0],
+	"quarry": ["Quarry", "mine", "mine", "", "", "", 22.0, 16.0, ["highlands", "badlands", "plains", "desert"], 0.03, 900.0, "road", 250.0],
+	"wayside_shrine": ["Shrine", "crypt", "shrine", "", "", "", 10.0, 8.0, [], 0.06, 500.0, "road", 120.0],
+	"stone_circle": ["Standing Stones", "ruin", "stones", "garrison_stones", "", "", 16.0, 0.0, [], 0.03, 1000.0, "high", 0.0],
+	"graveyard": ["Graveyard", "crypt", "grave", "enc_dead_ghouls", "grave_ghoul", "barrow", 22.0, 18.0, [], 0.04, 800.0, "low", 200.0],
+	"battlefield": ["Old Battlefield", "ruin", "battle", "enc_dead_ghouls", "skeleton_knight", "", 30.0, 0.0, ["plains", "highlands", "deadlands", "ashlands", "badlands", "tundra"], 0.02, 1500.0, "low", 0.0],
+	"monument": ["Monument", "ruin", "stones", "", "", "", 14.0, 10.0, [], 0.02, 1500.0, "high", 150.0],
+	"shipwreck": ["Shipwreck", "house", "wreck", "enc_coast_drowned", "drowned_sailor", "", 18.0, 0.0, ["coast", "swamp", "lakeland"], 0.04, 900.0, "water", 0.0],
+	"dock": ["Dock", "house", "dock", "", "", "", 18.0, 12.0, ["coast", "lakeland"], 0.04, 800.0, "water", 250.0],
+	"ferry": ["Ferry", "house", "dock", "", "", "", 16.0, 10.0, ["lakeland", "swamp", "coast"], 0.02, 1500.0, "water", 250.0],
+	"bridge": ["Old Bridge", "ruin", "bridge", "", "", "", 20.0, 0.0, ["lakeland", "forest", "highlands", "swamp", "plains"], 0.02, 1200.0, "water", 200.0],
+	"ruined_bastion": ["Ruined Bastion", "ruin", "ruin", "garrison_ruins", "skeleton_knight", "crypt", 26.0, 20.0, [], 0.03, 900.0, "high", 0.0],
+	"beast_den": ["Beast's Den", "camp", "camp", "enc_wolves", "cave_troll", "", 22.0, 18.0, ["forest", "highlands", "tundra", "snow_mountains", "swamp", "badlands"], 0.03, 1100.0, "low", 0.0],
+	# small places between the big ones (not discovered, not on the map: SMALL)
+	"roadside_camp": ["Campfire", "camp", "camp", "enc_wanderer", "", "", 6.0, 4.0, [], 0.15, 300.0, "road", 0.0],
+	"wrecked_cart": ["Wrecked Cart", "camp", "camp", "enc_plains_ambush", "", "", 6.0, 4.0, [], 0.12, 400.0, "road", 0.0],
+	"dead_traveller": ["Dead Traveller", "camp", "camp", "", "", "", 4.0, 0.0, [], 0.12, 400.0, "road", 0.0],
+	"lost_pack": ["Lost Pack", "camp", "camp", "", "", "", 3.0, 0.0, [], 0.12, 400.0, "any", 0.0],
+	"fishing_spot": ["Fishing Spot", "house", "dock", "", "", "", 6.0, 0.0, ["lakeland", "coast", "swamp", "forest", "plains"], 0.08, 500.0, "water", 0.0],
+	"herb_patch": ["Herb Patch", "camp", "camp", "", "", "", 5.0, 0.0, [], 0.15, 300.0, "any", 0.0],
+	"ore_outcrop": ["Ore Outcrop", "mine", "mine", "", "", "", 6.0, 0.0, ["highlands", "snow_mountains", "badlands", "tundra", "ashlands", "desert", "frozen_crown"], 0.12, 400.0, "high", 0.0],
+	"nest": ["Nest", "camp", "camp", "enc_forest_spiders", "", "", 7.0, 0.0, ["forest", "swamp", "highlands", "badlands", "deadlands"], 0.08, 500.0, "low", 0.0],
+	"wayside_inn": ["Wayside Rest", "house", "camp", "", "", "", 14.0, 10.0, ["plains", "lakeland", "forest", "highlands", "coast", "tundra", "desert"], 0.03, 1500.0, "road", 60.0],
 }
 
 var _n := 0
@@ -104,6 +121,12 @@ func _new(file: String, kind: String, cells: Vector3i) -> ExteriorSite:
 
 
 func _done(file: String) -> void:
+	# a peaceful place gets spots for whoever might take it one day (empty until then: SiteChanges)
+	if SiteChanges.TAKEABLE.has(_site.site_kind) and not _site.sockets().any(func(s: SpawnSocket) -> bool: return s.kind == S.ENEMY):
+		var r := _site.bounds().size.x * 0.3
+		for i in 3:
+			_s(S.ENEMY, [], Vector3(cos(TAU * i / 3.0 + 0.5) * r, 0, sin(TAU * i / 3.0 + 0.5) * r), 0.0, 1.0)
+		_s(S.BOSS, [], Vector3(0, 0, r * 0.5), PI)
 	_save(_site, SITE_DIR + file + ".tscn")
 
 
@@ -253,6 +276,9 @@ func _sites() -> void:
 	_dock(false)
 	_dock(true)
 	_bridge()
+	_ruined_bastion()
+	_beast_den()
+	_small_places()
 
 
 func _bandit_camp(v: int) -> void:
@@ -747,6 +773,151 @@ func _bridge() -> void:
 	_done(file)
 
 
+
+
+# A ruined bastion: terraces climbing to a broken gate tower, joined by slopes and broken stairs, with a
+# gap to jump near the top and the way down into its vaults from the highest ledge
+func _ruined_bastion() -> void:
+	var file := "ruined_bastion_a"
+	_new(file, "ruined_bastion", Vector3i(10, 4, 10))
+	var levels := [[Vector3(-8, 0, 8), Vector2(14, 10), 3.0], [Vector3(8, 0, 6), Vector2(12, 10), 6.0], [Vector3(4, 0, -9), Vector2(14, 8), 9.5], [Vector3(-10, 0, -8), Vector2(8, 8), 13.0]]
+	for i in levels.size():
+		var at: Vector3 = levels[i][0]
+		var size: Vector2 = levels[i][1]
+		var h: float = levels[i][2]
+		_b(Vector3(size.x, h, size.y), at + Vector3(0, h * 0.5, 0), "moss_stone" if i % 2 == 0 else "stone")
+		_s(S.ENEMY, ["guard"] if i == 0 else ([] if i < 3 else ["archer"]), at + Vector3(1.0, h, 0.5), 0.0, 0.85)
+		_s(S.DECORATION, ["rubble", "broken_pillar"], at + Vector3(-size.x * 0.3, h, size.y * 0.25), i, 0.8)
+	# slopes from the ground to the first terrace and from each terrace to the next (broken stairs)
+	var joins := [[Vector3(-8, 0, -2.5), Vector3(-8, 3.0, 3.0)], [Vector3(-1.0, 3.0, 8), Vector3(2.0, 6.0, 8)], [Vector3(8, 6.0, 1.0), Vector3(8, 9.5, -5.0)]]
+	for j in joins.size():
+		var a: Vector3 = joins[j][0]
+		var b: Vector3 = joins[j][1]
+		var holder := Node3D.new()
+		_n += 1
+		holder.name = "Climb%d" % j
+		_site.add_child(holder)
+		holder.owner = _site
+		var flat := Vector2(b.x - a.x, b.z - a.z)
+		holder.position = Vector3(a.x, 0, a.z)
+		holder.rotation.y = atan2(-flat.x, -flat.y) + PI
+		_ramp(holder, _site, 2.6, 0.0, a.y, flat.length(), b.y, "stone", true)
+	# the gap: the top ledge stands apart, a jump from the third terrace (a fallen block to land on)
+	_b(Vector3(2.0, 11.0, 2.0), Vector3(-4.0, 5.5, -8.5), "stone")
+	_s(S.CHEST, [], Vector3(-11.5, 13.0, -9.5), 0.0)
+	_s(S.BOSS, [], Vector3(-9.0, 13.0, -7.0), PI)
+	_link(SiteLink.Kind.HATCH, Vector3(-8.0, 13.05, -10.0), PI, "the vaults")
+	_b(Vector3(1.4, 0.1, 1.4), Vector3(-8.0, 13.05, -10.0), "wood_dark", false)
+	_done(file)
+
+
+# A beast's den: a bowl of rock with one way in, bones everywhere, and the thing that lives there
+# (the arena: rock walls all round, so the fight is in the bowl)
+func _beast_den() -> void:
+	var file := "beast_den_a"
+	_new(file, "beast_den", Vector3i(10, 2, 10))
+	var n := 22
+	for i in n:
+		var a := TAU * i / n
+		if absf(wrapf(a - PI * 1.5, -PI, PI)) < 0.32:
+			continue  # the way in
+		var tall := 5.0 + (i % 4) * 1.2
+		_b(Vector3(5.0, tall, 3.0), Vector3(cos(a) * 17.0, tall * 0.5 - 0.5, sin(a) * 17.0), "rock" if i % 2 == 0 else "rock_dark", true, -a + PI * 0.5)
+	for i in 8:
+		var a := TAU * i / 8.0 + 0.3
+		_s(S.DECORATION, ["bones", "remains"], Vector3(cos(a) * (6.0 + i % 3 * 3.0), 0, sin(a) * (6.0 + i % 3 * 3.0)), a, 0.9)
+	_s(S.BOSS, [], Vector3(0, 0, 4.0), PI)
+	_s(S.ENEMY, [], Vector3(-6.0, 0, -4.0), 0.0, 0.8)
+	_s(S.ENEMY, [], Vector3(6.0, 0, -2.0), 0.0, 0.8)
+	_s(S.LOOT, [], Vector3(3.0, 0, 10.0), 0.0, 1.0)
+	_s(S.DECORATION, ["rock", "boulder"], Vector3(-9.0, 0, 8.0), 0.4, 0.9)
+	_marker(_site, "Arena", Vector3.ZERO, 0.0)
+	_done(file)
+
+
+
+# Little stories between the big places
+func _small_places() -> void:
+	for v in 2:
+		var file := "roadside_camp_" + "ab"[v]
+		_new(file, "roadside_camp", Vector3i(2, 1, 2))
+		_s(S.LIGHT, ["campfire"], Vector3.ZERO)
+		_s(S.FURNITURE, ["bedroll", "set"], Vector3(1.8, 0, 1.0 - v * 2.0), 0.6)
+		_s(S.FURNITURE, ["log", "seat"], Vector3(-1.6, 0, 0.4), 0.4)
+		_s(S.LOOT, ["pack"], Vector3(2.4, 0, -1.4 + v * 2.8), 0.0, 0.8)
+		_s(S.ENEMY, [], Vector3(-1.0, 0, -1.6), 0.0, 0.5)
+		_done(file)
+	for v in 2:
+		var file := "wrecked_cart_" + "ab"[v]
+		_new(file, "wrecked_cart", Vector3i(2, 1, 2))
+		_s(S.DECORATION, ["cart", "wreck"], Vector3.ZERO, 0.4 + v)
+		_s(S.DECORATION, ["crate", "barrel", "sack"], Vector3(2.0, 0, 1.0), 0.3)
+		_s(S.DECORATION, ["crate", "barrel", "sack"], Vector3(-1.8, 0, -1.2), 1.1, 0.8)
+		_s(S.DECORATION, ["bones", "remains"], Vector3(1.2, 0, -2.0), 0.0, 0.6)
+		_s(S.LOOT, [], Vector3(-0.8, 0, 1.8), 0.0, 0.9)
+		for i in 2:
+			_s(S.ENEMY, ["ambush"], Vector3(-3.0 + i * 6.0, 0, 3.0), PI, 0.55)
+		_done(file)
+	var file := "dead_traveller_a"
+	_new(file, "dead_traveller", Vector3i(1, 1, 1))
+	_s(S.DECORATION, ["bones", "remains"], Vector3.ZERO, 0.3)
+	_s(S.LOOT, [], Vector3(0.8, 0, 0.4), 0.0, 1.0)
+	_marker(_site, "Note", Vector3(-0.6, 0.05, 0.3), 0.4)
+	_done(file)
+	file = "lost_pack_a"
+	_new(file, "lost_pack", Vector3i(1, 1, 1))
+	_s(S.LOOT, ["pack"], Vector3.ZERO, 0.0, 1.0)
+	_s(S.DECORATION, ["bucket", "rope"], Vector3(0.9, 0, 0.6), 0.0, 0.7)
+	_done(file)
+	file = "fishing_spot_a"
+	_new(file, "fishing_spot", Vector3i(2, 1, 2))
+	_b(Vector3(1.6, 0.2, 5.0), Vector3(0, 0.3, -2.5), "wood")
+	for z in [-1.0, -4.5]:
+		_b(Vector3(0.2, 1.4, 0.2), Vector3(0.7, -0.2, z), "wood_dark")
+	_s(S.DECORATION, ["bucket"], Vector3(0.3, 0.4, -4.0))
+	_s(S.FURNITURE, ["boat"], Vector3(2.0, 0, -3.0), 0.2, 0.6)
+	_s(S.LOOT, [], Vector3(-0.5, 0.4, -1.5), 0.0, 0.6)
+	_done(file)
+	for v in 2:
+		file = "herb_patch_" + "ab"[v]
+		_new(file, "herb_patch", Vector3i(2, 1, 2))
+		for i in 5 + v:
+			var a := TAU * i / (5.0 + v)
+			_marker(_site, "Herb%d" % i, Vector3(cos(a) * (1.4 + (i % 2) * 1.2), 0, sin(a) * (1.4 + (i % 2) * 1.2)), a)
+		_s(S.DECORATION, ["rock", "boulder"], Vector3(0.3, 0, 0.2), 0.5, 0.5)
+		_done(file)
+	file = "ore_outcrop_a"
+	_new(file, "ore_outcrop", Vector3i(2, 1, 2))
+	_b(Vector3(3.0, 1.8, 2.4), Vector3(0, 0.7, 0.8), "rock", true, 0.4)
+	_b(Vector3(1.8, 1.2, 1.6), Vector3(1.6, 0.5, -0.6), "rock_dark", true, 1.1)
+	for i in 3:
+		_marker(_site, "Ore%d" % i, Vector3(-1.8 + i * 1.8, 0, -1.6), 0.0)
+	_s(S.DECORATION, ["tools", "pickaxes"], Vector3(-2.2, 0, 1.6), PI, 0.5)
+	_done(file)
+	file = "nest_a"
+	_new(file, "nest", Vector3i(2, 1, 2))
+	_b(Vector3(3.2, 0.5, 3.2), Vector3(0, 0.25, 0), "straw", false)
+	for i in 3:
+		_s(S.DECORATION, ["bones", "remains"], Vector3(cos(i * 2.1) * 2.4, 0, sin(i * 2.1) * 2.4), i, 0.9)
+	_s(S.LOOT, ["eggs"], Vector3(0, 0.5, 0), 0.0, 1.0)
+	_s(S.ENEMY, [], Vector3(2.0, 0, 1.0), 0.0, 0.9, 2)
+	_done(file)
+	# a wayside rest: a roof over a hearth and tables, straw beds, the keeper
+	file = "wayside_inn_a"
+	_new(file, "wayside_inn", Vector3i(6, 1, 6))
+	_house(Vector3(0, 0, 2.0), 12.0, 9.0, "wood")
+	_s(S.FURNITURE, ["hearth"], Vector3(0, 0, 6.05), 0.0, 1.0)
+	_s(S.FURNITURE, ["table"], Vector3(-2.5, 0, 0.5), 0.0, 1.0)
+	_s(S.FURNITURE, ["bench", "set"], Vector3(-2.5, 0, -0.3), 0.0, 1.0)
+	_s(S.FURNITURE, ["table"], Vector3(2.5, 0, 0.5), 0.0, 1.0)
+	_s(S.FURNITURE, ["bench", "set"], Vector3(2.5, 0, -0.3), 0.0, 1.0)
+	for i in 3:
+		_s(S.FURNITURE, ["bedroll", "hay"], Vector3(-4.6 + i * 2.0, 0, 4.6), 0.0, 1.0)
+	_s(S.DECORATION, ["barrel", "crate"], Vector3(5.0, 0, 5.0))
+	_s(S.DECORATION, ["cart"], Vector3(8.5, 0, -6.0), 0.4)
+	_marker(_site, "Keeper", Vector3(1.0, 0, 3.5), PI)
+	_done(file)
+
 # ---------------------------------------------------------------- kinds and biomes
 
 func _kinds() -> void:
@@ -765,6 +936,10 @@ func _kinds() -> void:
 		d.flatten_radius = float(k[7])
 		d.max_slope_deg = 12.0 if float(k[7]) > 0.0 else 20.0
 		d.map_icon = k[2]
+		d.prefer = String(k[11])
+		d.min_same_distance = float(k[10])
+		d.path_to_road = float(k[12])
+		d.discoverable = not SMALL.has(kind)
 		d.map_color = {"camp": Color(0.8, 0.45, 0.3), "tower": Color(0.7, 0.7, 0.75), "ruin": Color(0.6, 0.65, 0.5), "fort": Color(0.75, 0.6, 0.5),
 			"farm": Color(0.85, 0.8, 0.4), "mill": Color(0.85, 0.8, 0.5), "mine": Color(0.55, 0.45, 0.35), "shrine": Color(0.7, 0.8, 1.0),
 			"stones": Color(0.65, 0.65, 0.7), "grave": Color(0.5, 0.55, 0.6), "battle": Color(0.7, 0.4, 0.35), "wreck": Color(0.5, 0.45, 0.4),
@@ -794,10 +969,15 @@ func _biomes() -> void:
 			continue
 		var key := f.get_basename()
 		var have := {}
+		var added := 0
 		for r in biome.poi_rules:
 			if r != null and r.poi != null:
 				have[r.poi.resource_path] = true
-		var added := 0
+				var kk := r.poi.resource_path.get_file().get_basename()
+				if r.poi.resource_path.begins_with(KIND_DIR) and KINDS.has(kk) and not is_equal_approx(r.count_max, float(KINDS[kk][9]) * _density(kk) * 1.3):
+					r.count_min = float(KINDS[kk][9]) * _density(kk) * 0.7
+					r.count_max = float(KINDS[kk][9]) * _density(kk) * 1.3
+					added += 1
 		for kind: String in KINDS:
 			var k: Array = KINDS[kind]
 			var lands: Array = k[8]
@@ -809,8 +989,8 @@ func _biomes() -> void:
 			var rule := POIRule.new()
 			rule.poi = load(kp) as POIData
 			rule.count_mode = POIRule.CountMode.PER_SQUARE_KM
-			rule.count_min = float(k[9]) * 0.7
-			rule.count_max = float(k[9]) * 1.3
+			rule.count_min = float(k[9]) * _density(kind) * 0.7
+			rule.count_max = float(k[9]) * _density(kind) * 1.3
 			rule.extra_spacing = 40.0
 			rule.border_margin = 40.0
 			biome.poi_rules.append(rule)
@@ -818,3 +998,8 @@ func _biomes() -> void:
 		if added > 0:
 			ResourceSaver.save(biome, path)
 			print("build_sites: %s gets %d site kinds" % [key, added])
+
+
+# The big places come three times as thick as before; the small things keep their own counts
+func _density(kind: String) -> float:
+	return 1.0 if SMALL.has(kind) else DENSITY

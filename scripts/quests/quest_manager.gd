@@ -929,6 +929,7 @@ func _process(delta: float) -> void:
 	Radiant.tend(self, _radiant_spawned)
 	if world.clock != null:
 		Rumors.daily(world, world.clock.day)
+		SiteChanges.daily(world, world.clock.day)  # places change hands (Alpha 1.14)
 	_tend_thieves()
 
 

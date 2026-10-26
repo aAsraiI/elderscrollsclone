@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_ivaeq"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_ntff3"]
+
+[node name="DeadTravellerA" type="Node3D" unique_id=351727991]
+script = ExtResource("1_ivaeq")
+site_kind = "dead_traveller"
+biomes = PackedStringArray()
+size_class = 0
+themes = PackedStringArray("camp")
+cells = Vector3i(1, 1, 1)
+
+[node name="Decoration0" type="Marker3D" parent="." unique_id=1621421504]
+transform = Transform3D(0.9553365, 0, 0.29552022, 0, 1, 0, -0.29552022, 0, 0.9553365, 0, 0, 0)
+script = ExtResource("2_ntff3")
+tags = PackedStringArray("bones", "remains")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Loot1" type="Marker3D" parent="." unique_id=22285386]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, 0.4)
+script = ExtResource("2_ntff3")
+kind = 4
+tags = PackedStringArray()
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Note" type="Marker3D" parent="." unique_id=210189838]
+transform = Transform3D(0.921061, 0, 0.38941833, 0, 1, 0, -0.38941833, 0, 0.921061, -0.6, 0.05, 0.3)

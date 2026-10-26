@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/crypt.tres" id="1_ngjtj"]
+[ext_resource type="Resource" path="res://data/spawns/garrison_ruins.tres" id="2_q104b"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_qpusb"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ruined_bastion_a.tscn" id="4_vwib8"]
+
+[resource]
+script = ExtResource("3_qpusb")
+sites = Array[PackedScene]([ExtResource("4_vwib8")])
+occupants = ExtResource("2_q104b")
+map_icon = "ruin"
+dungeon = ExtResource("1_ngjtj")
+enter_name = "Ruined Bastion"
+id = &"site_ruined_bastion"
+display_name = "Ruined Bastion"
+map_color = Color(0.6, 0.65, 0.5, 1)
+footprint_radius = 26.0
+flatten_radius = 20.0
+max_slope_deg = 12.0
+prefer = "high"
+min_same_distance = 900.0

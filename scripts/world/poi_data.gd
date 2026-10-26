@@ -18,6 +18,17 @@ extends Resource
 @export_range(0.0, 300.0, 0.5, "or_greater") var flatten_radius := 0.0
 ## Sites steeper than this (degrees, measured across the footprint) are rejected
 @export_range(0.0, 60.0, 0.5) var max_slope_deg := 14.0
+## Where it likes to stand (Alpha 1.14): "high" (hilltops: forts, towers), "water" (by a lake,
+## river or the sea: docks, mills, wrecks), "road" (by a road: shrines, farms), "low" (hollows:
+## graveyards) or "any" (anywhere it fits)
+@export_enum("any", "high", "low", "water", "road") var prefer := "any"
+## Places of this same kind stay at least this far apart (m); 0 = only the usual spacing
+@export var min_same_distance := 0.0
+## A dirt path is laid to the nearest road within this many meters (0 = none)
+@export var path_to_road := 0.0
+## A place you discover (a banner, the map, fast travel). Off for small things: a campfire, a
+## signpost, a lost pack
+@export var discoverable := true
 ## Turn each one a random way. Off = always facing the same direction.
 @export var random_rotation := true
 

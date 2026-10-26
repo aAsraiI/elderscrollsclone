@@ -99,7 +99,7 @@ func t_dungeon(wm: WorldManager, player: CharacterBody3D) -> void:
 	var entrance: PlacedPOI = null
 	var best := INF
 	for p in wm.pois:
-		if p.poi is DungeonEntrancePOIData and p.position.distance_to(player.global_position) < best:
+		if p.poi is DungeonEntrancePOIData and (p.poi as DungeonEntrancePOIData).dungeon != null and p.position.distance_to(player.global_position) < best:
 			best = p.position.distance_to(player.global_position)
 			entrance = p
 	check("there is a dungeon entrance in the realm", entrance != null)
@@ -112,7 +112,7 @@ func t_dungeon(wm: WorldManager, player: CharacterBody3D) -> void:
 	var entered: bool = await wm.dungeons.enter(entrance.id, outside, 0.0)
 	check("the player goes down", entered and wm.dungeons.is_inside())
 	await secs(1.5)
-	check("the floor is drawn as merged boxes", not wm.dungeons._root.find_children("MergedBoxes", "MeshInstance3D", true, false).is_empty())
+	check("the floor is drawn as merged boxes", not wm.dungeons._root.find_children("MergedBoxes", "MeshInstance3D", true, false).is_empty() or not wm.dungeons._root.find_children("MergedRoom", "MeshInstance3D", true, false).is_empty())
 	check("the player stands inside, not falling", player.global_position.y > DungeonManager.DUNGEON_Y - 50.0 and absf(player.velocity.y) < 20.0,
 		str(player.global_position))
 	wm.dungeons.exit()

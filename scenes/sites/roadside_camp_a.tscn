@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_qmp8h"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_wewyq"]
+
+[node name="RoadsideCampA" type="Node3D" unique_id=548785381]
+script = ExtResource("1_qmp8h")
+site_kind = "roadside_camp"
+biomes = PackedStringArray()
+size_class = 0
+min_distance = 300.0
+themes = PackedStringArray("camp")
+
+[node name="Light0" type="Marker3D" parent="." unique_id=1376447261]
+script = ExtResource("2_wewyq")
+kind = 7
+tags = PackedStringArray("campfire")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Furniture1" type="Marker3D" parent="." unique_id=1751195264]
+transform = Transform3D(0.8253356, 0, 0.5646425, 0, 1, 0, -0.5646425, 0, 0.8253356, 1.8, 0, 1)
+script = ExtResource("2_wewyq")
+kind = 0
+tags = PackedStringArray("bedroll", "set")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Furniture2" type="Marker3D" parent="." unique_id=1495343463]
+transform = Transform3D(0.921061, 0, 0.38941833, 0, 1, 0, -0.38941833, 0, 0.921061, -1.6, 0, 0.4)
+script = ExtResource("2_wewyq")
+kind = 0
+tags = PackedStringArray("log", "seat")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Loot3" type="Marker3D" parent="." unique_id=536748285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0, -1.4)
+script = ExtResource("2_wewyq")
+kind = 4
+tags = PackedStringArray("pack")
+chance = 0.8
+pool = PackedStringArray()
+
+[node name="Enemy4" type="Marker3D" parent="." unique_id=927078518]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -1.6)
+script = ExtResource("2_wewyq")
+kind = 5
+tags = PackedStringArray()
+chance = 0.5
+pool = PackedStringArray()

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_ia68n"]
+[ext_resource type="PackedScene" path="res://scenes/sites/lost_pack_a.tscn" id="2_50vv1"]
+
+[resource]
+script = ExtResource("1_ia68n")
+sites = Array[PackedScene]([ExtResource("2_50vv1")])
+map_icon = "camp"
+enter_name = "Lost Pack"
+id = &"site_lost_pack"
+display_name = "Lost Pack"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 3.0
+max_slope_deg = 20.0
+min_same_distance = 400.0
+discoverable = false

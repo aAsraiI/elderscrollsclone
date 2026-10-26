@@ -21,6 +21,14 @@
 [ext_resource type="Resource" path="res://data/world/Sites/battlefield.tres" id="32_ipjmt"]
 [ext_resource type="Resource" path="res://data/world/Sites/monument.tres" id="33_utvr3"]
 [ext_resource type="Resource" path="res://data/world/Sites/bridge.tres" id="34_yahen"]
+[ext_resource type="Resource" path="res://data/world/Sites/ruined_bastion.tres" id="35_3jrw2"]
+[ext_resource type="Resource" path="res://data/world/Sites/roadside_camp.tres" id="36_oqrjl"]
+[ext_resource type="Resource" path="res://data/world/Sites/wrecked_cart.tres" id="37_x7qan"]
+[ext_resource type="Resource" path="res://data/world/Sites/dead_traveller.tres" id="38_gug8d"]
+[ext_resource type="Resource" path="res://data/world/Sites/lost_pack.tres" id="39_ny0k1"]
+[ext_resource type="Resource" path="res://data/world/Sites/fishing_spot.tres" id="40_ov12w"]
+[ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="41_ubmtw"]
+[ext_resource type="Resource" path="res://data/world/Sites/wayside_inn.tres" id="42_jhapa"]
 [ext_resource type="Resource" path="res://data/encounters/plains_ambush.tres" id="enc_0"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="enc_1"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wanderer.tres" id="enc_2"]
@@ -97,144 +105,208 @@ border_margin = 80.0
 [sub_resource type="Resource" id="Resource_qmb38"]
 script = ExtResource("rule_script")
 poi = ExtResource("17_7ysya")
-count_min = 0.06999999999999999
-count_max = 0.13
+count_min = 0.21
+count_max = 0.39000000000000007
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_eay81"]
 script = ExtResource("rule_script")
 poi = ExtResource("18_3jrw2")
-count_min = 0.027999999999999997
-count_max = 0.052000000000000005
+count_min = 0.08399999999999999
+count_max = 0.156
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_ps87v"]
 script = ExtResource("rule_script")
 poi = ExtResource("19_iul8v")
-count_min = 0.049
-count_max = 0.09100000000000001
+count_min = 0.147
+count_max = 0.273
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_x1dsh"]
 script = ExtResource("rule_script")
 poi = ExtResource("20_sr2j3")
-count_min = 0.013999999999999999
-count_max = 0.026000000000000002
+count_min = 0.04199999999999999
+count_max = 0.078
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_rfcgj"]
 script = ExtResource("rule_script")
 poi = ExtResource("21_iljly")
-count_min = 0.034999999999999996
-count_max = 0.065
+count_min = 0.105
+count_max = 0.19500000000000003
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_3qqjl"]
 script = ExtResource("rule_script")
 poi = ExtResource("22_cc2hk")
-count_min = 0.027999999999999997
-count_max = 0.052000000000000005
+count_min = 0.08399999999999999
+count_max = 0.156
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_k0u2d"]
 script = ExtResource("rule_script")
 poi = ExtResource("23_ud016")
-count_min = 0.020999999999999998
-count_max = 0.039
+count_min = 0.063
+count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_rj7rt"]
 script = ExtResource("rule_script")
 poi = ExtResource("24_cfy0k")
-count_min = 0.013999999999999999
-count_max = 0.026000000000000002
+count_min = 0.04199999999999999
+count_max = 0.078
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_rd7ta"]
 script = ExtResource("rule_script")
 poi = ExtResource("25_oqrjl")
-count_min = 0.017499999999999998
-count_max = 0.0325
+count_min = 0.0525
+count_max = 0.09750000000000002
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_b30ys"]
 script = ExtResource("rule_script")
 poi = ExtResource("26_x7qan")
-count_min = 0.055999999999999994
-count_max = 0.10400000000000001
+count_min = 0.16799999999999998
+count_max = 0.312
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_v8j6l"]
 script = ExtResource("rule_script")
 poi = ExtResource("27_gug8d")
-count_min = 0.027999999999999997
-count_max = 0.052000000000000005
+count_min = 0.08399999999999999
+count_max = 0.156
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_vg5i6"]
 script = ExtResource("rule_script")
 poi = ExtResource("28_ny0k1")
-count_min = 0.020999999999999998
-count_max = 0.039
+count_min = 0.063
+count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_cbwrt"]
 script = ExtResource("rule_script")
 poi = ExtResource("29_ov12w")
-count_min = 0.041999999999999996
-count_max = 0.078
+count_min = 0.126
+count_max = 0.234
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_51mgi"]
 script = ExtResource("rule_script")
 poi = ExtResource("30_ubmtw")
-count_min = 0.020999999999999998
-count_max = 0.039
+count_min = 0.063
+count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_2da6y"]
 script = ExtResource("rule_script")
 poi = ExtResource("31_jhapa")
-count_min = 0.027999999999999997
-count_max = 0.052000000000000005
+count_min = 0.08399999999999999
+count_max = 0.156
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_pvcn7"]
 script = ExtResource("rule_script")
 poi = ExtResource("32_ipjmt")
-count_min = 0.013999999999999999
-count_max = 0.026000000000000002
+count_min = 0.04199999999999999
+count_max = 0.078
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_4b413"]
 script = ExtResource("rule_script")
 poi = ExtResource("33_utvr3")
-count_min = 0.013999999999999999
-count_max = 0.026000000000000002
+count_min = 0.04199999999999999
+count_max = 0.078
 extra_spacing = 40.0
 border_margin = 40.0
 
 [sub_resource type="Resource" id="Resource_v0mc6"]
 script = ExtResource("rule_script")
 poi = ExtResource("34_yahen")
-count_min = 0.013999999999999999
-count_max = 0.026000000000000002
+count_min = 0.04199999999999999
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_iul8v"]
+script = ExtResource("rule_script")
+poi = ExtResource("35_3jrw2")
+count_min = 0.063
+count_max = 0.117
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_ipjmt"]
+script = ExtResource("rule_script")
+poi = ExtResource("36_oqrjl")
+count_min = 0.105
+count_max = 0.195
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_utvr3"]
+script = ExtResource("rule_script")
+poi = ExtResource("37_x7qan")
+count_min = 0.08399999999999999
+count_max = 0.156
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_yahen"]
+script = ExtResource("rule_script")
+poi = ExtResource("38_gug8d")
+count_min = 0.08399999999999999
+count_max = 0.156
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_yboh7"]
+script = ExtResource("rule_script")
+poi = ExtResource("39_ny0k1")
+count_min = 0.08399999999999999
+count_max = 0.156
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_0ywal"]
+script = ExtResource("rule_script")
+poi = ExtResource("40_ov12w")
+count_min = 0.055999999999999994
+count_max = 0.10400000000000001
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_6bkho"]
+script = ExtResource("rule_script")
+poi = ExtResource("41_ubmtw")
+count_min = 0.105
+count_max = 0.195
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_salbl"]
+script = ExtResource("rule_script")
+poi = ExtResource("42_jhapa")
+count_min = 0.063
+count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
@@ -246,5 +318,5 @@ hills_amplitude = 9.0
 hills_scale = 240.0
 tree_density = 10.0
 tree_color = Color(0.24, 0.44, 0.18, 1)
-poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("rule_5"), SubResource("rule_6"), SubResource("Resource_r3ovm"), SubResource("Resource_kphei"), SubResource("Resource_qmb38"), SubResource("Resource_eay81"), SubResource("Resource_ps87v"), SubResource("Resource_x1dsh"), SubResource("Resource_rfcgj"), SubResource("Resource_3qqjl"), SubResource("Resource_k0u2d"), SubResource("Resource_rj7rt"), SubResource("Resource_rd7ta"), SubResource("Resource_b30ys"), SubResource("Resource_v8j6l"), SubResource("Resource_vg5i6"), SubResource("Resource_cbwrt"), SubResource("Resource_51mgi"), SubResource("Resource_2da6y"), SubResource("Resource_pvcn7"), SubResource("Resource_4b413"), SubResource("Resource_v0mc6")])
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("rule_5"), SubResource("rule_6"), SubResource("Resource_r3ovm"), SubResource("Resource_kphei"), SubResource("Resource_qmb38"), SubResource("Resource_eay81"), SubResource("Resource_ps87v"), SubResource("Resource_x1dsh"), SubResource("Resource_rfcgj"), SubResource("Resource_3qqjl"), SubResource("Resource_k0u2d"), SubResource("Resource_rj7rt"), SubResource("Resource_rd7ta"), SubResource("Resource_b30ys"), SubResource("Resource_v8j6l"), SubResource("Resource_vg5i6"), SubResource("Resource_cbwrt"), SubResource("Resource_51mgi"), SubResource("Resource_2da6y"), SubResource("Resource_pvcn7"), SubResource("Resource_4b413"), SubResource("Resource_v0mc6"), SubResource("Resource_iul8v"), SubResource("Resource_ipjmt"), SubResource("Resource_utvr3"), SubResource("Resource_yahen"), SubResource("Resource_yboh7"), SubResource("Resource_0ywal"), SubResource("Resource_6bkho"), SubResource("Resource_salbl")])
 encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("enc_4")])

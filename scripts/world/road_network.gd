@@ -166,3 +166,24 @@ func _segment_distance(i: int, x: float, z: float) -> float:
 	var px := _ax[i] + abx * t - x
 	var pz := _az[i] + abz * t - z
 	return sqrt(px * px + pz * pz)
+
+
+## The nearest point on a road's middle line (x, road height, z), or Vector3.INF if none is within
+## max_dist (paths to places start here)
+func nearest_point(x: float, z: float, max_dist: float) -> Vector3:
+	var best := INF
+	var out := Vector3.INF
+	var c0 := Vector2i(floori((x - max_dist) / CELL), floori((z - max_dist) / CELL))
+	var c1 := Vector2i(floori((x + max_dist) / CELL), floori((z + max_dist) / CELL))
+	for cz in range(c0.y, c1.y + 1):
+		for cx in range(c0.x, c1.x + 1):
+			for i in _grid.get(Vector2i(cx, cz), PackedInt32Array()):
+				var d := _segment_distance(i, x, z)
+				if d < best:
+					best = d
+					var abx := _bx[i] - _ax[i]
+					var abz := _bz[i] - _az[i]
+					var len2 := abx * abx + abz * abz
+					var t := clampf(((x - _ax[i]) * abx + (z - _az[i]) * abz) / len2, 0.0, 1.0) if len2 > 0.0001 else 0.0
+					out = Vector3(_ax[i] + abx * t, lerpf(_ah[i], _bh[i], t), _az[i] + abz * t)
+	return out if best <= max_dist else Vector3.INF

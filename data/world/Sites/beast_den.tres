@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_wolves.tres" id="1_dutbv"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_rbjfp"]
+[ext_resource type="PackedScene" path="res://scenes/sites/beast_den_a.tscn" id="3_3xhna"]
+
+[resource]
+script = ExtResource("2_rbjfp")
+sites = Array[PackedScene]([ExtResource("3_3xhna")])
+occupants = ExtResource("1_dutbv")
+map_icon = "camp"
+enter_name = "Beast's Den"
+id = &"site_beast_den"
+display_name = "Beast's Den"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 22.0
+flatten_radius = 18.0
+max_slope_deg = 12.0
+prefer = "low"
+min_same_distance = 1100.0

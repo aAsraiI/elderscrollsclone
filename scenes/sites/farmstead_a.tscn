@@ -78,7 +78,7 @@ size = Vector3(9.6, 0.15, 4.34)
 [sub_resource type="BoxMesh" id="BoxMesh_g7aeh"]
 size = Vector3(9.6, 0.15, 4.34)
 
-[node name="FarmsteadA" type="Node3D" unique_id=1217967561]
+[node name="FarmsteadA" type="Node3D" unique_id=1061286396]
 script = ExtResource("1_xt2sd")
 site_kind = "farmstead"
 biomes = PackedStringArray("plains", "lakeland", "forest", "highlands", "coast")
@@ -88,247 +88,247 @@ map_icon = "farm"
 themes = PackedStringArray("house")
 cells = Vector3i(10, 2, 10)
 
-[node name="Part1" type="StaticBody3D" parent="." unique_id=424467962 groups=["interior_geometry"]]
+[node name="Part1" type="StaticBody3D" parent="." unique_id=339797085 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.35, 1.6, 3)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part1" unique_id=355519780]
+[node name="Mesh" type="MeshInstance3D" parent="Part1" unique_id=1996405618]
 material_override = ExtResource("2_7urw4")
 mesh = SubResource("BoxMesh_ce2k5")
 
-[node name="Shape" type="CollisionShape3D" parent="Part1" unique_id=1442707480]
+[node name="Shape" type="CollisionShape3D" parent="Part1" unique_id=371162193]
 shape = SubResource("BoxShape3D_unabq")
 
-[node name="Part2" type="StaticBody3D" parent="." unique_id=295518120 groups=["interior_geometry"]]
+[node name="Part2" type="StaticBody3D" parent="." unique_id=1794861515 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.65, 1.6, 3)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part2" unique_id=2143343153]
+[node name="Mesh" type="MeshInstance3D" parent="Part2" unique_id=1001449814]
 material_override = ExtResource("2_7urw4")
 mesh = SubResource("BoxMesh_ogp17")
 
-[node name="Shape" type="CollisionShape3D" parent="Part2" unique_id=725893881]
+[node name="Shape" type="CollisionShape3D" parent="Part2" unique_id=442422350]
 shape = SubResource("BoxShape3D_25lbw")
 
-[node name="Part3" type="StaticBody3D" parent="." unique_id=544379911 groups=["interior_geometry"]]
+[node name="Part3" type="StaticBody3D" parent="." unique_id=527241925 groups=["interior_geometry"]]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -2, 1.6, 6)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part3" unique_id=1144867480]
+[node name="Mesh" type="MeshInstance3D" parent="Part3" unique_id=1293464521]
 material_override = ExtResource("2_7urw4")
 mesh = SubResource("BoxMesh_0hu1e")
 
-[node name="Shape" type="CollisionShape3D" parent="Part3" unique_id=1647530957]
+[node name="Shape" type="CollisionShape3D" parent="Part3" unique_id=249054159]
 shape = SubResource("BoxShape3D_2u83r")
 
-[node name="Part4" type="StaticBody3D" parent="." unique_id=403096510 groups=["interior_geometry"]]
+[node name="Part4" type="StaticBody3D" parent="." unique_id=626296289 groups=["interior_geometry"]]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -6, 1.6, 9)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part4" unique_id=1095411995]
+[node name="Mesh" type="MeshInstance3D" parent="Part4" unique_id=479409496]
 material_override = ExtResource("2_7urw4")
 mesh = SubResource("BoxMesh_7m2f1")
 
-[node name="Shape" type="CollisionShape3D" parent="Part4" unique_id=1840055687]
+[node name="Shape" type="CollisionShape3D" parent="Part4" unique_id=890559122]
 shape = SubResource("BoxShape3D_i4lee")
 
-[node name="Part5" type="StaticBody3D" parent="." unique_id=678203470 groups=["interior_geometry"]]
+[node name="Part5" type="StaticBody3D" parent="." unique_id=1142376347 groups=["interior_geometry"]]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 1.6, 6)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part5" unique_id=1537512668]
+[node name="Mesh" type="MeshInstance3D" parent="Part5" unique_id=1184721046]
 material_override = ExtResource("2_7urw4")
 mesh = SubResource("BoxMesh_jdpbd")
 
-[node name="Shape" type="CollisionShape3D" parent="Part5" unique_id=148282295]
+[node name="Shape" type="CollisionShape3D" parent="Part5" unique_id=117957148]
 shape = SubResource("BoxShape3D_a1vrr")
 
-[node name="Part6" type="Node3D" parent="." unique_id=278690167 groups=["interior_geometry"]]
+[node name="Part6" type="Node3D" parent="." unique_id=406189331 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 0.8253356, -0.5646425, 0, 0.5646425, 0.8253356, -6, 4.28, 4.5)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part6" unique_id=1043428488]
+[node name="Mesh" type="MeshInstance3D" parent="Part6" unique_id=600330541]
 material_override = ExtResource("3_noul5")
 mesh = SubResource("BoxMesh_oeufk")
 
-[node name="Part7" type="Node3D" parent="." unique_id=1271682071 groups=["interior_geometry"]]
+[node name="Part7" type="Node3D" parent="." unique_id=362304008 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 0.8253356, 0.5646425, 0, -0.5646425, 0.8253356, -6, 4.28, 7.5)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part7" unique_id=519761279]
+[node name="Mesh" type="MeshInstance3D" parent="Part7" unique_id=1111191232]
 material_override = ExtResource("3_noul5")
 mesh = SubResource("BoxMesh_5t2u5")
 
-[node name="Part8" type="StaticBody3D" parent="." unique_id=576248847 groups=["interior_geometry"]]
+[node name="Part8" type="StaticBody3D" parent="." unique_id=915043927 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4, 1.6, 4.5)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part8" unique_id=1971942410]
+[node name="Mesh" type="MeshInstance3D" parent="Part8" unique_id=1277770334]
 material_override = ExtResource("4_upf1s")
 mesh = SubResource("BoxMesh_jj7eg")
 
-[node name="Shape" type="CollisionShape3D" parent="Part8" unique_id=989356966]
+[node name="Shape" type="CollisionShape3D" parent="Part8" unique_id=372677306]
 shape = SubResource("BoxShape3D_djrva")
 
-[node name="Part9" type="StaticBody3D" parent="." unique_id=514383795 groups=["interior_geometry"]]
+[node name="Part9" type="StaticBody3D" parent="." unique_id=1365371573 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6, 1.6, 4.5)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part9" unique_id=600880238]
+[node name="Mesh" type="MeshInstance3D" parent="Part9" unique_id=788800796]
 material_override = ExtResource("4_upf1s")
 mesh = SubResource("BoxMesh_lv4ct")
 
-[node name="Shape" type="CollisionShape3D" parent="Part9" unique_id=101802293]
+[node name="Shape" type="CollisionShape3D" parent="Part9" unique_id=178322242]
 shape = SubResource("BoxShape3D_aefw5")
 
-[node name="Part10" type="StaticBody3D" parent="." unique_id=1643712068 groups=["interior_geometry"]]
+[node name="Part10" type="StaticBody3D" parent="." unique_id=12089282 groups=["interior_geometry"]]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 12.5, 1.6, 8)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part10" unique_id=1200513551]
+[node name="Mesh" type="MeshInstance3D" parent="Part10" unique_id=1157594748]
 material_override = ExtResource("4_upf1s")
 mesh = SubResource("BoxMesh_rfhf0")
 
-[node name="Shape" type="CollisionShape3D" parent="Part10" unique_id=338078150]
+[node name="Shape" type="CollisionShape3D" parent="Part10" unique_id=2044288843]
 shape = SubResource("BoxShape3D_n864o")
 
-[node name="Part11" type="StaticBody3D" parent="." unique_id=1488027054 groups=["interior_geometry"]]
+[node name="Part11" type="StaticBody3D" parent="." unique_id=666627755 groups=["interior_geometry"]]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 8, 1.6, 11.5)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part11" unique_id=1997432354]
+[node name="Mesh" type="MeshInstance3D" parent="Part11" unique_id=319378714]
 material_override = ExtResource("4_upf1s")
 mesh = SubResource("BoxMesh_osp26")
 
-[node name="Shape" type="CollisionShape3D" parent="Part11" unique_id=435241853]
+[node name="Shape" type="CollisionShape3D" parent="Part11" unique_id=534373039]
 shape = SubResource("BoxShape3D_uk8va")
 
-[node name="Part12" type="StaticBody3D" parent="." unique_id=49218884 groups=["interior_geometry"]]
+[node name="Part12" type="StaticBody3D" parent="." unique_id=2030919648 groups=["interior_geometry"]]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.5, 1.6, 8)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part12" unique_id=1174612345]
+[node name="Mesh" type="MeshInstance3D" parent="Part12" unique_id=2100094352]
 material_override = ExtResource("4_upf1s")
 mesh = SubResource("BoxMesh_lhds5")
 
-[node name="Shape" type="CollisionShape3D" parent="Part12" unique_id=565001731]
+[node name="Shape" type="CollisionShape3D" parent="Part12" unique_id=2108910594]
 shape = SubResource("BoxShape3D_jn0jo")
 
-[node name="Part13" type="Node3D" parent="." unique_id=999642970 groups=["interior_geometry"]]
+[node name="Part13" type="Node3D" parent="." unique_id=1170167954 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 0.8253356, -0.5646425, 0, 0.5646425, 0.8253356, 8, 4.46, 6.25)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part13" unique_id=919204540]
+[node name="Mesh" type="MeshInstance3D" parent="Part13" unique_id=185438763]
 material_override = ExtResource("3_noul5")
 mesh = SubResource("BoxMesh_eaqtn")
 
-[node name="Part14" type="Node3D" parent="." unique_id=692893873 groups=["interior_geometry"]]
+[node name="Part14" type="Node3D" parent="." unique_id=437593274 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 0.8253356, 0.5646425, 0, -0.5646425, 0.8253356, 8, 4.46, 9.75)
 
-[node name="Mesh" type="MeshInstance3D" parent="Part14" unique_id=595155127]
+[node name="Mesh" type="MeshInstance3D" parent="Part14" unique_id=17639306]
 material_override = ExtResource("3_noul5")
 mesh = SubResource("BoxMesh_g7aeh")
 
-[node name="Decoration14" type="Marker3D" parent="." unique_id=2110000271]
+[node name="Decoration14" type="Marker3D" parent="." unique_id=1096099818]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration15" type="Marker3D" parent="." unique_id=242243144]
+[node name="Decoration15" type="Marker3D" parent="." unique_id=1347407252]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration16" type="Marker3D" parent="." unique_id=1594862432]
+[node name="Decoration16" type="Marker3D" parent="." unique_id=2058249287]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.4, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration17" type="Marker3D" parent="." unique_id=2141752520]
+[node name="Decoration17" type="Marker3D" parent="." unique_id=2827619]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration18" type="Marker3D" parent="." unique_id=691647442]
+[node name="Decoration18" type="Marker3D" parent="." unique_id=1967529607]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.8, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration19" type="Marker3D" parent="." unique_id=2110862076]
+[node name="Decoration19" type="Marker3D" parent="." unique_id=1404351996]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.2, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration20" type="Marker3D" parent="." unique_id=1745537968]
+[node name="Decoration20" type="Marker3D" parent="." unique_id=1175874964]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration21" type="Marker3D" parent="." unique_id=1680486663]
+[node name="Decoration21" type="Marker3D" parent="." unique_id=583724483]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.8, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration22" type="Marker3D" parent="." unique_id=2068986426]
+[node name="Decoration22" type="Marker3D" parent="." unique_id=1110478478]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration23" type="Marker3D" parent="." unique_id=2005483783]
+[node name="Decoration23" type="Marker3D" parent="." unique_id=476612161]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.4, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration24" type="Marker3D" parent="." unique_id=2091310720]
+[node name="Decoration24" type="Marker3D" parent="." unique_id=1717424428]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration25" type="Marker3D" parent="." unique_id=1185263809]
+[node name="Decoration25" type="Marker3D" parent="." unique_id=536504872]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -10)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("crops", "field")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration26" type="Marker3D" parent="." unique_id=955120111]
+[node name="Decoration26" type="Marker3D" parent="." unique_id=717094988]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -18, 0, -12)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("fence")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration27" type="Marker3D" parent="." unique_id=1199927153]
+[node name="Decoration27" type="Marker3D" parent="." unique_id=1921005270]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -18, 0, -8)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("fence")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration28" type="Marker3D" parent="." unique_id=718224326]
+[node name="Decoration28" type="Marker3D" parent="." unique_id=1078029821]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -18, 0, -4)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("fence")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration29" type="Marker3D" parent="." unique_id=1303075552]
+[node name="Decoration29" type="Marker3D" parent="." unique_id=1545771808]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -18, 0, 0)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("fence")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Furniture30" type="Marker3D" parent="." unique_id=1174996386]
+[node name="Furniture30" type="Marker3D" parent="." unique_id=530773604]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
 script = ExtResource("5_6buul")
 kind = 0
@@ -336,31 +336,63 @@ tags = PackedStringArray("well")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration31" type="Marker3D" parent="." unique_id=52439798]
+[node name="Decoration31" type="Marker3D" parent="." unique_id=902975137]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 2)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("hay")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration32" type="Marker3D" parent="." unique_id=1950504001]
+[node name="Decoration32" type="Marker3D" parent="." unique_id=78941083]
 transform = Transform3D(0.921061, 0, 0.38941833, 0, 1, 0, -0.38941833, 0, 0.921061, 2, 0, 6)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("cart")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Decoration33" type="Marker3D" parent="." unique_id=951079148]
+[node name="Decoration33" type="Marker3D" parent="." unique_id=2077392903]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 9)
 script = ExtResource("5_6buul")
 tags = PackedStringArray("barrel", "crate", "sack")
 chance = 1.0
 pool = PackedStringArray()
 
-[node name="Chest34" type="Marker3D" parent="." unique_id=584836246]
+[node name="Chest34" type="Marker3D" parent="." unique_id=679493143]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -6, 0, 7.5)
 script = ExtResource("5_6buul")
 kind = 3
 tags = PackedStringArray()
 chance = 0.8
+pool = PackedStringArray()
+
+[node name="Enemy35" type="Marker3D" parent="." unique_id=335545033]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.530991, 0, 5.7531066)
+script = ExtResource("5_6buul")
+kind = 5
+tags = PackedStringArray()
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Enemy36" type="Marker3D" parent="." unique_id=1296835590]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.247831, 0, 6.243552)
+script = ExtResource("5_6buul")
+kind = 5
+tags = PackedStringArray()
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Enemy37" type="Marker3D" parent="." unique_id=1576813675]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.28315902, 0, -11.996658)
+script = ExtResource("5_6buul")
+kind = 5
+tags = PackedStringArray()
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Boss38" type="Marker3D" parent="." unique_id=864300495]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 6)
+script = ExtResource("5_6buul")
+kind = 6
+tags = PackedStringArray()
+chance = 1.0
 pool = PackedStringArray()

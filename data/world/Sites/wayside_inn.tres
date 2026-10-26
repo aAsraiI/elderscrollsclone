@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_mnjvl"]
+[ext_resource type="PackedScene" path="res://scenes/sites/wayside_inn_a.tscn" id="2_e3uqm"]
+
+[resource]
+script = ExtResource("1_mnjvl")
+sites = Array[PackedScene]([ExtResource("2_e3uqm")])
+map_icon = "camp"
+enter_name = "Wayside Rest"
+id = &"site_wayside_inn"
+display_name = "Wayside Rest"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 14.0
+flatten_radius = 10.0
+max_slope_deg = 12.0
+prefer = "road"
+min_same_distance = 1500.0
+path_to_road = 60.0

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_plains_ambush.tres" id="1_dvgfi"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_whtsv"]
+[ext_resource type="PackedScene" path="res://scenes/sites/wrecked_cart_a.tscn" id="3_nbnk3"]
+[ext_resource type="PackedScene" path="res://scenes/sites/wrecked_cart_b.tscn" id="4_u51vp"]
+
+[resource]
+script = ExtResource("2_whtsv")
+sites = Array[PackedScene]([ExtResource("3_nbnk3"), ExtResource("4_u51vp")])
+occupants = ExtResource("1_dvgfi")
+map_icon = "camp"
+enter_name = "Wrecked Cart"
+id = &"site_wrecked_cart"
+display_name = "Wrecked Cart"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 6.0
+flatten_radius = 4.0
+max_slope_deg = 12.0
+prefer = "road"
+min_same_distance = 400.0
+discoverable = false

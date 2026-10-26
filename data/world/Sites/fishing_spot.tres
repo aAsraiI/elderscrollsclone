@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_pku1w"]
+[ext_resource type="PackedScene" path="res://scenes/sites/fishing_spot_a.tscn" id="2_nje3j"]
+
+[resource]
+script = ExtResource("1_pku1w")
+sites = Array[PackedScene]([ExtResource("2_nje3j")])
+map_icon = "dock"
+enter_name = "Fishing Spot"
+id = &"site_fishing_spot"
+display_name = "Fishing Spot"
+map_color = Color(0.5, 0.6, 0.7, 1)
+footprint_radius = 6.0
+max_slope_deg = 20.0
+prefer = "water"
+min_same_distance = 500.0
+discoverable = false

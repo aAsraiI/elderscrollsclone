@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_wanderer.tres" id="1_ftf2n"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_24y4w"]
+[ext_resource type="PackedScene" path="res://scenes/sites/roadside_camp_a.tscn" id="3_5p03o"]
+[ext_resource type="PackedScene" path="res://scenes/sites/roadside_camp_b.tscn" id="4_e6a6y"]
+
+[resource]
+script = ExtResource("2_24y4w")
+sites = Array[PackedScene]([ExtResource("3_5p03o"), ExtResource("4_e6a6y")])
+occupants = ExtResource("1_ftf2n")
+map_icon = "camp"
+enter_name = "Campfire"
+id = &"site_roadside_camp"
+display_name = "Campfire"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 6.0
+flatten_radius = 4.0
+max_slope_deg = 12.0
+prefer = "road"
+min_same_distance = 300.0
+discoverable = false

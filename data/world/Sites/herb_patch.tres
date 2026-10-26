@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_oef0n"]
+[ext_resource type="PackedScene" path="res://scenes/sites/herb_patch_a.tscn" id="2_e44vq"]
+[ext_resource type="PackedScene" path="res://scenes/sites/herb_patch_b.tscn" id="3_deb5t"]
+
+[resource]
+script = ExtResource("1_oef0n")
+sites = Array[PackedScene]([ExtResource("2_e44vq"), ExtResource("3_deb5t")])
+map_icon = "camp"
+enter_name = "Herb Patch"
+id = &"site_herb_patch"
+display_name = "Herb Patch"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 5.0
+max_slope_deg = 20.0
+min_same_distance = 300.0
+discoverable = false

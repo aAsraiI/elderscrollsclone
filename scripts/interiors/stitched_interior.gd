@@ -27,8 +27,15 @@ static func is_legacy(dungeon_id: String) -> bool:
 		return false
 	var prefix := "dungeon/%s/" % dungeon_id
 	for key: String in WorldState.records:
-		if (key.begins_with(prefix) or key.begins_with("kill/" + prefix)) and not key.contains("/r"):
-			return true
+		var rest := ""
+		if key.begins_with(prefix):
+			rest = key.trim_prefix(prefix)
+		elif key.begins_with("kill/" + prefix):
+			rest = key.trim_prefix("kill/" + prefix)
+		else:
+			continue
+		if not (rest.begins_with("r") and rest.substr(1, 1).is_valid_int()) and rest != "boss" and rest != "chest_boss":
+			return true  # an old layout's chest or body (a stitched room's are "r<n>/...")
 	return false
 
 

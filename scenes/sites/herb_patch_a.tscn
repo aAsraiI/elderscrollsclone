@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_axbye"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_46cvr"]
+
+[node name="HerbPatchA" type="Node3D" unique_id=17952640]
+script = ExtResource("1_axbye")
+site_kind = "herb_patch"
+biomes = PackedStringArray()
+size_class = 0
+min_distance = 300.0
+themes = PackedStringArray("camp")
+
+[node name="Herb0" type="Marker3D" parent="." unique_id=1200363225]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 0, 0)
+
+[node name="Herb1" type="Marker3D" parent="." unique_id=1058120753]
+transform = Transform3D(0.30901697, 0, 0.95105654, 0, 1, 0, -0.95105654, 0, 0.30901697, 0.8034442, 0, 2.4727468)
+
+[node name="Herb2" type="Marker3D" parent="." unique_id=579110784]
+transform = Transform3D(-0.80901706, 0, 0.5877852, 0, 1, 0, -0.5877852, 0, -0.80901706, -1.1326238, 0, 0.82289934)
+
+[node name="Herb3" type="Marker3D" parent="." unique_id=1809474092]
+transform = Transform3D(-0.80901694, 0, -0.58778536, 0, 1, 0, 0.58778536, 0, -0.80901694, -2.103444, 0, -1.5282416)
+
+[node name="Herb4" type="Marker3D" parent="." unique_id=442457506]
+transform = Transform3D(0.30901712, 0, -0.9510565, 0, 1, 0, 0.9510565, 0, 0.30901712, 0.4326238, 0, -1.3314791)
+
+[node name="Decoration5" type="Marker3D" parent="." unique_id=110842506]
+transform = Transform3D(0.87758255, 0, 0.47942555, 0, 1, 0, -0.47942555, 0, 0.87758255, 0.3, 0, 0.2)
+script = ExtResource("2_46cvr")
+tags = PackedStringArray("rock", "boulder")
+chance = 0.5
+pool = PackedStringArray()

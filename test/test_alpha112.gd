@@ -88,6 +88,7 @@ func t_radiant() -> void:
 	await _persuade()
 	_console()
 	_dialogue_roles()
+	await _main_story()
 	_journal_cleanup()
 	await _notes()
 	await _custom_npc()
@@ -137,6 +138,48 @@ func _dialogue_roles() -> void:
 			if town.town.display_name == t and town.position.distance_to(city.position) > 6000.0:
 				far += 1
 	check("a commoner doesn't talk about towns far away", far == 0)
+
+
+# ---------------------------------------------------------------- the main quest's priest
+
+func _main_story() -> void:
+	print("-- the main quest")
+	var story := get_first_node_in_group("story") as Story
+	check("the story runs", story != null)
+	if story == null:
+		return
+	WorldState.erase_record(Story.ID)
+	story._begin(p)
+	var st := Story.state()
+	check("the story starts with the letter", Story.stage() == 1)
+	var priest: TownLife.Resident = null
+	for t in wm.towns:
+		if t.id == String(st.get("town", "")):
+			for r: TownLife.Resident in wm.life.get_town_residents(t.id):
+				if r.data.work_id == String(st["temple"]):
+					priest = r
+	check("the temple has its priest", priest != null)
+	if priest == null:
+		return
+	var b := wm.get_building(String(st["temple"]))
+	var mark: Vector2 = Story.target()["pos"]
+	check("the marker points at the temple", mark.distance_to(Vector2(b.world_pos.x, b.world_pos.z)) < 1.0)
+	Locks.set_locked(b.id, false)
+	wm.clock.set_time(priest.data.work_start + 1.0)
+	await _go(b.get_door_position())
+	await wm.dungeons.enter(b.id, b.get_door_position(), 0.0)
+	await secs(0.5)
+	var opened := priest.node != null and is_instance_valid(priest.node) and ui.open_with(priest.node)
+	check("you can talk to the priest", opened)
+	if opened:
+		var topics := DialogueEngine.topics_for(ui.speaker, wm)
+		check("the priest lists \"the sealed letter\"", topics.has("the sealed letter"), str(topics))
+		ui.ask("the sealed letter")
+		check("asking moves the main quest on", Story.stage() == 2, str(Story.state()))
+		ui.close()
+	await wm.dungeons.exit()
+	await secs(0.5)
+	wm.clock.set_time(12.0)
 
 
 # ---------------------------------------------------------------- 1.12.6 journal
@@ -218,7 +261,7 @@ func _custom_npc() -> void:
 	await secs(1.0)
 	var body: Enemy = null
 	for e in get_nodes_in_group("enemies"):
-		if (e as Node).get_meta("custom_npc", null) == hermit:
+		if (e as Node).has_meta("custom_npc") and (e as Node).get_meta("custom_npc") == hermit:
 			body = e
 	check("they stand in their town when you come near", body != null and body.global_position.distance_to(spot) < 5.0)
 	if body == null or not ui.open_with(body):

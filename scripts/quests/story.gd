@@ -97,7 +97,7 @@ func _nearest_city_temple(pos: Vector3) -> Dictionary:
 				var d := t.position.distance_to(pos) * (1.0 if (t.poi as TownData).kind == TownData.Kind.CITY else 1.6)
 				if d < best_d:
 					best_d = d
-					best = {"building": b.id, "town": t.id, "town_name": t.town.display_name, "pos": [t.position.x, t.position.z]}
+					best = {"building": b.id, "town": t.id, "town_name": t.town.display_name, "pos": [b.world_pos.x, b.world_pos.z]}
 	return best
 
 

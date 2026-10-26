@@ -36,6 +36,8 @@ var world: WorldManager
 var _timer := 0.0
 var _stranger: Enemy
 var _stranger_time := 0.0
+var _extra_cache := {}
+var _extra_frame := -1
 
 
 func _ready() -> void:
@@ -568,6 +570,18 @@ func _place_dig_spot(q: Dictionary, placed: PlacedPOI, level: int) -> void:
 
 ## Extra topics this speaker has (a guild leader's membership, a delivery for the recipient...)
 func extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
+	# the dialogue asks once per known topic: work it out once a frame per person
+	var frame := Engine.get_process_frames()
+	if frame != _extra_frame:
+		_extra_frame = frame
+		_extra_cache.clear()
+	var key := "%s|%s|%d" % [s.id, s.name, s.get_instance_id()]
+	if not _extra_cache.has(key):
+		_extra_cache[key] = _extra_topics(s)
+	return _extra_cache[key]
+
+
+func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 	var out := PackedStringArray()
 	var leader := Factions.leader_of(s, world)
 	if leader != "":
@@ -607,6 +621,7 @@ func _delivery_for(s: DialogueEngine.Speaker) -> Dictionary:
 
 ## The answer for a job topic, or {} when it isn't one (DialogueEngine asks first)
 func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
+	_extra_cache.clear()  # what is said may change who has which topics
 	var story := get_tree().get_first_node_in_group("story") as Story
 	if story != null:
 		var told := story.respond(s, topic)

@@ -72,7 +72,7 @@ static func speaker_for(e: Enemy, world: WorldManager) -> Speaker:
 	s.asleep = bool(e.get_meta("asleep", false))
 	s.lines = e.talk_lines
 	s.base_disposition = 55 if e.disposition == Enemy.Disposition.FRIENDLY else 45
-	var custom := e.get_meta("custom_npc", null) as CustomNpcData
+	var custom := e.get_meta("custom_npc") as CustomNpcData if e.has_meta("custom_npc") else null
 	if custom != null:
 		# a hand-made person (CustomNpcs): their own sheet and dialogue
 		s.data = custom.to_npc_data()
@@ -360,9 +360,13 @@ static func _reason(s: Speaker, topic: String, world: WorldManager, prof: Dictio
 		var t := d.get_topic(topic)
 		if t != null and t.pick(get_disposition(s)) != null:
 			return "special"
-	# Guild leaders' topics (membership, duties, advancement...) and job topics only for those who have them
+	# Guild leaders' topics (membership, duties, advancement...), job topics and the main story's,
+	# marriage's and the homestead's topics: only for those who have them, and never cut
+	var extra := world.quests.extra_topics(s) if world != null and world.quests != null else PackedStringArray()
+	if extra.has(topic):
+		return "special"
 	if QuestManager.TOPICS.has(topic):
-		return "special" if world != null and world.quests != null and world.quests.extra_topics(s).has(topic) else ""
+		return ""
 	if world != null and world.book != null and world.book.topics_for(s).has(topic):
 		return "special"
 	if s.own_topics_only:

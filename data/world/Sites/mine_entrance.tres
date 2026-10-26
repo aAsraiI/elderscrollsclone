@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/abandoned_mine.tres" id="1_tqqvo"]
+[ext_resource type="Resource" path="res://data/spawns/enc_prospector.tres" id="2_mc8g7"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_ebgto"]
+[ext_resource type="PackedScene" path="res://scenes/sites/mine_entrance_a.tscn" id="4_laccc"]
+
+[resource]
+script = ExtResource("3_ebgto")
+sites = Array[PackedScene]([ExtResource("4_laccc")])
+occupants = ExtResource("2_mc8g7")
+map_icon = "mine"
+dungeon = ExtResource("1_tqqvo")
+enter_name = "Mine"
+id = &"site_mine_entrance"
+display_name = "Mine"
+map_color = Color(0.55, 0.45, 0.35, 1)
+footprint_radius = 18.0
+flatten_radius = 12.0
+max_slope_deg = 12.0

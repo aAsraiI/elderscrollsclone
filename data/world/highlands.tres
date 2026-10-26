@@ -1,23 +1,42 @@
-[gd_resource type="Resource" script_class="BiomeData" format=3 uid="uid://bebpqo5doent"]
+[gd_resource type="Resource" script_class="BiomeData" format=3]
 
-[ext_resource type="Script" uid="uid://bula71da23th1" path="res://scripts/world/biome_data.gd" id="1_biome"]
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="1_biome"]
 [ext_resource type="Resource" path="res://data/encounters/night_werewolf.tres" id="6_rwip1"]
 [ext_resource type="Resource" path="res://data/encounters/night_vampire.tres" id="7_u8k0c"]
 [ext_resource type="Resource" path="res://data/encounters/highland_harpies.tres" id="8_hdd4b"]
 [ext_resource type="Resource" path="res://data/world/POIs/abandoned_mine_entrance.tres" id="11_yw0kk"]
 [ext_resource type="Resource" path="res://data/world/POIs/barrow_entrance.tres" id="12_ox1p8"]
 [ext_resource type="Resource" path="res://data/world/POIs/fort_ruin_entrance.tres" id="13_imqa2"]
-[ext_resource type="Resource" uid="uid://buipbwtfyvo45" path="res://data/world/POIs/dragon_lair.tres" id="17_08b3l"]
+[ext_resource type="Resource" path="res://data/world/POIs/dragon_lair.tres" id="17_08b3l"]
+[ext_resource type="Resource" path="res://data/world/Sites/bandit_camp.tres" id="18_0uqtf"]
+[ext_resource type="Resource" path="res://data/world/Sites/bandit_hold.tres" id="19_5axyk"]
+[ext_resource type="Resource" path="res://data/world/Sites/hunters_camp.tres" id="20_scsbi"]
+[ext_resource type="Resource" path="res://data/world/Sites/giant_camp.tres" id="21_xp4sc"]
+[ext_resource type="Resource" path="res://data/world/Sites/watchtower.tres" id="22_ne7kq"]
+[ext_resource type="Resource" path="res://data/world/Sites/mage_tower.tres" id="23_01wbe"]
+[ext_resource type="Resource" path="res://data/world/Sites/ruined_keep.tres" id="24_og6d0"]
+[ext_resource type="Resource" path="res://data/world/Sites/ruined_temple.tres" id="25_i8a51"]
+[ext_resource type="Resource" path="res://data/world/Sites/fort.tres" id="26_vwqev"]
+[ext_resource type="Resource" path="res://data/world/Sites/farmstead.tres" id="27_ulvhd"]
+[ext_resource type="Resource" path="res://data/world/Sites/lumber_camp.tres" id="28_872jv"]
+[ext_resource type="Resource" path="res://data/world/Sites/mine_entrance.tres" id="29_r6ctu"]
+[ext_resource type="Resource" path="res://data/world/Sites/quarry.tres" id="30_tebx0"]
+[ext_resource type="Resource" path="res://data/world/Sites/wayside_shrine.tres" id="31_ls7bt"]
+[ext_resource type="Resource" path="res://data/world/Sites/stone_circle.tres" id="32_shmte"]
+[ext_resource type="Resource" path="res://data/world/Sites/graveyard.tres" id="33_8hu27"]
+[ext_resource type="Resource" path="res://data/world/Sites/battlefield.tres" id="34_m8q1e"]
+[ext_resource type="Resource" path="res://data/world/Sites/monument.tres" id="35_48jbe"]
+[ext_resource type="Resource" path="res://data/world/Sites/bridge.tres" id="36_as6bj"]
 [ext_resource type="Resource" path="res://data/encounters/snow_reavers.tres" id="enc_0"]
 [ext_resource type="Resource" path="res://data/encounters/snow_beasts.tres" id="enc_1"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="enc_2"]
 [ext_resource type="Resource" path="res://data/encounters/snow_trapper.tres" id="enc_3"]
-[ext_resource type="Script" uid="uid://0fpv5k8e3f4r" path="res://scripts/world/encounter_data.gd" id="enc_script"]
-[ext_resource type="Resource" uid="uid://ctkcd8v0rjb18" path="res://data/world/POIs/watchtower.tres" id="poi_0"]
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="enc_script"]
+[ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="poi_0"]
 [ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="poi_1"]
-[ext_resource type="Resource" uid="uid://bk7ydnyeb77t0" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
 [ext_resource type="Resource" path="res://data/world/POIs/standing_stones.tres" id="poi_3"]
-[ext_resource type="Script" uid="uid://clkfbb8lga0d6" path="res://scripts/world/poi_rule.gd" id="rule_script"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
 
 [sub_resource type="Resource" id="rule_0"]
 script = ExtResource("rule_script")
@@ -78,6 +97,158 @@ count_max = 0.7
 extra_spacing = 250.0
 border_margin = 80.0
 
+[sub_resource type="Resource" id="Resource_kaa6h"]
+script = ExtResource("rule_script")
+poi = ExtResource("18_0uqtf")
+count_min = 0.06999999999999999
+count_max = 0.13
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_7wa5q"]
+script = ExtResource("rule_script")
+poi = ExtResource("19_5axyk")
+count_min = 0.027999999999999997
+count_max = 0.052000000000000005
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_rxkev"]
+script = ExtResource("rule_script")
+poi = ExtResource("20_scsbi")
+count_min = 0.041999999999999996
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_4xdj6"]
+script = ExtResource("rule_script")
+poi = ExtResource("21_xp4sc")
+count_min = 0.020999999999999998
+count_max = 0.039
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_ksok1"]
+script = ExtResource("rule_script")
+poi = ExtResource("22_ne7kq")
+count_min = 0.049
+count_max = 0.09100000000000001
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_uv45p"]
+script = ExtResource("rule_script")
+poi = ExtResource("23_01wbe")
+count_min = 0.013999999999999999
+count_max = 0.026000000000000002
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_jjxd7"]
+script = ExtResource("rule_script")
+poi = ExtResource("24_og6d0")
+count_min = 0.034999999999999996
+count_max = 0.065
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_aq5p8"]
+script = ExtResource("rule_script")
+poi = ExtResource("25_i8a51")
+count_min = 0.027999999999999997
+count_max = 0.052000000000000005
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_e1q4i"]
+script = ExtResource("rule_script")
+poi = ExtResource("26_vwqev")
+count_min = 0.017499999999999998
+count_max = 0.0325
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_bg0w3"]
+script = ExtResource("rule_script")
+poi = ExtResource("27_ulvhd")
+count_min = 0.055999999999999994
+count_max = 0.10400000000000001
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_0e3lb"]
+script = ExtResource("rule_script")
+poi = ExtResource("28_872jv")
+count_min = 0.034999999999999996
+count_max = 0.065
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_0yq8g"]
+script = ExtResource("rule_script")
+poi = ExtResource("29_r6ctu")
+count_min = 0.034999999999999996
+count_max = 0.065
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_ku8he"]
+script = ExtResource("rule_script")
+poi = ExtResource("30_tebx0")
+count_min = 0.020999999999999998
+count_max = 0.039
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_vuwet"]
+script = ExtResource("rule_script")
+poi = ExtResource("31_ls7bt")
+count_min = 0.041999999999999996
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_veu3j"]
+script = ExtResource("rule_script")
+poi = ExtResource("32_shmte")
+count_min = 0.020999999999999998
+count_max = 0.039
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_tajxu"]
+script = ExtResource("rule_script")
+poi = ExtResource("33_8hu27")
+count_min = 0.027999999999999997
+count_max = 0.052000000000000005
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_0pf3v"]
+script = ExtResource("rule_script")
+poi = ExtResource("34_m8q1e")
+count_min = 0.013999999999999999
+count_max = 0.026000000000000002
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_cwoc5"]
+script = ExtResource("rule_script")
+poi = ExtResource("35_48jbe")
+count_min = 0.013999999999999999
+count_max = 0.026000000000000002
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_i0e47"]
+script = ExtResource("rule_script")
+poi = ExtResource("36_as6bj")
+count_min = 0.013999999999999999
+count_max = 0.026000000000000002
+extra_spacing = 40.0
+border_margin = 40.0
+
 [resource]
 script = ExtResource("1_biome")
 id = &"highlands"
@@ -96,7 +267,7 @@ steep_color = Color(0.42, 0.4, 0.38, 1)
 tree_style = 1
 tree_density = 30.0
 tree_color = Color(0.16, 0.32, 0.18, 1)
-poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_ox1p8"), SubResource("Resource_imqa2"), SubResource("Resource_rwip1"), SubResource("Resource_j2nbg")])
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_ox1p8"), SubResource("Resource_imqa2"), SubResource("Resource_rwip1"), SubResource("Resource_j2nbg"), SubResource("Resource_kaa6h"), SubResource("Resource_7wa5q"), SubResource("Resource_rxkev"), SubResource("Resource_4xdj6"), SubResource("Resource_ksok1"), SubResource("Resource_uv45p"), SubResource("Resource_jjxd7"), SubResource("Resource_aq5p8"), SubResource("Resource_e1q4i"), SubResource("Resource_bg0w3"), SubResource("Resource_0e3lb"), SubResource("Resource_0yq8g"), SubResource("Resource_ku8he"), SubResource("Resource_vuwet"), SubResource("Resource_veu3j"), SubResource("Resource_tajxu"), SubResource("Resource_0pf3v"), SubResource("Resource_cwoc5"), SubResource("Resource_i0e47")])
 level_min = 10
 level_max = 24
 encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("6_rwip1"), ExtResource("7_u8k0c"), ExtResource("8_hdd4b")])

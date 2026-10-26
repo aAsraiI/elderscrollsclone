@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_forest_troll.tres" id="1_mkpv2"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_aw50k"]
+[ext_resource type="PackedScene" path="res://scenes/sites/giant_camp_a.tscn" id="3_ki3wq"]
+[ext_resource type="PackedScene" path="res://scenes/sites/giant_camp_b.tscn" id="4_3pul2"]
+
+[resource]
+script = ExtResource("2_aw50k")
+sites = Array[PackedScene]([ExtResource("3_ki3wq"), ExtResource("4_3pul2")])
+occupants = ExtResource("1_mkpv2")
+map_icon = "camp"
+enter_name = "Giant Camp"
+id = &"site_giant_camp"
+display_name = "Giant Camp"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 24.0
+flatten_radius = 18.0
+max_slope_deg = 12.0

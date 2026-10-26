@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_coast_drowned.tres" id="1_nj0hq"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_s4lt2"]
+[ext_resource type="PackedScene" path="res://scenes/sites/shipwreck_a.tscn" id="3_qtcvk"]
+
+[resource]
+script = ExtResource("2_s4lt2")
+sites = Array[PackedScene]([ExtResource("3_qtcvk")])
+occupants = ExtResource("1_nj0hq")
+map_icon = "wreck"
+enter_name = "Shipwreck"
+id = &"site_shipwreck"
+display_name = "Shipwreck"
+map_color = Color(0.5, 0.45, 0.4, 1)
+footprint_radius = 18.0
+max_slope_deg = 20.0

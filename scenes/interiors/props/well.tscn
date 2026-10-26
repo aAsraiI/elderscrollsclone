@@ -1,0 +1,66 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_ceqar"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_25ong"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_d4fdu"]
+[ext_resource type="Material" path="res://data/interiors/materials/water.tres" id="4_migf8"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_oybi6"]
+top_radius = 0.8
+bottom_radius = 0.8
+height = 0.9
+radial_segments = 10
+
+[sub_resource type="BoxMesh" id="BoxMesh_2m7b7"]
+size = Vector3(0.1, 1.8, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gie4a"]
+size = Vector3(0.1, 1.8, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2i7ky"]
+size = Vector3(1.6, 0.1, 0.1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_qkbe0"]
+top_radius = 0.65
+bottom_radius = 0.65
+height = 0.04
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vqciv"]
+size = Vector3(1.6, 2.35, 1.6)
+
+[node name="Well" type="StaticBody3D" unique_id=165196297]
+script = ExtResource("1_ceqar")
+tags = PackedStringArray("well", "water")
+socket_kinds = PackedStringArray("FURNITURE")
+themes = PackedStringArray("house", "ruin", "camp")
+radius = 0.8
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=533396798]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+material_override = ExtResource("2_25ong")
+mesh = SubResource("CylinderMesh_oybi6")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=2080641314]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 1.4, 0)
+material_override = ExtResource("3_d4fdu")
+mesh = SubResource("BoxMesh_2m7b7")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1117860360]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 1.4, 0)
+material_override = ExtResource("3_d4fdu")
+mesh = SubResource("BoxMesh_gie4a")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=746899024]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, 0)
+material_override = ExtResource("3_d4fdu")
+mesh = SubResource("BoxMesh_2i7ky")
+
+[node name="Part4" type="MeshInstance3D" parent="." unique_id=1911397908]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+material_override = ExtResource("4_migf8")
+mesh = SubResource("CylinderMesh_qkbe0")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=760095671]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.175, 0)
+shape = SubResource("BoxShape3D_vqciv")

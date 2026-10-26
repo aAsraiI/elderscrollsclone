@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_qplv3"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_la0kc"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_lkelu"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 2.4
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_vbrom"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 2.4
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hj8cp"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 2.4
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8p3nb"]
+size = Vector3(0.4, 2.75, 0.8)
+
+[node name="LogPile" type="StaticBody3D" unique_id=1695362658]
+script = ExtResource("1_qplv3")
+tags = PackedStringArray("logs", "storage")
+socket_kinds = PackedStringArray("DECORATION", "FURNITURE")
+themes = PackedStringArray("camp", "house")
+radius = 0.4
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=517163741]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -0.35)
+material_override = ExtResource("2_la0kc")
+mesh = SubResource("CylinderMesh_lkelu")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=116589316]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0.05)
+material_override = ExtResource("2_la0kc")
+mesh = SubResource("CylinderMesh_vbrom")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=714395379]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -0.15)
+material_override = ExtResource("2_la0kc")
+mesh = SubResource("CylinderMesh_hj8cp")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=691198732]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.375, -0.15)
+shape = SubResource("BoxShape3D_8p3nb")

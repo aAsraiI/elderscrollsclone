@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/barrow.tres" id="1_sy7eg"]
+[ext_resource type="Resource" path="res://data/spawns/enc_dead_ghouls.tres" id="2_o14se"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_qcumn"]
+[ext_resource type="PackedScene" path="res://scenes/sites/graveyard_a.tscn" id="4_x2wx2"]
+[ext_resource type="PackedScene" path="res://scenes/sites/graveyard_b.tscn" id="5_lnwmi"]
+
+[resource]
+script = ExtResource("3_qcumn")
+sites = Array[PackedScene]([ExtResource("4_x2wx2"), ExtResource("5_lnwmi")])
+occupants = ExtResource("2_o14se")
+map_icon = "grave"
+dungeon = ExtResource("1_sy7eg")
+enter_name = "Graveyard"
+id = &"site_graveyard"
+display_name = "Graveyard"
+map_color = Color(0.5, 0.55, 0.6, 1)
+footprint_radius = 22.0
+flatten_radius = 18.0
+max_slope_deg = 12.0

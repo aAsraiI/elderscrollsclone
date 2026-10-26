@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_gv4a3"]
+[ext_resource type="PackedScene" path="res://scenes/sites/lumber_camp_a.tscn" id="2_yxeuo"]
+
+[resource]
+script = ExtResource("1_gv4a3")
+sites = Array[PackedScene]([ExtResource("2_yxeuo")])
+map_icon = "camp"
+enter_name = "Lumber Camp"
+id = &"site_lumber_camp"
+display_name = "Lumber Camp"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 18.0
+flatten_radius = 14.0
+max_slope_deg = 12.0

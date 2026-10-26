@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_2ahmx"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_rg4ko"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_8prlr"]
+top_radius = 0.225
+bottom_radius = 0.225
+height = 1.8
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kfmki"]
+size = Vector3(0.45, 1.8, 0.45)
+
+[node name="LogSeat" type="StaticBody3D" unique_id=802693458]
+script = ExtResource("1_2ahmx")
+tags = PackedStringArray("seat", "log", "bench")
+socket_kinds = PackedStringArray("FURNITURE", "DECORATION")
+themes = PackedStringArray("camp", "house")
+radius = 0.225
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=400509140]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
+material_override = ExtResource("2_rg4ko")
+mesh = SubResource("CylinderMesh_8prlr")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1260172389]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22000003, 0)
+shape = SubResource("BoxShape3D_kfmki")

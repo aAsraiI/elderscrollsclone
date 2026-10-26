@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_xojop"]
+[ext_resource type="PackedScene" path="res://scenes/sites/quarry_a.tscn" id="2_i22xo"]
+
+[resource]
+script = ExtResource("1_xojop")
+sites = Array[PackedScene]([ExtResource("2_i22xo")])
+map_icon = "mine"
+enter_name = "Quarry"
+id = &"site_quarry"
+display_name = "Quarry"
+map_color = Color(0.55, 0.45, 0.35, 1)
+footprint_radius = 22.0
+flatten_radius = 16.0
+max_slope_deg = 12.0

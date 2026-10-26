@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/crypt.tres" id="1_oxgnw"]
+[ext_resource type="Resource" path="res://data/spawns/garrison_ruins.tres" id="2_qdwjb"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_va3dc"]
+[ext_resource type="PackedScene" path="res://scenes/sites/mage_tower_a.tscn" id="4_jv1d3"]
+
+[resource]
+script = ExtResource("3_va3dc")
+sites = Array[PackedScene]([ExtResource("4_jv1d3")])
+occupants = ExtResource("2_qdwjb")
+map_icon = "tower"
+dungeon = ExtResource("1_oxgnw")
+enter_name = "Mage Tower"
+id = &"site_mage_tower"
+display_name = "Mage Tower"
+map_color = Color(0.7, 0.7, 0.75, 1)
+footprint_radius = 16.0
+flatten_radius = 12.0
+max_slope_deg = 12.0

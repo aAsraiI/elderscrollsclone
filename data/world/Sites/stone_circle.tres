@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/garrison_stones.tres" id="1_a4rjq"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_t335v"]
+[ext_resource type="PackedScene" path="res://scenes/sites/stone_circle_a.tscn" id="3_8hgrp"]
+[ext_resource type="PackedScene" path="res://scenes/sites/stone_circle_b.tscn" id="4_mhy00"]
+
+[resource]
+script = ExtResource("2_t335v")
+sites = Array[PackedScene]([ExtResource("3_8hgrp"), ExtResource("4_mhy00")])
+occupants = ExtResource("1_a4rjq")
+map_icon = "stones"
+enter_name = "Standing Stones"
+id = &"site_stone_circle"
+display_name = "Standing Stones"
+map_color = Color(0.65, 0.65, 0.7, 1)
+footprint_radius = 16.0
+max_slope_deg = 20.0

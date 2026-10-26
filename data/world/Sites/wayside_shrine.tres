@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_lt6uf"]
+[ext_resource type="PackedScene" path="res://scenes/sites/wayside_shrine_a.tscn" id="2_i7aay"]
+[ext_resource type="PackedScene" path="res://scenes/sites/wayside_shrine_b.tscn" id="3_u6tbc"]
+
+[resource]
+script = ExtResource("1_lt6uf")
+sites = Array[PackedScene]([ExtResource("2_i7aay"), ExtResource("3_u6tbc")])
+map_icon = "shrine"
+enter_name = "Shrine"
+id = &"site_wayside_shrine"
+display_name = "Shrine"
+map_color = Color(0.7, 0.8, 1, 1)
+footprint_radius = 10.0
+flatten_radius = 8.0
+max_slope_deg = 12.0

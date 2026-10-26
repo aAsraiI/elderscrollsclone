@@ -1,18 +1,32 @@
-[gd_resource type="Resource" script_class="BiomeData" format=3 uid="uid://b38neko473qij"]
+[gd_resource type="Resource" script_class="BiomeData" format=3]
 
-[ext_resource type="Script" uid="uid://bula71da23th1" path="res://scripts/world/biome_data.gd" id="1_biome"]
+[ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="1_biome"]
 [ext_resource type="Resource" path="res://data/world/POIs/abandoned_mine_entrance.tres" id="10_cklic"]
 [ext_resource type="Resource" path="res://data/world/POIs/barrow_entrance.tres" id="11_54qs3"]
-[ext_resource type="Resource" uid="uid://buipbwtfyvo45" path="res://data/world/POIs/dragon_lair.tres" id="12_futsf"]
+[ext_resource type="Resource" path="res://data/world/POIs/dragon_lair.tres" id="12_futsf"]
+[ext_resource type="Resource" path="res://data/world/Sites/bandit_camp.tres" id="13_i252e"]
+[ext_resource type="Resource" path="res://data/world/Sites/bandit_hold.tres" id="14_fk7p0"]
+[ext_resource type="Resource" path="res://data/world/Sites/hunters_camp.tres" id="15_upxes"]
+[ext_resource type="Resource" path="res://data/world/Sites/giant_camp.tres" id="16_omwxt"]
+[ext_resource type="Resource" path="res://data/world/Sites/watchtower.tres" id="17_0fxor"]
+[ext_resource type="Resource" path="res://data/world/Sites/mage_tower.tres" id="18_qo41v"]
+[ext_resource type="Resource" path="res://data/world/Sites/ruined_keep.tres" id="19_yc4rf"]
+[ext_resource type="Resource" path="res://data/world/Sites/ruined_temple.tres" id="20_g1nhj"]
+[ext_resource type="Resource" path="res://data/world/Sites/fort.tres" id="21_sjl5l"]
+[ext_resource type="Resource" path="res://data/world/Sites/mine_entrance.tres" id="22_ts3xc"]
+[ext_resource type="Resource" path="res://data/world/Sites/wayside_shrine.tres" id="23_g3orv"]
+[ext_resource type="Resource" path="res://data/world/Sites/stone_circle.tres" id="24_4xmxx"]
+[ext_resource type="Resource" path="res://data/world/Sites/graveyard.tres" id="25_ynms2"]
+[ext_resource type="Resource" path="res://data/world/Sites/monument.tres" id="26_d0gpj"]
 [ext_resource type="Resource" path="res://data/encounters/snow_reavers.tres" id="enc_0"]
 [ext_resource type="Resource" path="res://data/encounters/snow_beasts.tres" id="enc_1"]
 [ext_resource type="Resource" path="res://data/encounters/snow_trapper.tres" id="enc_2"]
-[ext_resource type="Script" uid="uid://0fpv5k8e3f4r" path="res://scripts/world/encounter_data.gd" id="enc_script"]
+[ext_resource type="Script" path="res://scripts/world/encounter_data.gd" id="enc_script"]
 [ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="poi_0"]
-[ext_resource type="Resource" uid="uid://ctkcd8v0rjb18" path="res://data/world/POIs/watchtower.tres" id="poi_1"]
-[ext_resource type="Resource" uid="uid://bk7ydnyeb77t0" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
+[ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="poi_1"]
+[ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
 [ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="poi_3"]
-[ext_resource type="Script" uid="uid://clkfbb8lga0d6" path="res://scripts/world/poi_rule.gd" id="rule_script"]
+[ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
 
 [sub_resource type="Resource" id="rule_0"]
 script = ExtResource("rule_script")
@@ -67,6 +81,118 @@ count_max = 0.7
 extra_spacing = 250.0
 border_margin = 80.0
 
+[sub_resource type="Resource" id="Resource_601xd"]
+script = ExtResource("rule_script")
+poi = ExtResource("13_i252e")
+count_min = 0.06999999999999999
+count_max = 0.13
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_hfxwu"]
+script = ExtResource("rule_script")
+poi = ExtResource("14_fk7p0")
+count_min = 0.027999999999999997
+count_max = 0.052000000000000005
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_oafam"]
+script = ExtResource("rule_script")
+poi = ExtResource("15_upxes")
+count_min = 0.041999999999999996
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_t2ex0"]
+script = ExtResource("rule_script")
+poi = ExtResource("16_omwxt")
+count_min = 0.020999999999999998
+count_max = 0.039
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_ee82u"]
+script = ExtResource("rule_script")
+poi = ExtResource("17_0fxor")
+count_min = 0.049
+count_max = 0.09100000000000001
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_4gkd1"]
+script = ExtResource("rule_script")
+poi = ExtResource("18_qo41v")
+count_min = 0.013999999999999999
+count_max = 0.026000000000000002
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_aat3x"]
+script = ExtResource("rule_script")
+poi = ExtResource("19_yc4rf")
+count_min = 0.034999999999999996
+count_max = 0.065
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_ahc2w"]
+script = ExtResource("rule_script")
+poi = ExtResource("20_g1nhj")
+count_min = 0.027999999999999997
+count_max = 0.052000000000000005
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_efm2g"]
+script = ExtResource("rule_script")
+poi = ExtResource("21_sjl5l")
+count_min = 0.017499999999999998
+count_max = 0.0325
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_htavu"]
+script = ExtResource("rule_script")
+poi = ExtResource("22_ts3xc")
+count_min = 0.034999999999999996
+count_max = 0.065
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_a85ah"]
+script = ExtResource("rule_script")
+poi = ExtResource("23_g3orv")
+count_min = 0.041999999999999996
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_vwxij"]
+script = ExtResource("rule_script")
+poi = ExtResource("24_4xmxx")
+count_min = 0.020999999999999998
+count_max = 0.039
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_k0ym7"]
+script = ExtResource("rule_script")
+poi = ExtResource("25_ynms2")
+count_min = 0.027999999999999997
+count_max = 0.052000000000000005
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_870jx"]
+script = ExtResource("rule_script")
+poi = ExtResource("26_d0gpj")
+count_min = 0.013999999999999999
+count_max = 0.026000000000000002
+extra_spacing = 40.0
+border_margin = 40.0
+
 [resource]
 script = ExtResource("1_biome")
 id = &"snow_mountains"
@@ -90,7 +216,7 @@ peak_blend = 40.0
 tree_style = 1
 tree_density = 28.0
 tree_color = Color(0.16, 0.3, 0.2, 1)
-poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_54qs3"), SubResource("Resource_wk4ym"), SubResource("Resource_8d7e2")])
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_54qs3"), SubResource("Resource_wk4ym"), SubResource("Resource_8d7e2"), SubResource("Resource_601xd"), SubResource("Resource_hfxwu"), SubResource("Resource_oafam"), SubResource("Resource_t2ex0"), SubResource("Resource_ee82u"), SubResource("Resource_4gkd1"), SubResource("Resource_aat3x"), SubResource("Resource_ahc2w"), SubResource("Resource_efm2g"), SubResource("Resource_htavu"), SubResource("Resource_a85ah"), SubResource("Resource_vwxij"), SubResource("Resource_k0ym7"), SubResource("Resource_870jx")])
 level_min = 12
 level_max = 28
 encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2")])

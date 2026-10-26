@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/garrison_shrine.tres" id="1_b7n46"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_y8ben"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ruined_temple_a.tscn" id="3_k6q0m"]
+
+[resource]
+script = ExtResource("2_y8ben")
+sites = Array[PackedScene]([ExtResource("3_k6q0m")])
+occupants = ExtResource("1_b7n46")
+map_icon = "ruin"
+enter_name = "Ruined Temple"
+id = &"site_ruined_temple"
+display_name = "Ruined Temple"
+map_color = Color(0.6, 0.65, 0.5, 1)
+flatten_radius = 16.0
+max_slope_deg = 12.0

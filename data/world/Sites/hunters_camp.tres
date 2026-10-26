@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_hunter.tres" id="1_khl2v"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_i8pb0"]
+[ext_resource type="PackedScene" path="res://scenes/sites/hunters_camp_a.tscn" id="3_a6hgm"]
+[ext_resource type="PackedScene" path="res://scenes/sites/hunters_camp_b.tscn" id="4_viqfe"]
+
+[resource]
+script = ExtResource("2_i8pb0")
+sites = Array[PackedScene]([ExtResource("3_a6hgm"), ExtResource("4_viqfe")])
+occupants = ExtResource("1_khl2v")
+map_icon = "camp"
+enter_name = "Hunters' Camp"
+id = &"site_hunters_camp"
+display_name = "Hunters' Camp"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 14.0
+flatten_radius = 10.0
+max_slope_deg = 12.0

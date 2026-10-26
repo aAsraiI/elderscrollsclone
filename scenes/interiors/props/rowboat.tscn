@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_asivl"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_rkexn"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="3_w7qxm"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ud8yr"]
+size = Vector3(1.3, 0.5, 3.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_f1rpp"]
+size = Vector3(1.1, 0.08, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_a33xx"]
+size = Vector3(3.2, 0.5, 3.2)
+
+[node name="Rowboat" type="StaticBody3D" unique_id=1373317713]
+script = ExtResource("1_asivl")
+tags = PackedStringArray("boat")
+socket_kinds = PackedStringArray("DECORATION", "FURNITURE")
+themes = PackedStringArray("house")
+radius = 1.6
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1752671554]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+material_override = ExtResource("2_rkexn")
+mesh = SubResource("BoxMesh_ud8yr")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1498313274]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.2)
+material_override = ExtResource("3_w7qxm")
+mesh = SubResource("BoxMesh_f1rpp")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=657059452]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("BoxShape3D_a33xx")

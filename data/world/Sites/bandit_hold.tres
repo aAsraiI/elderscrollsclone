@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/fort_ruin.tres" id="1_ewssy"]
+[ext_resource type="Resource" path="res://data/spawns/garrison_camp.tres" id="2_sxx4p"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_4mfb4"]
+[ext_resource type="PackedScene" path="res://scenes/sites/bandit_hold_a.tscn" id="4_splln"]
+
+[resource]
+script = ExtResource("3_4mfb4")
+sites = Array[PackedScene]([ExtResource("4_splln")])
+occupants = ExtResource("2_sxx4p")
+map_icon = "camp"
+dungeon = ExtResource("1_ewssy")
+enter_name = "Bandit Hold"
+id = &"site_bandit_hold"
+display_name = "Bandit Hold"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 30.0
+flatten_radius = 26.0
+max_slope_deg = 12.0

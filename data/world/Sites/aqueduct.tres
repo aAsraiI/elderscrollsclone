@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_uhoe3"]
+[ext_resource type="PackedScene" path="res://scenes/sites/aqueduct_a.tscn" id="2_t1ux4"]
+[ext_resource type="PackedScene" path="res://scenes/sites/aqueduct_b.tscn" id="3_03bd5"]
+
+[resource]
+script = ExtResource("1_uhoe3")
+sites = Array[PackedScene]([ExtResource("2_t1ux4"), ExtResource("3_03bd5")])
+map_icon = "ruin"
+enter_name = "Old Aqueduct"
+id = &"site_aqueduct"
+display_name = "Old Aqueduct"
+map_color = Color(0.6, 0.65, 0.5, 1)
+footprint_radius = 26.0
+max_slope_deg = 20.0

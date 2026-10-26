@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/garrison_tower.tres" id="1_13hdw"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_jw46j"]
+[ext_resource type="PackedScene" path="res://scenes/sites/watchtower_a.tscn" id="3_7qi5o"]
+[ext_resource type="PackedScene" path="res://scenes/sites/watchtower_b.tscn" id="4_al5aa"]
+
+[resource]
+script = ExtResource("2_jw46j")
+sites = Array[PackedScene]([ExtResource("3_7qi5o"), ExtResource("4_al5aa")])
+occupants = ExtResource("1_13hdw")
+map_icon = "tower"
+enter_name = "Watchtower"
+id = &"site_watchtower"
+display_name = "Watchtower"
+map_color = Color(0.7, 0.7, 0.75, 1)
+footprint_radius = 14.0
+flatten_radius = 10.0
+max_slope_deg = 12.0

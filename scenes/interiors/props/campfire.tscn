@@ -1,0 +1,61 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_1elmr"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="2_fwfhy"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_aptor"]
+[ext_resource type="Material" path="res://data/interiors/materials/glow.tres" id="4_31tjv"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_xtk0t"]
+top_radius = 0.6
+bottom_radius = 0.6
+height = 0.15
+radial_segments = 10
+
+[sub_resource type="BoxMesh" id="BoxMesh_m8aik"]
+size = Vector3(0.9, 0.12, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6x4wj"]
+size = Vector3(0.9, 0.12, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nhl3v"]
+size = Vector3(0.35, 0.3, 0.35)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pxyty"]
+size = Vector3(1.2, 0.505, 1.2)
+
+[node name="Campfire" type="StaticBody3D" unique_id=2088736315]
+script = ExtResource("1_1elmr")
+tags = PackedStringArray("campfire", "fire", "light")
+socket_kinds = PackedStringArray("LIGHT", "FURNITURE", "DECORATION")
+themes = PackedStringArray("camp", "house", "ruin", "mine")
+radius = 0.6
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=768116907]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.07, 0)
+material_override = ExtResource("2_fwfhy")
+mesh = SubResource("CylinderMesh_xtk0t")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1974048448]
+transform = Transform3D(0.8253356, 0, 0.5646425, 0, 1, 0, -0.5646425, 0, 0.8253356, 0, 0.2, 0)
+material_override = ExtResource("3_aptor")
+mesh = SubResource("BoxMesh_m8aik")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1965516219]
+transform = Transform3D(0.8253356, 0, -0.5646425, 0, 1, 0, 0.5646425, 0, 0.8253356, 0, 0.2, 0)
+material_override = ExtResource("3_aptor")
+mesh = SubResource("BoxMesh_6x4wj")
+
+[node name="Part3" type="MeshInstance3D" parent="." unique_id=1091842119]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+material_override = ExtResource("4_31tjv")
+mesh = SubResource("BoxMesh_nhl3v")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1660946265]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2475, 0)
+shape = SubResource("BoxShape3D_pxyty")
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=407984732]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+light_color = Color(1, 0.6, 0.3, 1)
+light_energy = 1.6
+omni_range = 9.0

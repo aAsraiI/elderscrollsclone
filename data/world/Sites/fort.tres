@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/fort_ruin.tres" id="1_sroum"]
+[ext_resource type="Resource" path="res://data/spawns/dungeon_fort.tres" id="2_rb10p"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_ompax"]
+[ext_resource type="PackedScene" path="res://scenes/sites/fort_a.tscn" id="4_36a3x"]
+[ext_resource type="PackedScene" path="res://scenes/sites/fort_b.tscn" id="5_1v2ph"]
+
+[resource]
+script = ExtResource("3_ompax")
+sites = Array[PackedScene]([ExtResource("4_36a3x"), ExtResource("5_1v2ph")])
+occupants = ExtResource("2_rb10p")
+map_icon = "fort"
+dungeon = ExtResource("1_sroum")
+enter_name = "Fort"
+id = &"site_fort"
+display_name = "Fort"
+map_color = Color(0.75, 0.6, 0.5, 1)
+footprint_radius = 36.0
+flatten_radius = 32.0
+max_slope_deg = 12.0

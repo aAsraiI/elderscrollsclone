@@ -8,6 +8,7 @@
 [ext_resource type="Resource" path="res://data/weapons/steel_greatsword.tres" id="item_3"]
 [ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/items/loot_entry.gd" id="loot"]
 [ext_resource type="Resource" uid="uid://ddg7mrjsyk25w" path="res://data/spawns/dungeon_crypt.tres" id="spawn_table"]
+[ext_resource type="Resource" path="res://data/interiors/recipes/crypt.tres" id="rcp_113"]
 
 [sub_resource type="Resource" id="loot_0"]
 script = ExtResource("loot")
@@ -31,6 +32,7 @@ chance = 0.2
 
 [resource]
 script = ExtResource("dd")
+recipe = ExtResource("rcp_113")
 id = &"crypt"
 display_name = "Old Crypt"
 min_rooms = 8

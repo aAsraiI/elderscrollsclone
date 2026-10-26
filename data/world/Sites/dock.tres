@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_8d20a"]
+[ext_resource type="PackedScene" path="res://scenes/sites/dock_a.tscn" id="2_kttmw"]
+
+[resource]
+script = ExtResource("1_8d20a")
+sites = Array[PackedScene]([ExtResource("2_kttmw")])
+map_icon = "dock"
+enter_name = "Dock"
+id = &"site_dock"
+display_name = "Dock"
+map_color = Color(0.5, 0.6, 0.7, 1)
+footprint_radius = 18.0
+flatten_radius = 12.0
+max_slope_deg = 12.0

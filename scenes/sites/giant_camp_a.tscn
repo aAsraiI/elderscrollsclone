@@ -1,0 +1,184 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_fpyr4"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="2_qlff4"]
+[ext_resource type="Material" path="res://data/interiors/materials/glow.tres" id="3_y3qcx"]
+[ext_resource type="Material" path="res://data/interiors/materials/bone.tres" id="4_x0p73"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="5_mbdie"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ei6hg"]
+size = Vector3(2.4, 0.4, 2.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hq0hr"]
+size = Vector3(2.4, 0.4, 2.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pmjb5"]
+size = Vector3(1.6, 0.8, 1.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_47y35"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ssc5c"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3e3xo"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bdwhf"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lofal"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5vsw3"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yxyhj"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_eow2n"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_aeosc"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yah4y"]
+size = Vector3(0.5, 6, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ag7to"]
+size = Vector3(3.2, 1.8, 2.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mmp4u"]
+size = Vector3(3.2, 1.8, 2.6)
+
+[node name="GiantCampA" type="Node3D" unique_id=1622605510]
+script = ExtResource("1_fpyr4")
+site_kind = "giant_camp"
+biomes = PackedStringArray("highlands", "tundra", "snow_mountains", "frozen_crown", "badlands")
+size_class = 2
+min_distance = 1200.0
+themes = PackedStringArray("camp")
+cells = Vector3i(10, 2, 10)
+
+[node name="Part1" type="StaticBody3D" parent="." unique_id=1977709492 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part1" unique_id=1541873352]
+material_override = ExtResource("2_qlff4")
+mesh = SubResource("BoxMesh_ei6hg")
+
+[node name="Shape" type="CollisionShape3D" parent="Part1" unique_id=522570470]
+shape = SubResource("BoxShape3D_hq0hr")
+
+[node name="Part2" type="Node3D" parent="." unique_id=261638264 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part2" unique_id=1272155658]
+material_override = ExtResource("3_y3qcx")
+mesh = SubResource("BoxMesh_pmjb5")
+
+[node name="Part3" type="StaticBody3D" parent="." unique_id=2015441770 groups=["interior_geometry"]]
+transform = Transform3D(0.9393727, 0.3428978, 0, -0.3428978, 0.9393727, 0, 0, 0, 1, 7, 2.6, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part3" unique_id=1006971973]
+material_override = ExtResource("4_x0p73")
+mesh = SubResource("BoxMesh_47y35")
+
+[node name="Shape" type="CollisionShape3D" parent="Part3" unique_id=1668007419]
+shape = SubResource("BoxShape3D_ssc5c")
+
+[node name="Part4" type="StaticBody3D" parent="." unique_id=604274962 groups=["interior_geometry"]]
+transform = Transform3D(0.9942106, 0.10596125, -0.017817913, -0.10596125, 0.9393727, -0.3261152, -0.017817913, 0.3261152, 0.9451621, 2.163119, 2.6, 6.657396)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part4" unique_id=925070332]
+material_override = ExtResource("4_x0p73")
+mesh = SubResource("BoxMesh_3e3xo")
+
+[node name="Shape" type="CollisionShape3D" parent="Part4" unique_id=1570880074]
+shape = SubResource("BoxShape3D_bdwhf")
+
+[node name="Part5" type="StaticBody3D" parent="." unique_id=1569624594 groups=["interior_geometry"]]
+transform = Transform3D(0.9603189, -0.27741015, 0.028829986, 0.27741015, 0.9393727, -0.20155028, 0.028829986, 0.20155028, 0.9790538, -5.663119, 2.6, 4.1144967)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part5" unique_id=53610174]
+material_override = ExtResource("4_x0p73")
+mesh = SubResource("BoxMesh_lofal")
+
+[node name="Shape" type="CollisionShape3D" parent="Part5" unique_id=1042972106]
+shape = SubResource("BoxShape3D_5vsw3")
+
+[node name="Part6" type="StaticBody3D" parent="." unique_id=700549568 groups=["interior_geometry"]]
+transform = Transform3D(0.9603189, -0.27741015, -0.028829986, 0.27741015, 0.9393727, 0.20155028, -0.028829986, -0.20155028, 0.9790538, -5.663119, 2.6, -4.1144967)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part6" unique_id=1455427819]
+material_override = ExtResource("4_x0p73")
+mesh = SubResource("BoxMesh_yxyhj")
+
+[node name="Shape" type="CollisionShape3D" parent="Part6" unique_id=1343613283]
+shape = SubResource("BoxShape3D_eow2n")
+
+[node name="Part7" type="StaticBody3D" parent="." unique_id=1751171379 groups=["interior_geometry"]]
+transform = Transform3D(0.9942106, 0.10596125, 0.017817913, -0.10596125, 0.9393727, 0.3261152, 0.017817913, -0.3261152, 0.9451621, 2.163119, 2.6, -6.657396)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part7" unique_id=616213966]
+material_override = ExtResource("4_x0p73")
+mesh = SubResource("BoxMesh_aeosc")
+
+[node name="Shape" type="CollisionShape3D" parent="Part7" unique_id=1753522385]
+shape = SubResource("BoxShape3D_yah4y")
+
+[node name="Part8" type="StaticBody3D" parent="." unique_id=780362013 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.9, 6)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part8" unique_id=1134008566]
+material_override = ExtResource("4_x0p73")
+mesh = SubResource("BoxMesh_ag7to")
+
+[node name="Shape" type="CollisionShape3D" parent="Part8" unique_id=1478091801]
+shape = SubResource("BoxShape3D_mmp4u")
+
+[node name="Light8" type="Marker3D" parent="." unique_id=1249712997]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.5)
+script = ExtResource("5_mbdie")
+kind = 7
+tags = PackedStringArray("campfire")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Decoration9" type="Marker3D" parent="." unique_id=683415545]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 5)
+script = ExtResource("5_mbdie")
+tags = PackedStringArray("bones", "remains")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Decoration10" type="Marker3D" parent="." unique_id=249268436]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -9)
+script = ExtResource("5_mbdie")
+tags = PackedStringArray("bones", "remains")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Boss11" type="Marker3D" parent="." unique_id=152791983]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 4)
+script = ExtResource("5_mbdie")
+kind = 6
+tags = PackedStringArray()
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Enemy12" type="Marker3D" parent="." unique_id=1880703908]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 2)
+script = ExtResource("5_mbdie")
+kind = 5
+tags = PackedStringArray()
+chance = 0.8
+pool = PackedStringArray()
+
+[node name="Chest13" type="Marker3D" parent="." unique_id=1050715381]
+transform = Transform3D(0.87758255, 0, 0.47942555, 0, 1, 0, -0.47942555, 0, 0.87758255, -12, 0, -6)
+script = ExtResource("5_mbdie")
+kind = 3
+tags = PackedStringArray()
+chance = 1.0
+pool = PackedStringArray()

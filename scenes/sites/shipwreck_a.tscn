@@ -1,0 +1,94 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_g8fjn"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_y68we"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="3_losoj"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="4_hewud"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_l8k8o"]
+size = Vector3(6, 4, 22)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_utf02"]
+size = Vector3(6, 4, 22)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hhb0j"]
+size = Vector3(0.5, 12, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jlqio"]
+size = Vector3(0.5, 12, 0.5)
+
+[node name="ShipwreckA" type="Node3D" unique_id=839114447]
+script = ExtResource("1_g8fjn")
+site_kind = "shipwreck"
+biomes = PackedStringArray("coast", "swamp", "lakeland")
+size_class = 2
+min_distance = 900.0
+map_icon = "wreck"
+themes = PackedStringArray("house")
+cells = Vector3i(8, 2, 8)
+
+[node name="Part1" type="StaticBody3D" parent="." unique_id=1371593109 groups=["interior_geometry"]]
+transform = Transform3D(0.89741707, -0.32758278, 0.29552022, 0.3428978, 0.9393727, 0, -0.27760363, 0.10133323, 0.9553365, 0, 1.2, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part1" unique_id=164280116]
+material_override = ExtResource("2_y68we")
+mesh = SubResource("BoxMesh_l8k8o")
+
+[node name="Shape" type="CollisionShape3D" parent="Part1" unique_id=34688763]
+shape = SubResource("BoxShape3D_utf02")
+
+[node name="Part2" type="StaticBody3D" parent="." unique_id=119663560 groups=["interior_geometry"]]
+transform = Transform3D(0.62161, -0.7833269, 0, 0.7833269, 0.62161, 0, 0, 0, 1, -3, 5, -2)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part2" unique_id=1601182489]
+material_override = ExtResource("3_losoj")
+mesh = SubResource("BoxMesh_hhb0j")
+
+[node name="Shape" type="CollisionShape3D" parent="Part2" unique_id=1126092821]
+shape = SubResource("BoxShape3D_jlqio")
+
+[node name="Decoration2" type="Marker3D" parent="." unique_id=1858958894]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 4)
+script = ExtResource("4_hewud")
+tags = PackedStringArray("crate", "barrel")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Decoration3" type="Marker3D" parent="." unique_id=725432747]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -6)
+script = ExtResource("4_hewud")
+tags = PackedStringArray("crate", "barrel")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Decoration4" type="Marker3D" parent="." unique_id=1881969916]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 8)
+script = ExtResource("4_hewud")
+tags = PackedStringArray("rope")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Chest5" type="Marker3D" parent="." unique_id=862135914]
+transform = Transform3D(0.8253356, 0, 0.5646425, 0, 1, 0, -0.5646425, 0, 0.8253356, 4.5, 0, -1)
+script = ExtResource("4_hewud")
+kind = 3
+tags = PackedStringArray()
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Enemy6" type="Marker3D" parent="." unique_id=690820886]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -9)
+script = ExtResource("4_hewud")
+kind = 5
+tags = PackedStringArray()
+chance = 1.0
+pool = PackedStringArray()
+count = 2
+
+[node name="Boss7" type="Marker3D" parent="." unique_id=426398700]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5, 0, 9)
+script = ExtResource("4_hewud")
+kind = 6
+tags = PackedStringArray()
+chance = 0.6
+pool = PackedStringArray()

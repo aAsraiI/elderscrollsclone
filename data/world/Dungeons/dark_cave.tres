@@ -7,6 +7,7 @@
 [ext_resource type="Resource" uid="uid://ccs0i8i2yls70" path="res://data/weapons/iron_sword.tres" id="item_2"]
 [ext_resource type="Script" uid="uid://ddwlysg0tvmni" path="res://scripts/items/loot_entry.gd" id="loot"]
 [ext_resource type="Resource" uid="uid://c1l6qrwk7ld64" path="res://data/spawns/dungeon_cave.tres" id="spawn_table"]
+[ext_resource type="Resource" path="res://data/interiors/recipes/cave.tres" id="rcp_113"]
 
 [sub_resource type="Resource" id="loot_0"]
 script = ExtResource("loot")
@@ -25,6 +26,7 @@ chance = 0.4
 
 [resource]
 script = ExtResource("dd")
+recipe = ExtResource("rcp_113")
 id = &"dark_cave"
 loot_table = Array[ExtResource("loot")]([SubResource("loot_0"), SubResource("loot_1"), SubResource("loot_2")])
 spawn_table = ExtResource("spawn_table")

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_iqd54"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ferry_a.tscn" id="2_30kul"]
+
+[resource]
+script = ExtResource("1_iqd54")
+sites = Array[PackedScene]([ExtResource("2_30kul")])
+map_icon = "dock"
+enter_name = "Ferry"
+id = &"site_ferry"
+display_name = "Ferry"
+map_color = Color(0.5, 0.6, 0.7, 1)
+footprint_radius = 16.0
+flatten_radius = 10.0
+max_slope_deg = 12.0

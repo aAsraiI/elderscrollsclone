@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_hdyb2"]
+[ext_resource type="Material" path="res://data/interiors/materials/ash.tres" id="2_m1io3"]
+[ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="3_vx6c4"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_p65k0"]
+size = Vector3(0.6, 0.15, 3.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_o52q1"]
+size = Vector3(0.4, 0.6, 3.4)
+
+[node name="CropRow" type="StaticBody3D" unique_id=50301506]
+collision_layer = 0
+script = ExtResource("1_hdyb2")
+tags = PackedStringArray("crops", "field")
+socket_kinds = PackedStringArray("DECORATION")
+themes = PackedStringArray("house")
+radius = 1.8
+weight = 2.0
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=432135802]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.07, 0)
+material_override = ExtResource("2_m1io3")
+mesh = SubResource("BoxMesh_p65k0")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1624967966]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+material_override = ExtResource("3_vx6c4")
+mesh = SubResource("BoxMesh_o52q1")

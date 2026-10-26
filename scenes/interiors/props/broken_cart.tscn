@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_ewotk"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_wqcbq"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_mh53m"]
+size = Vector3(1.4, 0.5, 2.4)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_af0lx"]
+height = 0.1
+radial_segments = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_smtt0"]
+size = Vector3(2.6, 0.65, 2.4)
+
+[node name="BrokenCart" type="StaticBody3D" unique_id=2084705094]
+script = ExtResource("1_ewotk")
+tags = PackedStringArray("cart", "wreck")
+socket_kinds = PackedStringArray("DECORATION", "FURNITURE")
+themes = PackedStringArray("camp", "house", "fort", "ruin", "mine", "crypt")
+radius = 1.300000011920929
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=1995274923]
+transform = Transform3D(0.9553365, 0, 0.29552022, 0, 1, 0, -0.29552022, 0, 0.9553365, 0, 0.45, 0)
+material_override = ExtResource("2_wqcbq")
+mesh = SubResource("BoxMesh_mh53m")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=1549244325]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0.1, 0.6)
+material_override = ExtResource("2_wqcbq")
+mesh = SubResource("CylinderMesh_af0lx")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=606302638]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.099999964, 0.375, 0)
+shape = SubResource("BoxShape3D_smtt0")

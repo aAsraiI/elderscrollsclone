@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_bqiql"]
+[ext_resource type="PackedScene" path="res://scenes/sites/farmstead_a.tscn" id="2_rmkum"]
+[ext_resource type="PackedScene" path="res://scenes/sites/farmstead_b.tscn" id="3_buny5"]
+
+[resource]
+script = ExtResource("1_bqiql")
+sites = Array[PackedScene]([ExtResource("2_rmkum"), ExtResource("3_buny5")])
+map_icon = "farm"
+enter_name = "Farmstead"
+id = &"site_farmstead"
+display_name = "Farmstead"
+map_color = Color(0.85, 0.8, 0.4, 1)
+footprint_radius = 24.0
+flatten_radius = 20.0
+max_slope_deg = 12.0

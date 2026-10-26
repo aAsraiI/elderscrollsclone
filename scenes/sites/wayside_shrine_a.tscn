@@ -1,0 +1,107 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_ugr0p"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_frtu2"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_du0wb"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="4_w72t7"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_yalwg"]
+size = Vector3(4, 0.3, 4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oscj0"]
+size = Vector3(4, 0.3, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7d1q1"]
+size = Vector3(0.5, 3, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vhjkh"]
+size = Vector3(0.5, 3, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_x5bwk"]
+size = Vector3(0.5, 3, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7xccu"]
+size = Vector3(0.5, 3, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vnjih"]
+size = Vector3(4, 0.4, 1.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_k38m8"]
+size = Vector3(4, 0.4, 1.6)
+
+[node name="WaysideShrineA" type="Node3D" unique_id=387647278]
+script = ExtResource("1_ugr0p")
+site_kind = "wayside_shrine"
+biomes = PackedStringArray()
+size_class = 0
+min_distance = 500.0
+map_icon = "shrine"
+themes = PackedStringArray("crypt")
+cells = Vector3i(4, 1, 4)
+
+[node name="Part1" type="StaticBody3D" parent="." unique_id=1406670785 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part1" unique_id=38101063]
+material_override = ExtResource("2_frtu2")
+mesh = SubResource("BoxMesh_yalwg")
+
+[node name="Shape" type="CollisionShape3D" parent="Part1" unique_id=1332984873]
+shape = SubResource("BoxShape3D_oscj0")
+
+[node name="Part2" type="StaticBody3D" parent="." unique_id=1984481458 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.5, 1.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part2" unique_id=1474361639]
+material_override = ExtResource("2_frtu2")
+mesh = SubResource("BoxMesh_7d1q1")
+
+[node name="Shape" type="CollisionShape3D" parent="Part2" unique_id=1524073819]
+shape = SubResource("BoxShape3D_vhjkh")
+
+[node name="Part3" type="StaticBody3D" parent="." unique_id=2007876317 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.5, 1.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part3" unique_id=837081288]
+material_override = ExtResource("2_frtu2")
+mesh = SubResource("BoxMesh_x5bwk")
+
+[node name="Shape" type="CollisionShape3D" parent="Part3" unique_id=1733893388]
+shape = SubResource("BoxShape3D_7xccu")
+
+[node name="Part4" type="StaticBody3D" parent="." unique_id=1003942719 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 1.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part4" unique_id=1045304167]
+material_override = ExtResource("3_du0wb")
+mesh = SubResource("BoxMesh_vnjih")
+
+[node name="Shape" type="CollisionShape3D" parent="Part4" unique_id=664071665]
+shape = SubResource("BoxShape3D_k38m8")
+
+[node name="Furniture4" type="Marker3D" parent="." unique_id=1080989928]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 1)
+script = ExtResource("4_w72t7")
+kind = 0
+tags = PackedStringArray("altar")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Light5" type="Marker3D" parent="." unique_id=644499371]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.3, -0.4)
+script = ExtResource("4_w72t7")
+kind = 7
+tags = PackedStringArray("candle")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Light6" type="Marker3D" parent="." unique_id=1008189997]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.3, -0.4)
+script = ExtResource("4_w72t7")
+kind = 7
+tags = PackedStringArray("candle")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Blessing" type="Marker3D" parent="." unique_id=511007681]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -0.6)

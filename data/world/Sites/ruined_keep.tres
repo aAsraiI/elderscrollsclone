@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/crypt.tres" id="1_sh7of"]
+[ext_resource type="Resource" path="res://data/spawns/garrison_ruins.tres" id="2_4hjjq"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_ejukv"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ruined_keep_a.tscn" id="4_ijp0r"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ruined_keep_b.tscn" id="5_84wuq"]
+
+[resource]
+script = ExtResource("3_ejukv")
+sites = Array[PackedScene]([ExtResource("4_ijp0r"), ExtResource("5_84wuq")])
+occupants = ExtResource("2_4hjjq")
+map_icon = "ruin"
+dungeon = ExtResource("1_sh7of")
+enter_name = "Ruined Keep"
+id = &"site_ruined_keep"
+display_name = "Ruined Keep"
+map_color = Color(0.6, 0.65, 0.5, 1)
+footprint_radius = 26.0
+flatten_radius = 20.0
+max_slope_deg = 12.0

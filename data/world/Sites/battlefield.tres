@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_dead_ghouls.tres" id="1_t7jef"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_tvs7q"]
+[ext_resource type="PackedScene" path="res://scenes/sites/battlefield_a.tscn" id="3_8qh7f"]
+[ext_resource type="PackedScene" path="res://scenes/sites/battlefield_b.tscn" id="4_rp1e5"]
+
+[resource]
+script = ExtResource("2_tvs7q")
+sites = Array[PackedScene]([ExtResource("3_8qh7f"), ExtResource("4_rp1e5")])
+occupants = ExtResource("1_t7jef")
+map_icon = "battle"
+enter_name = "Old Battlefield"
+id = &"site_battlefield"
+display_name = "Old Battlefield"
+map_color = Color(0.7, 0.4, 0.35, 1)
+footprint_radius = 30.0
+max_slope_deg = 20.0

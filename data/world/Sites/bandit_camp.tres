@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/garrison_camp.tres" id="1_hydvk"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_exhpx"]
+[ext_resource type="PackedScene" path="res://scenes/sites/bandit_camp_a.tscn" id="3_xn8hf"]
+[ext_resource type="PackedScene" path="res://scenes/sites/bandit_camp_b.tscn" id="4_kwqyd"]
+
+[resource]
+script = ExtResource("2_exhpx")
+sites = Array[PackedScene]([ExtResource("3_xn8hf"), ExtResource("4_kwqyd")])
+occupants = ExtResource("1_hydvk")
+map_icon = "camp"
+enter_name = "Bandit Camp"
+id = &"site_bandit_camp"
+display_name = "Bandit Camp"
+map_color = Color(0.8, 0.45, 0.3, 1)
+flatten_radius = 16.0
+max_slope_deg = 12.0

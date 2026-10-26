@@ -1,0 +1,91 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_8avw1"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_pdh2v"]
+
+[node name="HuntersCampB" type="Node3D" unique_id=333852422]
+script = ExtResource("1_8avw1")
+site_kind = "hunters_camp"
+biomes = PackedStringArray("forest", "tundra", "snow_mountains", "highlands", "lakeland", "swamp")
+min_distance = 500.0
+themes = PackedStringArray("camp")
+cells = Vector3i(6, 1, 6)
+
+[node name="Light0" type="Marker3D" parent="." unique_id=387523770]
+script = ExtResource("2_pdh2v")
+kind = 7
+tags = PackedStringArray("campfire")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Furniture1" type="Marker3D" parent="." unique_id=151948464]
+transform = Transform3D(0.841471, 0, 0.5403023, 0, 1, 0, -0.5403023, 0, 0.841471, 3.241814, 0, 5.0488257)
+script = ExtResource("2_pdh2v")
+kind = 0
+tags = PackedStringArray("tent")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Furniture2" type="Marker3D" parent="." unique_id=464277058]
+transform = Transform3D(0.047180016, 0, -0.9988864, 0, 1, 0, 0.9988864, 0, 0.047180016, -5.9933186, 0, 0.2830802)
+script = ExtResource("2_pdh2v")
+kind = 0
+tags = PackedStringArray("tent")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Furniture3" type="Marker3D" parent="." unique_id=993576345]
+transform = Transform3D(-0.888651, 0, 0.45858404, 0, 1, 0, -0.45858404, 0, -0.888651, 2.7515047, 0, -5.3319063)
+script = ExtResource("2_pdh2v")
+kind = 0
+tags = PackedStringArray("tent")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Furniture4" type="Marker3D" parent="." unique_id=1228346530]
+transform = Transform3D(0.921061, 0, 0.38941833, 0, 1, 0, -0.38941833, 0, 0.921061, -6, 0, -4)
+script = ExtResource("2_pdh2v")
+kind = 0
+tags = PackedStringArray("rack", "pelts")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Furniture5" type="Marker3D" parent="." unique_id=875433207]
+transform = Transform3D(0.9553365, 0, -0.29552022, 0, 1, 0, 0.29552022, 0, 0.9553365, 5.5, 0, -5)
+script = ExtResource("2_pdh2v")
+kind = 0
+tags = PackedStringArray("rack", "pelts")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Furniture6" type="Marker3D" parent="." unique_id=1928141120]
+transform = Transform3D(0.9553365, 0, 0.29552022, 0, 1, 0, -0.29552022, 0, 0.9553365, 2, 0, 0.5)
+script = ExtResource("2_pdh2v")
+kind = 0
+tags = PackedStringArray("log", "seat")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Enemy7" type="Marker3D" parent="." unique_id=2003826613]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 1)
+script = ExtResource("2_pdh2v")
+kind = 5
+tags = PackedStringArray("eating")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Enemy8" type="Marker3D" parent="." unique_id=1648460778]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -3)
+script = ExtResource("2_pdh2v")
+kind = 5
+tags = PackedStringArray()
+chance = 0.7
+pool = PackedStringArray()
+
+[node name="Chest9" type="Marker3D" parent="." unique_id=2086358158]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 7.5)
+script = ExtResource("2_pdh2v")
+kind = 3
+tags = PackedStringArray()
+chance = 0.8
+pool = PackedStringArray()

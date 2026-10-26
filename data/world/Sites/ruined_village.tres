@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_dead_ghouls.tres" id="1_c7txr"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_dmeou"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ruined_village_a.tscn" id="3_y6uxc"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ruined_village_b.tscn" id="4_ojn2a"]
+
+[resource]
+script = ExtResource("2_dmeou")
+sites = Array[PackedScene]([ExtResource("3_y6uxc"), ExtResource("4_ojn2a")])
+occupants = ExtResource("1_c7txr")
+map_icon = "ruin"
+enter_name = "Ruined Village"
+id = &"site_ruined_village"
+display_name = "Ruined Village"
+map_color = Color(0.6, 0.65, 0.5, 1)
+footprint_radius = 30.0
+flatten_radius = 24.0
+max_slope_deg = 12.0

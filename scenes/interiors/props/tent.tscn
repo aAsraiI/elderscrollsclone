@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/interior_prop.gd" id="1_86esh"]
+[ext_resource type="Material" path="res://data/interiors/materials/cloth.tres" id="2_e3kfo"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_dqw5v"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_0ahuf"]
+size = Vector3(2.6, 0.08, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ydqp4"]
+size = Vector3(0.06, 1.9, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_okxr0"]
+size = Vector3(0.06, 1.9, 0.06)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_puc30"]
+size = Vector3(3, 1.9, 3)
+
+[node name="Tent" type="StaticBody3D" unique_id=790999050]
+script = ExtResource("1_86esh")
+tags = PackedStringArray("tent")
+socket_kinds = PackedStringArray("FURNITURE")
+themes = PackedStringArray("camp")
+radius = 1.5
+
+[node name="Part0" type="MeshInstance3D" parent="." unique_id=790721119]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.62, 0.9, 0)
+material_override = ExtResource("2_e3kfo")
+mesh = SubResource("BoxMesh_0ahuf")
+
+[node name="Part1" type="MeshInstance3D" parent="." unique_id=537746311]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, -1.4)
+material_override = ExtResource("3_dqw5v")
+mesh = SubResource("BoxMesh_ydqp4")
+
+[node name="Part2" type="MeshInstance3D" parent="." unique_id=1775055212]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 1.4)
+material_override = ExtResource("3_dqw5v")
+mesh = SubResource("BoxMesh_okxr0")
+
+[node name="Shape" type="CollisionShape3D" parent="." unique_id=1056516895]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.61999995, 0.95, 0)
+shape = SubResource("BoxShape3D_puc30")

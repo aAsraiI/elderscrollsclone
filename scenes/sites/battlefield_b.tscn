@@ -1,0 +1,231 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_4a8fv"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_am4hj"]
+
+[node name="BattlefieldB" type="Node3D" unique_id=401666200]
+script = ExtResource("1_4a8fv")
+site_kind = "battlefield"
+biomes = PackedStringArray("plains", "highlands", "deadlands", "ashlands", "badlands", "tundra")
+size_class = 3
+min_distance = 1500.0
+map_icon = "battle"
+themes = PackedStringArray("ruin")
+cells = Vector3i(14, 1, 14)
+
+[node name="Decoration0" type="Marker3D" parent="." unique_id=102607981]
+transform = Transform3D(-0.59986216, 0, 0.80010337, 0, 1, 0, -0.80010337, 0, -0.59986216, 3.1947746, 0, 23.6688)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("weapons", "battle")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration1" type="Marker3D" parent="." unique_id=109641600]
+transform = Transform3D(0.2635968, 0, 0.9646329, 0, 1, 0, -0.9646329, 0, 0.2635968, -3.416504, 0, -3.0206795)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("bones", "remains")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration2" type="Marker3D" parent="." unique_id=1124985241]
+transform = Transform3D(0.83600676, 0, -0.54871917, 0, 1, 0, 0.54871917, 0, 0.83600676, 23.578613, 0, -21.98606)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("weapons", "battle")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration3" type="Marker3D" parent="." unique_id=2000188298]
+transform = Transform3D(0.3234449, 0, 0.946247, 0, 1, 0, -0.946247, 0, 0.3234449, 8.036026, 0, 22.449654)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("bones", "remains")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration4" type="Marker3D" parent="." unique_id=388964724]
+transform = Transform3D(-0.72945374, 0, -0.6840302, 0, 1, 0, 0.6840302, 0, -0.72945374, 4.579727, 0, 15.637226)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("weapons", "battle")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration5" type="Marker3D" parent="." unique_id=574429215]
+transform = Transform3D(0.004043405, 0, 0.99999183, 0, 1, 0, -0.99999183, 0, 0.004043405, 15.101715, 0, -6.2024307)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("bones", "remains")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration6" type="Marker3D" parent="." unique_id=105544617]
+transform = Transform3D(0.8602007, 0, -0.5099556, 0, 1, 0, 0.5099556, 0, 0.8602007, 5.747547, 0, 16.158558)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("weapons", "battle")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration7" type="Marker3D" parent="." unique_id=721891780]
+transform = Transform3D(-0.85074246, 0, 0.52558273, 0, 1, 0, -0.52558273, 0, -0.85074246, -18.559761, 0, -5.7320404)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("bones", "remains")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration8" type="Marker3D" parent="." unique_id=1914196698]
+transform = Transform3D(0.9991808, 0, 0.04046845, 0, 1, 0, -0.04046845, 0, 0.9991808, -14.160626, 0, 4.8138275)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("weapons", "battle")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration9" type="Marker3D" parent="." unique_id=1106325299]
+transform = Transform3D(0.08587073, 0, -0.9963063, 0, 1, 0, 0.9963063, 0, 0.08587073, 14.48851, 0, 3.212349)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("bones", "remains")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration10" type="Marker3D" parent="." unique_id=1682498545]
+transform = Transform3D(0.94172597, 0, 0.33638105, 0, 1, 0, -0.33638105, 0, 0.94172597, -10.998331, 0, 20.791618)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("weapons", "battle")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration11" type="Marker3D" parent="." unique_id=1378580779]
+transform = Transform3D(0.58725685, 0, -0.8094006, 0, 1, 0, 0.8094006, 0, 0.58725685, 13.603268, 0, -11.484306)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("bones", "remains")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration12" type="Marker3D" parent="." unique_id=500751331]
+transform = Transform3D(0.9824301, 0, -0.1866308, 0, 1, 0, 0.1866308, 0, 0.9824301, 8.618225, 0, -7.338291)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("weapons", "battle")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration13" type="Marker3D" parent="." unique_id=2126761189]
+transform = Transform3D(-0.77186114, 0, -0.6357912, 0, 1, 0, 0.6357912, 0, -0.77186114, -8.611086, 0, 11.25671)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("bones", "remains")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration14" type="Marker3D" parent="." unique_id=873065109]
+transform = Transform3D(-0.12981538, 0, 0.99153817, 0, 1, 0, -0.99153817, 0, -0.12981538, 12.951981, 0, -10.8236475)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("weapons", "battle")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration15" type="Marker3D" parent="." unique_id=515310668]
+transform = Transform3D(-0.14678417, 0, -0.9891685, 0, 1, 0, 0.9891685, 0, -0.14678417, -1.1002007, 0, -7.8916187)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("bones", "remains")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration16" type="Marker3D" parent="." unique_id=1606741087]
+transform = Transform3D(-0.96216786, 0, 0.27245733, 0, 1, 0, -0.27245733, 0, -0.96216786, 14.411102, 0, -20.671791)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("weapons", "battle")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration17" type="Marker3D" parent="." unique_id=1541195302]
+transform = Transform3D(0.7826641, 0, 0.6224443, 0, 1, 0, -0.6224443, 0, 0.7826641, 22.45478, 0, -0.51224136)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("bones", "remains")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration18" type="Marker3D" parent="." unique_id=1147765519]
+transform = Transform3D(0.54829067, 0, 0.83628786, 0, 1, 0, -0.83628786, 0, 0.54829067, 11.274677, 0, 7.518606)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("banner", "pole")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration19" type="Marker3D" parent="." unique_id=49379635]
+transform = Transform3D(0.7665427, 0, 0.6421934, 0, 1, 0, -0.6421934, 0, 0.7665427, -4.2662773, 0, -9.88031)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("banner", "pole")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration20" type="Marker3D" parent="." unique_id=553271119]
+transform = Transform3D(-0.09461515, 0, 0.9955139, 0, 1, 0, -0.9955139, 0, -0.09461515, -4.63521, 0, -10.250772)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("banner", "pole")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration21" type="Marker3D" parent="." unique_id=572520389]
+transform = Transform3D(-0.46179858, 0, 0.8869848, 0, 1, 0, -0.8869848, 0, -0.46179858, 3.8267517, 0, 6.1681786)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("banner", "pole")
+chance = 0.9
+pool = PackedStringArray()
+
+[node name="Decoration22" type="Marker3D" parent="." unique_id=644166252]
+transform = Transform3D(-0.41614684, 0, 0.9092974, 0, 1, 0, -0.9092974, 0, -0.41614684, 6, 0, -4)
+script = ExtResource("2_am4hj")
+tags = PackedStringArray("cart", "wreck")
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Enemy23" type="Marker3D" parent="." unique_id=739972847]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9990044, 0, 8.023672)
+script = ExtResource("2_am4hj")
+kind = 5
+tags = PackedStringArray("undead")
+chance = 0.7
+pool = PackedStringArray()
+
+[node name="Enemy24" type="Marker3D" parent="." unique_id=1629766609]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.905562, 0, 0.35570908)
+script = ExtResource("2_am4hj")
+kind = 5
+tags = PackedStringArray("undead")
+chance = 0.7
+pool = PackedStringArray()
+
+[node name="Enemy25" type="Marker3D" parent="." unique_id=684830181]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2112026, 0, -15.443859)
+script = ExtResource("2_am4hj")
+kind = 5
+tags = PackedStringArray("undead")
+chance = 0.7
+pool = PackedStringArray()
+
+[node name="Enemy26" type="Marker3D" parent="." unique_id=2037104358]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.415079, 0, -9.1769495)
+script = ExtResource("2_am4hj")
+kind = 5
+tags = PackedStringArray("undead")
+chance = 0.7
+pool = PackedStringArray()
+
+[node name="Enemy27" type="Marker3D" parent="." unique_id=1809748196]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.9769, 0, 13.7788105)
+script = ExtResource("2_am4hj")
+kind = 5
+tags = PackedStringArray("undead")
+chance = 0.7
+pool = PackedStringArray()
+
+[node name="Boss28" type="Marker3D" parent="." unique_id=397346124]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+script = ExtResource("2_am4hj")
+kind = 6
+tags = PackedStringArray()
+chance = 0.8
+pool = PackedStringArray()
+
+[node name="Loot29" type="Marker3D" parent="." unique_id=1789422698]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 6)
+script = ExtResource("2_am4hj")
+kind = 4
+tags = PackedStringArray()
+chance = 0.8
+pool = PackedStringArray()

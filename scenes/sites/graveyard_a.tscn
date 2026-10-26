@@ -1,0 +1,403 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_s6djo"]
+[ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="2_wcfn5"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="3_rsoy7"]
+[ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="4_poj8a"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="5_tya4l"]
+[ext_resource type="Script" path="res://scripts/sites/site_link.gd" id="6_poxyb"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_efyvp"]
+size = Vector3(15, 1.1, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lbgly"]
+size = Vector3(15, 1.1, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hiwe3"]
+size = Vector3(15, 1.1, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cdowd"]
+size = Vector3(15, 1.1, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i3d43"]
+size = Vector3(34, 1.1, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_suc3k"]
+size = Vector3(34, 1.1, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_52rm1"]
+size = Vector3(34, 1.1, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sbd0d"]
+size = Vector3(34, 1.1, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7ub8h"]
+size = Vector3(34.000004, 1.1, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ywfuj"]
+size = Vector3(34.000004, 1.1, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_b0g7g"]
+size = Vector3(2.8, 3.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4xra6"]
+size = Vector3(2.8, 3.2, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2pi6a"]
+size = Vector3(2.8, 3.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_o7aja"]
+size = Vector3(2.8, 3.2, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_b5bf1"]
+size = Vector3(6, 3.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0l5yj"]
+size = Vector3(6, 3.2, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_apcgw"]
+size = Vector3(7, 3.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dlg0x"]
+size = Vector3(7, 3.2, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dkh3i"]
+size = Vector3(6, 3.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_soriw"]
+size = Vector3(6, 3.2, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ft1fi"]
+size = Vector3(7.6, 0.15, 3.72)
+
+[sub_resource type="BoxMesh" id="BoxMesh_is1w8"]
+size = Vector3(7.6, 0.15, 3.72)
+
+[node name="GraveyardA" type="Node3D" unique_id=1054243731]
+script = ExtResource("1_s6djo")
+site_kind = "graveyard"
+biomes = PackedStringArray()
+size_class = 2
+min_distance = 800.0
+map_icon = "grave"
+themes = PackedStringArray("crypt")
+cells = Vector3i(10, 2, 10)
+
+[node name="Part1" type="StaticBody3D" parent="." unique_id=284243389 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0.55, -17)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part1" unique_id=800106110]
+material_override = ExtResource("2_wcfn5")
+mesh = SubResource("BoxMesh_efyvp")
+
+[node name="Shape" type="CollisionShape3D" parent="Part1" unique_id=356857398]
+shape = SubResource("BoxShape3D_lbgly")
+
+[node name="Part2" type="StaticBody3D" parent="." unique_id=1348452650 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 0.55, -17)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part2" unique_id=1401954292]
+material_override = ExtResource("2_wcfn5")
+mesh = SubResource("BoxMesh_hiwe3")
+
+[node name="Shape" type="CollisionShape3D" parent="Part2" unique_id=1626756831]
+shape = SubResource("BoxShape3D_cdowd")
+
+[node name="Part3" type="StaticBody3D" parent="." unique_id=245418814 groups=["interior_geometry"]]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 17, 0.55, 9.536743e-07)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part3" unique_id=800236483]
+material_override = ExtResource("2_wcfn5")
+mesh = SubResource("BoxMesh_i3d43")
+
+[node name="Shape" type="CollisionShape3D" parent="Part3" unique_id=1379136740]
+shape = SubResource("BoxShape3D_suc3k")
+
+[node name="Part4" type="StaticBody3D" parent="." unique_id=1159145682 groups=["interior_geometry"]]
+transform = Transform3D(-1, 0, 1.509958e-07, 0, 1, 0, -1.509958e-07, 0, -1, -9.536743e-07, 0.55, 17)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part4" unique_id=1607949013]
+material_override = ExtResource("2_wcfn5")
+mesh = SubResource("BoxMesh_52rm1")
+
+[node name="Shape" type="CollisionShape3D" parent="Part4" unique_id=2050558308]
+shape = SubResource("BoxShape3D_sbd0d")
+
+[node name="Part5" type="StaticBody3D" parent="." unique_id=2114735770 groups=["interior_geometry"]]
+transform = Transform3D(7.54979e-08, 0, 1, 0, 1, 0, -1, 0, 7.54979e-08, -16.999998, 0.55, -1.9073486e-06)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part5" unique_id=1957157747]
+material_override = ExtResource("2_wcfn5")
+mesh = SubResource("BoxMesh_7ub8h")
+
+[node name="Shape" type="CollisionShape3D" parent="Part5" unique_id=82991230]
+shape = SubResource("BoxShape3D_ywfuj")
+
+[node name="Decoration5" type="Marker3D" parent="." unique_id=1489356317]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0, -11)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration6" type="Marker3D" parent="." unique_id=1105743578]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0, -11)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration7" type="Marker3D" parent="." unique_id=1953185522]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, -11)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration8" type="Marker3D" parent="." unique_id=400230945]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, -11)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration9" type="Marker3D" parent="." unique_id=1500294669]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 0, -11)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration10" type="Marker3D" parent="." unique_id=616871286]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 0, -11)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration11" type="Marker3D" parent="." unique_id=1441058022]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0, -6)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration12" type="Marker3D" parent="." unique_id=803808324]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0, -6)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration13" type="Marker3D" parent="." unique_id=1071057041]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, -6)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration14" type="Marker3D" parent="." unique_id=1123887807]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, -6)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration15" type="Marker3D" parent="." unique_id=706144326]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 0, -6)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration16" type="Marker3D" parent="." unique_id=1547080810]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 0, -6)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration17" type="Marker3D" parent="." unique_id=1602593758]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0, -1)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration18" type="Marker3D" parent="." unique_id=636363378]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0, -1)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration19" type="Marker3D" parent="." unique_id=1444830536]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, -1)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration20" type="Marker3D" parent="." unique_id=1262781216]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, -1)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration21" type="Marker3D" parent="." unique_id=364068640]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 0, -1)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration22" type="Marker3D" parent="." unique_id=1983375325]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 0, -1)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration23" type="Marker3D" parent="." unique_id=753919126]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0, 4)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration24" type="Marker3D" parent="." unique_id=299173156]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0, 4)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration25" type="Marker3D" parent="." unique_id=1132527942]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, 4)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration26" type="Marker3D" parent="." unique_id=77999028]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, 4)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration27" type="Marker3D" parent="." unique_id=1930717901]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 0, 4)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Decoration28" type="Marker3D" parent="." unique_id=49673013]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 0, 4)
+script = ExtResource("3_rsoy7")
+tags = PackedStringArray("gravestone")
+chance = 0.85
+pool = PackedStringArray()
+
+[node name="Part6" type="StaticBody3D" parent="." unique_id=2136847078 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1, 1.6, 9)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part6" unique_id=1622518423]
+material_override = ExtResource("4_poj8a")
+mesh = SubResource("BoxMesh_b0g7g")
+
+[node name="Shape" type="CollisionShape3D" parent="Part6" unique_id=1881677265]
+shape = SubResource("BoxShape3D_4xra6")
+
+[node name="Part7" type="StaticBody3D" parent="." unique_id=180546159 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1, 1.6, 9)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part7" unique_id=12214784]
+material_override = ExtResource("4_poj8a")
+mesh = SubResource("BoxMesh_2pi6a")
+
+[node name="Shape" type="CollisionShape3D" parent="Part7" unique_id=2128810110]
+shape = SubResource("BoxShape3D_o7aja")
+
+[node name="Part8" type="StaticBody3D" parent="." unique_id=173996280 groups=["interior_geometry"]]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.5, 1.6, 12)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part8" unique_id=1386210458]
+material_override = ExtResource("4_poj8a")
+mesh = SubResource("BoxMesh_b5bf1")
+
+[node name="Shape" type="CollisionShape3D" parent="Part8" unique_id=529611848]
+shape = SubResource("BoxShape3D_0l5yj")
+
+[node name="Part9" type="StaticBody3D" parent="." unique_id=1423404061 groups=["interior_geometry"]]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 1.6, 15)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part9" unique_id=1615609907]
+material_override = ExtResource("4_poj8a")
+mesh = SubResource("BoxMesh_apcgw")
+
+[node name="Shape" type="CollisionShape3D" parent="Part9" unique_id=1042174472]
+shape = SubResource("BoxShape3D_dlg0x")
+
+[node name="Part10" type="StaticBody3D" parent="." unique_id=605536183 groups=["interior_geometry"]]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.5, 1.6, 12)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part10" unique_id=719382191]
+material_override = ExtResource("4_poj8a")
+mesh = SubResource("BoxMesh_dkh3i")
+
+[node name="Shape" type="CollisionShape3D" parent="Part10" unique_id=681276332]
+shape = SubResource("BoxShape3D_soriw")
+
+[node name="Part11" type="Node3D" parent="." unique_id=165683791 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 0.8253356, -0.5646425, 0, 0.5646425, 0.8253356, 0, 4.28, 10.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part11" unique_id=890279558]
+material_override = ExtResource("5_tya4l")
+mesh = SubResource("BoxMesh_ft1fi")
+
+[node name="Part12" type="Node3D" parent="." unique_id=2056213079 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 0.8253356, 0.5646425, 0, -0.5646425, 0.8253356, 0, 4.28, 13.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part12" unique_id=299331249]
+material_override = ExtResource("5_tya4l")
+mesh = SubResource("BoxMesh_is1w8")
+
+[node name="Link" type="Marker3D" parent="." unique_id=1032450363]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.05, 9.4)
+script = ExtResource("6_poxyb")
+label = "the mausoleum"
+
+[node name="Enemy37" type="Marker3D" parent="." unique_id=671738542]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -4)
+script = ExtResource("3_rsoy7")
+kind = 5
+tags = PackedStringArray("undead")
+chance = 0.7
+pool = PackedStringArray()
+
+[node name="Enemy38" type="Marker3D" parent="." unique_id=206278960]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 3)
+script = ExtResource("3_rsoy7")
+kind = 5
+tags = PackedStringArray("undead")
+chance = 0.7
+pool = PackedStringArray()
+
+[node name="Boss39" type="Marker3D" parent="." unique_id=1251830050]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 7)
+script = ExtResource("3_rsoy7")
+kind = 6
+tags = PackedStringArray()
+chance = 0.7
+pool = PackedStringArray()
+
+[node name="Light40" type="Marker3D" parent="." unique_id=187964463]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 8)
+script = ExtResource("3_rsoy7")
+kind = 7
+tags = PackedStringArray("candle", "brazier")
+chance = 1.0
+pool = PackedStringArray()

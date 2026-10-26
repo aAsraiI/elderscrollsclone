@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="CustomNpcData" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/custom_npc_data.gd" id="1_npc"]
+[ext_resource type="Script" path="res://scripts/dialogue/dialogue_data.gd" id="2_data"]
+[ext_resource type="Script" path="res://scripts/dialogue/dialogue_topic.gd" id="3_topic"]
+[ext_resource type="Script" path="res://scripts/dialogue/dialogue_response.gd" id="4_resp"]
+
+[sub_resource type="Resource" id="resp_eclipse"]
+script = ExtResource("4_resp")
+text = "The sky went dark at noon, the year I was born. My mother said the old kings looked down that day and did not like what they saw. They say it will come again. Ask me about the old kings, if you have the patience."
+learn_topics = PackedStringArray("the old kings")
+
+[sub_resource type="Resource" id="topic_eclipse"]
+script = ExtResource("3_topic")
+topic = "the dark noon"
+responses = Array[ExtResource("4_resp")]([SubResource("resp_eclipse")])
+learn_on_greeting = true
+
+[sub_resource type="Resource" id="resp_kings_warm"]
+script = ExtResource("4_resp")
+text = "You listen better than most. The old kings sleep under Dawnhold, in the Crypt of Kings. Go and see them, if you dare. Speak softly down there."
+min_disposition = 60
+not_flag = "hermit_gift"
+set_flag = "hermit_gift"
+
+[sub_resource type="Resource" id="resp_kings"]
+script = ExtResource("4_resp")
+text = "The old kings? Dust and crowns. I tell their story only to friends. Come back when we know each other better."
+
+[sub_resource type="Resource" id="topic_kings"]
+script = ExtResource("3_topic")
+topic = "the old kings"
+responses = Array[ExtResource("4_resp")]([SubResource("resp_kings_warm"), SubResource("resp_kings")])
+
+[sub_resource type="Resource" id="dialogue"]
+script = ExtResource("2_data")
+topics = Array[ExtResource("3_topic")]([SubResource("topic_eclipse"), SubResource("topic_kings")])
+
+[resource]
+script = ExtResource("1_npc")
+id = "example_hermit"
+display_name = "Old Maudrey"
+personality = 5
+base_disposition = 55
+level = 4
+color = Color(0.36, 0.33, 0.3, 1)
+greeting = "Hm. A traveler. Sit a while, if you like. I am Maudrey, and I remember things."
+dialogue = SubResource("dialogue")
+town = "Kingsreach"
+offset = Vector3(8, 0, 8)

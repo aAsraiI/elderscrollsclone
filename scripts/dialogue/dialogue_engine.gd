@@ -6,7 +6,10 @@ extends RefCounted
 ##
 ## Topics, Morrowind style: the player starts knowing a few general ones. Every topic name that
 ## appears in something said (a town, a person, a shop, a cave nearby) becomes a link and is
-## learned. Each speaker only lists the known topics they have something to say about.
+## learned. Each speaker only lists the known topics that fit who they are (PROFILES: a guard
+## talks about the law and nearby dangers, a merchant about trade and the towns on the road...),
+## at most a few named ones, always the same for the same person. "duties" and the other guild
+## topics only show for the guild leaders who have them (QuestManager.extra_topics).
 
 const DIALOGUE_DIR := "res://data/dialogue"
 ## Below this, people won't share rumors, advice or gossip
@@ -42,6 +45,8 @@ class Speaker:
 	var position := Vector3.ZERO
 	## Travelers' own lines (EnemyData talk lines)
 	var lines: PackedStringArray = []
+	## A hand-made person (CustomNpcData) who only talks about their own topics
+	var own_topics_only := false
 
 
 ## The searchable list of every topic name in this world
@@ -67,6 +72,20 @@ static func speaker_for(e: Enemy, world: WorldManager) -> Speaker:
 	s.asleep = bool(e.get_meta("asleep", false))
 	s.lines = e.talk_lines
 	s.base_disposition = 55 if e.disposition == Enemy.Disposition.FRIENDLY else 45
+	var custom := e.get_meta("custom_npc", null) as CustomNpcData
+	if custom != null:
+		# a hand-made person (CustomNpcs): their own sheet and dialogue
+		s.data = custom.to_npc_data()
+		s.id = s.data.id
+		s.name = custom.display_name
+		s.role = custom.role
+		s.personality = custom.personality
+		s.faction = custom.faction
+		s.base_disposition = custom.base_disposition
+		s.own_topics_only = not custom.generated_topics
+		if world != null:
+			s.town = world.get_nearest_town(s.position)
+		return s
 	var npc_id := String(e.get_meta("npc_id", ""))
 	if npc_id != "" and world != null and world.life != null:
 		var r := world.life.get_resident(npc_id)
@@ -244,10 +263,52 @@ static func greeting_topics(s: Speaker) -> PackedStringArray:
 
 # ---------------------------------------------------------------- what they know
 
-## The known topics this speaker can talk about, sorted (general ones first)
+## What each kind of person talks about (Alpha 1.12): their general topics, the kinds of named
+## topic they know, how many other towns they talk about (the nearest), and the most named topics
+## they list. Quest, guild and hand-written topics are always listed on top of these.
+##   home: their own town   towns: other towns   place / person: buildings and people of their
+##   town   poi: places in the wild nearby   guilds: every guild   own_guild: only their own
+const PROFILES := {
+	"commoner": {"generic": ["background", "my trade", "latest rumors", "little advice"], "kinds": ["home", "towns", "place", "person", "poi"], "towns": 2, "cap": 6},
+	"worker": {"generic": ["background", "my trade", "latest rumors", "little advice"], "kinds": ["home", "towns", "person", "poi"], "towns": 1, "cap": 5},
+	"merchant": {"generic": ["background", "my trade", "latest rumors"], "kinds": ["home", "towns", "place", "person"], "towns": 3, "cap": 6},
+	"innkeeper": {"generic": ["background", "my trade", "latest rumors", "little advice"], "kinds": ["home", "towns", "place", "poi", "guilds"], "towns": 5, "cap": 8},
+	"guard": {"generic": ["background", "my trade", "the law", "latest rumors"], "kinds": ["home", "towns", "place", "poi"], "towns": 3, "cap": 8},
+	"priest": {"generic": ["background", "my trade", "little advice"], "kinds": ["home", "place", "person"], "towns": 0, "cap": 5},
+	"guild": {"generic": ["background", "my trade", "latest rumors"], "kinds": ["home", "towns", "place", "own_guild"], "towns": 2, "cap": 6},
+	"lord": {"generic": ["background", "my trade", "the law", "latest rumors"], "kinds": ["home", "towns", "place", "poi", "guilds"], "towns": 6, "cap": 10},
+	"traveler": {"generic": ["background", "latest rumors", "little advice"], "kinds": ["towns", "poi"], "towns": 3, "cap": 5},
+}
+
+
+## The PROFILES entry for this speaker
+static func profile_for(s: Speaker) -> Dictionary:
+	if s.data == null:
+		return PROFILES["traveler"]
+	match s.role:
+		NpcData.Role.MERCHANT, NpcData.Role.SMITH:
+			return PROFILES["merchant"]
+		NpcData.Role.INNKEEPER:
+			return PROFILES["innkeeper"]
+		NpcData.Role.GUARD:
+			return PROFILES["guard"]
+		NpcData.Role.PRIEST:
+			return PROFILES["priest"]
+		NpcData.Role.GUILD_MEMBER:
+			return PROFILES["guild"]
+		NpcData.Role.LORD:
+			return PROFILES["lord"]
+		NpcData.Role.FARMER, NpcData.Role.WOODCUTTER, NpcData.Role.FISHERMAN, NpcData.Role.HUNTER, NpcData.Role.MINER, NpcData.Role.HERBALIST:
+			return PROFILES["worker"]
+	return PROFILES["commoner"]
+
+
+## The known topics this speaker can talk about, sorted (general ones first, then quest and
+## hand-written ones, then named topics: at most the profile's cap, the same ones every visit)
 static func topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
 	var general := PackedStringArray()
-	var named := PackedStringArray()
+	var special := PackedStringArray()
+	var named: Array[String] = []
 	# Quest topics (a written quest's hook, the next thing to ask) are known as soon as the person
 	# who has them is met
 	if world != null and world.book != null and not s.asleep:
@@ -255,50 +316,112 @@ static func topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
 			DialogueState.learn(t)
 		if Factions.leader_of(s, world) in ClanTerritory.CLANS:
 			DialogueState.learn("the territory war")
+	var prof := profile_for(s)
+	var near := _near_towns(s, world, int(prof["towns"]))
 	for t in DialogueState.known_topics():
-		if not can_discuss(s, t, world):
-			continue
-		if GENERIC.has(t):
-			general.append(t)
-		else:
-			named.append(t)
+		var why := _reason(s, t, world, prof, near)
+		match why:
+			"generic":
+				general.append(t)
+			"special":
+				special.append(t)
+			"named":
+				named.append(t)
+	# keep the cap: their own town and guild first, then a choice of their own (stable per person)
+	named.sort_custom(func(a: String, b: String) -> bool:
+		var pa := _priority(s, a)
+		var pb := _priority(s, b)
+		if pa != pb:
+			return pa < pb
+		return _stable(s, a) < _stable(s, b))
+	named = named.slice(0, int(prof["cap"]))
 	named.sort()
+	special.sort()
 	var ordered := PackedStringArray()
 	for g in GENERIC:
 		if general.has(g):
 			ordered.append(g)
-	ordered.append_array(named)
+	ordered.append_array(special)
+	ordered.append_array(PackedStringArray(named))
 	return ordered
 
 
+## Would this speaker list the topic (if the player knew it)? Named topics also have to make the cap.
 static func can_discuss(s: Speaker, topic: String, world: WorldManager) -> bool:
+	var prof := profile_for(s)
+	var why := _reason(s, topic, world, prof, _near_towns(s, world, int(prof["towns"])))
+	return why != "" and (why != "named" or topics_for(s, world).has(topic))
+
+
+# Why this speaker lists a topic: "generic", "special" (quest, guild, hand-written: never cut),
+# "named" (counts toward the cap) or "" (not theirs to talk about)
+static func _reason(s: Speaker, topic: String, world: WorldManager, prof: Dictionary, near: Array) -> String:
 	for d in _custom_for(s):
 		var t := d.get_topic(topic)
 		if t != null and t.pick(get_disposition(s)) != null:
-			return true
-	var e: Dictionary = index(world).entries.get(topic.to_lower(), {})
-	# Guild leaders' topics (membership, advancement...) and job topics only for those who have them
+			return "special"
+	# Guild leaders' topics (membership, duties, advancement...) and job topics only for those who have them
 	if QuestManager.TOPICS.has(topic):
-		return world != null and world.quests != null and world.quests.extra_topics(s).has(topic)
+		return "special" if world != null and world.quests != null and world.quests.extra_topics(s).has(topic) else ""
 	if world != null and world.book != null and world.book.topics_for(s).has(topic):
-		return true
+		return "special"
+	if s.own_topics_only:
+		return ""
+	var e: Dictionary = index(world).entries.get(topic.to_lower(), {})
+	var kinds: Array = prof["kinds"]
 	match String(e.get("kind", "")):
 		"generic":
-			return topic != "the law" or s.data != null
-		"faction", "town":
-			return true
+			return "generic" if (prof["generic"] as Array).has(topic) else ""
+		"faction":
+			if kinds.has("guilds") or (kinds.has("own_guild") and s.faction == String(e["faction"])):
+				return "named"
+			return ""
+		"town":
+			var t: PlacedPOI = e["town"]
+			if s.town == t:
+				return "named" if kinds.has("home") else ""
+			return "named" if kinds.has("towns") and near.has(t) else ""
 		"place", "person":
+			if not kinds.has(String(e["kind"])):
+				return ""
 			var list: Array = e.get("buildings", e.get("people", []))
 			for b: BuildingPlot in list:
 				if s.town != null and b.town_id == s.town.id:
-					return true
-			return false
+					return "named"
+			return ""
 		"poi":
+			if not kinds.has("poi"):
+				return ""
 			for p: PlacedPOI in e["pois"]:
 				if Vector2(p.position.x - s.position.x, p.position.z - s.position.z).length() < RUMOR_RANGE:
-					return true
-			return false
-	return false
+					return "named"
+			return ""
+	return ""
+
+
+# The other towns this speaker knows about: the nearest few
+static func _near_towns(s: Speaker, world: WorldManager, count: int) -> Array:
+	if world == null or count <= 0:
+		return []
+	var others: Array = world.towns.filter(func(t: PlacedPOI) -> bool: return t != s.town)
+	var at := s.town.position if s.town != null else s.position
+	others.sort_custom(func(a: PlacedPOI, b: PlacedPOI) -> bool:
+		return a.position.distance_squared_to(at) < b.position.distance_squared_to(at))
+	return others.slice(0, count)
+
+
+# Lower comes first when the cap cuts: their own town, their own guild, then the rest
+static func _priority(s: Speaker, topic: String) -> int:
+	if s.town != null and s.town.town != null and topic == s.town.town.display_name:
+		return 0
+	if s.faction != "" and FACTIONS.get(topic, "") == s.faction:
+		return 1
+	return 2
+
+
+# A number from the person and the topic that never changes (their own choice of what to talk about)
+static func _stable(s: Speaker, topic: String) -> int:
+	return absi(("%s|%s|%s" % [s.id, s.name, topic]).hash())
 
 
 # ---------------------------------------------------------------- greetings

@@ -172,6 +172,9 @@ func _ready() -> void:
 	discovery = Discovery.new()
 	discovery.name = "Discovery"
 	add_child(discovery)
+	var custom := CustomNpcs.new()  # the hand-made people of data/npcs/custom/
+	custom.name = "CustomNpcs"
+	add_child(custom)
 	if settings.debug_map_enabled:
 		_debug_map = WorldDebugMap.new()
 		_debug_map.name = "WorldDebugMap"
@@ -179,6 +182,10 @@ func _ready() -> void:
 	if follow_video_settings:
 		apply_settings()
 	LoadingScreen.close(get_tree())
+	if OS.is_debug_build():
+		# quests that could never be finished in this world (QuestCheck)
+		for line in QuestCheck.problems(self):
+			push_warning("[Quest] " + line)
 	world_ready.emit()
 
 

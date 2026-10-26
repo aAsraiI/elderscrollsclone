@@ -300,6 +300,7 @@ func start(id: String) -> void:
 	_store(id, {"status": "active", "step": 0, "flags": [], "places": {}})
 	_journal(d, String(d["intro"]))
 	Locks.toast(get_tree(), "New quest: %s" % d["name"])
+	QuestManager.log_quest(d, "started")
 	_begin_step(id, 0)
 
 
@@ -341,6 +342,7 @@ func _begin_step(id: String, i: int) -> void:
 	if step.has("carry"):
 		_inv().add_item(QuestItems.get_item(_item_key(id, "carry"), String(step["carry"])))
 	_journal(d, String(step.get("text", "")))
+	QuestManager.log_quest(d, "step %d of %d: %s" % [i + 1, steps.size(), QuestDebug.book_step_text(self, id)])
 	_check_step(id)  # a place already cleared, an item already carried...
 
 
@@ -392,6 +394,7 @@ func finish(id: String) -> void:
 			lines.append("You are now a %s of the %s." % [title, Factions.display_name(f)])
 	_journal(d, "Quest complete: %s.%s" % [d["name"], (" " + " ".join(lines)) if not lines.is_empty() else ""])
 	Locks.toast(get_tree(), "Quest complete: %s" % d["name"])
+	QuestManager.log_quest(d, "complete")
 	if bool(d.get("penance", false)):
 		WorldState.erase_record(STATE + id)  # a penance can be needed again after another cure
 
@@ -806,16 +809,39 @@ func _person_pos(who: Dictionary, d: Dictionary) -> Vector3:
 	if who.has("guild"):
 		var best := Vector3.INF
 		var p := _player().global_position
-		for t in world.towns:
-			for b in t.town.buildings:
-				if b.kind == BuildingPlot.Kind.GUILD_HALL and b.guild == String(who["guild"]) and (not best.is_finite() or b.world_pos.distance_to(p) < best.distance_to(p)):
-					best = b.world_pos
+		for b in guild_places(world, String(who["guild"])):
+			if not best.is_finite() or b.world_pos.distance_to(p) < best.distance_to(p):
+				best = b.world_pos
 		return best
 	if who.has("spawn"):
 		return _spawn_place_pos(String(d["id"]), who)
 	if who.has("realm_npc"):
 		return RealmManager.gate_position(world, String(who["realm"]))
 	return Vector3.INF
+
+
+## Where a guild's leaders are found: its halls, or for the Thieves Guild the city pawnbrokers,
+## and for the Assassins Cult the city inns (its hooded contacts sit there at night)
+static func guild_places(w: WorldManager, guild: String) -> Array[BuildingPlot]:
+	var out: Array[BuildingPlot] = []
+	if w == null:
+		return out
+	for t in w.towns:
+		if t.town == null:
+			continue
+		var city := t.poi is TownData and (t.poi as TownData).kind == TownData.Kind.CITY
+		for b in t.town.buildings:
+			match guild:
+				"thieves":
+					if city and b.kind == BuildingPlot.Kind.SHOP and b.trade == "pawnbroker":
+						out.append(b)
+				"assassins":
+					if city and b.kind == BuildingPlot.Kind.INN:
+						out.append(b)
+				_:
+					if b.kind == BuildingPlot.Kind.GUILD_HALL and b.guild == guild:
+						out.append(b)
+	return out
 
 
 # ---------------------------------------------------------------- the map
@@ -879,6 +905,42 @@ func debug_complete(id: String) -> void:
 	if status(id) == "":
 		start(id)
 	finish(id)
+
+
+## Jumps an active quest to one of its steps (0 = the first), starting it first if needed
+func debug_set_step(id: String, i: int) -> void:
+	if status(id) == "":
+		start(id)
+	if not is_active(id):
+		return
+	_despawn_step(id, int(state(id).get("step", 0)))
+	_begin_step(id, clampi(i, 0, (get_def(id)["steps"] as Array).size()))
+
+
+## Ends a quest as failed: it can't be offered again until it is reset
+func fail(id: String, why: String) -> void:
+	var d := get_def(id)
+	if d.is_empty() or not is_active(id):
+		return
+	_despawn_step(id, int(state(id).get("step", 0)))
+	var st := state(id).duplicate(true)
+	st["status"] = "failed"
+	st["fail_reason"] = why
+	st.erase("pos")
+	_store(id, st)
+	_journal(d, "Failed: %s. %s" % [d["name"], why])
+	Locks.toast(get_tree(), "Quest failed: %s" % d["name"], true)
+	QuestManager.log_quest(d, "failed: " + why)
+
+
+## Forgets a quest entirely, so its giver offers it again
+func reset(id: String) -> void:
+	var d := get_def(id)
+	if d.is_empty():
+		return
+	_despawn_step(id, int(state(id).get("step", 0)))
+	WorldState.erase_record(STATE + id)
+	QuestManager.log_quest(d, "reset")
 
 
 # The person who gave the quest remembers you did it (NpcMemory): a named townsperson or a lord

@@ -13,13 +13,17 @@ extends Node
 ##   assassinate  a townsperson in another town (Assassins Cult)              kill them, come back
 ## Finished jobs count toward promotion (ask about "advancement"). Everything said about a job is
 ## written in the journal under the job's name, and active targets show on the map (M).
+## Once the task is done the job is "ready": a notice says so, the map and compass point back to
+## whoever gave it, and their guild's leaders get a "report back" topic that hands it in.
+## Every change of a job's state is printed as a [Quest] line (see QuestDebug for the console).
 ##
 ## The Assassins Cult: after your first murder, a hooded stranger finds you one night. Hooded
 ## figures also sit in city inns at night. They are the cult's contacts.
 ## Saved in WorldState: "quests" (every job, and the counter) and "assassins/invited".
 
 const STATE := "quests"
-const TOPICS: Array[String] = ["membership", "advancement", "clear bounty", "a delivery", "the territory war", "marriage", "our shop", "land for sale"]
+const TOPICS: Array[String] = ["membership", "duties", "report back", "advancement", "clear bounty", "a delivery", "the territory war", "marriage", "our shop", "land for sale"]
+const REPORT := "report back"
 const PERSUADE_GOAL := 70
 const CHIEF_BODY := "res://data/enemies/bandit_brute.tres"
 const BEAST_BODY := "res://data/enemies/frost_bear.tres"
@@ -95,7 +99,9 @@ static func active_targets() -> Array:
 		return out
 	for q: Dictionary in all_quests():
 		if q["status"] == "active":
-			out.append({"pos": Vector2(float(q["pos"][0]), float(q["pos"][1])), "name": String(q["name"]), "id": String(q["id"])})
+			# done: back to whoever gave it
+			var at: Array = q["giver_pos"] if bool(q.get("ready", false)) and q.has("giver_pos") else q["pos"]
+			out.append({"pos": Vector2(float(at[0]), float(at[1])), "name": String(q["name"]), "id": String(q["id"])})
 	var raid := TerritoryWar.target()
 	if not raid.is_empty():
 		out.append(raid)
@@ -164,11 +170,14 @@ func offer(faction: String, s: DialogueEngine.Speaker, only_type: String = "") -
 	q["giver"] = s.id
 	q["giver_name"] = s.name
 	q["giver_town"] = town.town.display_name if town != null else ""
+	var back := s.home.world_pos if s.home != null else (s.position if s.position != Vector3.ZERO else (town.position if town != null else Vector3.ZERO))
+	q["giver_pos"] = [back.x, back.z]
 	q["status"] = "active"
 	q["reward"] = d.reward_base + 40 * Factions.rank(faction) + rng.randi_range(0, 30)
 	var list := all_quests().duplicate(true)
 	list.append(q)
 	_save_list(list, counter + 1)
+	log_quest(q, "offered by %s (%s) and taken: %s" % [s.name, faction, q["objective"]])
 	if q["type"] == "deliver":
 		var inv := _player().get_node("Inventory") as Inventory
 		inv.add_item(QuestItems.get_item(qid, String(q["item_name"])))
@@ -205,11 +214,15 @@ func offer_bounty(town: PlacedPOI, board_id: String) -> Dictionary:
 	q["giver"] = board_id
 	q["giver_name"] = board.name
 	q["giver_town"] = town.town.display_name
+	var seat := town.town.get_seat() if town.town != null else null
+	var back := seat.world_pos if seat != null else town.position
+	q["giver_pos"] = [back.x, back.z]
 	q["status"] = "active"
 	q["reward"] = 120 + 20 * (skills.get_player_level() if skills != null else 1) + rng.randi_range(0, 40)
 	var list := all_quests().duplicate(true)
 	list.append(q)
 	_save_list(list, counter + 1)
+	log_quest(q, "posted on %s and taken: %s" % [board.name, q["objective"]])
 	if world.get_poi_node(String(q["target"])) != null:
 		var placed := world.get_poi(String(q["target"]))
 		for e in on_garrison(placed, world.get_poi_node(placed.id)):
@@ -427,7 +440,58 @@ func complete(q: Dictionary) -> int:
 		skills.add_deed_xp(SkillDatabase.deed_xp(skills.get_player_level(), 5.0))  # a deed: helps past level 80
 	q["status"] = "done"
 	_update_quest(q)
+	log_quest(q, "handed in: %d gold" % gold)
 	return gold
+
+
+## Ends a job without its reward (the debug console, or a job that can no longer be done)
+func fail(q: Dictionary, why: String) -> void:
+	if q.is_empty() or q["status"] != "active":
+		return
+	q["status"] = "failed"
+	q["fail_reason"] = why
+	_update_quest(q)
+	log_quest(q, "failed: " + why)
+	_journal(q, "Failed: %s. %s" % [q["name"], why])
+	Locks.toast(get_tree(), "Job failed: %s" % q["name"], true)
+
+
+## Prints a job's change of state as a [Quest] line in the output
+static func log_quest(q: Dictionary, what: String) -> void:
+	print("[Quest] %s \"%s\": %s" % [q.get("id", "?"), q.get("name", ""), what])
+
+
+# Once per job: its task is done, so say where to hand it in
+func _check_ready() -> void:
+	if _player() == null:
+		return
+	for q: Dictionary in all_quests():
+		if q["status"] != "active":
+			continue
+		var now := is_ready(q)
+		if now == bool(q.get("ready", false)):
+			continue
+		var q2 := q.duplicate(true)
+		if not now:  # the item was dropped or sold: back to the task
+			q2["ready"] = false
+			_update_quest(q2)
+			log_quest(q2, "no longer ready")
+			continue
+		q2["ready"] = true
+		_update_quest(q2)
+		var who := String(q2.get("giver_name", "whoever gave it"))
+		var town := String(q2.get("giver_town", ""))
+		var where := "%s in %s" % [who, town] if town != "" and not who.contains(town) else who
+		var how := "Use the board again." if q2["faction"] == "bounty" else "Ask about \"%s\"." % REPORT
+		log_quest(q2, "ready to hand in to %s" % where)
+		_journal(q2, "Done. Now report back to %s. %s" % [where, how])
+		Locks.toast(get_tree(), "%s: done. Report back to %s." % [q2["name"], where])
+
+
+func _journal(q: Dictionary, text: String) -> void:
+	var clock := world.clock if world != null else null
+	DialogueState.add_journal({"text": text, "speaker": "", "topic": "", "day": clock.day if clock != null else 1,
+		"time": clock.get_time_text() if clock != null else "", "quest_id": String(q.get("id", "")), "quest_name": String(q.get("name", ""))})
 
 
 ## CrimeManager tells us about a killing (for the assassination bonus)
@@ -511,6 +575,9 @@ func extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 		out.append("duties")
 		if Factions.is_member(leader):
 			out.append("advancement")
+			var job := active_for(leader)
+			if not job.is_empty() and is_ready(job):
+				out.append(REPORT)
 		if leader == "thieves" and Factions.is_member("thieves") and not CrimeManager.bounties().is_empty():
 			out.append("clear bounty")
 	if not _delivery_for(s).is_empty():
@@ -592,10 +659,12 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 				return _say("You've earned it. From today you are a %s of the %s." % [title, guild])
 			var n := Factions.next_rank(leader, p)
 			return _say("Not yet. You still need %s." % n["why"] if String(n.get("why", "")) != "" and n.has("name") else String(n.get("why", "Not yet.")))
-		"duties":
+		"duties", REPORT:
 			if not Factions.is_member(leader):
 				return _say("We only give work to members. Ask me about membership.")
 			var q := active_for(leader)
+			if topic == REPORT and (q.is_empty() or not is_ready(q)):
+				return _say("You've nothing to report yet." if q.is_empty() else "Not done yet. %s" % q["objective"], q)
 			if not q.is_empty():
 				if is_ready(q):
 					var gold := complete(q)
@@ -647,6 +716,7 @@ func _process(delta: float) -> void:
 		return
 	_timer = 0.0
 	_tick_stranger()
+	_check_ready()
 
 
 # After a first murder, a hooded stranger walks up to you one night

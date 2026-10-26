@@ -18,6 +18,12 @@ time <hour> [day]         set the clock (13.5 = half past one)
 weather <kind>            clear, cloudy, overcast, rain, storm, snow, blizzard, fog, sandstorm
 kill                      kills every hostile creature within 30 m
 quest <id> [done]         show a book quest's state, or finish it (S-KR01, H-VA02...)
+quest.list / quest.why    active quests (why: and what blocks each one)
+quest.start <id>          start a book quest, or quest.start <guild> <kind> (fighters kill)
+quest.setstage <id> <n>   jump a book quest to step n
+quest.complete / quest.fail / quest.reset <id>   finish, fail or forget a quest (S-KR01, q3...)
+quest.check               look for quests that can never be finished
+quest.overlay             show or hide the quest overlay
 clear                     empty this window"""
 
 var _root: Control
@@ -26,6 +32,8 @@ var _input: LineEdit
 var _open := false
 var _history: PackedStringArray = []
 var _history_at := 0
+var _overlay: Label
+var _overlay_timer := 0.0
 
 
 func _ready() -> void:
@@ -114,6 +122,36 @@ func _submit(text: String) -> void:
 	_print(run(text))
 
 
+# The quest overlay: active quests, their step, who takes them in and what blocks them (QuestDebug)
+func _toggle_overlay() -> void:
+	if _overlay != null:
+		_overlay.queue_free()
+		_overlay = null
+		return
+	_overlay = Label.new()
+	_overlay.position = Vector2(12, 320)
+	_overlay.add_theme_font_size_override("font_size", 13)
+	_overlay.add_theme_color_override("font_outline_color", Color.BLACK)
+	_overlay.add_theme_constant_override("outline_size", 4)
+	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_overlay)
+	_overlay_timer = 0.0
+
+
+func _process(delta: float) -> void:
+	if _overlay == null:
+		return
+	_overlay_timer -= delta
+	if _overlay_timer > 0.0:
+		return
+	_overlay_timer = 0.5
+	var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if world == null or world.quests == null:
+		return
+	var lines := QuestDebug.report(world, true)
+	_overlay.text = "QUESTS (quest.overlay hides this)\n" + ("\n".join(lines) if not lines.is_empty() else "none active")
+
+
 func _print(text: String) -> void:
 	if text != "":
 		_log.append_text(text + "\n")
@@ -126,6 +164,11 @@ func run(text: String) -> String:
 	var args := parts.slice(1)
 	var p := get_parent() as Node3D
 	var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if cmd == "quest.overlay":
+		_toggle_overlay()
+		return "Quest overlay %s." % ("on" if _overlay != null else "off")
+	if cmd.begins_with("quest."):
+		return QuestDebug.run(cmd.trim_prefix("quest."), args, world)
 	match cmd:
 		"help":
 			return HELP

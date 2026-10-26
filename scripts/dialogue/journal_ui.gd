@@ -9,6 +9,9 @@ extends CanvasLayer
 ##   left list    All entries, each Quest (stage 6 fills these in; example topics use it now),
 ##                each Topic
 ##   entries      topic names in the text are links: click one to see everything about that topic
+##   notes        your own notes: "+ New note" writes one (a title and the words), click one to
+##                read it, then Edit or Delete. A note being written is kept if the journal closes.
+## One entry per topic (DialogueState.add_journal): old saves are cleaned when the journal opens.
 
 signal opened
 signal closed
@@ -28,6 +31,14 @@ var _track: Button
 var _filter_kind := "all"
 var _filter_value := ""
 var _filter_rows: Array = []  # per ItemList row: [kind, value]
+## The note editor (shown instead of the entries while writing)
+var _editor: VBoxContainer
+var _note_title: LineEdit
+var _note_body: TextEdit
+var _note_count: Label
+var _note_delete: Button
+var _editing := 0   # the note being edited (0 = a new one)
+var _confirm_delete := false
 
 
 func _ready() -> void:
@@ -55,6 +66,7 @@ func open() -> void:
 	_root.visible = true
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	DialogueState.compact_journal()
 	_refresh()
 	_filters.grab_focus()  # click the search box to type (so 1-4 and Tab still switch pages)
 	opened.emit()
@@ -63,6 +75,8 @@ func open() -> void:
 func close() -> void:
 	if not _open:
 		return
+	if is_editing():
+		save_note()  # never lose what was being written
 	_open = false
 	_root.visible = false
 	if not _was_paused:
@@ -117,8 +131,127 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _input(event: InputEvent) -> void:
 	if _open and event.is_action_pressed("ui_cancel"):
-		close()
+		if is_editing():
+			cancel_note()  # Esc while writing: back to the journal (the words are kept if changed)
+		else:
+			close()
 		get_viewport().set_input_as_handled()
+
+
+# ---------------------------------------------------------------- notes
+
+func is_editing() -> bool:
+	return _editor != null and _editor.visible
+
+
+## Opens the editor: a new note (id 0), or an existing one
+func edit_note(id: int = 0) -> void:
+	var n := DialogueState.get_note(id) if id != 0 else {}
+	_editing = int(n.get("id", 0))
+	_note_title.text = String(n.get("title", ""))
+	_note_body.text = String(n.get("text", ""))
+	_confirm_delete = false
+	_note_delete.visible = _editing != 0
+	_note_delete.text = "Delete"
+	_editor.visible = true
+	_text.visible = false
+	_update_count()
+	if _editing != 0:
+		_note_body.grab_focus()
+	else:
+		_note_title.grab_focus()
+
+
+## Saves what is in the editor and shows the note. Returns its id (0 if there was nothing to save).
+func save_note() -> int:
+	var body := _note_body.text.strip_edges(false, true)
+	var title := _note_title.text
+	_editor.visible = false
+	_text.visible = true
+	if body.strip_edges() == "" and title.strip_edges() == "":
+		_refresh()
+		return 0
+	if _editing != 0:
+		DialogueState.edit_note(_editing, title, body)
+	else:
+		var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
+		var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+		_editing = DialogueState.add_note(title, body, clock.day if clock != null else 1, clock.get_time_text() if clock != null else "", _where(world))
+	_filter_kind = "note"
+	_filter_value = str(_editing)
+	_refresh()
+	return _editing
+
+
+## Leaves the editor. A changed note is still saved, so nothing written is ever lost.
+func cancel_note() -> void:
+	var old := DialogueState.get_note(_editing) if _editing != 0 else {}
+	var changed := _note_body.text != String(old.get("text", "")) or (_note_title.text != String(old.get("title", "")) and _note_title.text.strip_edges() != "")
+	if changed:
+		save_note()
+		return
+	_editor.visible = false
+	_text.visible = true
+	_refresh()
+
+
+func delete_note() -> void:
+	if _editing == 0:
+		return
+	if not _confirm_delete:
+		_confirm_delete = true
+		_note_delete.text = "Really delete?"
+		return
+	DialogueState.delete_note(_editing)
+	_editing = 0
+	_editor.visible = false
+	_text.visible = true
+	_filter_kind = "notes"
+	_filter_value = ""
+	_refresh()
+
+
+func _update_count() -> void:
+	_note_count.text = "%d / %d" % [_note_body.text.length(), DialogueState.NOTE_MAX]
+
+
+# Where the player is: the building or dungeon they are in, else the nearest town
+static func _where(world: WorldManager) -> String:
+	if world == null:
+		return ""
+	if world.dungeons != null and world.dungeons.is_inside():
+		return world.dungeons.get_current_name()
+	var p := world.get_tree().get_first_node_in_group("player") as Node3D
+	var t := world.get_nearest_town(p.global_position) if p != null else null
+	return t.town.display_name if t != null and t.town != null else ""
+
+
+func _show_notes(list: Array, q: String) -> void:
+	if list.is_empty():
+		_text.append_text("[i]No notes yet. Pick \"+ New note\" on the left to write one.[/i]")
+		return
+	for n: Dictionary in list:
+		_show_note(n, q)
+
+
+func _show_note(n: Dictionary, q: String) -> void:
+	var head := "Day %d, %s" % [int(n.get("day", 1)), n.get("time", "")]
+	if String(n.get("place", "")) != "":
+		head += "  ·  " + String(n["place"])
+	_text.append_text("[color=#ffd95a][b]%s[/b][/color]   [url=note:edit:%d][color=#9fc7ff]Edit[/color][/url]\n" % [_mark(String(n["title"]), q), int(n["id"])])
+	_text.append_text("[color=#b8a47a]%s[/color]\n%s\n\n" % [DialogueUI._esc(head), _mark(String(n["text"]), q)])
+
+
+static func _note_matches(n: Dictionary, q: String) -> bool:
+	return q == "" or ("%s\n%s\n%s" % [n.get("title", ""), n.get("text", ""), n.get("place", "")]).to_lower().contains(q.to_lower())
+
+
+func _on_meta(meta: Variant) -> void:
+	var m := String(meta)
+	if m.begins_with("note:edit:"):
+		edit_note(int(m.trim_prefix("note:edit:")))
+		return
+	show_topic(m.uri_decode())
 
 
 # ---------------------------------------------------------------- showing
@@ -161,6 +294,13 @@ func _refresh() -> void:
 	tkeys.sort_custom(func(a: String, b: String) -> bool: return a.to_lower() < b.to_lower())
 	for t in tkeys:
 		_add_row("   %s  (%d)" % [t, topics[t]], "topic", t)
+	var notes := DialogueState.notes()
+	_add_header("Your notes")
+	_add_row("   + New note", "new_note", "")
+	if not notes.is_empty():
+		_add_row("   All notes  (%d)" % notes.size(), "notes", "")
+	for n: Dictionary in notes:
+		_add_row("      " + String(n["title"]), "note", str(n["id"]))
 	for i in _filter_rows.size():
 		var row: Array = _filter_rows[i]
 		if row[0] == _filter_kind and row[1] == _filter_value:
@@ -169,10 +309,22 @@ func _refresh() -> void:
 	_track.visible = _filter_kind == "quest"
 	_track.text = "Stop tracking" if _filter_kind == "quest" and QuestManager.tracked_id() == _filter_value else "Track on compass"
 
+	_text.clear()
+	var q_notes := _search.text.strip_edges()
+	if _filter_kind == "notes" or _filter_kind == "note":
+		var list := notes.filter(func(n: Dictionary) -> bool:
+			return (_filter_kind == "notes" or str(n["id"]) == _filter_value) and _note_matches(n, q_notes))
+		_count.text = "%d of %d notes" % [list.size(), notes.size()]
+		_show_notes(list, q_notes)
+		return
 	var shown := filter(entries, _search.text, _filter_kind, _filter_value)
 	var job: Dictionary = jobs.get(_filter_value, {}) if _filter_kind == "quest" else {}
 	_count.text = "%d of %d entries" % [shown.size(), entries.size()]
-	_text.clear()
+	if _filter_kind == "all" and q_notes != "":
+		# a search looks through your notes too
+		for n: Dictionary in notes:
+			if _note_matches(n, q_notes):
+				_show_note(n, q_notes)
 	if not job.is_empty():
 		# The job itself first: what to do, and whether it's finished
 		var status := "Finished" if job["status"] == "done" else "In progress"
@@ -197,7 +349,11 @@ func _refresh() -> void:
 	var ix := DialogueEngine.index(world)
 	var q := _search.text.strip_edges()
 	for e: Dictionary in shown:
-		var head := "Day %d, %s  ·  %s" % [int(e.get("day", 1)), e.get("time", ""), e.get("speaker", "")]
+		var who := String(e.get("speaker", ""))
+		var heard: Array = e.get("heard", [])
+		if heard.size() > 1:
+			who += " (and %d other%s)" % [heard.size() - 1, "" if heard.size() == 2 else "s"]
+		var head := "Day %d, %s  ·  %s" % [int(e.get("day", 1)), e.get("time", ""), who]
 		if String(e.get("place", "")) != "":
 			head += ", " + String(e["place"])
 		if String(e.get("topic", "")) != "":
@@ -241,6 +397,11 @@ func _add_header(label: String) -> void:
 func _on_filter_selected(i: int) -> void:
 	var row: Array = _filter_rows[i]
 	if row[0] == "":
+		return
+	if is_editing():
+		save_note()
+	if row[0] == "new_note":
+		edit_note(0)
 		return
 	_filter_kind = row[0]
 	_filter_value = row[1]
@@ -306,10 +467,57 @@ func _build_ui() -> void:
 	_text.bbcode_enabled = true
 	_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_text.add_theme_font_size_override("normal_font_size", 17)
-	_text.meta_clicked.connect(func(meta: Variant) -> void: show_topic(String(meta).uri_decode()))
+	_text.meta_clicked.connect(_on_meta)
 	split.add_child(_text)
 
+	# the note editor, in the same place as the entries
+	_editor = VBoxContainer.new()
+	_editor.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_editor.add_theme_constant_override("separation", 8)
+	_editor.visible = false
+	split.add_child(_editor)
+	_note_title = LineEdit.new()
+	_note_title.placeholder_text = "Title (optional)"
+	_note_title.max_length = 60
+	_editor.add_child(_note_title)
+	_note_body = TextEdit.new()
+	_note_body.placeholder_text = "Write your note here..."
+	_note_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_note_body.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	_note_body.add_theme_font_size_override("font_size", 17)
+	_note_body.text_changed.connect(func() -> void:
+		if _note_body.text.length() > DialogueState.NOTE_MAX:
+			_note_body.text = _note_body.text.left(DialogueState.NOTE_MAX)
+			_note_body.set_caret_column(_note_body.get_line(_note_body.get_line_count() - 1).length())
+			_note_body.set_caret_line(_note_body.get_line_count() - 1)
+		_update_count())
+	_editor.add_child(_note_body)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	_editor.add_child(row)
+	var save := Button.new()
+	save.text = "Save"
+	save.custom_minimum_size = Vector2(110, 32)
+	save.pressed.connect(func() -> void: save_note())
+	row.add_child(save)
+	var cancel := Button.new()
+	cancel.text = "Close"
+	cancel.custom_minimum_size = Vector2(110, 32)
+	cancel.pressed.connect(cancel_note)
+	row.add_child(cancel)
+	_note_delete = Button.new()
+	_note_delete.text = "Delete"
+	_note_delete.custom_minimum_size = Vector2(130, 32)
+	_note_delete.pressed.connect(delete_note)
+	row.add_child(_note_delete)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(gap)
+	_note_count = Label.new()
+	_note_count.modulate = Color(1, 1, 1, 0.6)
+	row.add_child(_note_count)
+
 	var hint := Label.new()
-	hint.text = "Click a highlighted word to see everything about it    [J] or [Esc] Close"
+	hint.text = "Click a highlighted word to see everything about it    + New note writes your own    [J] or [Esc] Close"
 	hint.modulate = Color(1, 1, 1, 0.5)
 	vbox.add_child(hint)

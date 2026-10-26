@@ -715,12 +715,12 @@ func _place_dig_spot(q: Dictionary, placed: PlacedPOI, level: int) -> void:
 
 ## Extra topics this speaker has (a guild leader's membership, a delivery for the recipient...)
 func extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
-	# the dialogue asks once per known topic: work it out once a frame per person
-	var frame := Engine.get_process_frames()
+	# the dialogue asks once per known topic: work it out once a frame per person (until something changes)
+	var frame := Engine.get_process_frames() * 100000 + WorldState.version
 	if frame != _extra_frame:
 		_extra_frame = frame
 		_extra_cache.clear()
-	var key := "%s|%s|%d" % [s.id, s.name, s.get_instance_id()]
+	var key := "%s|%s|%d|%d" % [s.id, s.name, int(s.role), s.enemy.get_instance_id() if s.enemy != null and is_instance_valid(s.enemy) else 0]
 	if not _extra_cache.has(key):
 		_extra_cache[key] = _extra_topics(s)
 	return _extra_cache[key]

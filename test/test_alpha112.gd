@@ -103,6 +103,7 @@ func t_radiant() -> void:
 	await _integration()
 	_rumors_and_barks()
 	await _authoring()
+	await _qa()
 	await _across_a_load()
 
 
@@ -302,6 +303,8 @@ func _radiant_v2() -> void:
 		made += 1
 		if Radiant.validate(qm, q) != "":
 			bad.append("%s: %s" % [q["type"], Radiant.validate(qm, q)])
+		if String(q["objective"]).to_lower().contains("the the ") or String(q["objective"]).contains("  "):
+			bad.append("%s: clumsy wording '%s'" % [q["type"], q["objective"]])
 		if String(q["name"]).contains("{") or String(q["objective"]).contains("{") or String(q["name"]) == "":
 			bad.append("%s: bad wording '%s' / '%s'" % [q["type"], q["name"], q["objective"]])
 	check("100 generated jobs, none impossible (%d made)" % made, made >= 100 and bad.is_empty(), "\n".join(bad.slice(0, 5)))
@@ -669,6 +672,109 @@ func _authoring() -> void:
 	check("and carries what they were given", body.inventory.get_count(load("res://data/ingredients/bloodmoss.tres")) == 1)
 	body.queue_free()
 	check("text keys are ready for translation", tr("Quests") == "Quests")
+
+
+# ---------------------------------------------------------------- 1.12.15 QA
+
+func _qa() -> void:
+	print("-- QA: every state saved, edge cases, speed, balance")
+	var runner := wm.runner
+	var id := "qa_states"
+	var q := QuestData.new()
+	q.id = id
+	q.title = "QA States"
+	var a := QuestStage.new()
+	var o := QuestObjective.new()
+	o.type = QuestObjective.Type.COLLECT
+	o.target = "res://data/ingredients/thistle.tres"
+	o.count = 2
+	a.objectives = [o]
+	var b := QuestStage.new()
+	var c := QuestChoice.new()
+	c.topic = "qa choice"
+	b.choices = [c]
+	q.stages = [a, b]
+	QuestRunner.register(q)
+	var inv := p.get_node("Inventory") as Inventory
+	var thistle := load("res://data/ingredients/thistle.tres") as ItemData
+	var states := []
+	var snap := func() -> void:
+		var before := runner.status(id)
+		var stage := int(QuestRunner.record(id).get("stage", 0))
+		var saved := WorldState.to_dict()
+		WorldState.clear()
+		WorldState.from_dict(saved)
+		runner.recompute()
+		states.append(runner.status(id) == before and int(QuestRunner.record(id).get("stage", 0)) == stage)
+	snap.call()                       # available
+	runner.start(id)
+	snap.call()                       # active, stage 1
+	inv.add_item(thistle, 2)
+	await secs(1.0)
+	snap.call()                       # active, stage 2 (the choice)
+	runner._begin_stage(id, 2)
+	snap.call()                       # ready
+	inv.remove_item(thistle, inv.get_count(thistle))
+	await secs(1.0)
+	check("losing a collected item takes a ready quest back to active", runner.status(id) == "active")
+	inv.add_item(thistle, 2)
+	runner._begin_stage(id, 2)
+	runner.complete(id)
+	snap.call()                       # completed
+	check("saved and loaded at every state, each comes back the same (%d states)" % states.size(), states.size() == 5 and states.all(func(x: bool) -> bool: return x), str(states))
+	# a conversation ends when the person dies mid-talk
+	var r: TownLife.Resident = null
+	for res: TownLife.Resident in wm.life.get_town_residents(city.id):
+		if res.data.role == NpcData.Role.COMMONER and res.node != null and is_instance_valid(res.node) and r == null:
+			r = res
+	if r == null:
+		await _go(city.position)
+		for res: TownLife.Resident in wm.life.get_town_residents(city.id):
+			if res.data.role == NpcData.Role.COMMONER and res.node != null and is_instance_valid(res.node) and r == null:
+				r = res
+	if r != null and ui.open_with(r.node):
+		await frames(3)
+		var focus := ui.get_viewport().gui_get_focus_owner()
+		check("the keyboard starts on the first topic", focus is Button and focus.get_parent() == ui._topics)
+		r.node.stats.modify_vital("health", -999999.0)
+		await frames(5)
+		check("the conversation closes when they die mid-talk", not ui.is_open())
+		WorldState.erase_record("kill/" + r.data.id)
+		r.dead = false
+	# speed
+	var big := DialogueState.journal().duplicate(true)
+	for n in DialogueState.JOURNAL_MAX:
+		big.append({"text": "Line %d about nothing." % n, "topic": "Topic %d" % (n % 40), "type": "Knowledge", "quest_id": "", "day": 1, "id": 100000 + n, "read": false})
+	WorldState.set_record(DialogueState.JOURNAL, {"entries": big})
+	var ju := get_first_node_in_group("journal_ui") as JournalUI
+	var t0 := Time.get_ticks_msec()
+	ju.open()
+	ju._tabs.current_tab = JournalUI.TAB_TOPICS
+	ju._refresh()
+	var ms := Time.get_ticks_msec() - t0
+	ju.close()
+	check("the journal opens fast with %d entries (%d ms)" % [big.size(), ms], ms < 1500)
+	var list := QuestManager.all_quests().duplicate(true)
+	for n in 60:
+		list.append({"id": "perf%d" % n, "type": "kill", "name": "Perf", "status": "active", "target": "", "chief": "X", "faction": "fighters", "reward": 1, "pos": [0, 0], "objective": "x"})
+	WorldState.set_record(QuestManager.STATE, {"list": list, "counter": QuestManager._counter()})
+	t0 = Time.get_ticks_msec()
+	wm.quests._check_ready()
+	ms = Time.get_ticks_msec() - t0
+	check("60 active jobs checked quickly (%d ms)" % ms, ms < 200)
+	_clear_jobs()
+	for n in 2500:
+		DialogueState.learn("Made-up Topic %d" % n)
+	t0 = Time.get_ticks_msec()
+	DialogueEngine.topics_for(_speaker(leaders["fighters"]), wm)
+	ms = Time.get_ticks_msec() - t0
+	check("a person's topics are worked out quickly even with thousands known (%d ms)" % ms, ms < 400)
+	# balance
+	var t := Radiant.template("retrieve")
+	var low := t.reward_base + t.reward_per_level * 1
+	var high := t.reward_base + t.reward_per_level * 30
+	check("rewards grow sensibly with level (%d at 1, %d at 30)" % [low, high], low >= 50 and low <= 200 and high > low * 2 and high < 800)
+	check("cooldowns and limits are sensible", QuestManager.COOLDOWN_HOURS <= 6.0 and Radiant.TOWN_LIMIT >= 2 and Radiant.BOARD_DAYS <= 7)
 
 
 func _clear_jobs() -> void:

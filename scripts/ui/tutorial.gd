@@ -95,3 +95,22 @@ func _watch() -> void:
 			hint("vampire", "You are a vampire. Food is useless: press F on sleeping people or fresh bodies to feed (Shift+F fills a bottle). Stay out of the sun when hungry, and never let the hunger grow ravenous in town.")
 		if aff.werewolf:
 			hint("werewolf", "You are a werewolf. Press B to change (once a day). The full moon changes you anyway. In beast form, F on a body devours it.")
+	_watch_quests()
+
+
+# Quests, the journal and talking: the first time each comes up
+func _watch_quests() -> void:
+	var wm := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if wm == null:
+		return
+	var active := QuestLog.all(wm).filter(func(q: Dictionary) -> bool: return q["status"] == "active")
+	if not active.is_empty():
+		hint("quests", "You have a quest. Press J for the journal: its Quests tab shows what to do next. Pick Track to see it on the compass (and on screen: Settings > Interface > Tracked quests on screen).")
+	if active.any(func(q: Dictionary) -> bool: return q["source"] == "job" and String(q["next"]).begins_with("Report back")):
+		hint("report_back", "A job is done. Go back to whoever gave it and ask about \"report back\". A ? over someone means they want to see you.")
+	if DialogueState.journal().size() >= 5:
+		hint("journal_notes", "The journal keeps one entry per topic. Write your own notes there too: \"+ New note\" in the Notes tab, or Shift+J from anywhere.")
+	for e in ActorRegistry.near(_player.global_position, 6.0):
+		if e.talk_name != "" and e.disposition != Enemy.Disposition.HOSTILE:
+			hint("talking", "Press E to talk. Click topics on the right or highlighted words; new topics have a dot. Persuade, Gift and the service buttons (Train, Rent Room...) are along the bottom.")
+			break

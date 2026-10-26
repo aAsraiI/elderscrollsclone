@@ -322,6 +322,26 @@ static func _cap(prof: DialogueProfile, s: Speaker, world: WorldManager) -> int:
 ## The known topics this speaker can talk about, sorted (general ones first, then quest and
 ## hand-written ones, then named topics: at most the profile's cap, the same ones every visit)
 static func topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
+	# the window asks several times a frame: work it out once a frame per person (a cost cap)
+	var frame := Engine.get_process_frames() * 100000 + WorldState.version  # stale once anything changes
+	var ckey := "%s|%s|%d|%d" % [s.id, s.name, int(s.role), s.enemy.get_instance_id() if s.enemy != null and is_instance_valid(s.enemy) else 0]
+	if frame == _topics_frame and _topics_cache.has(ckey):
+		return _topics_cache[ckey]
+	if frame != _topics_frame:
+		_topics_frame = frame
+		_topics_cache.clear()
+	var result := _topics_for(s, world)
+	_topics_cache[ckey] = result
+	return result
+
+
+static var _topics_cache := {}
+static var _topics_frame := -1
+## At most this many known topics are weighed for one person (the newest learned first)
+const MAX_TOPIC_CHECKS := 2000
+
+
+static func _topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
 	var general := PackedStringArray()
 	var special := PackedStringArray()
 	var named: Array[String] = []
@@ -337,7 +357,15 @@ static func topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
 				DialogueState.learn(t)
 	var prof := profile_for(s, world)
 	var near := _near_towns(s, world, prof.towns)
-	for t in DialogueState.known_topics():
+	var known := DialogueState.known_topics()
+	if known.size() > MAX_TOPIC_CHECKS:  # the basic topics always, then the newest learned
+		var basic := PackedStringArray()
+		for t in known:
+			if GENERIC.has(t) or QuestManager.TOPICS.has(t) or _priority(s, t) < 2:  # and their own town and guild
+				basic.append(t)
+		basic.append_array(known.slice(known.size() - MAX_TOPIC_CHECKS))
+		known = basic
+	for t in known:
 		var why := _reason(s, t, world, prof, near)
 		match why:
 			"generic":

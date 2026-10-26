@@ -212,6 +212,13 @@ func _input(event: InputEvent) -> void:
 		else:
 			close()
 		get_viewport().set_input_as_handled()
+		return
+	# the keyboard: Ctrl+Left / Ctrl+Right switch tabs
+	if not is_editing() and event is InputEventKey and event.pressed and (event as InputEventKey).ctrl_pressed:
+		var k := (event as InputEventKey).keycode
+		if k == KEY_LEFT or k == KEY_RIGHT:
+			_tabs.current_tab = wrapi(_tabs.current_tab + (1 if k == KEY_RIGHT else -1), 0, TABS.size())
+			get_viewport().set_input_as_handled()
 
 
 # ---------------------------------------------------------------- notes
@@ -705,6 +712,7 @@ func _build_ui() -> void:
 	for t in TABS:
 		_tabs.add_tab(tr(t))  # text keys: ready for translation
 	_tabs.focus_mode = Control.FOCUS_NONE
+	_tabs.tooltip_text = "Ctrl+Left / Ctrl+Right switch tabs"
 	_tabs.tab_changed.connect(func(_i: int) -> void:
 		_filter_kind = "notes" if _tabs.current_tab == TAB_NOTES else "all"
 		_filter_value = ""
@@ -728,16 +736,19 @@ func _build_ui() -> void:
 	bar.add_child(_search)
 	_filter_opt = OptionButton.new()
 	_filter_opt.focus_mode = Control.FOCUS_NONE
+	_filter_opt.tooltip_text = "Show only one guild, town, type or note colour"
 	_filter_opt.item_selected.connect(func(_i: int) -> void: _refresh())
 	bar.add_child(_filter_opt)
 	_sort_opt = OptionButton.new()
 	_sort_opt.focus_mode = Control.FOCUS_NONE
+	_sort_opt.tooltip_text = "The order of the list and the entries"
 	for s in SORTS:
 		_sort_opt.add_item(s)
 	_sort_opt.item_selected.connect(func(_i: int) -> void: _refresh())
 	bar.add_child(_sort_opt)
 	var read_all := Button.new()
 	read_all.text = "Mark all read"
+	read_all.tooltip_text = "Clear every NEW mark"
 	read_all.focus_mode = Control.FOCUS_NONE
 	read_all.pressed.connect(func() -> void:
 		DialogueState.mark_read()
@@ -777,6 +788,7 @@ func _build_ui() -> void:
 	_abandon = Button.new()
 	_abandon.text = "Abandon"
 	_abandon.focus_mode = Control.FOCUS_NONE
+	_abandon.tooltip_text = "Give the quest up (asks first). The giver will think less of you."
 	_abandon.pressed.connect(func() -> void:
 		if not _confirm_abandon:
 			_confirm_abandon = true
@@ -788,6 +800,7 @@ func _build_ui() -> void:
 	_bookmark = Button.new()
 	_bookmark.text = "Bookmark"
 	_bookmark.focus_mode = Control.FOCUS_NONE
+	_bookmark.tooltip_text = "Keep it at the top of the list"
 	_bookmark.pressed.connect(func() -> void:
 		DialogueState.toggle_bookmark("%s:%s" % [_filter_kind, _filter_value])
 		_refresh())

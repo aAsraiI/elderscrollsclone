@@ -124,7 +124,7 @@ func t_in_game() -> void:
 	check("a Lodge has a leader", hunter_giver != null)
 	if hunter_giver != null:
 		var hunt := qm.offer("hunters", hunter_giver, "hunt")
-		check("the Lodge offers a hunt for a named beast", not hunt.is_empty() and hunt["type"] == "hunt" and String(hunt["name"]).begins_with("The Hunt for"))
+		check("the Lodge offers a hunt for a named beast", not hunt.is_empty() and hunt["type"] == "hunt" and String(hunt["name"]).contains(String(hunt["chief"])))
 	# the museum
 	var inv := p.get_node("Inventory") as Inventory
 	var idol: ItemData = load("res://data/artifacts/sunfire_idol.tres")

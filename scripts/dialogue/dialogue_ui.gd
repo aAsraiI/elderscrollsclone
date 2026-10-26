@@ -37,6 +37,7 @@ var _persuade_buttons: Array[Button] = []
 var _barter_button: Button
 var _services: HBoxContainer
 var _last_answer := ""
+var _focus_topic := ""  # the topic the keyboard was on (kept after asking)
 var _fov_before := 0.0
 ## Typewriter text (Settings): characters still to reveal
 var _typing := false
@@ -77,6 +78,7 @@ func open_with(e: Enemy) -> bool:
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_persuade_row.visible = false
+	_focus_topic = ""
 	_log.clear()
 	_last_answer = ""
 	_apply_text_size()
@@ -150,6 +152,7 @@ func close() -> void:
 func ask(topic: String) -> Dictionary:
 	if not _open or speaker == null:
 		return {}
+	_focus_topic = topic
 	var r := DialogueEngine.respond(speaker, topic, _world)
 	QuestEvents.talk(get_tree(), speaker, topic)
 	var text := String(r["text"])
@@ -301,6 +304,7 @@ func _refresh() -> void:
 	var disp := DialogueEngine.get_disposition(speaker)
 	_disp_bar.value = disp
 	_disp_label.text = "Disposition %d" % disp
+	var old_count := _topics.get_child_count()  # the old buttons stay until the frame ends
 	for c in _topics.get_children():
 		c.queue_free()
 	for t in DialogueEngine.topics_for(speaker, _world):
@@ -318,6 +322,8 @@ func _refresh() -> void:
 		b.add_theme_color_override("font_color", c)
 		b.pressed.connect(ask.bind(t))
 		_topics.add_child(b)
+		if (_focus_topic == "" and b.get_index() == old_count) or t == _focus_topic:
+			b.grab_focus.call_deferred()  # the keyboard: Up / Down through the topics, Enter asks
 	var trade := Barter.trade_status(speaker, _world)
 	_barter_button.visible = trade["merchant"] != null
 	_barter_button.disabled = not trade["open"]

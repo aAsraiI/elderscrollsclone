@@ -14,6 +14,8 @@ extends RefCounted
 ## game and fills it from the file for a load.
 
 static var records: Dictionary = {}
+## Goes up with every change (caches elsewhere use it to know they are stale)
+static var version := 0
 
 
 static func has_record(id: String) -> bool:
@@ -26,14 +28,17 @@ static func get_record(id: String) -> Dictionary:
 
 static func set_record(id: String, data: Dictionary) -> void:
 	records[id] = data
+	version += 1
 
 
 static func erase_record(id: String) -> void:
 	records.erase(id)
+	version += 1
 
 
 static func clear() -> void:
 	records = {}
+	version += 1
 
 
 static func to_dict() -> Dictionary:
@@ -62,3 +67,4 @@ static func to_save_dict() -> Dictionary:
 
 static func from_dict(data: Dictionary) -> void:
 	records = data.duplicate(true)
+	version += 1

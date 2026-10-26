@@ -247,12 +247,12 @@ func t_world() -> void:
 	check("asking about background gives an answer", String(r1.get("text", "")).length() > 10, String(r1.get("text", "")))
 	check("which mentions their home, and you learn it as a topic", DialogueState.knows(s.home.display_name), s.home.display_name)
 	check("and the town", DialogueState.knows(town.town.display_name))
-	check("small talk like background is not written in the journal (Alpha 1.12)", DialogueState.journal().is_empty())
+	check("small talk like background is not written in the journal (Alpha 1.12)", _said().is_empty())
 	ui.ask("background")
 	ui.ask(town.town.display_name)
-	check("what they say about a place is written in the journal", DialogueState.journal().size() == 1 and DialogueState.journal()[0]["speaker"] == talker.data.display_name and DialogueState.journal()[0]["topic"] == town.town.display_name)
+	check("what they say about a place is written in the journal", _said().size() == 1 and _said()[0]["speaker"] == talker.data.display_name and _said()[0]["topic"] == town.town.display_name)
 	ui.ask(town.town.display_name)
-	check("asking again adds nothing new", DialogueState.journal().size() == 1)
+	check("asking again adds nothing new", _said().size() == 1)
 	check("the new topics show up in the list", DialogueEngine.topics_for(s, wm).has(town.town.display_name))
 	var rt := ui.ask(town.town.display_name)
 	check("they talk about their own town", String(rt["text"]).contains(town.town.display_name))
@@ -398,3 +398,8 @@ func t_world() -> void:
 func _unlock(s: DialogueEngine.Speaker) -> void:
 	for k in Persuasion.Kind.size():
 		WorldState.erase_record("plock/%s/%d" % [s.id, k])
+
+
+# What people said (the journal also holds the game's own entries: places found, guilds joined)
+func _said() -> Array:
+	return DialogueState.journal().filter(func(e: Dictionary) -> bool: return String(e.get("speaker", "")) != "")

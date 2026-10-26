@@ -83,7 +83,7 @@ func _begin(p: Node3D) -> void:
 	(p.get_node("Inventory") as Inventory).add_item(letter, 1)
 	_store({"stage": 1, "temple": temple["building"], "town": temple["town"], "pos": temple["pos"]})
 	_journal("A dying courier pressed a sealed letter into your hands: 'Take it to the priests of %s. Tell them the sun is in danger.' Then the courier was gone." % temple["town_name"])
-	Locks.toast(get_tree(), "New quest: %s" % NAME)
+	Notices.quest(get_tree(), "Quest started", NAME)
 
 
 func _nearest_city_temple(pos: Vector3) -> Dictionary:

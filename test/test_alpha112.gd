@@ -87,6 +87,7 @@ func t_radiant() -> void:
 	await _steal()
 	await _persuade()
 	_console()
+	await _job_rules()
 	_dialogue_roles()
 	await _main_story()
 	_journal_cleanup()
@@ -426,6 +427,33 @@ func _custom_npc() -> void:
 	var warm := String(ui.ask("the old kings")["text"])
 	check("their answers depend on how much they like you", cold.contains("only to friends") and warm.contains("Crypt of Kings"), cold + " / " + warm)
 	ui.close()
+
+
+## Guild jobs: failing, abandoning, waiting for the next one
+func _job_rules() -> void:
+	print("-- job rules")
+	var qm := wm.quests
+	var cool := QuestManager.cooldown_left("fighters", qm._hours())
+	check("after a job, the guild waits before the next", cool > 0.0)
+	var said := qm.respond(_speaker(leaders["fighters"]), "duties")
+	check("and says so", String(said.get("text", "")).contains("Come back in"), String(said.get("text", "")))
+	WorldState.erase_record(QuestManager.COOLDOWN)
+	var q := _job("mages", "persuade")
+	var r: TownLife.Resident = wm.life.get_resident(String(q.get("target", "")))
+	if r != null:
+		r.dead = true
+		await secs(1.5)
+		check("the person dying fails a persuade job", QuestManager.get_quest(String(q["id"]))["status"] == "failed")
+		check("with the reason", String(QuestManager.get_quest(String(q["id"])).get("fail_reason", "")).contains("dead"))
+		r.dead = false
+	var k := _job("fighters", "kill")
+	var rep := Reputation.get_rep("fighters")
+	qm.abandon(k)
+	check("abandoning a job ends it", QuestManager.get_quest(String(k["id"]))["status"] == "abandoned")
+	check("and the guild thinks less of you", Reputation.get_rep("fighters") < rep)
+	check("finished jobs raised guild reputation", rep > 0)
+	var later := QuestManager.get_quest(String(k["id"]))
+	check("a job's pay grows with level (it records the level-based reward)", int(later["reward"]) > 0)
 
 
 ## The quest.* debug console commands

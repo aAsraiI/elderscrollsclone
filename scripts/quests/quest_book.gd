@@ -32,6 +32,8 @@ const SPAWN_NEAR := 150.0
 const SPAWN_FAR := 260.0
 const TALKER_NEAR := 110.0
 const WEAPON_CHARGE := 2000.0
+## Hours before a failed or abandoned quest is offered again
+const RETRY_HOURS := 72.0
 
 static var _defs := {}
 static var _order: Array[String] = []
@@ -149,7 +151,7 @@ static func cast_for(town_name: String) -> Array:
 # ---------------------------------------------------------------- can it start?
 
 func can_start(d: Dictionary) -> bool:
-	if status(d["id"]) != "":
+	if status(d["id"]) != "" and not can_retry(d):
 		return false
 	for a in d["after"]:
 		if not is_done(String(a)):
@@ -194,7 +196,7 @@ func topics_for(s: DialogueEngine.Speaker) -> PackedStringArray:
 	for id in ids():
 		var d: Dictionary = _defs[id]
 		var st := status(id)
-		if st == "":
+		if st == "" or can_retry(d):
 			if _matches(s, d["giver"], d) and can_start(d):
 				out.append(String(d["hook"]))
 		elif st == "active":
@@ -216,7 +218,7 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 	for id in ids():
 		var d: Dictionary = _defs[id]
 		var st := status(id)
-		if st == "" and String(d["hook"]) == topic and _matches(s, d["giver"], d) and can_start(d):
+		if (st == "" or can_retry(d)) and String(d["hook"]) == topic and _matches(s, d["giver"], d) and can_start(d):
 			start(id)
 			return _say(String(d["intro"]), d)
 		if st != "active":
@@ -269,7 +271,10 @@ func _matches(s: DialogueEngine.Speaker, who: Dictionary, d: Dictionary) -> bool
 	if who.has("lord"):
 		return s.role == NpcData.Role.LORD and town_name == String(who["lord"])
 	if who.has("cast"):
-		return s.name == String(who["cast"]) and (town_name == "" or town_name == String(who["town"]))
+		if s.name == String(who["cast"]) and (town_name == "" or town_name == String(who["town"])):
+			return true
+		# they are dead: the lord of their town speaks for them
+		return s.role == NpcData.Role.LORD and town_name == String(who["town"]) and _cast_dead(who)
 	if who.has("guild"):
 		return Factions.leader_of(s, world) == String(who["guild"])
 	if who.has("leader"):
@@ -295,11 +300,11 @@ static func _realms_of(step: Dictionary) -> Array:
 
 func start(id: String) -> void:
 	var d := get_def(id)
-	if d.is_empty() or status(id) != "":
+	if d.is_empty() or (status(id) != "" and not can_retry(d)):
 		return
 	_store(id, {"status": "active", "step": 0, "flags": [], "places": {}})
 	_journal(d, String(d["intro"]))
-	Locks.toast(get_tree(), "New quest: %s" % d["name"])
+	Notices.quest(get_tree(), "Quest started", String(d["name"]))
 	QuestManager.log_quest(d, "started")
 	_begin_step(id, 0)
 
@@ -393,7 +398,7 @@ func finish(id: String) -> void:
 		if title != "":
 			lines.append("You are now a %s of the %s." % [title, Factions.display_name(f)])
 	_journal(d, "Quest complete: %s.%s" % [d["name"], (" " + " ".join(lines)) if not lines.is_empty() else ""])
-	Locks.toast(get_tree(), "Quest complete: %s" % d["name"])
+	Notices.quest(get_tree(), "Quest completed", String(d["name"]))
 	QuestManager.log_quest(d, "complete")
 	if bool(d.get("penance", false)):
 		WorldState.erase_record(STATE + id)  # a penance can be needed again after another cure
@@ -926,10 +931,11 @@ func fail(id: String, why: String) -> void:
 	var st := state(id).duplicate(true)
 	st["status"] = "failed"
 	st["fail_reason"] = why
+	st["ended_at"] = _hours()
 	st.erase("pos")
 	_store(id, st)
 	_journal(d, "Failed: %s. %s" % [d["name"], why])
-	Locks.toast(get_tree(), "Quest failed: %s" % d["name"], true)
+	Notices.quest(get_tree(), "Quest failed", "%s: %s" % [d["name"], why], true)
 	QuestManager.log_quest(d, "failed: " + why)
 
 
@@ -954,3 +960,40 @@ func _remember_giver(d: Dictionary) -> void:
 			for e: Dictionary in NamedSettlements.LIST[biome]:
 				if String(e["name"]) == String(who["lord"]):
 					NpcMemory.remember(String(e["lord"]), String(who["lord"]), "quest", String(d["name"]), day)
+
+
+## A failed or abandoned quest is offered again after RETRY_HOURS (unless it says "retry": false)
+func can_retry(d: Dictionary) -> bool:
+	var st := state(String(d["id"]))
+	if not String(st.get("status", "")) in ["failed", "abandoned"] or not bool(d.get("retry", true)):
+		return false
+	return _hours() - float(st.get("ended_at", 0.0)) >= RETRY_HOURS
+
+
+## Gives a quest up (the journal's Abandon): the giver's town thinks a little less of you
+func abandon(id: String) -> void:
+	var d := get_def(id)
+	if d.is_empty() or not is_active(id):
+		return
+	_despawn_step(id, int(state(id).get("step", 0)))
+	var st := state(id).duplicate(true)
+	st["status"] = "abandoned"
+	st["ended_at"] = _hours()
+	st.erase("pos")
+	_store(id, st)
+	Reputation.add_fame(String(d.get("group", "")), -2)
+	_journal(d, "Abandoned: %s." % d["name"])
+	Notices.quest(get_tree(), "Quest abandoned", String(d["name"]), true)
+	QuestManager.log_quest(d, "abandoned")
+
+
+# Is a named townsperson of a quest dead?
+func _cast_dead(who: Dictionary) -> bool:
+	if world == null or world.life == null:
+		return false
+	for t in world.towns:
+		if t.town != null and t.town.display_name == String(who.get("town", "")):
+			for r: TownLife.Resident in world.life.get_town_residents(t.id):
+				if r.data.display_name == String(who["cast"]):
+					return r.dead
+	return false

@@ -24,6 +24,12 @@ extends Node
 const STATE := "quests"
 const TOPICS: Array[String] = ["membership", "duties", "report back", "advancement", "clear bounty", "a delivery", "the territory war", "marriage", "our shop", "land for sale"]
 const REPORT := "report back"
+## The skill a kind of job trains when it is handed in
+const SKILL_OF := {"retrieve": "athletics", "kill": "one_handed", "hunt": "archery", "steal": "security", "persuade": "speech",
+	"deliver": "athletics", "assassinate": "sneak", "excavate": "athletics", "survey": "block"}
+## Hours a guild waits after a finished job before it has another
+const COOLDOWN_HOURS := 3.0
+const COOLDOWN := "job_cooldown"
 const PERSUADE_GOAL := 70
 const CHIEF_BODY := "res://data/enemies/bandit_brute.tres"
 const BEAST_BODY := "res://data/enemies/frost_bear.tres"
@@ -46,6 +52,7 @@ func _ready() -> void:
 	if world != null and world.dungeons != null:
 		world.dungeons.entered.connect(_on_entered)
 	_apply_perks.call_deferred()
+	_listen_crime.call_deferred()
 	var sm := get_tree().get_first_node_in_group("save_manager") as SaveManager
 	if sm != null:
 		sm.loaded.connect(func(_slot: String) -> void: _apply_perks())
@@ -178,11 +185,15 @@ func offer(faction: String, s: DialogueEngine.Speaker, only_type: String = "") -
 	var back := s.home.world_pos if s.home != null else (s.position if s.position != Vector3.ZERO else (town.position if town != null else Vector3.ZERO))
 	q["giver_pos"] = [back.x, back.z]
 	q["status"] = "active"
-	q["reward"] = d.reward_base + 40 * Factions.rank(faction) + rng.randi_range(0, 30)
+	q["reward"] = d.reward_base + 40 * Factions.rank(faction) + 6 * _player_level() + rng.randi_range(0, 30)  # grows with rank and level
+	q["offered_day"] = world.clock.day if world.clock != null else 1
+	q["deadline_day"] = int(q["offered_day"]) + (5 if q["type"] == "deliver" else 14)
+	q["skill"] = String(SKILL_OF.get(q["type"], ""))
 	var list := all_quests().duplicate(true)
 	list.append(q)
 	_save_list(list, counter + 1)
 	log_quest(q, "offered by %s (%s) and taken: %s" % [s.name, faction, q["objective"]])
+	Notices.quest(get_tree(), "Quest started", String(q["name"]))
 	if q["type"] == "deliver":
 		var inv := _player().get_node("Inventory") as Inventory
 		inv.add_item(QuestItems.get_item(qid, String(q["item_name"])))
@@ -438,14 +449,28 @@ func complete(q: Dictionary) -> int:
 	var gold := int(q["reward"])
 	if q["type"] == "assassinate" and not bool(q.get("witnessed", false)):
 		gold = roundi(gold * 1.5)
+	if q["type"] == "steal" and not bool(q.get("witnessed", false)):
+		gold += roundi(gold * 0.25)  # bonus: nobody saw a thing
+	if q["type"] == "retrieve" and Discovery.is_cleared(String(q.get("target", ""))):
+		gold += roundi(gold * 0.25)  # bonus: the place was cleared too
 	Currency.add_gold(inv, gold)
 	Factions.add_quest_done(String(q["faction"]))
 	var skills := p.get_node_or_null("Skills") as Skills
 	if skills != null:
 		skills.add_deed_xp(SkillDatabase.deed_xp(skills.get_player_level(), 5.0))  # a deed: helps past level 80
+		if String(q.get("skill", "")) != "":
+			skills.add_xp(StringName(q["skill"]), 25.0 + 5.0 * Factions.rank(String(q["faction"])))
+	if Factions.get_data(String(q["faction"])) != null:
+		Reputation.add(String(q["faction"]), 3)
+	Reputation.add_fame(String(q.get("giver_town", "")), 1)
+	q["done_day"] = world.clock.day if world != null and world.clock != null else 1
+	var cool := WorldState.get_record(COOLDOWN).duplicate()
+	cool[String(q["faction"])] = _hours() + COOLDOWN_HOURS
+	WorldState.set_record(COOLDOWN, cool)
 	q["status"] = "done"
 	_update_quest(q)
 	log_quest(q, "handed in: %d gold" % gold)
+	Notices.quest(get_tree(), "Quest completed", "%s: %d gold" % [q["name"], gold])
 	return gold
 
 
@@ -458,7 +483,68 @@ func fail(q: Dictionary, why: String) -> void:
 	_update_quest(q)
 	log_quest(q, "failed: " + why)
 	_journal(q, "Failed: %s. %s" % [q["name"], why])
-	Locks.toast(get_tree(), "Job failed: %s" % q["name"], true)
+	Notices.quest(get_tree(), "Quest failed", "%s: %s" % [q["name"], why], true)
+
+
+## Why an active job can no longer be done ("" = it still can): out of time, the person dead, the
+## package lost, seen while stealing
+func failure(q: Dictionary) -> String:
+	var day := world.clock.day if world != null and world.clock != null else 1
+	if q.has("deadline_day") and day > int(q["deadline_day"]) and q["faction"] != "bounty":
+		return "You ran out of time."
+	var t := String(q.get("type", ""))
+	if t in ["persuade", "deliver"] and world != null and world.life != null:
+		var r: TownLife.Resident = world.life.get_resident(String(q["target"]))
+		if r == null or r.dead:
+			return "%s is dead." % q.get("target_name", "They")
+	if t == "deliver":
+		var inv := _player().get_node("Inventory") as Inventory
+		if not inv.has_item(QuestItems.get_item(String(q["id"]), String(q["item_name"]))):
+			return "The package is lost."
+	if t == "steal" and bool(q.get("caught", false)):
+		return "You were seen. The guild wants nothing traced back to it."
+	return ""
+
+
+## Gives up a job: the guild thinks less of you
+func abandon(q: Dictionary) -> void:
+	if q.is_empty() or q["status"] != "active":
+		return
+	q["status"] = "abandoned"
+	_update_quest(q)
+	if Factions.get_data(String(q["faction"])) != null:
+		Reputation.add(String(q["faction"]), -5)
+	log_quest(q, "abandoned")
+	_journal(q, "Abandoned: %s." % q["name"])
+	Notices.quest(get_tree(), "Quest abandoned", String(q["name"]), true)
+
+
+# CrimeManager: a theft was seen. Inside a steal job's house, the job is blown.
+func _on_crime(kind: String, _town_id: String, _bounty: int, witnessed: bool) -> void:
+	if kind != "theft" or not witnessed or world == null or world.dungeons == null:
+		return
+	var root := world.dungeons.get_interior_root()
+	var inside := String(root.get_meta("building_id", "")) if root != null else ""
+	for q: Dictionary in all_quests():
+		if q["status"] == "active" and q["type"] == "steal" and String(q["target"]) == inside:
+			q["caught"] = true
+			q["witnessed"] = true
+			_update_quest(q)
+
+
+## Hours until this guild has another job (0 = now)
+static func cooldown_left(faction: String, now_hours: float) -> float:
+	return maxf(float(WorldState.get_record(COOLDOWN).get(faction, 0.0)) - now_hours, 0.0)
+
+
+func _hours() -> float:
+	var clock := world.clock if world != null else null
+	return float(clock.day) * 24.0 + clock.hour if clock != null else 0.0
+
+
+func _player_level() -> int:
+	var sk := _player().get_node_or_null("Skills") as Skills if _player() != null else null
+	return sk.get_player_level() if sk != null else 1
 
 
 ## Prints a job's change of state as a [Quest] line in the output
@@ -472,6 +558,10 @@ func _check_ready() -> void:
 		return
 	for q: Dictionary in all_quests():
 		if q["status"] != "active":
+			continue
+		var why := failure(q)
+		if why != "":
+			fail(q, why)
 			continue
 		var now := is_ready(q)
 		if now == bool(q.get("ready", false)):
@@ -490,7 +580,7 @@ func _check_ready() -> void:
 		var how := "Use the board again." if q2["faction"] == "bounty" else "Ask about \"%s\"." % REPORT
 		log_quest(q2, "ready to hand in to %s" % where)
 		_journal(q2, "Done. Now report back to %s. %s" % [where, how])
-		Locks.toast(get_tree(), "%s: done. Report back to %s." % [q2["name"], where])
+		Notices.quest(get_tree(), "Ready to turn in", "%s: report back to %s" % [q2["name"], where])
 
 
 func _journal(q: Dictionary, text: String) -> void:
@@ -698,8 +788,13 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 					var promo := Factions.next_rank(leader, p)
 					if bool(promo.get("ok", false)):
 						extra += " Ask me about advancement."
+					if q.has("item_name") and q["type"] != "deliver":
+						extra = " [You hand over the %s.]" % q["item_name"] + extra
 					return _say("Well done. Here is your pay: %d gold.%s" % [gold, extra], q)
 				return _say("You already have a job: %s" % q["objective"], q)
+			var wait := cooldown_left(leader, _hours())
+			if wait > 0.0:
+				return _say("Nothing yet. Come back in %d hour%s." % [ceili(wait), "" if ceili(wait) == 1 else "s"])
 			var nq := offer(leader, s)
 			if nq.is_empty():
 				return _say("Nothing for you right now. Come back later.")
@@ -815,3 +910,8 @@ static func _make_contact(parent: Node, at: Vector3, name_shown: String) -> Enem
 
 func _player() -> Node3D:
 	return get_tree().get_first_node_in_group("player") as Node3D
+
+
+func _listen_crime() -> void:
+	if world != null and world.crime != null and not world.crime.crime_reported.is_connected(_on_crime):
+		world.crime.crime_reported.connect(_on_crime)

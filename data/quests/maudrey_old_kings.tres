@@ -1,0 +1,77 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/quest_data.gd" id="1_q"]
+[ext_resource type="Script" path="res://scripts/quests/quest_stage.gd" id="2_s"]
+[ext_resource type="Script" path="res://scripts/quests/quest_objective.gd" id="3_o"]
+[ext_resource type="Script" path="res://scripts/quests/quest_choice.gd" id="4_c"]
+[ext_resource type="Script" path="res://scripts/quests/quest_condition.gd" id="5_k"]
+[ext_resource type="Resource" path="res://data/jewelry/copper_amulet_insight.tres" id="6_a"]
+[ext_resource type="Resource" path="res://data/jewelry/copper_ring_endurance.tres" id="7_r"]
+
+[sub_resource type="Resource" id="o_wolves"]
+script = ExtResource("3_o")
+type = 0
+text = "Kill the grave wolves at the old barrow camp near Kingsreach"
+target = "Grave Wolf"
+count = 3
+place = "camp near Kingsreach"
+spawn = "res://data/enemies/wolf.tres"
+
+[sub_resource type="Resource" id="o_flower"]
+script = ExtResource("3_o")
+type = 1
+text = "Bring Maudrey two blue mountain flowers for the graves"
+target = "res://data/ingredients/blue_mountain_flower.tres"
+count = 2
+bonus = true
+bonus_gold = 25
+
+[sub_resource type="Resource" id="s_hunt"]
+script = ExtResource("2_s")
+text = "Maudrey says grave wolves dig at the old kings' barrow near Kingsreach. She wants them gone. If I find blue mountain flowers, she would like two for the graves."
+objectives = Array[ExtResource("3_o")]([SubResource("o_wolves"), SubResource("o_flower")])
+
+[sub_resource type="Resource" id="c_bury"]
+script = ExtResource("4_c")
+who = "custom/example_hermit"
+topic = "bury the bones"
+say = "Good. Let them sleep. The kings were cruel, but the dead have paid enough."
+flag = "buried"
+
+[sub_resource type="Resource" id="c_keep"]
+script = ExtResource("4_c")
+who = "custom/example_hermit"
+topic = "keep the barrow open"
+say = "Open? For grave-robbers? ...Fine. You did the killing. It is your call, not mine."
+flag = "opened"
+
+[sub_resource type="Resource" id="s_choice"]
+script = ExtResource("2_s")
+text = "The wolves are dead. Maudrey asks what should be done with the barrow: bury the bones, or keep it open."
+choices = Array[ExtResource("4_c")]([SubResource("c_bury"), SubResource("c_keep")])
+
+[sub_resource type="Resource" id="k_level"]
+script = ExtResource("5_k")
+kind = 0
+amount = 1
+
+[resource]
+script = ExtResource("1_q")
+id = "maudrey_old_kings"
+title = "The Barrow of the Old Kings"
+description = "Old Maudrey of Kingsreach wants the grave wolves at the old barrow killed."
+level = 3
+giver = "custom/example_hermit"
+hook = "the barrow"
+intro = "Grave wolves have been digging at the old kings' barrow, south of town. Kill them before they drag the bones out. Bring me two blue mountain flowers too, if you see any."
+requirements = Array[ExtResource("5_k")]([SubResource("k_level")])
+stages = Array[ExtResource("2_s")]([SubResource("s_hunt"), SubResource("s_choice")])
+turn_in_say = "You did well. Here, take one of these. They were my husband's."
+reward_gold = 60
+gold_per_level = 5
+reward_choice = Array[Resource]([ExtResource("6_a"), ExtResource("7_r")])
+reward_skill = "speech"
+reward_skill_xp = 30.0
+reward_rep_with = "Kingsreach"
+reward_rep = 5
+reward_flag = "maudrey_barrow_done"

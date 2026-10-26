@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/quest_data.gd" id="1_q"]
+[ext_resource type="Script" path="res://scripts/quests/quest_stage.gd" id="2_s"]
+[ext_resource type="Script" path="res://scripts/quests/quest_objective.gd" id="3_o"]
+[ext_resource type="Script" path="res://scripts/quests/quest_choice.gd" id="4_c"]
+
+[sub_resource type="Resource" id="c1"]
+script = ExtResource("4_c")
+topic = "help the farmer"
+say = "Thank you. I'll not forget it."
+next = 1
+flag = "helped"
+
+[sub_resource type="Resource" id="c2"]
+script = ExtResource("4_c")
+topic = "side with the lord"
+say = "Then you'll answer to the village."
+next = 2
+flag = "sided_lord"
+
+[sub_resource type="Resource" id="s1"]
+script = ExtResource("2_s")
+text = "A farmer and the lord quarrel over a field. Choose a side: ask the giver about one of the choices."
+choices = Array[ExtResource("4_c")]([SubResource("c1"), SubResource("c2")])
+
+[sub_resource type="Resource" id="o2"]
+script = ExtResource("3_o")
+type = 3
+who = "Name@Town"
+topic = "the field"
+say = "The field is mine again."
+
+[sub_resource type="Resource" id="s2"]
+script = ExtResource("2_s")
+text = "Branch A: tell the farmer."
+objectives = Array[ExtResource("3_o")]([SubResource("o2")])
+next = 3
+
+[sub_resource type="Resource" id="s3"]
+script = ExtResource("2_s")
+text = "Branch B: the lord's way. The quest ends here."
+
+[resource]
+script = ExtResource("1_q")
+id = "template_branching"
+title = "Template: Branching"
+template = true
+description = "A stage with Choices ends when one is picked; each choice says which stage comes next (Next), and its Flag is remembered (QuestCondition FLAG template_branching:helped)."
+giver = "Name@Town"
+hook = "the quarrel"
+intro = "There's a quarrel over the north field."
+stages = Array[ExtResource("2_s")]([SubResource("s1"), SubResource("s2"), SubResource("s3")])
+reward_gold = 80

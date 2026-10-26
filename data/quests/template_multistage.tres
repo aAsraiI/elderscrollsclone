@@ -1,0 +1,51 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/quest_data.gd" id="1_q"]
+[ext_resource type="Script" path="res://scripts/quests/quest_stage.gd" id="2_s"]
+[ext_resource type="Script" path="res://scripts/quests/quest_objective.gd" id="3_o"]
+[ext_resource type="Script" path="res://scripts/quests/quest_choice.gd" id="4_c"]
+
+[sub_resource type="Resource" id="o1"]
+script = ExtResource("3_o")
+type = 4
+text = "Go to the dungeon near Kingsreach"
+place = "dungeon near Kingsreach"
+radius = 40.0
+
+[sub_resource type="Resource" id="o2"]
+script = ExtResource("3_o")
+type = 3
+text = "Ask the lord of Kingsreach about the old map"
+who = "Name@Kingsreach"
+topic = "the old map"
+say = "That map? It was my grandfather's. He hid something in that dungeon."
+
+[sub_resource type="Resource" id="o3"]
+script = ExtResource("3_o")
+type = 8
+text = "Find the place on the map"
+place = "dungeon near Kingsreach"
+
+[sub_resource type="Resource" id="s1"]
+script = ExtResource("2_s")
+text = "Stage 1: go to the place."
+objectives = Array[ExtResource("3_o")]([SubResource("o1")])
+
+[sub_resource type="Resource" id="s2"]
+script = ExtResource("2_s")
+text = "Stage 2: two things, one after the other (Sequential)."
+objectives = Array[ExtResource("3_o")]([SubResource("o2"), SubResource("o3")])
+sequential = true
+
+[resource]
+script = ExtResource("1_q")
+id = "template_multistage"
+title = "Template: Multi-stage"
+template = true
+description = "Stages run one after another; a stage's objectives run side by side unless Sequential is on."
+giver = "Name@Town"
+hook = "the old map"
+intro = "Help me follow this old map."
+stages = Array[ExtResource("2_s")]([SubResource("s1"), SubResource("s2")])
+completion = 1
+reward_gold = 150

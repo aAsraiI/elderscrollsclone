@@ -111,6 +111,9 @@ static func active_targets() -> Array:
 	if not st.is_empty():
 		out.append(st)
 	out.append_array(QuestBook.targets())
+	var runner := QuestRunner.of(Engine.get_main_loop() as SceneTree)
+	if runner != null:
+		out.append_array(runner.targets())
 	return out
 
 
@@ -603,6 +606,8 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 		out.append_array(story.topics_for(s))
 	if world != null and world.book != null:
 		out.append_array(world.book.topics_for(s))
+	if world != null and world.runner != null:
+		out.append_array(world.runner.topics_for(s))
 	out.append_array(Marriage.topics_for(s))
 	out.append_array(Homestead.topics_for(s))
 	return out
@@ -631,6 +636,10 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 		var written := world.book.respond(s, topic)
 		if not written.is_empty():
 			return written
+	if world != null and world.runner != null:
+		var handmade := world.runner.respond(s, topic)
+		if not handmade.is_empty():
+			return handmade
 	var wed := Marriage.respond(s, topic, _player(), world.clock.day if world != null and world.clock != null else 1)
 	if not wed.is_empty():
 		return wed

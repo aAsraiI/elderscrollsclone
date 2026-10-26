@@ -28,6 +28,7 @@ static func verb(_player: Node, item: ItemData) -> String:
 
 static func use(player: Node, item: ItemData) -> void:
 	var tree := player.get_tree()
+	QuestEvents.use(tree, item)
 	match verb(player, item):
 		"Read book":
 			BookUI.open(tree, item.display_name, LoreBooks.read(player, item))

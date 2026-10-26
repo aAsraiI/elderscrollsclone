@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/quest_data.gd" id="1_q"]
+[ext_resource type="Script" path="res://scripts/quests/quest_stage.gd" id="2_s"]
+[ext_resource type="Script" path="res://scripts/quests/quest_objective.gd" id="3_o"]
+[ext_resource type="Script" path="res://scripts/quests/quest_choice.gd" id="4_c"]
+
+[sub_resource type="Resource" id="o1"]
+script = ExtResource("3_o")
+type = 0
+text = "Kill the bandit leader at the camp"
+target = "Bandit Leader"
+count = 1
+place = "camp near Kingsreach"
+spawn = "res://data/enemies/bandit_brute.tres"
+
+[sub_resource type="Resource" id="s1"]
+script = ExtResource("2_s")
+text = "A bandit leader has set up camp near the town. Kill them."
+objectives = Array[ExtResource("3_o")]([SubResource("o1")])
+
+[resource]
+script = ExtResource("1_q")
+id = "template_kill"
+title = "Template: Kill"
+template = true
+description = "Copy this file, untick Template, give it a new id, and change the giver, place and enemy."
+giver = "Name@Town"
+hook = "the bandit leader"
+intro = "A bandit leader is camped nearby. Deal with them and I'll pay you."
+stages = Array[ExtResource("2_s")]([SubResource("s1")])
+reward_gold = 100
+gold_per_level = 10

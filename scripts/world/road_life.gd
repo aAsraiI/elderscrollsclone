@@ -201,7 +201,7 @@ func _cleanup(p: Node3D) -> void:
 			if not is_instance_valid(member) or (member as Enemy).is_queued_for_deletion():
 				continue
 			var e := member as Enemy
-			if e.global_position.distance_to(p.global_position) > despawn_distance:
+			if e.global_position.distance_to(p.global_position) > despawn_distance and not QuestTargets.is_critical(e):
 				e.queue_free()  # far behind: gone (a corpse too)
 				continue
 			if not e.is_dead():

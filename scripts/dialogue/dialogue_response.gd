@@ -11,6 +11,8 @@ extends Resource
 @export var need_flag := ""
 ## This flag must NOT be set ("" = no check)
 @export var not_flag := ""
+## All of these must pass too (level, skill, guild rank, quest done, time of day... see QuestCondition)
+@export var conditions: Array[QuestCondition] = []
 @export_group("Then")
 ## Sets this flag after speaking
 @export var set_flag := ""
@@ -31,5 +33,7 @@ func passes(disposition: int) -> bool:
 	if need_flag != "" and not DialogueState.has_flag(need_flag):
 		return false
 	if not_flag != "" and DialogueState.has_flag(not_flag):
+		return false
+	if not conditions.is_empty() and not QuestCondition.all_pass(conditions, Engine.get_main_loop() as SceneTree, disposition):
 		return false
 	return true

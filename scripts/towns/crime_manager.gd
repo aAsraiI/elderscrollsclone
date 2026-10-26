@@ -225,6 +225,7 @@ func on_player_hurt(victim: Enemy, killed: bool) -> void:
 
 ## ContainerUI calls this when the player takes from an owned container
 func on_taken(item: ItemData, count: int) -> void:
+	QuestEvents.steal(get_tree(), item, count)
 	add_stolen(item, count)
 	Factions.note_crime("thefts")
 	report("theft", item.value * count)

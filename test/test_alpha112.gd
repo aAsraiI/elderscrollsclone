@@ -92,7 +92,157 @@ func t_radiant() -> void:
 	_journal_cleanup()
 	await _notes()
 	await _custom_npc()
+	await _handmade_quest()
+	await _lifecycle()
 	await _across_a_load()
+
+
+# ---------------------------------------------------------------- 1.12.2 / 1.12.3 handmade quests
+
+func _handmade_quest() -> void:
+	print("-- a handmade quest (QuestData)")
+	var runner := wm.runner
+	check("the runner exists and loads data/quests (not the templates)", runner != null and QuestRunner.get_data("maudrey_old_kings") != null and QuestRunner.get_data("template_kill") == null)
+	if runner == null:
+		return
+	var id := "maudrey_old_kings"
+	check("a change that isn't allowed is refused", not runner.set_state(id, "completed") and runner.status(id) == "available")
+	var hermit: CustomNpcData = null
+	for d in CustomNpcs.all():
+		if d.id == "example_hermit":
+			hermit = d
+	var spot := (wm.get_node("CustomNpcs") as CustomNpcs).spot_of(hermit)
+	var body := await _custom_body(hermit, spot)
+	if body == null or not ui.open_with(body):
+		check("Maudrey can be talked to", false)
+		return
+	check("she offers the quest", DialogueEngine.topics_for(ui.speaker, wm).has("the barrow"))
+	var said := String(ui.ask("the barrow")["text"])
+	check("taking it shows the reward", runner.status(id) == "active" and said.contains("Reward"), said)
+	ui.close()
+	var inv := p.get_node("Inventory") as Inventory
+	var flower := load("res://data/ingredients/blue_mountain_flower.tres") as ItemData
+	inv.add_item(flower, 2)
+	var camp := QuestTargets.place(wm, "camp near Kingsreach")
+	await _go(camp["pos"] + Vector3(0, 0, 20))
+	await secs(1.5)
+	var wolves: Array = []
+	for e in get_nodes_in_group("enemies"):
+		if String((e as Enemy).spawn_key).begins_with("qi/%s/" % id):
+			wolves.append(e)
+	check("the grave wolves appear when you come near (3)", wolves.size() == 3, str(wolves.size()))
+	check("they are quest-critical", wolves.all(func(e: Enemy) -> bool: return QuestTargets.is_critical(e)))
+	check("the tracker shows the count", runner.next_step(id).contains("0/3"), runner.next_step(id))
+	for e: Enemy in wolves:
+		e.stats.modify_vital("health", -999999.0)
+	await secs(1.0)
+	check("killing them moves to the choice", int(QuestRunner.record(id).get("stage", 0)) == 1, str(QuestRunner.record(id)))
+	body = await _custom_body(hermit, spot)
+	if body == null or not ui.open_with(body):
+		check("Maudrey is back", false)
+		return
+	var topics := DialogueEngine.topics_for(ui.speaker, wm)
+	check("the choice is offered", topics.has("bury the bones") and topics.has("keep the barrow open"), str(topics))
+	ui.ask("bury the bones")
+	check("the choice is remembered", QuestBook.flag("%s:buried" % id))
+	check("then it's ready to turn in", runner.status(id) == "ready")
+	topics = DialogueEngine.topics_for(ui.speaker, wm)
+	var pick := ""
+	for t in topics:
+		if t.begins_with("take the "):
+			pick = t
+	check("a reward to pick from", pick != "", str(topics))
+	var gold := Currency.get_gold(inv)
+	var answer := String(ui.ask(pick)["text"])
+	ui.close()
+	check("picking it completes the quest", runner.status(id) == "completed")
+	check("with gold, the bonus for the flowers, and the flowers handed over", Currency.get_gold(inv) >= gold + 60 + 25 and inv.get_count(flower) == 0, "%d -> %d" % [gold, Currency.get_gold(inv)])
+	check("the turn-in says what you handed over", answer.contains("You hand over 2 Blue Mountain Flower"), answer)
+	check("and Kingsreach thinks better of you", Reputation.get_rep("Kingsreach") > 0)
+	check("the flag is set", DialogueState.has_flag("maudrey_barrow_done"))
+
+
+func _custom_body(d: CustomNpcData, spot: Vector3) -> Enemy:
+	await _go(spot + Vector3(4, 0, 4))
+	await secs(1.0)
+	for e in get_nodes_in_group("enemies"):
+		if (e as Node).has_meta("custom_npc") and (e as Node).get_meta("custom_npc") == d:
+			return e
+	return null
+
+
+func _lifecycle() -> void:
+	print("-- the life of a quest")
+	var runner := wm.runner
+	# a quest given by a townsperson who dies before it is handed in
+	var giver: TownLife.Resident = null
+	var lord: TownLife.Resident = null
+	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
+		if r.data.role == NpcData.Role.COMMONER and giver == null and Factions.leader_of(_speaker(r), wm) == "":
+			giver = r
+		if r.data.role == NpcData.Role.LORD:
+			lord = r
+	var q := QuestData.new()
+	q.id = "test_fallback"
+	q.title = "Test Fallback"
+	q.giver = giver.data.id
+	q.hook = "test errand"
+	var st := QuestStage.new()
+	var o := QuestObjective.new()
+	o.type = QuestObjective.Type.COLLECT
+	o.target = "res://data/ingredients/bloodmoss.tres"
+	o.count = 1
+	st.objectives = [o]
+	q.stages = [st]
+	q.reward_gold = 10
+	QuestRunner.register(q)
+	check("the giver offers a registered quest", runner.topics_for(_speaker(giver)).has("test errand"))
+	runner.respond(_speaker(giver), "test errand")
+	(p.get_node("Inventory") as Inventory).add_item(load("res://data/ingredients/bloodmoss.tres"), 1)
+	await secs(1.0)
+	check("collecting it makes it ready", runner.status("test_fallback") == "ready")
+	WorldState.set_record("kill/" + giver.data.id, {"dead": true})
+	giver.dead = true
+	check("with the giver dead, the lord takes it in", lord != null and runner.topics_for(_speaker(lord)).has("report back"))
+	if lord != null:
+		runner.respond(_speaker(lord), "report back")
+	check("and it completes", runner.status("test_fallback") == "completed")
+	giver.dead = false
+	WorldState.erase_record("kill/" + giver.data.id)
+	# time limits, abandoning, retrying, offers that run out
+	var t := QuestData.new()
+	t.id = "test_timed"
+	t.title = "Test Timed"
+	t.time_limit_hours = 1.0
+	t.stages = [st]
+	t.retry = false
+	QuestRunner.register(t)
+	runner.start("test_timed")
+	wm.clock.set_time(wm.clock.hour + 2.0 if wm.clock.hour < 21.0 else 1.0, wm.clock.day + (0 if wm.clock.hour < 21.0 else 1))
+	await secs(1.0)
+	check("running out of time fails it", runner.status("test_timed") == "failed" and String(QuestRunner.record("test_timed").get("why", "")).contains("time"))
+	check("a failed quest without retry is closed for good", not runner.can_offer(t))
+	var a := QuestData.new()
+	a.id = "test_abandon"
+	a.title = "Test Abandon"
+	a.stages = [st]
+	QuestRunner.register(a)
+	runner.start("test_abandon")
+	runner.abandon("test_abandon")
+	check("abandoning ends it", runner.status("test_abandon") == "abandoned")
+	check("it can be offered again only after a while", not runner.can_offer(a))
+	wm.clock.set_time(wm.clock.hour, wm.clock.day + 4)
+	check("then it can", runner.can_offer(a))
+	check("every ended quest is exactly one ending", ["completed", "failed", "abandoned"].all(func(s: String) -> bool: return QuestRunner.ENDED.has(s)))
+	var cond := QuestCondition.new()
+	cond.kind = QuestCondition.Kind.TIME_OF_DAY
+	cond.amount = int(wm.clock.hour)
+	cond.amount2 = int(wm.clock.hour) + 1
+	check("a time-of-day condition", cond.passes(self))
+	cond.kind = QuestCondition.Kind.QUEST_DONE
+	cond.key = "maudrey_old_kings"
+	check("a quest-done condition", cond.passes(self))
+	check("notices queue instead of overlapping", Notices.of(self) != null)
 
 
 # ---------------------------------------------------------------- 1.12.4 / 1.12.5 dialogue

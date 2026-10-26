@@ -1541,6 +1541,7 @@ func _on_died() -> void:
 		add_to_group("persistent")  # its corpse (and what is still in it) is saved
 	if spawn_key != "":
 		WorldState.set_record("kill/" + spawn_key, {"dead": true})
+	QuestEvents.kill(self)
 	if enemy_id == "dragon":
 		var slain := int(WorldState.get_record("dragons_slain").get("n", 0)) + 1
 		WorldState.set_record("dragons_slain", {"n": slain})

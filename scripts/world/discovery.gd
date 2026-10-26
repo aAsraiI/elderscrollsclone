@@ -58,6 +58,7 @@ func mark_found(poi: PlacedPOI) -> bool:
 		var hud := p.get_node_or_null("CompassHUD") as CompassHUD
 		if hud != null and poi.town == null:
 			hud.show_banner("Discovered: %s" % place_name(_manager, poi), "Level %d" % LevelCurve.place_level(_manager.map, poi.position))
+	QuestEvents.discover(get_tree(), poi.id)
 	discovered.emit(poi)
 	return true
 

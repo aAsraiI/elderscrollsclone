@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="QuestData" format=3]
+
+[ext_resource type="Script" path="res://scripts/quests/quest_data.gd" id="1_q"]
+[ext_resource type="Script" path="res://scripts/quests/quest_stage.gd" id="2_s"]
+[ext_resource type="Script" path="res://scripts/quests/quest_objective.gd" id="3_o"]
+[ext_resource type="Script" path="res://scripts/quests/quest_choice.gd" id="4_c"]
+
+[sub_resource type="Resource" id="o1"]
+script = ExtResource("3_o")
+type = 1
+text = "Gather 5 bloodmoss"
+target = "res://data/ingredients/bloodmoss.tres"
+count = 5
+
+[sub_resource type="Resource" id="s1"]
+script = ExtResource("2_s")
+text = "Bring back five bloodmoss."
+objectives = Array[ExtResource("3_o")]([SubResource("o1")])
+
+[resource]
+script = ExtResource("1_q")
+id = "template_fetch"
+title = "Template: Fetch"
+template = true
+description = "Copy this file, untick Template, give it a new id. COLLECT items are handed over at the turn-in."
+giver = "Name@Town"
+hook = "bloodmoss"
+intro = "I need five bloodmoss for my potions."
+stages = Array[ExtResource("2_s")]([SubResource("s1")])
+reward_gold = 50

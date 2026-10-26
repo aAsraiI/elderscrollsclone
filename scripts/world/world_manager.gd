@@ -63,6 +63,8 @@ var crime: CrimeManager
 var quests: QuestManager
 ## The written quests of the design bible (QuestBook) and the instanced realms (RealmManager)
 var book: QuestBook
+## The handmade quests of data/quests/ (QuestData)
+var runner: QuestRunner
 var realms: RealmManager
 var road_life: RoadLife
 ## Found places and fast travel
@@ -147,6 +149,9 @@ func _ready() -> void:
 	book = QuestBook.new()
 	book.name = "QuestBook"
 	add_child(book)
+	runner = QuestRunner.new()
+	runner.name = "QuestRunner"
+	add_child(runner)
 	realms = RealmManager.new()
 	realms.name = "RealmManager"
 	add_child(realms)

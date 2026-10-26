@@ -257,6 +257,7 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 			if player is CharacterBody3D:
 				(player as CharacterBody3D).velocity = Vector3.ZERO
 	entered.emit(entrance_id)
+	QuestEvents.enter(get_tree(), entrance_id)
 	return true
 
 

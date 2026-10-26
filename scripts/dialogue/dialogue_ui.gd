@@ -97,6 +97,7 @@ func ask(topic: String) -> Dictionary:
 	if not _open or speaker == null:
 		return {}
 	var r := DialogueEngine.respond(speaker, topic, _world)
+	QuestEvents.talk(get_tree(), speaker, topic)
 	var text := String(r["text"])
 	_say(speaker.name, text, topic)
 	var ix := DialogueEngine.index(_world)
@@ -137,6 +138,8 @@ func persuade(kind: Persuasion.Kind) -> Dictionary:
 	if not _open or speaker == null:
 		return {}
 	var res := Persuasion.attempt(kind, speaker, _player, _rng)
+	if res["success"]:
+		QuestEvents.persuade(get_tree(), speaker, int(res.get("disposition", 0)))
 	_log.append_text("\n[i]You try: %s.[/i]  %s\n" % [Persuasion.LABELS[kind], "[color=#8fd18f]It works.[/color]" if res["success"] else "[color=#e07a6f]It doesn't work.[/color]"])
 	_say(speaker.name, String(res["text"]), "")
 	_refresh()

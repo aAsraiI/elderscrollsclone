@@ -316,6 +316,9 @@ static func topics_for(s: Speaker, world: WorldManager) -> PackedStringArray:
 			DialogueState.learn(t)
 		if Factions.leader_of(s, world) in ClanTerritory.CLANS:
 			DialogueState.learn("the territory war")
+		if world.quests != null:
+			for t in world.quests.extra_topics(s):  # a choice or a reward that just became possible
+				DialogueState.learn(t)
 	var prof := profile_for(s)
 	var near := _near_towns(s, world, int(prof["towns"]))
 	for t in DialogueState.known_topics():

@@ -39,6 +39,16 @@ const DEFAULTS := {
 	"view_distance": 10,  # terrain chunks drawn around you (64 m each)
 	"shadows": 2,  # 0 off, 1 near only, 2 full
 	"far_land": true,  # the coarse land and town outlines past the view distance (FarLand)
+	"quest_popups": true,  # Quest Started / Objective Updated / Completed... notices (Notices)
+	"quest_tracker": false,  # the tracked-quest lines in the top right (QuestTracker)
+	"quest_npc_markers": true,  # a mark over someone you can hand a quest in to
+	"quest_offer_markers": false,  # a faint mark over people with a quest to offer
+	"quest_item_glow": true,  # quest items glow on the ground and are marked in containers
+	"dialogue_typewriter": false,  # answers appear letter by letter (click to skip)
+	"text_size": 1.0,  # dialogue, journal and notices
+	"colorblind_markers": false,  # markers use shapes and blue / orange instead of red / green
+	"high_contrast": false,  # darker panels and brighter text
+	"dialogue_camera": 0,  # 0 stay first-person, 1 ease in towards the speaker
 }
 
 ## Graphics quality presets (Settings > Video): what each one sets. High is the default look.
@@ -67,6 +77,16 @@ const OPTIONS := [
 	{"tab": "Interface", "key": "tutorial", "label": "Tutorial hints", "kind": "check"},
 	{"tab": "Gameplay", "key": "controller_look", "label": "Controller look speed", "kind": "slider", "min": 1.0, "max": 6.0, "step": 0.25, "fmt": "%.2f"},
 	{"tab": "Interface", "key": "show_fps", "label": "FPS counter", "kind": "check"},
+	{"tab": "Interface", "key": "quest_popups", "label": "Quest notices", "kind": "check"},
+	{"tab": "Interface", "key": "quest_tracker", "label": "Tracked quests on screen", "kind": "check"},
+	{"tab": "Interface", "key": "quest_npc_markers", "label": "Mark people to hand quests in to", "kind": "check"},
+	{"tab": "Interface", "key": "quest_offer_markers", "label": "Mark people with quests to offer", "kind": "check"},
+	{"tab": "Interface", "key": "quest_item_glow", "label": "Highlight quest items", "kind": "check"},
+	{"tab": "Interface", "key": "dialogue_typewriter", "label": "Dialogue appears letter by letter", "kind": "check"},
+	{"tab": "Interface", "key": "dialogue_camera", "label": "Camera in conversations", "kind": "choice", "choices": ["Stay", "Ease in"]},
+	{"tab": "Interface", "key": "text_size", "label": "Text size (dialogue, journal)", "kind": "slider", "min": 0.8, "max": 1.6, "step": 0.05, "fmt": "%d%%", "scale": 100.0},
+	{"tab": "Interface", "key": "colorblind_markers", "label": "Colourblind-safe markers", "kind": "check"},
+	{"tab": "Interface", "key": "high_contrast", "label": "High contrast text", "kind": "check"},
 	{"tab": "Video", "key": "graphics_preset", "label": "Graphics quality", "kind": "choice", "choices": ["Custom", "Low", "Medium", "High", "Ultra"]},
 	{"tab": "Video", "key": "window_mode", "label": "Window", "kind": "choice", "choices": ["Windowed", "Borderless fullscreen", "Fullscreen"]},
 	{"tab": "Video", "key": "vsync", "label": "V-Sync", "kind": "check"},

@@ -199,6 +199,33 @@ func t_in_game() -> void:
 	check("the same dungeon every visit", enemy_keys == again)
 	await wm.dungeons.exit()
 	await frames(20)
+	await t_climb(wm, p)
+
+
+# The player can climb a ladder room and walk up a stair room
+func t_climb(wm: WorldManager, p: CharacterBody3D) -> void:
+	print("-- ladders and stairs")
+	for file in ["fort/stairs_ladder", "fort/stairs_straight"]:
+		var room := (load(ModuleLibrary.DIR + file + ".tscn") as PackedScene).instantiate() as RoomModule
+		wm.add_child(room)
+		room.global_position = p.global_position + Vector3(0, 300, 0)
+		await frames(5)
+		var start := room.global_position + Vector3(0, 0.3, -room.bounds().size.z * 0.5 + 1.5)
+		p.global_position = start
+		p.velocity = Vector3.ZERO
+		p.rotation.y = PI  # face +Z, into the room
+		await frames(10)
+		Input.action_press("move_forward")
+		var rose := 0.0
+		for k in 360:
+			await physics_frame
+			rose = maxf(rose, p.global_position.y - room.global_position.y)
+			if rose > RoomModule.LEVEL - 0.3:
+				break
+		Input.action_release("move_forward")
+		check("%s: you get up to the next floor (%.1f m)" % [file.get_file(), rose], rose > RoomModule.LEVEL - 1.0, str(p.global_position - room.global_position))
+		room.queue_free()
+		await frames(3)
 
 
 func t_build() -> void:

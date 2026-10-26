@@ -35,11 +35,15 @@ var links: Array = []   # [room a, door a, room b, door b]
 
 ## Plans an interior. Returns the plan (no nodes yet): call build() to make the scene.
 static func plan(r: DungeonRecipe, seed_value: int, lvl: int) -> DungeonAssembler:
-	var a := DungeonAssembler.new()
-	a.recipe = r
-	a.level = lvl
-	a.rng.seed = seed_value
-	a._run()
+	var a: DungeonAssembler
+	for attempt in 6:  # a plan that found no room for its boss is made again (same seeds every time)
+		a = DungeonAssembler.new()
+		a.recipe = r
+		a.level = lvl
+		a.rng.seed = seed_value + attempt * 104729
+		a._run()
+		if not r.boss or a.placed.any(func(p: Placed) -> bool: return p.entry.role == RoomModule.Role.BOSS):
+			break
 	return a
 
 

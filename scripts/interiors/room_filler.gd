@@ -71,6 +71,9 @@ static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 			SpawnSocket.Kind.BOSS:
 				if data == null or data.boss == null:
 					continue
+				if bool(ctx.get("boss_done", false)):
+					continue  # one boss per dungeon
+				ctx["boss_done"] = true
 				var bkey := "dungeon/%s/boss" % ctx.get("dungeon_id", "")
 				out["boss"] = true
 				if WorldState.has_record("kill/" + bkey):

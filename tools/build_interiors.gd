@@ -209,6 +209,7 @@ const FURNISH := {
 	"cells": [["walls", S.FURNITURE, ["cage", "bedroll"], 0.8, 1], ["scatter", S.DECORATION, ["bones", "bucket", "hay"], 0.7, 3], ["ceiling", S.CEILING, ["chain"], 0.5, 1], ["wall_high", S.LIGHT, ["torch"], 0.4, 1], ["center", S.NPC, ["captive"], 0.3, 1], ["scatter", S.ENEMY, ["guard"], 0.6, 1]],
 	"guard_post": [["center", S.FURNITURE, ["table", "stool"], 0.8, 1], ["wall_high", S.LIGHT, ["torch"], 0.8, 1], ["scatter", S.ENEMY, ["guard"], 0.9, 1]],
 	"great_hall": [["cells", S.FURNITURE, ["pillar"], 0.35, 1], ["center", S.FURNITURE, ["throne", "table"], 1.0, 1], ["wall_high", S.WALL_DECORATION, ["banner", "tapestry"], 0.8, 1], ["corners", S.LIGHT, ["brazier"], 0.9, 1], ["center", S.BOSS, [], 1.0, 1], ["scatter", S.ENEMY, [], 0.8, 2], ["corners", S.CHEST, ["boss"], 1.0, 1]],
+	"gallery": [["center", S.FURNITURE, ["table", "statue", "altar"], 0.8, 1], ["wall_high", S.WALL_DECORATION, ["banner", "tapestry"], 0.7, 1], ["corners", S.LIGHT, ["brazier", "candle"], 0.8, 1], ["scatter", S.ENEMY, [], 0.8, 3], ["scatter", S.DECORATION, ["rubble", "barrel", "bones"], 0.5, 2]],
 	"corridor": [["wall_high", S.LIGHT, ["torch", "fungus"], 0.35, 1], ["scatter", S.DECORATION, ["rubble", "bones", "barrel", "crate", "rails", "puddle"], 0.4, 1], ["ceiling", S.CEILING, ["cobweb", "chain"], 0.2, 1], ["scatter", S.ENEMY, ["patrol"], 0.25, 1]],
 	"entrance": [["wall_high", S.LIGHT, ["torch"], 0.8, 1], ["scatter", S.DECORATION, ["barrel", "crate", "rubble", "bones"], 0.6, 2]],
 	"stairs": [["wall_high", S.LIGHT, ["torch"], 0.6, 1]],
@@ -278,6 +279,10 @@ func _room(theme: String, file: String, kind: String, role: RoomModule.Role, cel
 	if opts.has("extras"):
 		(opts["extras"] as Callable).call(room, theme)
 	_furnish(room, kind if FURNISH.has(kind) else ("corridor" if role in [RoomModule.Role.CORRIDOR, RoomModule.Role.JUNCTION, RoomModule.Role.DEAD_END] else "entrance"))
+	if role == RoomModule.Role.BOSS and not FURNISH.get(kind, []).any(func(r: Array) -> bool: return int(r[1]) == S.BOSS):
+		# every boss room has its boss and the boss chest (quests put their items in it)
+		_socket(room, S.BOSS, [], Vector3(0, 0, room.bounds().size.z * 0.15), PI, 1.0, 1)
+		_socket(room, S.CHEST, ["boss"], Vector3(room.bounds().size.x * 0.5 - 1.2, 0, room.bounds().size.z * 0.5 - 1.2), PI * 0.75, 1.0, 1)
 	if role == RoomModule.Role.ENTRANCE:
 		_marker(room, "PlayerStart", Vector3(0, 0.1, 0), PI)
 		_marker(room, "Exit", Vector3(RoomModule.CELL * 0.5, 0.0, -room.bounds().size.z * 0.5 + 0.6), PI)  # the way out, on the front wall
@@ -411,7 +416,12 @@ func _modules() -> void:
 		var bk: String = boss[theme]
 		_room(theme, "boss_" + bk, bk, R.BOSS, Vector3i(4, 1, 4), [[0, 1, 0, "door", 3.2]], {"door_tags": tags, "max": 1, "level_min": 1})
 		# stairs: up a floor, from the front at the bottom to the back at the top
-		_room(theme, "stairs_straight", "stairs", R.STAIRS, Vector3i(1, 2, 3), [[0, 0, 0], [2, 0, 1]], {"door_tags": tags, "extras": _stairs_straight})
+		_room(theme, "stairs_straight", "stairs", R.STAIRS, Vector3i(1, 2, 4), [[0, 0, 0], [2, 0, 1]], {"door_tags": tags, "extras": _stairs_straight})
+		_room(theme, "stairs_ladder", "stairs", R.STAIRS, Vector3i(1, 2, 2), [[0, 0, 0], [2, 0, 1]], {"door_tags": tags, "extras": _stairs_ladder, "weight": 0.6})
+		if theme in ["cave", "mine", "lair"]:
+			_room(theme, "stairs_ramp", "stairs", R.STAIRS, Vector3i(2, 2, 4), [[0, 0, 0], [2, 1, 1]], {"door_tags": tags, "extras": _stairs_ramp})
+		if theme in ["fort", "crypt", "ruin"]:
+			_room(theme, "gallery_hall", "gallery", R.HALL, Vector3i(3, 2, 3), [[0, 1, 0], [2, 1, 0], [1, 1, 1], [3, 1, 1]], {"door_tags": tags, "extras": _gallery, "max": 1})
 	# the templates: one per role, to copy
 	_room("fort", "template_room", "", R.ROOM, Vector3i(2, 1, 2), [[0, 0], [2, 1]], {"also": ["template"]})
 	_save_template("template_room")
@@ -430,17 +440,108 @@ func _save_template(file: String) -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(src))
 
 
-# Steps from the bottom of the front cell up to a landing over the back cell
+# A slope you can walk (the player body can't climb tall step boxes): an invisible tilted box,
+# from (z0, y0) to (z1, y1), as wide as w
+func _ramp(holder: Node3D, room: RoomModule, w: float, z0: float, y0: float, z1: float, y1: float, mat: String, visible_slope: bool) -> void:
+	var run := z1 - z0
+	var rise := y1 - y0
+	var length := sqrt(run * run + rise * rise)
+	var body := StaticBody3D.new()
+	body.name = "Ramp"
+	holder.add_child(body)
+	body.owner = room
+	var shape := CollisionShape3D.new()
+	shape.name = "Shape"
+	var bs := BoxShape3D.new()
+	bs.size = Vector3(w, 0.2, length)
+	shape.shape = bs
+	body.add_child(shape)
+	shape.owner = room
+	if visible_slope:
+		var mi := MeshInstance3D.new()
+		mi.name = "Mesh"
+		var bm := BoxMesh.new()
+		bm.size = bs.size
+		mi.mesh = bm
+		mi.material_override = InteriorKit.material(mat)
+		body.add_child(mi)
+		mi.owner = room
+	body.position = Vector3(0, (y0 + y1) * 0.5 - 0.1, (z0 + z1) * 0.5)
+	body.rotation.x = -atan2(rise, run)
+
+
+# Steps up across the two middle cells to a landing over the back cell (32 degrees: walkable)
 func _stairs_straight(room: RoomModule, theme: String) -> void:
 	var b := room.bounds()
-	var steps := 10
-	var rise := RoomModule.LEVEL / steps
-	var run := RoomModule.CELL / steps
 	var holder := Node3D.new()
 	holder.name = "Stairs"
 	room.add_child(holder)
 	holder.owner = room
+	var z0 := -b.size.z * 0.5 + RoomModule.CELL
+	var z1 := b.size.z * 0.5 - RoomModule.CELL
+	var steps := 16
+	var w := b.size.x - InteriorKit.WALL * 2
 	for i in steps:
-		InteriorKit.box(holder, "Step%d" % i, Vector3(b.size.x - InteriorKit.WALL * 2, rise * (i + 1), run), Vector3(0, rise * (i + 1) * 0.5, -RoomModule.CELL * 0.5 + run * (i + 0.5)), InteriorKit.surface(theme, "floor"), room)
-	# the landing over the back cell, and the upper floor's ledge over the front cell
+		var h := RoomModule.LEVEL * (i + 1) / steps
+		InteriorKit.box(holder, "Step%d" % i, Vector3(w, h, (z1 - z0) / steps), Vector3(0, h * 0.5, z0 + (z1 - z0) * (i + 0.5) / steps), InteriorKit.surface(theme, "floor"), room, false)
+	_ramp(holder, room, w, z0, 0.0, z1, RoomModule.LEVEL, "", false)
 	InteriorKit.box(holder, "Landing", Vector3(b.size.x, InteriorKit.SLAB, RoomModule.CELL), Vector3(0, RoomModule.LEVEL - InteriorKit.SLAB * 0.5, b.size.z * 0.5 - RoomModule.CELL * 0.5), InteriorKit.surface(theme, "floor"), room)
+
+
+# A ladder up the middle wall to a landing over the back cell
+func _stairs_ladder(room: RoomModule, theme: String) -> void:
+	var b := room.bounds()
+	var holder := Node3D.new()
+	holder.name = "LadderUp"
+	room.add_child(holder)
+	holder.owner = room
+	InteriorKit.box(holder, "Landing", Vector3(b.size.x, InteriorKit.SLAB, RoomModule.CELL), Vector3(0, RoomModule.LEVEL - InteriorKit.SLAB * 0.5, b.size.z * 0.5 - RoomModule.CELL * 0.5), InteriorKit.surface(theme, "floor"), room)
+	InteriorKit.box(holder, "LandingFace", Vector3(b.size.x, RoomModule.LEVEL - 0.3, 0.3), Vector3(0, (RoomModule.LEVEL - 0.3) * 0.5, 0.15), InteriorKit.surface(theme, "wall"), room)
+	for i in 10:
+		InteriorKit.box(holder, "Rung%d" % i, Vector3(0.8, 0.06, 0.06), Vector3(0, 0.45 + i * 0.5, -0.12), "wood", room, false)
+	InteriorKit.box(holder, "RailL", Vector3(0.08, RoomModule.LEVEL + 0.4, 0.08), Vector3(-0.42, (RoomModule.LEVEL + 0.4) * 0.5, -0.12), "wood", room, false)
+	InteriorKit.box(holder, "RailR", Vector3(0.08, RoomModule.LEVEL + 0.4, 0.08), Vector3(0.42, (RoomModule.LEVEL + 0.4) * 0.5, -0.12), "wood", room, false)
+	var ladder := Ladder.new()
+	ladder.name = "Ladder"
+	ladder.height = RoomModule.LEVEL
+	holder.add_child(ladder)
+	ladder.owner = room
+	ladder.position = Vector3(0, 0, -0.5)
+	ladder.rotation.y = PI  # its -Z faces the landing
+
+
+# A wide rough slope of rock up to the next floor (caves and mines)
+func _stairs_ramp(room: RoomModule, theme: String) -> void:
+	var b := room.bounds()
+	var holder := Node3D.new()
+	holder.name = "Slope"
+	room.add_child(holder)
+	holder.owner = room
+	var z0 := -b.size.z * 0.5 + RoomModule.CELL
+	var z1 := b.size.z * 0.5 - RoomModule.CELL
+	_ramp(holder, room, b.size.x - InteriorKit.WALL * 2, z0, 0.0, z1, RoomModule.LEVEL, InteriorKit.surface(theme, "floor"), true)
+	InteriorKit.box(holder, "Landing", Vector3(b.size.x, InteriorKit.SLAB, RoomModule.CELL), Vector3(0, RoomModule.LEVEL - InteriorKit.SLAB * 0.5, b.size.z * 0.5 - RoomModule.CELL * 0.5), InteriorKit.surface(theme, "floor"), room)
+
+
+# A two-storey hall with a gallery round the upper floor (doorways up there on the sides)
+func _gallery(room: RoomModule, theme: String) -> void:
+	var b := room.bounds()
+	var holder := Node3D.new()
+	holder.name = "Gallery"
+	room.add_child(holder)
+	holder.owner = room
+	var w := 1.8
+	var y := RoomModule.LEVEL - InteriorKit.SLAB * 0.5
+	var trim := InteriorKit.surface(theme, "trim")
+	var floor := InteriorKit.surface(theme, "floor")
+	InteriorKit.box(holder, "WalkN", Vector3(b.size.x, InteriorKit.SLAB, w), Vector3(0, y, -b.size.z * 0.5 + w * 0.5), floor, room)
+	InteriorKit.box(holder, "WalkS", Vector3(b.size.x, InteriorKit.SLAB, w), Vector3(0, y, b.size.z * 0.5 - w * 0.5), floor, room)
+	InteriorKit.box(holder, "WalkW", Vector3(w, InteriorKit.SLAB, b.size.z - w * 2), Vector3(-b.size.x * 0.5 + w * 0.5, y, 0), floor, room)
+	InteriorKit.box(holder, "WalkE", Vector3(w, InteriorKit.SLAB, b.size.z - w * 2), Vector3(b.size.x * 0.5 - w * 0.5, y, 0), floor, room)
+	InteriorKit.box(holder, "RailN", Vector3(b.size.x - w * 2, 1.0, 0.15), Vector3(0, RoomModule.LEVEL + 0.5, -b.size.z * 0.5 + w), trim, room)
+	InteriorKit.box(holder, "RailS", Vector3(b.size.x - w * 2, 1.0, 0.15), Vector3(0, RoomModule.LEVEL + 0.5, b.size.z * 0.5 - w), trim, room)
+	InteriorKit.box(holder, "RailW", Vector3(0.15, 1.0, b.size.z - w * 2), Vector3(-b.size.x * 0.5 + w, RoomModule.LEVEL + 0.5, 0), trim, room)
+	InteriorKit.box(holder, "RailE", Vector3(0.15, 1.0, b.size.z - w * 2), Vector3(b.size.x * 0.5 - w, RoomModule.LEVEL + 0.5, 0), trim, room)
+	for sx in [-1, 1]:
+		for sz in [-1, 1]:
+			InteriorKit.box(holder, "Post%d%d" % [sx + 1, sz + 1], Vector3(0.6, RoomModule.LEVEL, 0.6), Vector3(sx * (b.size.x * 0.5 - w), RoomModule.LEVEL * 0.5, sz * (b.size.z * 0.5 - w)), trim, room)

@@ -179,6 +179,9 @@ func _physics_process(delta: float) -> void:
 	if swim != null and swim.is_swimming():
 		swim.swim_move(delta, input_dir, Input.is_action_pressed("sprint"))
 		return
+	if has_meta("ladder") and is_instance_valid(get_meta("ladder")):
+		(get_meta("ladder") as Ladder).climb(self, delta, input_dir)
+		return
 	if has_meta("boat"):
 		(get_meta("boat") as Boat).steer(delta, input_dir, Input.is_action_pressed("sprint"))
 		return

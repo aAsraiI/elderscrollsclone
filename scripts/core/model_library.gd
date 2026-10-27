@@ -784,3 +784,30 @@ static func batch_dressed(root: Node3D) -> int:
 			look.free()
 		n += list.size()
 	return n
+
+
+## Collision that is exactly the model's faces (a doorway or an archway stays open), on a new body under
+## `parent`. For big set pieces only: it costs more than the hulls add_collision makes.
+static func add_trimesh(parent: Node3D, model: Node3D) -> StaticBody3D:
+	var faces := PackedVector3Array()
+	for mi in model.find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if m.mesh == null:
+			continue
+		var xf := relative_transform(parent, m)
+		for s in m.mesh.get_surface_count():
+			var a := m.mesh.surface_get_arrays(s)
+			var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+			var idx: PackedInt32Array = a[Mesh.ARRAY_INDEX] if a[Mesh.ARRAY_INDEX] != null else PackedInt32Array(range(v.size()))
+			for k in idx:
+				faces.append(xf * v[k])
+	var body := StaticBody3D.new()
+	body.name = "Solid"
+	var shape := ConcavePolygonShape3D.new()
+	shape.set_faces(faces)
+	shape.backface_collision = true
+	var cs := CollisionShape3D.new()
+	cs.shape = shape
+	body.add_child(cs)
+	parent.add_child(body)
+	return body

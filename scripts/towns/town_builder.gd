@@ -631,7 +631,8 @@ static func _wall_ring(root: Node3D, layout: TownLayout, placed: PlacedPOI, map:
 		if ModelLibrary.has("wall/arch"):
 			# the arched gateway: drawn from the ground up over the road, solid only above it (the lintel)
 			var arch := POIBuilder.add_box(root, Vector3(t + 1.0, h + 2.0, 8.2), Vector3(gp.x, gy + h * 0.5, gp.y), stone, 0.0, Vector3.ZERO, false)
-			ModelLibrary.dress_box(arch, "wall/arch")
+			if ModelLibrary.dress_box(arch, "wall/arch"):
+				ModelLibrary.add_trimesh(root, arch.get_node("Look"))  # its pillars and stone solid, the archway open
 			for mi in lintel.find_children("*", "MeshInstance3D", false, false):
 				lintel.remove_child(mi)
 				mi.free()  # now, before the town is merged

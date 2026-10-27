@@ -56,7 +56,7 @@ func t_data() -> void:
 	for id in QuestBook.ids():
 		var d: Dictionary = defs[id]
 		for a in d["after"]:
-			if not defs.has(a):
+			if not defs.has(a) and a != "story":  # the main quest's first act (Story)
 				problems.append("%s: needs unknown %s" % [id, a])
 		var f := String(d.get("faction", ""))
 		if f != "" and Factions.get_data(f) == null:

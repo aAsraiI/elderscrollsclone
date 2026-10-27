@@ -70,6 +70,7 @@ static func defs() -> Dictionary:
 		lists.append_array(QuestDefsNight.list())
 		lists.append_array(QuestDefsGuilds.list())
 		lists.append_array(QuestDefsRealms.list())
+		lists.append_array(QuestDefsMain.list())  # the main quest after the Story (1.17)
 		for d: Dictionary in lists:
 			_defs[d["id"]] = d
 			_order.append(d["id"])
@@ -98,6 +99,8 @@ static func status(id: String) -> String:
 
 
 static func is_done(id: String) -> bool:
+	if id == "story":
+		return Story.stage() >= 6  # the first act of the main quest (Story) is over
 	return status(id) == "done"
 
 

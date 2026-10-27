@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_teukh"]
+
+[resource]
+script = ExtResource("1_teukh")
+id = &"cloth_bolt"
+display_name = "Bolt of Cloth"
+description = "Useful, or worth selling."
+weight = 4.0
+value = 20
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("shop", "rich_home")
+ingredient_effects = PackedStringArray()

@@ -32,7 +32,7 @@ const PROPS := {
 	"prop/candles": ["l/light_com_candle_06.nif", "l/light_com_candle_01.nif"],
 	"prop/candle_stand": ["l/light_com_candle_16.nif", "l/light_com_candle_15.nif"],
 	"prop/sconce": ["l/light_com_sconce_01.nif"],
-	"prop/lamp_post": ["l/light_de_streetlight_01.nif"],
+	"prop/lamp_post": ["l/light_mh_streetlamp_01.nif", "l/light_de_streetlight_01.nif"],
 	"prop/cart": ["f/furn_cart00.nif"],
 	"prop/broken_cart": ["f/furn_guarcart00.nif", "f/furn_cart00.nif"],
 	"prop/broken_pillar": ["x/ex_dae_pillar_02_ruin.nif"],
@@ -83,7 +83,7 @@ const PROPS := {
 	"prop/tent": ["i/in_ashl_tent_01.nif"],
 	"prop/flower_box": ["f/furn_planter_01.nif", "f/furn_com_planter.nif"],
 	"prop/drying_rack": ["f/furn_com_winerack.nif"],
-	"prop/street_tree": ["f/flora_tree_wg_01.nif", "f/flora_tree_ai_05.nif"],
+	"prop/street_tree": ["f/flora_tree_ai_05.nif", "f/flora_tree_wg_01.nif"],  # the plains tree (tree/broadleaf)
 	"prop/sarcophagus": ["f/furn_burial00.nif"],
 	"prop/niche": ["f/furn_burial10.nif"],
 	"prop/stalagmite": ["i/in_mudcave_stal30.nif", "i/in_moldcave_stal30.nif"],
@@ -213,6 +213,19 @@ const ITEMS := {
 	"item/cabbage": ["n/ingred_scrib_cabbage_01.nif"],
 	"item/leek": ["n/ingred_marshmerrow_01.nif"],
 	"food/potato": ["n/ingred_ash_yam_01.nif"],
+	"item/ladle": ["m/misc_com_iron_ladle.nif"],
+	"item/rolling_pin": ["m/misc_rollingpin_01.nif"],
+	"item/shears": ["m/misc_shears_01.nif"],
+	"item/spool": ["m/misc_spool_01.nif"],
+	"item/cloth_bolt": ["f/furn_clothbolt_01.nif"],
+	"item/pillow": ["m/misc_com_pillow_01.nif"],
+	"item/vase": ["m/misc_redware_vase.nif"],
+	"item/clay_pot": ["m/misc_pot_redware_01.nif"],
+	"item/scrap_metal": ["n/ingred_scrap_metal_01.nif"],
+	"item/scrap_wood": ["m/misc_scrapwood01.nif"],
+	"item/shackles": ["m/misc_shackles00.nif"],
+	"item/wheat": ["m/misc_wheatbundle00.nif"],
+	"item/fishing_pole": ["m/misc_de_fishing_pole.nif"],
 	"food/onion": ["n/ingred_ash_yam_01.nif"],
 }
 
@@ -259,7 +272,7 @@ const MATERIALS := {"iron": "iron", "steel": "steel", "silver": "silver", "obsid
 	"dragonbone": "daedric", "starforged": "dwemer", "leather": "netch", "hide": "nordicfur", "dragonscale": "dragonscale",
 	"shadowscale": "chitin", "silverweave": "bonemold", "ebonweave": "indoril", "starweave": "glass"}
 ## The game's weapon kinds -> Morrowind's names for them
-const WEAPON_NAMES := {"sword": ["longsword", "broadsword", "shortsword"], "dagger": ["dagger", "knife", "shortsword"],
+const WEAPON_NAMES := {"sword": ["longsword", "broadsword", "shortsword"], "shortsword": ["shortsword"], "club": ["club", "mace"], "halberd": ["halberd", "spear"], "dagger": ["dagger", "knife", "shortsword"],
 	"greatsword": ["claymore"], "warhammer": ["warhammer"], "waraxe": ["waraxe", "axe"], "mace": ["mace", "club"],
 	"spear": ["spear", "longspear", "halberd"], "battleaxe": ["battleaxe"]}
 ## The game's armour pieces -> Morrowind's ground models
@@ -306,7 +319,7 @@ const CREATURES := {
 const ARMED := ["creature/skeleton", "creature/skeleton_knight", "creature/barrow_wight", "creature/wight_lord",
 	"creature/drowned_sailor", "creature/cave_dweller", "creature/crypt_warden", "creature/frost_giant"]
 ## How much bigger than Morrowind's own a few are
-const CREATURE_SCALE := {"creature/dragon": 3.0, "creature/crawler_queen": 0.6, "creature/giant_spider": 2.6}
+const CREATURE_SCALE := {"creature/dragon": 3.0, "creature/crawler_queen": 0.6, "creature/giant_spider": 1.5}
 
 ## Nature: trees by style, rocks for scatter (nature/rock_N), see TerrainChunk and NatureMeshes
 const NATURE := {
@@ -314,6 +327,15 @@ const NATURE := {
 	"tree/pine": ["f/flora_tree_ac_01.nif", "f/flora_tree_gl_01.nif"],
 	"tree/dead": ["f/flora_tree_wg_05.nif", "f/flora_tree_ac_03.nif"],
 	"tree/cactus": ["f/flora_tree_ac_04.nif"],
+	"wall/city": ["x/ex_imp_wall_01.nif"],
+	"wall/tower": ["x/ex_imp_guardtower_01.nif", "x/ex_imp_guardtower_02.nif"],  # square towers (ex_imp_wall_tower is a long wall piece)
+	"wall/stairs": ["i/in_c_stair_plain_tall_01.nif", "x/ex_mh_steps_01.nif"],  # a plain stone flight (the wall stairs have a wall built on)
+	"wall/corner": ["x/ex_imp_wall_corner_01.nif"],
+	"wall/arch": ["x/ex_imp_wall_arch_01.nif", "x/ex_imp_wallent_01.nif"],
+	"wall/palisade": ["x/ex_colony_wall_01.nif", "x/ex_colony_wall_02.nif"],
+	"entrance/cave": ["x/ex_wg_cave_entrance_01.nif", "x/ex_gl_cave_entrance_01.nif"],
+	"entrance/doorway": ["x/ex_velothi_entrance_01.nif", "x/ex_imp_entrance_01.nif"],
+	"nature/bush": ["f/flora_bm_shrub_01.nif", "f/flora_bush_01.nif", "f/flora_bm_shrub_02.nif"],
 	"nature/rock_0": ["f/terrain_rock_wg_02.nif"],
 	"nature/rock_1": ["f/terrain_rock_ai_03.nif"],
 	"nature/rock_2": ["f/terrain_rock_gl_04.nif"],

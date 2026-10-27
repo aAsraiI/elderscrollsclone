@@ -42,6 +42,8 @@ var root_part: RigidBody3D
 var _offset := Vector3.ZERO
 var _settle := 0.0
 var _start_y := 0.0
+var _skel: Skeleton3D = null      # a model ragdoll: its skeleton follows the parts
+var _bone_of := {}               # part -> [bone index, part-to-bone transform]
 
 
 ## Makes the ragdoll. impulse = the killing blow's push (world space).
@@ -149,6 +151,10 @@ func _build(body: CreatureBody, table: Dictionary, impulse: Vector3) -> void:
 # A real model plays its death clip and then lies as one piece, its collision fitted to how it lies
 func _build_model_corpse(body: CreatureBody, impulse: Vector3, lying: bool) -> void:
 	var mb := body.model_body
+	# a real ragdoll from the model's own skeleton (not the death clip), that stays one when dragged;
+	# a reloaded corpse just lies down in one piece
+	if not lying and _build_model_ragdoll(body, impulse):
+		return
 	mb.die(lying)
 	var rb := RigidBody3D.new()
 	rb.name = "Part_remains"
@@ -277,6 +283,8 @@ func dismantle() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _skel != null and is_instance_valid(_skel) and not (root_part != null and root_part.sleeping and _settle > 1.0):
+		_pose_skeleton()
 	if root_part == null or not is_instance_valid(root_part):
 		return
 	# The Enemy node (saved position, loot container, distance checks) follows the pelvis
@@ -292,3 +300,84 @@ func _physics_process(delta: float) -> void:
 			(part as RigidBody3D).freeze = true
 		return
 	enemy.global_position = p + _offset
+
+
+
+# A model ragdoll: a rigid body on every main bone of the model's skeleton (ModelBody.ragdoll_bones),
+# joined at the joints like the box bodies, and the skeleton posed from them every frame. False when
+# the model has no skeleton to do it with (it then lies down in one piece).
+func _build_model_ragdoll(body: CreatureBody, impulse: Vector3) -> bool:
+	var mb := body.model_body
+	var bones := mb.ragdoll_bones()
+	if bones.size() < 5:
+		return false
+	var skel := mb.hand_to_ragdoll()
+	var sx := skel.global_transform.basis.get_scale().x
+	var part_of_bone := {}
+	for i in bones:
+		var bone_xf := skel.global_transform * skel.get_bone_global_pose(i)
+		var kids := skel.get_bone_children(i)
+		var to_child := Vector3(0, 0.15 / maxf(sx, 0.001), 0)
+		for k in kids:
+			if skel.get_bone_rest(k).origin.length() > 0.0001:
+				to_child = skel.get_bone_rest(k).origin
+				break
+		var length := clampf(to_child.length() * sx, 0.1, 0.8)
+		var dir := (bone_xf.basis * to_child).normalized()
+		var n := skel.get_bone_name(i).to_lower()
+		var heavy := n.contains("pelvis") or n.contains("hips") or n.contains("spine") or n.contains("chest")
+		var rb := RigidBody3D.new()
+		rb.name = "Part_" + skel.get_bone_name(i).validate_node_name()
+		rb.top_level = true
+		rb.collision_layer = PART_LAYER
+		rb.collision_mask = WORLD_MASK
+		rb.mass = 10.0 if heavy else 3.0
+		rb.linear_damp = 0.4
+		rb.angular_damp = 3.0
+		rb.can_sleep = true
+		rb.continuous_cd = heavy
+		rb.set_meta("ragdoll_owner", enemy)
+		enemy.add_child(rb)
+		# the body lies along the bone: from this joint halfway to the next
+		var up := dir if dir.length() > 0.5 else Vector3.UP
+		var side := up.cross(Vector3.FORWARD if absf(up.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT).normalized()
+		rb.global_transform = Transform3D(Basis(side, up, side.cross(up)).orthonormalized(), bone_xf.origin + up * length * 0.5)
+		var cs := CollisionShape3D.new()
+		var cap := CapsuleShape3D.new()
+		cap.radius = 0.14 if heavy else clampf(length * 0.22, 0.05, 0.1)
+		cap.height = maxf(length, cap.radius * 2.0 + 0.02)
+		cs.shape = cap
+		rb.add_child(cs)
+		_bone_of[rb] = [i, rb.global_transform.affine_inverse() * bone_xf]
+		part_of_bone[i] = rb
+		parts[skel.get_bone_name(i)] = rb
+		if root_part == null or heavy and (n.contains("pelvis") or n.contains("hips")):
+			root_part = rb
+	# joints: each part to the nearest part up its bone chain, at the joint where it starts
+	for i in bones:
+		var up_bone := skel.get_bone_parent(i)
+		while up_bone >= 0 and not part_of_bone.has(up_bone):
+			up_bone = skel.get_bone_parent(up_bone)
+		if up_bone < 0:
+			continue
+		var j := ConeTwistJoint3D.new()
+		j.set_param(ConeTwistJoint3D.PARAM_SWING_SPAN, deg_to_rad(50.0))
+		j.set_param(ConeTwistJoint3D.PARAM_TWIST_SPAN, deg_to_rad(25.0))
+		enemy.add_child(j)
+		j.global_position = (skel.global_transform * skel.get_bone_global_pose(i)).origin
+		j.node_a = j.get_path_to(part_of_bone[up_bone])
+		j.node_b = j.get_path_to(part_of_bone[i])
+	_skel = skel
+	_start_y = root_part.global_position.y
+	_push(impulse)
+	return true
+
+
+# The skeleton takes each part's place (the bones between parts follow their parents)
+func _pose_skeleton() -> void:
+	var inv := _skel.global_transform.affine_inverse()
+	for rb in _bone_of:
+		if not is_instance_valid(rb):
+			continue
+		var b: Array = _bone_of[rb]
+		_skel.set_bone_global_pose(int(b[0]), inv * ((rb as RigidBody3D).global_transform * (b[1] as Transform3D)))

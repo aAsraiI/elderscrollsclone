@@ -174,6 +174,14 @@ func model_keys() -> Array:
 			if String(k).begins_with("people/"):
 				own.append("player/" + String(k).trim_prefix("people/"))
 		out = own + ["player/body"] + out
+	else:
+		# one of the look's variants (a Morrowind import makes several: other races, faces, hair), by the person
+		var v := 1 + (pick / 7) % MwImport.VARIANTS
+		if v > 1:
+			for j in out.size():
+				var k := String(out[j])
+				if k.begins_with("people/") and ModelLibrary.has("%s~v%d" % [k, v]):
+					out[j] = "%s~v%d" % [k, v]
 	return out
 
 
@@ -406,7 +414,10 @@ func set_weapons(main: ItemData, off: ItemData) -> void:
 				c.queue_free()
 		if off != null:
 			if off.secondary_action == ItemData.SecondaryAction.BLOCK and off.item_type != ItemData.ItemType.WEAPON and ModelLibrary.first(ItemModels.model_keys(off)) != "":
-				var held := ItemModels.build_view(off)
+				var key := ModelLibrary.first(ItemModels.model_keys(off))
+				var raw := model_body != null and model_body.has_shield_bone() and String(ModelLibrary.entry(key).get("source", "")) == "morrowind"
+				# on Morrowind's shield bone its own shield hangs exactly as made; anything else is fitted to the grip
+				var held: Node3D = ModelLibrary.instance(key) if raw else ItemModels.build_view(off)
 				held.set_meta("weapon_model", true)
 				off_grip.add_child(held)
 			elif off.secondary_action == ItemData.SecondaryAction.BLOCK and off.item_type != ItemData.ItemType.WEAPON:

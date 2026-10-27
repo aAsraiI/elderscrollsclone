@@ -39,6 +39,55 @@ const CREATURE_CLIPS := {"idle": "Idle", "idle_combat": "Idle", "idle_combat_2h"
 const TAG := "morrowind"
 
 
+## How many looks each person in CAST comes in (the first is CAST's own): the rest mix Morrowind's
+## races, faces and hair at random, so a town is not full of twins (CreatureBody picks one by the person)
+const VARIANTS := 6
+const VARIANT_RACES := ["imperial", "nord", "breton", "redguard", "dark elf", "wood elf", "high elf", "orc"]
+
+
+# CAST, and each look again in VARIANTS - 1 other races, faces and hair: "people/man_1~v2"...
+static func _cast_with_variants() -> Dictionary:
+	var out := {}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1160
+	for key in CAST:
+		out[key] = CAST[key]
+		for v in range(2, VARIANTS + 1):
+			var spec: Dictionary = (CAST[key] as Dictionary).duplicate(true)
+			if key != "people/brute":  # the brute stays an orc
+				spec["race"] = VARIANT_RACES[rng.randi() % VARIANT_RACES.size()]
+			spec["head"] = rng.randi_range(1, 9)
+			spec["hair"] = rng.randi_range(1, 9)
+			out["%s~v%d" % [key, v]] = spec
+	return out
+
+
+# One person built and saved, with its models.json entry
+static func _build_person(data: MwData, key: String, spec: Dictionary, dir: String, manifest: Dictionary, out: Dictionary) -> void:
+	var builder := MwCharacter.new(data)
+	var node := builder.build(spec)
+	for p in builder.problems:
+		out["problems"].append("%s: %s" % [key, p])
+	if node == null:
+		return
+	var file := String(key).replace("/", "__") + ".scn"
+	_own(node, node)
+	var ps := PackedScene.new()
+	if ps.pack(node) != OK or ResourceSaver.save(ps, dir.path_join(file), ResourceSaver.FLAG_COMPRESS) != OK:
+		out["problems"].append("%s: could not save" % key)
+		node.free()
+		return
+	var height: float = data.esm.races.get(String(spec["race"]), {}).get("female_height" if spec["female"] else "male_height", 1.0)
+	var s := MwCharacter.SCALE * height
+	manifest[key] = {"path": file, "source": TAG, "fit": "height",
+		"hands": {"r": "Bip01 R Hand", "l": "Bip01 L Hand"}, "grip": "auto",
+		"clips": CLIPS,
+		"walk_speed": maxf(builder.speeds.get("WalkForward", 100.0) * s, 0.5),
+		"run_speed": maxf(builder.speeds.get("RunForward", 300.0) * s, 1.5)}
+	out["made"].append(key)
+	node.free()
+
+
 static func models_dir() -> String:
 	return ProjectSettings.globalize_path("user://models")
 
@@ -58,33 +107,13 @@ static func run(data_files: String, progress: Callable = Callable()) -> Dictiona
 	var statics := MwCatalog.statics(data)
 	var total := CAST.size() + MwCatalog.CREATURES.size() + statics.size()
 	var i := 0
-	for key in CAST:
+	var people := _cast_with_variants()
+	total += people.size() - CAST.size()
+	for key in people:
 		if progress.is_valid():
 			progress.call(i, total, key)
 		i += 1
-		var builder := MwCharacter.new(data)
-		var spec: Dictionary = CAST[key]
-		var node := builder.build(spec)
-		for p in builder.problems:
-			out["problems"].append("%s: %s" % [key, p])
-		if node == null:
-			continue
-		var file := String(key).replace("/", "__") + ".scn"
-		_own(node, node)
-		var ps := PackedScene.new()
-		if ps.pack(node) != OK or ResourceSaver.save(ps, dir.path_join(file), ResourceSaver.FLAG_COMPRESS) != OK:
-			out["problems"].append("%s: could not save" % key)
-			node.free()
-			continue
-		var height: float = data.esm.races.get(String(spec["race"]), {}).get("female_height" if spec["female"] else "male_height", 1.0)
-		var s := MwCharacter.SCALE * height
-		manifest[key] = {"path": file, "source": TAG, "fit": "height",
-			"hands": {"r": "Bip01 R Hand", "l": "Bip01 L Hand"}, "grip": "auto",
-			"clips": CLIPS,
-			"walk_speed": maxf(builder.speeds.get("WalkForward", 100.0) * s, 0.5),
-			"run_speed": maxf(builder.speeds.get("RunForward", 300.0) * s, 1.5)}
-		out["made"].append(key)
-		node.free()
+		_build_person(data, String(key), people[key], dir, manifest, out)
 	# Skies: the clouds for each weather and the night sky
 	MwSky.convert(data, dir.path_join("textures"))
 	MwSurfaces.convert(data, dir.path_join("textures"))

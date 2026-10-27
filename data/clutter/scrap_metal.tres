@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_2igxr"]
+
+[resource]
+script = ExtResource("1_2igxr")
+id = &"scrap_metal"
+display_name = "Scrap Metal"
+description = "Useful, or worth selling."
+weight = 2.0
+value = 4
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("smithy", "mine", "ruin")
+ingredient_effects = PackedStringArray()

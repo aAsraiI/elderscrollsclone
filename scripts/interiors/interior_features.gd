@@ -66,6 +66,7 @@ static func apply(plan: DungeonAssembler, root: Node3D, data: DungeonData, dunge
 				lever.name = "Lever"
 				root.add_child(lever)
 				lever.position = lroom.transform * (_wall_spot(lroom) + Vector3(0, 0.6, 0))
+				_clear_around(lroom, _wall_spot(lroom), 1.0)
 	# ---- traps in corridors
 	if data != null and level >= data.traps_from_level:
 		for i in rooms:
@@ -245,6 +246,7 @@ static func _puzzle(r: RoomModule, rng: RandomNumberGenerator, level: int) -> vo
 		r.add_child(lever)
 		lever.position = Vector3(-b.size.x * 0.5 + 0.8, 0, -b.size.z * 0.25 + i * b.size.z * 0.25)
 		lever.rotation.y = -PI * 0.5
+		_clear_around(r, lever.position, 1.0)  # nothing standing in front of it
 	_treasure(r, id + "_chest", level + 4)
 	if WorldState.has_record(id):
 		return
@@ -255,8 +257,22 @@ static func _puzzle(r: RoomModule, rng: RandomNumberGenerator, level: int) -> vo
 		var bars := InteriorDoor.new()
 		bars.door_id = "%s/bars%d" % [id, side]
 		bars.is_gate = true
-		bars.size = Vector2(1.8, 1.6)
+		bars.size = Vector2(1.8, 2.7)  # higher than you can jump
 		bars.hint = "Carved on the bars: %s, then %s, then %s." % [marks[order[0]], marks[order[1]], marks[order[2]]]
 		cage.add_child(bars)
 		bars.position = Basis(Vector3.UP, side * PI * 0.5) * Vector3(0, 0, 0.9)
 		bars.rotation.y = side * PI * 0.5
+	# and closed over the top, so nobody reaches in from above
+	var lid := POIBuilder.add_box(cage, Vector3(1.9, 0.12, 1.9), Vector3(0, 2.76, 0), Color(0.22, 0.22, 0.24))
+	lid.name = "VaultLid"
+
+
+# Furniture and props too close to a lever go (a lever must never end up inside a shelf or a crate)
+static func _clear_around(r: Node3D, local_at: Vector3, radius: float) -> void:
+	for c in r.get_children():
+		if not (c is Node3D) or not (c is InteriorProp or String(c.name).begins_with("Decor_") or String(c.name).begins_with("Clutter")):
+			continue
+		var p := (c as Node3D).position
+		if Vector2(p.x - local_at.x, p.z - local_at.z).length() < radius + 0.4:
+			r.remove_child(c)
+			c.free()

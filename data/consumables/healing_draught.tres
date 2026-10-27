@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_wbuta"]
+
+[resource]
+script = ExtResource("1_wbuta")
+id = &"healing_draught"
+display_name = "Healing Draught"
+item_type = 3
+weight = 0.4
+value = 35
+stackable = true
+max_stack = 99
+min_level = 5
+loot_tags = PackedStringArray("alchemist", "temple")
+use_verb = "Drink"
+effect_group = "potion"
+heal_amount = 60.0
+effect_duration = 10.0
+ingredient_effects = PackedStringArray()

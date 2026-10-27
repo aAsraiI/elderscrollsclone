@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_v0uig"]
+
+[resource]
+script = ExtResource("1_v0uig")
+id = &"fishing_pole"
+display_name = "Fishing Pole"
+description = "Worth a few coins to the right buyer."
+weight = 2.0
+value = 6
+stackable = true
+max_stack = 99
+junk = true
+loot_tags = PackedStringArray("coast", "home")
+ingredient_effects = PackedStringArray()

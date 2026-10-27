@@ -35,7 +35,8 @@ var _topics: VBoxContainer
 var _persuade_row: HBoxContainer
 var _persuade_buttons: Array[Button] = []
 var _barter_button: Button
-var _services: HBoxContainer
+var _services: HFlowContainer
+var _panel: PanelContainer
 var _last_answer := ""
 var _focus_topic := ""  # the topic the keyboard was on (kept after asking)
 var _fov_before := 0.0
@@ -82,6 +83,10 @@ func open_with(e: Enemy) -> bool:
 	_log.clear()
 	_last_answer = ""
 	_apply_text_size()
+	# never bigger than the window (a small window or a big text size)
+	var vp := get_viewport().get_visible_rect().size
+	if _panel != null:
+		_panel.custom_minimum_size = Vector2(minf(980.0, vp.x - 40.0), minf(580.0, vp.y - 40.0))
 	_face_player(e)
 	_camera_in(true)
 	_say(speaker.name, DialogueEngine.greeting(speaker, _world), "")
@@ -312,6 +317,8 @@ func _refresh() -> void:
 		b.text = t
 		b.flat = true
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # a long topic wraps in its column, never widens the window
+		b.custom_minimum_size = Vector2(1, 0)
 		# new topics stand out (Morrowind style), ones already asked about are dimmed
 		var c := Color(0.85, 0.9, 1.0) if not DialogueEngine.GENERIC.has(t) else Color(1, 1, 1)
 		if not DialogueState.was_asked(t):
@@ -334,7 +341,10 @@ func _refresh() -> void:
 		if sv["id"] == "trade":
 			continue  # the Barter button above
 		var sb := Button.new()
-		sb.text = tr(String(sv["label"])) if sv["why"] == "" else "%s (%s)" % [tr(String(sv["label"])), sv["why"]]
+		sb.text = tr(String(sv["label"]))
+		if sv["why"] != "":
+			sb.tooltip_text = String(sv["why"])  # why it is not offered: on hover, so the row stays short
+			sb.text += " *"
 		sb.disabled = sv["why"] != ""
 		sb.custom_minimum_size = Vector2(110, 32)
 		sb.pressed.connect(use_service.bind(String(sv["id"])))
@@ -446,7 +456,8 @@ func _build_ui() -> void:
 	var center := CenterContainer.new()
 	_root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var panel := PanelContainer.new()
+	_panel = PanelContainer.new()
+	var panel := _panel
 	panel.custom_minimum_size = Vector2(980, 580)
 	center.add_child(panel)
 	var margin := MarginContainer.new()
@@ -525,8 +536,9 @@ func _build_ui() -> void:
 		_persuade_buttons.append(b)
 
 	# buttons
-	var buttons := HBoxContainer.new()
-	buttons.add_theme_constant_override("separation", 10)
+	var buttons := HFlowContainer.new()  # wraps to a second row rather than running off the screen
+	buttons.add_theme_constant_override("h_separation", 10)
+	buttons.add_theme_constant_override("v_separation", 6)
 	vbox.add_child(buttons)
 	var persuade_btn := Button.new()
 	persuade_btn.text = "Persuade"
@@ -538,8 +550,8 @@ func _build_ui() -> void:
 	_barter_button.custom_minimum_size = Vector2(140, 36)
 	_barter_button.pressed.connect(open_barter)
 	buttons.add_child(_barter_button)
-	_services = HBoxContainer.new()
-	_services.add_theme_constant_override("separation", 6)
+	_services = HFlowContainer.new()
+	_services.add_theme_constant_override("h_separation", 6)
 	buttons.add_child(_services)
 	var gift := Button.new()
 	gift.text = "Gift"

@@ -69,13 +69,54 @@ func _process(delta: float) -> void:
 		return
 	match int(s.get("stage", 0)):
 		2:
-			if Discovery.is_cleared(String(s.get("dungeon", ""))):
-				var codex := QuestItems.get_item("story_codex", "Eclipse Codex")
-				(p.get_node("Inventory") as Inventory).add_item(codex, 1)
-				_advance(3, "Among the cultists' things lay the Eclipse Codex, written in ash-grey ink. The priest said a scholar of the Mages Guild could read it.", Vector3.INF)
+			# the Codex is a real book in the deepest room: the story moves on once it is in your pack
+			var codex := QuestItems.get_item("story_codex", "Eclipse Codex")
+			if (p.get_node("Inventory") as Inventory).has_item(codex):
+				var hall := _nearest_mages_hall(p.global_position)
+				_advance(3, "Among the cultists' things lay the Eclipse Codex, written in ash-grey ink. The priest said a scholar of the Mages Guild could read it.", hall)
+			else:
+				_place_codex(String(s.get("dungeon", "")), codex)
 		4:
 			_tick_ritual(p, s)
 
+
+
+# Inside the Codex's dungeon, it lies on the boss's chest in the deepest room (or the chest furthest
+# from the way in), until you take it
+func _place_codex(dungeon_id: String, codex: ItemData) -> void:
+	var dm := world.dungeons if world != null else null
+	if dm == null or dm.current_entrance_id != dungeon_id or not dm.is_inside():
+		return
+	var inside := dm.get_interior_root()
+	if inside == null or inside.find_child("StoryCodex", true, false) != null:
+		return
+	var chests := inside.find_children("Chest*", "StaticBody3D", true, false)
+	if chests.is_empty():
+		return
+	var start := (get_tree().get_first_node_in_group("player") as Node3D).global_position
+	var best: Node3D = null
+	for c: Node3D in chests:
+		var cc := c.get_node_or_null("ContainerComponent") as ContainerComponent
+		if cc != null and cc.display_name == "Boss Chest":
+			best = c
+			break
+		if best == null or c.global_position.distance_to(start) > best.global_position.distance_to(start):
+			best = c
+	var top := best.global_transform * ModelLibrary.bounds(best)
+	var w := WorldItem.place(codex, 1, inside, inside.to_local(Vector3(top.get_center().x, top.end.y, top.get_center().z)), "", "")
+	w.name = "StoryCodex"
+
+
+## The Mages Guild hall nearest a point (where the Codex is taken to be read)
+func _nearest_mages_hall(pos: Vector3) -> Vector3:
+	var best := Vector3.INF
+	for t in world.towns:
+		if t.town == null:
+			continue
+		for b in t.town.buildings:
+			if b.kind == BuildingPlot.Kind.GUILD_HALL and b.guild == "mages" and (not best.is_finite() or b.world_pos.distance_to(pos) < best.distance_to(pos)):
+				best = b.world_pos
+	return best
 
 func _begin(p: Node3D) -> void:
 	var temple := _nearest_city_temple(p.global_position)
@@ -240,25 +281,25 @@ func _tick_ritual(p: Node3D, s: Dictionary) -> void:
 
 func _spawn_cult(site: PlacedPOI) -> void:
 	var skills := get_tree().get_first_node_in_group("player").get_node_or_null("Skills") as Skills
-	var level := (skills.get_player_level() if skills != null else 10) + 3
+	var level := (skills.get_player_level() if skills != null else 10) - 1  # a fair fight at your level (1.16: was far too strong)
 	var priest := load("res://data/enemies/ashen_priest.tres") as EnemyData
 	var cultist := load("res://data/enemies/ash_cultist.tres") as EnemyData
 	var rng := RandomNumberGenerator.new()
 	rng.seed = site.id.hash()
-	for i in 6:
+	for i in 5:
 		var data := priest if i == 0 else cultist
 		if data == null:
 			continue
-		var a := float(i) / 6.0 * TAU
+		var a := float(i) / 5.0 * TAU
 		var x := site.position.x + cos(a) * (2.0 if i == 0 else 9.0)
 		var z := site.position.z + sin(a) * (2.0 if i == 0 else 9.0)
 		var pos := Vector3(x, world.get_height_at(x, z) + 0.5, z)
 		var e := Enemy.create()
-		data.apply(e, level + (4 if i == 0 else 0), rng)
+		data.apply(e, level + (3 if i == 0 else 0), rng)
 		e.persist_mode = Enemy.PersistMode.NEVER
 		if i == 0:
 			e.display_name = "Ash Hierophant"
-			e.max_health *= 3.0
+			e.max_health *= 1.6
 			e.body_scale = 1.15
 			e.set_meta("hierophant", true)
 		e.position = pos

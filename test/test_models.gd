@@ -354,15 +354,15 @@ func t_in_game() -> void:
 	wolf.body._speed = 2.0
 	wolf.body.model_body.animate(0.1, 2.0)
 	check("a moving wolf walks (%s)" % wolf.body.model_body.player.current_animation, wolf.body.model_body._role == "walk")
-	# Death: the death clip, lying as one searchable piece
+	# Death: a ragdoll from the model's own skeleton (1.16), every limb searchable
 	bandit.stats.modify_vital("health", -99999.0)
 	await frames(20)
 	var rag := bandit.get_node_or_null("Ragdoll") as Ragdoll
 	check("the bandit died", bandit.state == Enemy.State.DEAD)
-	check("its corpse is one piece", rag != null and rag.parts.has("remains"))
-	check("playing its death clip", mb._dead and mb.player.current_animation.to_lower().contains("death"))
+	check("it falls as a ragdoll (%d parts)" % (rag.parts.size() if rag != null else 0), rag != null and rag.parts.size() >= 5)
+	check("its clips stopped (no death clip)", mb._dead and (mb.player == null or not mb.player.active))
 	check("and still drawn", mb.model.is_visible_in_tree())
-	var searchable := rag != null and rag.parts.has("remains") and (rag.parts["remains"] as Node).has_meta("interactable")
+	var searchable := rag != null and not rag.parts.is_empty() and rag.parts.values().all(func(p: Node) -> bool: return p.has_meta("interactable"))
 	check("and can be searched", searchable)
 	# The lantern slot: wearing a lantern lights the way
 	var lantern_node := p.get_node_or_null("LanternLight") as LanternLight

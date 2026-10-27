@@ -22,6 +22,7 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 		root.add_child(scene.instantiate())
 	else:
 		POIBuilder.build_shape(root, int(shape), shape_scale, color, placed, map)
+		ModelLibrary.dress_structures(root)
 	POIBuilder.add_containers(root, containers, placed, map)
 	return root
 

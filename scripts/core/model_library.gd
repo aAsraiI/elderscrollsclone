@@ -623,3 +623,164 @@ static func surface_slots(node: Node3D, space: Node3D, label: String, reach: flo
 			var p := Vector2(r.position.x + r.size.x * f, r.get_center().y) if along_x else Vector2(r.get_center().x, r.position.y + r.size.y * f)
 			out.append([Vector3(p.x, s["y"], p.y), Vector2(length / n * 0.9, depth * 0.8) if along_x else Vector2(depth * 0.8, length / n * 0.9), label])
 	return out
+
+
+## A model's meshes as one ArrayMesh in the model's own space, a surface per part with its material
+## (for drawing many of it as a MultiMesh)
+static func bake(model: Node3D) -> ArrayMesh:
+	var out := ArrayMesh.new()
+	for mi: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if mi.mesh == null or mi.skin != null or not mi.visible:
+			continue
+		var xf := relative_transform(model, mi)
+		var nb := xf.basis.inverse().transposed()
+		for s in mi.mesh.get_surface_count():
+			var arrays := mi.mesh.surface_get_arrays(s)
+			var v: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			for i in v.size():
+				v[i] = xf * v[i]
+			arrays[Mesh.ARRAY_VERTEX] = v
+			if arrays[Mesh.ARRAY_NORMAL] != null:
+				var n: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+				for i in n.size():
+					n[i] = (nb * n[i]).normalized()
+				arrays[Mesh.ARRAY_NORMAL] = n
+			arrays[Mesh.ARRAY_TANGENT] = null
+			arrays[Mesh.ARRAY_BONES] = null
+			arrays[Mesh.ARRAY_WEIGHTS] = null
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+			var mat := mi.get_active_material(s)
+			out.surface_set_material(out.get_surface_count() - 1, mat)
+	return out if out.get_surface_count() > 0 else null
+
+
+## A box drawn as a model: `holder` is one of POIBuilder.add_box's pieces (a body with a box mesh and a
+## box shape); its mesh is swapped for the model `key` stretched to exactly the box (its long side along
+## the box's long side), and the box shape stays, so walls keep their walkway and gates their opening.
+## False (the box stays) without the model.
+static func dress_box(holder: Node3D, key: String) -> bool:
+	if not has(key):
+		return false
+	var box_mi: MeshInstance3D = null
+	for c in holder.get_children():
+		if c is MeshInstance3D and (c as MeshInstance3D).mesh is BoxMesh:
+			box_mi = c
+			break
+	if box_mi == null:
+		return false
+	var size := (box_mi.mesh as BoxMesh).size
+	var model := instance(key)
+	if model == null:
+		return false
+	var child := model.get_child(0) as Node3D
+	var b := bounds(model)
+	if (size.x >= size.z) != (b.size.x >= b.size.z):
+		child.rotate_y(PI * 0.5)  # its long side along the box's
+		b = bounds(model)
+	var s := Vector3(size.x / maxf(b.size.x, 0.001), size.y / maxf(b.size.y, 0.001), size.z / maxf(b.size.z, 0.001))
+	child.transform = Transform3D(Basis.from_scale(s), Vector3.ZERO) * child.transform
+	b = bounds(model)
+	child.position += box_mi.position - b.get_center()
+	model.name = "Look"
+	model.set_meta("dress_key", key)
+	holder.remove_child(box_mi)
+	box_mi.free()
+	holder.add_child(model)
+	return true
+
+
+## Built structures (a site's walls and towers, a ruin's, a fort's) drawn as Morrowind's: every plain
+## box piece under `root` (a body holding one box mesh and its box shape) that is clearly a wall or a
+## tower, by its material and its proportions, takes the matching model stretched over it; its box
+## shape stays, so what you walk on and bump into does not change. Floors, steps and small parts stay.
+static func dress_structures(root: Node3D) -> int:
+	var n := 0
+	for body in root.find_children("*", "StaticBody3D", true, false):
+		if body is InteriorProp or body.get_script() != null:
+			continue
+		var mi: MeshInstance3D = null
+		var count := 0
+		for c in body.get_children():
+			if c is MeshInstance3D:
+				count += 1
+				mi = c
+		if count != 1 or not (mi.mesh is BoxMesh):
+			continue
+		var key := structure_key((mi.mesh as BoxMesh).size, mi.material_override if mi.material_override != null else mi.mesh.surface_get_material(0))
+		if key != "" and dress_box(body, key):
+			n += 1
+	return n
+
+
+## Which model a box of this size and material is: "" when it is not clearly a wall or a tower
+static func structure_key(size: Vector3, mat: Material) -> String:
+	var long := maxf(size.x, size.z)
+	var thin := minf(size.x, size.z)
+	var stuff := _stuff(mat)
+	if stuff == "":
+		return ""
+	if size.y >= 2.0 and long >= 2.5 and long >= thin * 2.5 and thin <= 3.5:
+		return "wall/city" if stuff == "stone" else ("wall/palisade" if stuff == "wood" else "")
+	if size.y >= 4.0 and long <= thin * 1.6 and thin >= 1.5 and size.y >= long * 1.4 and stuff == "stone":
+		return "wall/tower"
+	return ""
+
+
+# What a box is made of: by its material's file (data/interiors/materials) or its colour
+static func _stuff(mat: Material) -> String:
+	if mat == null:
+		return ""
+	var path := mat.resource_path.get_file().to_lower()
+	for pair in [["stone", "stone"], ["brick", "stone"], ["flagstone", "stone"], ["rock", "stone"], ["moss", "stone"], ["wood", "wood"]]:
+		if path.contains(pair[0]):
+			return pair[1]
+	var c: Color = mat.albedo_color if mat is BaseMaterial3D else Color.WHITE
+	if c.s < 0.16 and c.v > 0.18:
+		return "stone"
+	if c.h > 0.02 and c.h < 0.14 and c.s > 0.45 and c.v < 0.66:
+		return "wood"
+	return ""
+
+
+## Everything dress_box drew under `root` (city walls, towers, a site's walls) as one MultiMesh per model:
+## each piece is the same model stretched its own way, so one baked mesh and a transform each draw them
+## all. The bodies and their box shapes stay as they were.
+static func batch_dressed(root: Node3D) -> int:
+	var by_key := {}
+	for look in root.find_children("Look", "Node3D", true, false):
+		if look.has_meta("dress_key"):
+			var k := String(look.get_meta("dress_key"))
+			if not by_key.has(k):
+				by_key[k] = []
+			by_key[k].append(look)
+	var n := 0
+	for key: String in by_key:
+		var list: Array = by_key[key]
+		if list.size() < 2:
+			continue
+		var base := instance(key)
+		if base == null:
+			continue
+		var mesh := bake(base)
+		var base_child := (base.get_child(0) as Node3D).transform
+		base.free()
+		if mesh == null:
+			continue
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = mesh
+		mm.instance_count = list.size()
+		for i in list.size():
+			var look: Node3D = list[i]
+			var child := (look.get_child(0) as Node3D).transform
+			mm.set_instance_transform(i, relative_transform(root, look) * child * base_child.affine_inverse())
+		var mmi := MultiMeshInstance3D.new()
+		mmi.name = "Many_" + key.replace("/", "_")
+		mmi.multimesh = mm
+		mmi.visibility_range_end = 600.0
+		root.add_child(mmi)
+		for look: Node3D in list:
+			look.get_parent().remove_child(look)
+			look.free()
+		n += list.size()
+	return n

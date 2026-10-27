@@ -73,6 +73,11 @@ static func _ensure() -> void:
 	_add(3, "chain_lightning", "Thunderbolt", F.BEAM, [["shock_damage", 60, 0]], 2.0)
 	_add(4, "incinerate", "Incinerate", F.TARGET, [["fire_damage", 80, 0], ["weakness_fire", 25, 10]], 3.0)
 	_add(4, "blizzard", "Blizzard", F.NOVA, [["frost_damage", 15, 6], ["slow", 50, 6]], 9.0)
+	_add(1, "scorching_touch", "Scorching Touch", F.TOUCH, [["fire_damage", 32, 0]])
+	_add(1, "venom_dart", "Venom Dart", F.TARGET, [["poison_damage", 4, 8]])
+	_add(2, "frost_nova", "Frost Nova", F.NOVA, [["frost_damage", 30, 0], ["slow", 30, 4]])
+	_add(2, "storm_nova", "Storm Nova", F.NOVA, [["shock_damage", 32, 0]])
+	_add(3, "searing_bolt", "Searing Bolt", F.TARGET, [["fire_damage", 58, 0], ["weakness_fire", 15, 8]], 2.0)
 
 	# ---- Restoration
 	_add(0, "healing", "Healing", F.SELF, [["restore_health", 30, 0]])
@@ -89,6 +94,10 @@ static func _ensure() -> void:
 	_add(3, "close_wounds", "Close Wounds", F.SELF, [["restore_health", 140, 0]])
 	_add(3, "battle_blessing", "Battle Blessing", F.SELF, [["fortify_attack", 20, 60], ["fortify_block", 15, 60]])
 	_add(4, "grand_healing", "Grand Healing", F.NOVA, [["restore_health", 150, 0]])
+	_add(0, "mend", "Mend", F.TOUCH, [["restore_health", 20, 0]])
+	_add(1, "second_wind", "Second Wind", F.SELF, [["restore_stamina", 90, 0]])
+	_add(2, "ward_of_elements", "Ward of the Elements", F.SELF, [["resist_fire", 25, 60], ["resist_frost", 25, 60], ["resist_shock", 25, 60]])
+	_add(2, "cleanse", "Cleanse", F.SELF, [["cure_poison", 0, 0], ["cure_disease", 0, 0]])
 
 	# ---- Alteration
 	_add(0, "candlelight", "Candlelight", F.SELF, [["light", 10, 90]])
@@ -104,6 +113,10 @@ static func _ensure() -> void:
 	_add(3, "paralyze_spell", "Paralyze", F.TARGET, [["paralyze", 0, 5]])
 	_add(3, "open_hard_lock", "Open Hard Lock", F.TOUCH, [["open_lock", 75, 0]])
 	_add(4, "mass_paralysis", "Mass Paralysis", F.NOVA, [["paralyze", 0, 6]], 8.0)
+	_add(1, "swiftness", "Swiftness", F.SELF, [["haste", 15, 60]])
+	_add(1, "featherfall", "Featherfall", F.SELF, [["slowfall", 0, 60]])
+	_add(4, "ebonyflesh", "Ebonyflesh", F.SELF, [["shield", 85, 60]])
+	_add(4, "open_master_lock", "Open Master Lock", F.TOUCH, [["open_lock", 100, 0]])
 
 	# ---- Conjuration
 	_add(0, "summon_wolf_spell", "Conjure Wolf", F.SELF, [["summon_wolf", 0, 60]])
@@ -119,6 +132,7 @@ static func _ensure() -> void:
 	_add(3, "summon_bear_spell", "Conjure Frost Bear", F.SELF, [["summon_bear", 0, 60]])
 	_add(4, "summon_troll_spell", "Conjure Cave Troll", F.SELF, [["summon_troll", 0, 60]])
 	_add(4, "dread_zombie", "Dread Zombie", F.TARGET, [["reanimate", 60, 60]])
+	_add(2, "summon_skeleton_archer", "Raise Bone Archer", F.SELF, [["summon_skeleton", 0, 90]])
 
 	# ---- Illusion
 	_add(0, "muffle_spell", "Muffle", F.SELF, [["muffle", 0, 60]])
@@ -132,6 +146,8 @@ static func _ensure() -> void:
 	_add(3, "invisibility_spell", "Invisibility", F.SELF, [["invisibility", 0, 30]])
 	_add(3, "mayhem", "Mayhem", F.NOVA, [["frenzy", 30, 30]], 12.0)
 	_add(4, "harmony", "Harmony", F.NOVA, [["calm", 60, 60]], 15.0)
+	_add(2, "terror", "Terror", F.NOVA, [["fear", 20, 15]], 8.0)
+	_add(3, "beguile", "Beguile", F.TARGET, [["charm", 40, 60]])
 
 	# ---- Mysticism
 	_add(0, "detect_life_spell", "Detect Life", F.SELF, [["detect_life", 50, 30]])
@@ -145,6 +161,9 @@ static func _ensure() -> void:
 	_add(3, "spell_absorption_spell", "Spell Absorption", F.SELF, [["spell_absorption", 30, 60]])
 	_add(3, "reflect_spell", "Reflect", F.SELF, [["reflect", 25, 60]])
 	_add(4, "soul_harvest", "Soul Harvest", F.BEAM, [["absorb_health", 50, 0], ["soul_trap", 0, 30]])
+	_add(1, "drain_stamina_spell", "Drain Stamina", F.TOUCH, [["absorb_stamina", 30, 0]])
+	_add(2, "drain_magicka_spell", "Drain Magicka", F.TARGET, [["absorb_magicka", 30, 0]])
+	_add(3, "life_leech", "Life Leech", F.BEAM, [["absorb_health", 30, 0]])
 
 	# ---- Vampire powers (learned by becoming a vampire, no tomes)
 	_add(9, "vampiric_drain", "Vampiric Drain", F.TOUCH, [["absorb_health", 18, 0], ["absorb_stamina", 10, 0]])

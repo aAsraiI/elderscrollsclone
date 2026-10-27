@@ -206,6 +206,10 @@ func _hang_hands() -> void:
 		hands = {"r": "Bip01 R Hand", "l": "Bip01 L Hand"}  # imports from before 1.15.4 named the weapon bones
 	for side in ["r", "l"]:
 		var bone_name := String(hands.get(side, ""))
+		# Morrowind's rigs carry shields on their own forearm bone, which its shields are made for
+		var on_shield_bone: bool = side == "l" and skel.find_bone("Shield Bone") >= 0 and body.off_grip != null and _holds_shield()
+		if on_shield_bone:
+			bone_name = "Shield Bone"
 		var bone := skel.find_bone(bone_name) if bone_name != "" else -1
 		if bone < 0:
 			continue
@@ -218,7 +222,11 @@ func _hang_hands() -> void:
 		# Undo every scale between the body and the skeleton, so weapons keep their real size
 		var skel_scale := ModelLibrary.relative_transform(self, skel).basis.get_scale()
 		var unscale := Basis.from_scale(Vector3.ONE / skel_scale.max(Vector3.ONE * 0.00001))
-		var fitted = _auto_grip(skel, bone, side) if auto else null
+		var fitted = _auto_grip(skel, bone, side) if auto and not on_shield_bone else null
+		if on_shield_bone:
+			# Morrowind's shield as made for this bone faces forward; a quarter turn about the forearm faces it
+			# out from the arm, the bowl round the arm (CreatureBody hangs the raw model)
+			fitted = Transform3D(Basis(_forearm_axis(skel, bone), SHIELD_TURN), Vector3.ZERO)
 		if fitted != null:
 			holder.transform = Transform3D((fitted as Transform3D).basis.orthonormalized() * unscale, (fitted as Transform3D).origin)
 		else:
@@ -232,6 +240,8 @@ func _hang_hands() -> void:
 			g.position = Vector3.ZERO
 			g.rotation = Vector3.ZERO
 			g.visible = true
+		if on_shield_bone:
+			_seat_shield.call_deferred(holder, skel, bone, 8)
 
 
 ## A grip worked out from the hand's own bones, for models with finger and thumb bones ("grip":
@@ -411,3 +421,101 @@ func die(at_end: bool = false) -> void:
 ## Drawn or not (the box body's own visibility no longer shows anything)
 func set_shown(on: bool) -> void:
 	model.visible = on
+
+
+## Bones that take part in a ragdoll (matched in their names, any rig: Morrowind's Bip01, KayKit, Quaternius)
+const RAG_BONES := ["pelvis", "hips", "spine", "chest", "neck", "head", "upperarm", "upper_arm", "arm.l", "arm.r",
+	"forearm", "lowerarm", "lower_arm", "thigh", "upperleg", "upper_leg", "calf", "lowerleg", "lower_leg", "shin", "leg"]
+const RAG_SKIP := ["finger", "toe", "nub", "weapon", "shield", "eye", "jaw", "twist", "tail", "clav", "foot", "hand", "prop", "root"]
+
+
+
+## The skeleton bones a ragdoll is made of: the main joints, any rig (Morrowind's Bip01, KayKit, Quaternius)
+func ragdoll_bones() -> Array[int]:
+	var out: Array[int] = []
+	var skel := _skeleton()
+	if skel == null:
+		return out
+	for i in skel.get_bone_count():
+		var n := skel.get_bone_name(i).to_lower()
+		if RAG_BONES.any(func(w): return n.contains(w)) and not RAG_SKIP.any(func(w): return n.contains(w)):
+			out.append(i)
+	return out
+
+
+## Stops the clips for good: from here a ragdoll moves the bones
+func hand_to_ragdoll() -> Skeleton3D:
+	_dead = true
+	if player != null:
+		player.stop()
+		player.active = false
+	return _skeleton()
+
+
+# Whether the off hand carries a shield (rather than a second weapon or a torch)
+func _holds_shield() -> bool:
+	var e := body.get_parent() as Enemy
+	if e == null:
+		return true
+	var off: ItemData = e.starting_off_hand
+	return off == null or off.secondary_action == ItemData.SecondaryAction.BLOCK
+
+
+
+
+## True when shields go on Morrowind's own shield bone (where its shield models sit as they are made)
+func has_shield_bone() -> bool:
+	var skel := _skeleton()
+	return skel != null and skel.find_bone("Shield Bone") >= 0
+
+
+## The quarter turn about the forearm that faces a shield out from the arm
+const SHIELD_TURN := -PI * 0.5
+
+
+# Along the forearm (toward the hand), in `bone`'s own space
+func _forearm_axis(skel: Skeleton3D, bone: int) -> Vector3:
+	var hand := skel.find_bone("Bip01 L Hand")
+	var fore := skel.find_bone("Bip01 L Forearm")
+	if hand < 0 or fore < 0:
+		return Vector3.UP
+	var at := skel.get_bone_global_rest(bone)
+	var d := at.basis.inverse() * (skel.get_bone_global_rest(hand).origin - skel.get_bone_global_rest(fore).origin)
+	return d.normalized() if d.length() > 0.0001 else Vector3.UP
+
+
+# The turned shield rests against the forearm: its middle a little past halfway down the forearm and just
+# out from it, the bowl round the arm (waits a few frames for the shield to be hung)
+func _seat_shield(holder: Node3D, skel: Skeleton3D, bone: int, tries: int) -> void:
+	if not is_instance_valid(holder) or not is_instance_valid(skel):
+		return
+	var meshes := holder.find_children("*", "MeshInstance3D", true, false)
+	if meshes.is_empty():
+		if tries > 0:
+			get_tree().create_timer(0.25).timeout.connect(_seat_shield.bind(holder, skel, bone, tries - 1))
+		return
+	var att := holder.get_parent() as Node3D
+	var b := AABB()
+	for i in meshes.size():
+		var m := meshes[i] as MeshInstance3D
+		var mb := ModelLibrary.relative_transform(att, m) * m.get_aabb()
+		b = mb if i == 0 else b.merge(mb)
+	var hand := skel.find_bone("Bip01 L Hand")
+	var fore := skel.find_bone("Bip01 L Forearm")
+	if hand < 0 or fore < 0:
+		return
+	var inv := skel.get_bone_global_rest(bone).affine_inverse()  # into the shield bone's space
+	var f := inv * skel.get_bone_global_rest(fore).origin
+	var h := inv * skel.get_bone_global_rest(hand).origin
+	var axis := (h - f).normalized()
+	var c := b.get_center()
+	var out := (c - f) - axis * (c - f).dot(axis)
+	if out.length() < 0.001:
+		return
+	var scale_f := skel.global_transform.basis.get_scale().x  # metres -> the bone's own units
+	var want := f.lerp(h, 0.55) + out.normalized() * (SHIELD_OFF_ARM / maxf(scale_f, 0.0001))
+	holder.position += want - c
+
+
+## How far the middle of a shield sits out from the forearm (metres)
+const SHIELD_OFF_ARM := 0.0

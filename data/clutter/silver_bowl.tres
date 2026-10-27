@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_vwdvd"]
+
+[resource]
+script = ExtResource("1_vwdvd")
+id = &"silver_bowl"
+display_name = "Silver Bowl"
+description = "Worth a few coins to the right buyer."
+weight = 0.5
+value = 30
+stackable = true
+max_stack = 99
+junk = true
+loot_tags = PackedStringArray("rich_home", "vault")
+ingredient_effects = PackedStringArray()

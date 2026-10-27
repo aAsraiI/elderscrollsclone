@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_nll55"]
+
+[resource]
+script = ExtResource("1_nll55")
+id = &"jerky"
+display_name = "Strip of Jerky"
+item_type = 3
+weight = 0.1
+value = 3
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("camp", "hunter")
+use_verb = "Eat"
+heal_amount = 10.0
+effect_duration = 60.0
+restore_stamina = 5.0
+ingredient_effects = PackedStringArray()

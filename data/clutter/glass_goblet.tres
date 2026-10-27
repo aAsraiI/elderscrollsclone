@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_pymot"]
+
+[resource]
+script = ExtResource("1_pymot")
+id = &"glass_goblet"
+display_name = "Glass Goblet"
+description = "Worth a few coins to the right buyer."
+weight = 0.3
+value = 18
+stackable = true
+max_stack = 99
+junk = true
+loot_tags = PackedStringArray("rich_home", "tavern")
+ingredient_effects = PackedStringArray()

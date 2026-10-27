@@ -58,6 +58,8 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 			if map != null:
 				a.y = POIBuilder.ground_y(placed, map, a.x, a.z)
 			SiteLife.animal(site, herd[i], a, "%s/animal%d" % [placed.id, i])
+	ModelLibrary.dress_structures(root)  # its walls and towers as Morrowind's (1.16)
+	ModelLibrary.batch_dressed(root)
 	StaticBatch.merge_interior(root)
 	return root
 

@@ -12,7 +12,7 @@ const IRON := Color(0.2, 0.2, 0.22)
 ## `floor_at` is the bottom middle of the doorway on the wall's face, `yaw` turns the door to face the side
 ## you approach from (+Z of the door faces there). Everything stands just out from the wall (never in it,
 ## where the two would flicker through each other).
-static func dress(parent: Node3D, floor_at: Vector3, yaw: float, key: String, lamp: bool = true) -> Node3D:
+static func dress(parent: Node3D, floor_at: Vector3, yaw: float, key: String, lamp: bool = true, frame: bool = true) -> Node3D:
 	var root := Node3D.new()
 	root.name = "DoorLook"
 	root.add_to_group("door_looks")
@@ -34,10 +34,11 @@ static func dress(parent: Node3D, floor_at: Vector3, yaw: float, key: String, la
 		for y in [0.55, 1.75]:
 			POIBuilder.add_box(root, Vector3(1.3, 0.08, 0.06), Vector3(0.0, y, 0.15), IRON, 0.0, Vector3.ZERO, false)
 		POIBuilder.add_box(root, Vector3(0.08, 0.08, 0.12), Vector3(0.5, 1.15, 0.17), Color(0.75, 0.62, 0.3), 0.0, Vector3.ZERO, false)
-	# A lighter frame, so the doorway stands out from the wall around it
-	for x in [-0.82, 0.82]:
+	# A lighter frame, so the doorway stands out from the wall around it (not in a rock mouth)
+	for x in ([-0.82, 0.82] if frame else []):
 		POIBuilder.add_box(root, Vector3(0.18, 2.6, 0.24), Vector3(x, 1.3, 0.13), FRAME_COLOR, 0.0, Vector3.ZERO, false)
-	POIBuilder.add_box(root, Vector3(1.82, 0.2, 0.26), Vector3(0.0, 2.65, 0.14), FRAME_COLOR, 0.0, Vector3.ZERO, false)
+	if frame:
+		POIBuilder.add_box(root, Vector3(1.82, 0.2, 0.26), Vector3(0.0, 2.65, 0.14), FRAME_COLOR, 0.0, Vector3.ZERO, false)
 	if lamp:
 		_lamp(root, Vector3(1.15, 2.05, 0.3))
 	return root
@@ -95,7 +96,7 @@ static func batch(root: Node3D) -> void:
 		var list: Array = by_key[key]
 		if list.size() < 2:
 			continue
-		var mesh := _bake(list[0])
+		var mesh := ModelLibrary.bake(list[0])
 		if mesh == null:
 			continue
 		var mm := MultiMesh.new()
@@ -113,33 +114,6 @@ static func batch(root: Node3D) -> void:
 		for d: Node3D in list:
 			d.get_parent().remove_child(d)
 			d.free()
-
-
-# The model's meshes as one ArrayMesh in the model's own space, a surface per part
-static func _bake(model: Node3D) -> ArrayMesh:
-	var out := ArrayMesh.new()
-	for mi: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
-		if mi.mesh == null or mi.skin != null:
-			continue
-		var xf := _relative(mi, model)
-		var nb := xf.basis.inverse().transposed()
-		for s in mi.mesh.get_surface_count():
-			var arrays := mi.mesh.surface_get_arrays(s)
-			var v: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			for i in v.size():
-				v[i] = xf * v[i]
-			arrays[Mesh.ARRAY_VERTEX] = v
-			if arrays[Mesh.ARRAY_NORMAL] != null:
-				var n: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
-				for i in n.size():
-					n[i] = (nb * n[i]).normalized()
-				arrays[Mesh.ARRAY_NORMAL] = n
-			arrays[Mesh.ARRAY_TANGENT] = null
-			arrays[Mesh.ARRAY_BONES] = null
-			arrays[Mesh.ARRAY_WEIGHTS] = null
-			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-			out.surface_set_material(out.get_surface_count() - 1, mi.get_active_material(s))
-	return out if out.get_surface_count() > 0 else null
 
 
 static func _relative(n: Node3D, to: Node3D) -> Transform3D:

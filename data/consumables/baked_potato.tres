@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_5i562"]
+
+[resource]
+script = ExtResource("1_5i562")
+id = &"baked_potato"
+display_name = "Baked Potato"
+item_type = 3
+weight = 0.3
+value = 2
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "home")
+use_verb = "Eat"
+heal_amount = 12.0
+effect_duration = 60.0
+ingredient_effects = PackedStringArray()

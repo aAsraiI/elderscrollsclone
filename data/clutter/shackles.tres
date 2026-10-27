@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_njctd"]
+
+[resource]
+script = ExtResource("1_njctd")
+id = &"shackles"
+display_name = "Iron Shackles"
+description = "Worth a few coins to the right buyer."
+weight = 2.0
+value = 5
+stackable = true
+max_stack = 99
+junk = true
+loot_tags = PackedStringArray("camp", "crypt")
+ingredient_effects = PackedStringArray()

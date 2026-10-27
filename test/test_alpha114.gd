@@ -346,7 +346,7 @@ func t_walls(wm: WorldManager) -> void:
 	if city != null:
 		var root := TownBuilder.build(city.poi as TownData, city, wm.map)
 		var stairs := root.find_children("WallStairs*", "", true, false).size()
-		check("a slope up to the walkway at each gate (%d)" % stairs, stairs == 2)
+		check("no stairs up the city wall (removed in 1.16) (%d)" % stairs, stairs == 0)
 		root.free()
 
 

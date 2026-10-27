@@ -211,6 +211,8 @@ static func _shrine(root: Node3D, s: float, color: Color) -> void:
 static func build_entrance_shape(root: Node3D, shape: int, s: float, color: Color, placed: PlacedPOI, _map: WorldMap) -> void:
 	var rng := _rng(placed, 2)
 	var dark := Color(0.02, 0.02, 0.025)
+	if _entrance_model(root, shape, s, placed):
+		return
 	match shape:
 		DungeonEntrancePOIData.Shape.CAVE:
 			# A heap of rocks with a dark opening on the -Z side
@@ -229,6 +231,51 @@ static func build_entrance_shape(root: Node3D, shape: int, s: float, color: Colo
 			add_box(root, Vector3(2.6, 3.4, 0.3) * s, Vector3(0.0, 1.7, 0.4) * s, dark)
 			add_box(root, Vector3(4.4, 0.25, 2.0) * s, Vector3(0.0, 0.12, -2.0) * s, color.darkened(0.25), 0.0, Vector3.ZERO, false)
 
+
+
+## Which way each entrance model has to turn so its mouth faces -Z, where the door is
+const ENTRANCE_TURN := {"entrance/cave": PI, "entrance/doorway": 0.0}
+## Where each entrance model's doorway is (its foot, for the fit at scale 1): measured by casting rays into
+## its face. The cave mouth's is up a rock ramp, about two metres above the ground.
+const ENTRANCE_DOOR := {"entrance/cave": Vector3(0.0, 1.95, 0.0)}
+
+
+# A cave mouth or a tomb doorway as one natural-looking model (Morrowind's), with plain collision kept to
+# the mound behind and the sides, so the way in stays open. False without the model.
+static func _entrance_model(root: Node3D, shape: int, s: float, placed: PlacedPOI) -> bool:
+	var key := "entrance/cave" if shape == DungeonEntrancePOIData.Shape.CAVE else "entrance/doorway"
+	if not ModelLibrary.has(key):
+		return false
+	var m := ModelLibrary.fitted(key, AABB(Vector3(-5.5, -0.4, -3.0) * s, Vector3(11.0, 7.5, 11.0) * s), "contain", float(ENTRANCE_TURN[key]))
+	if m == null:
+		return false
+	m.name = "EntranceLook"
+	root.add_child(m)
+	# solid as the rock is: its own faces (you walk up its ramp to the doorway)
+	var body := StaticBody3D.new()
+	body.name = "EntranceRock"
+	root.add_child(body)
+	var faces := PackedVector3Array()
+	for mi in m.find_children("*", "MeshInstance3D", true, false):
+		var xf := ModelLibrary.relative_transform(root, mi)
+		for si in (mi as MeshInstance3D).mesh.get_surface_count():
+			var a := (mi as MeshInstance3D).mesh.surface_get_arrays(si)
+			var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+			var idx: PackedInt32Array = a[Mesh.ARRAY_INDEX] if a[Mesh.ARRAY_INDEX] != null else PackedInt32Array(range(v.size()))
+			for k in idx:
+				faces.append(xf * v[k])
+	var rock := ConcavePolygonShape3D.new()
+	rock.set_faces(faces)
+	rock.backface_collision = true
+	var cs := CollisionShape3D.new()
+	cs.shape = rock
+	body.add_child(cs)
+	# the door in the model's own doorway (where Morrowind puts it), filling it
+	var spot: Vector3 = ENTRANCE_DOOR.get(key, Vector3(0.0, 0.0, -2.2)) * s
+	var look := DoorLook.dress(root, spot, PI, "door/dungeon", false, false)
+	look.scale = Vector3.ONE * (0.8 * s if shape == DungeonEntrancePOIData.Shape.CAVE else s)
+	root.set_meta("door_at", spot + Vector3(0.0, 1.1 * s, 0.0))
+	return true
 
 # ---------------------------------------------------------------- chests
 

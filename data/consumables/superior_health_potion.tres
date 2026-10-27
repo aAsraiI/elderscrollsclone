@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_kwu16"]
+
+[resource]
+script = ExtResource("1_kwu16")
+id = &"superior_health_potion"
+display_name = "Superior Health Potion"
+item_type = 3
+weight = 0.5
+value = 260
+stackable = true
+max_stack = 99
+min_level = 60
+loot_tags = PackedStringArray("alchemist", "vault")
+use_verb = "Drink"
+effect_group = "potion"
+heal_amount = 250.0
+ingredient_effects = PackedStringArray()

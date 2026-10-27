@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_5iimi"]
+
+[resource]
+script = ExtResource("1_5iimi")
+id = &"superior_magicka_potion"
+display_name = "Superior Magicka Potion"
+item_type = 3
+weight = 0.5
+value = 260
+stackable = true
+max_stack = 99
+min_level = 60
+loot_tags = PackedStringArray("alchemist", "vault")
+use_verb = "Drink"
+effect_group = "potion"
+restore_magicka = 240.0
+ingredient_effects = PackedStringArray()

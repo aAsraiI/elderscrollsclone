@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_qa28w"]
+
+[resource]
+script = ExtResource("1_qa28w")
+id = &"milk"
+display_name = "Jug of Milk"
+item_type = 3
+weight = 1.0
+value = 3
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "home")
+use_verb = "Drink"
+heal_amount = 8.0
+effect_duration = 60.0
+restore_stamina = 10.0
+ingredient_effects = PackedStringArray()

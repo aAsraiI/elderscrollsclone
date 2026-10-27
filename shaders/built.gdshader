@@ -10,6 +10,8 @@ uniform bool use_vertex_color = true;
 uniform vec3 base_color : source_color = vec3(0.5);
 uniform float detail : hint_range(0.0, 1.0) = 1.0;
 uniform float wetness = 0.0;
+// 0 = picked by colour; 4 = a roof (Morrowind's shingles or thatch)
+uniform int surface = 0;
 
 // Morrowind's wall textures (MwSurfaces, project shader globals), when imported: their detail and shading on
 // the colour each box was given
@@ -20,6 +22,7 @@ global uniform sampler2D mw_plaster : source_color, repeat_enable, filter_linear
 global uniform sampler2D mw_stone2 : source_color, repeat_enable, filter_linear_mipmap;
 global uniform sampler2D mw_wood2 : source_color, repeat_enable, filter_linear_mipmap;
 global uniform sampler2D mw_plaster2 : source_color, repeat_enable, filter_linear_mipmap;
+global uniform sampler2D mw_roof : source_color, repeat_enable, filter_linear_mipmap;
 
 vec3 mw_detail(sampler2D t, vec2 uv) {
 	// against the texture's own average (its smallest mipmap): light and dark, and a little of its hue
@@ -127,6 +130,11 @@ void fragment() {
 			tex = mix(mw_detail(mw_wood, uv * 0.7), mw_detail(mw_wood2, uv2 * 0.7), patch);
 		} else {
 			tex = mix(mw_detail(mw_plaster, uv * 0.5), mw_detail(mw_plaster2, uv2 * 0.5), patch);
+		}
+		if (surface == 4) {
+			// shingles run down the slope: lay the texture along the roof's length and its fall
+			vec2 ruv = abs(wnrm.x) > abs(wnrm.z) ? vec2(wpos.z, wpos.y / max(abs(wnrm.x), 0.3)) : vec2(wpos.x, wpos.y / max(abs(wnrm.z), 0.3));
+			tex = mix(mw_detail(mw_roof, ruv * 0.5), mw_detail(mw_roof, ruv * 0.31 + vec2(0.4, 0.13)), patch * 0.5);
 		}
 		tex = mix(vec3(1.0), tex, 0.8) * (0.86 + fbm(wpos * 0.21 + 11.0) * 0.28);  // softer detail, broad light and dark
 		k = mix(k, 1.0, 0.6);  // the texture brings its own blocks and grain

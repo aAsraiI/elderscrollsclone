@@ -9,8 +9,8 @@ extends CharacterBody3D
 ## Optional sibling nodes it uses if present: Stats (move speed from Agility), Skills (Athletics XP),
 ## MeleeCombat (slower while blocking), Grabber (slower while dragging, made by the Interactor). Combat nodes: MeleeCombat + PlayerCombat, see melee_combat.gd.
 
-@export var walk_speed: float = 5.0
-@export var sprint_speed: float = 8.5
+@export var walk_speed: float = 3.8
+@export var sprint_speed: float = 6.2
 @export var jump_velocity: float = 4.5
 @export var mouse_sensitivity: float = 0.002
 @export var ground_accel: float = 12.0

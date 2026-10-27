@@ -90,7 +90,7 @@ func _find_combat() -> MeleeCombat:
 # ---------------------------------------------------------------- per frame
 
 func _process(delta: float) -> void:
-	visible = combat.is_alive()
+	visible = combat.is_alive() and not _third_person()  # the hands are only seen in first person
 	var phase := combat.get_phase()
 	var action_hand := combat.get_action_hand()
 	var retract := _wall_retract() if avoid_walls else 0.0
@@ -297,3 +297,9 @@ func _build_model(item: ItemData) -> Node3D:
 ## GameSettings changed (weapon sway)
 func apply_settings() -> void:
 	bob_enabled = bool(GameSettings.get_value("head_bob"))
+
+
+func _third_person() -> bool:
+	var p := get_tree().get_first_node_in_group("player")
+	var tp := p.get_node_or_null("ThirdPerson") as ThirdPerson if p != null else null
+	return tp != null and tp.third

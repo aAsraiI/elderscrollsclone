@@ -17,8 +17,12 @@ const GLOBALS := {
 	"mw_wood2": ["tx_wood_brown_posts_02", "tx_wood_blackwood"],
 	"mw_plaster": ["tx_hlaalu_wall2_02", "tx_stone_adobe_01"],
 	"mw_plaster2": ["tx_hlaalu_wall2_01", "tx_hlaalu_wall2_03"],
+	"mw_roof": ["tx_shingles_01", "tx_rooftop_01", "tx_thatch_01"],
 }
 ## Interior material (data/interiors/materials) -> Morrowind texture
+## Kept as they are (not greyed): window glass
+const RAW := {"window": ["tx_window_diamond_01", "tx_window_pane", "tx_s_windowpane"]}
+
 const KIT := {
 	"stone": ["tx_stoneshaft00", "tx_stonewall00"],
 	"stone_dark": ["tx_stone_bluegrey", "tx_stone_darkgrey_01"],
@@ -45,7 +49,7 @@ static func _dir() -> String:
 ## Converts the surfaces (MwImport calls this); returns how many it made
 static func convert(data: MwData, dir: String) -> int:
 	var n := 0
-	for table: Dictionary in [GLOBALS, KIT]:
+	for table: Dictionary in [GLOBALS, KIT, RAW]:
 		for key in table:
 			for name in table[key]:
 				var tex := data.texture(String(name) + ".tga")

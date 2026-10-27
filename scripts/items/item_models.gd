@@ -155,7 +155,8 @@ static func model_keys(item: ItemData) -> Array:
 						["milk", "item/pitcher"], ["water", "item/bottle"], ["juice", "item/bottle"], ["pie", "item/plate"],
 						["roast", "food/meat"], ["steak", "food/meat"], ["venison", "food/meat"], ["ham", "food/meat"],
 						["salmon", "food/fish"], ["trout", "food/fish"], ["cake", "food/bread"], ["roll", "food/bread"],
-						["berr", "food/apple"], ["cabbage", "item/cabbage"], ["leek", "item/leek"]]:
+						["berr", "food/apple"], ["cabbage", "item/cabbage"], ["leek", "item/leek"], ["beef", "food/meat"], ["jerky", "food/meat"],
+						["egg", "item/egg"], ["cider", "item/bottle"], ["brandy", "item/bottle"], ["tart", "item/plate"]]:
 					if n.contains(pair[0]):
 						out.append(pair[1])
 				for food in ["apple", "onion", "potato", "bread", "cheese", "meat", "fish", "pear", "carrot"]:
@@ -167,6 +168,14 @@ static func model_keys(item: ItemData) -> Array:
 		ItemData.ItemType.KEY:
 			out.append("item/key")
 			return out
+	for pair in [["fork", "clutter/fork"], ["kitchen knife", "clutter/knife"], ["spoon", "clutter/spoon"], ["ladle", "item/ladle"],
+			["rolling pin", "item/rolling_pin"], ["shears", "item/shears"], ["spool", "item/spool"], ["bolt of cloth", "item/cloth_bolt"],
+			["pillow", "item/pillow"], ["vase", "item/vase"], ["clay pot", "item/clay_pot"], ["basket", "clutter/basket"],
+			["drum", "clutter/drum"], ["mortar", "station/mortar"], ["scrap metal", "item/scrap_metal"], ["scrap wood", "item/scrap_wood"],
+			["shackles", "item/shackles"], ["wheat", "item/wheat"], ["oil lamp", "item/lamp"], ["fishing pole", "item/fishing_pole"],
+			["gear", "item/ingot"]]:
+		if n.contains(pair[0]):
+			out.append(pair[1])
 	for pair in [["book", "item/book"], ["journal", "item/book"], ["ledger", "item/book"], ["tome", "item/book"],
 			["scroll", "item/scroll"], ["quill", "item/scroll"], ["ingot", "item/ingot"], ["ore", "item/ore"],
 			["pelt", "item/pelt"], ["leather", "item/pelt"], ["tankard", "item/tankard"], ["goblet", "item/goblet"],

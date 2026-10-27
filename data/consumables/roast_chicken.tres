@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ibbc8"]
+
+[resource]
+script = ExtResource("1_ibbc8")
+id = &"roast_chicken"
+display_name = "Roast Chicken"
+item_type = 3
+weight = 1.0
+value = 9
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "tavern")
+use_verb = "Eat"
+heal_amount = 28.0
+effect_duration = 60.0
+ingredient_effects = PackedStringArray()

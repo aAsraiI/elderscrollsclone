@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_82nyi"]
+
+[resource]
+script = ExtResource("1_82nyi")
+id = &"tome_frost_nova"
+display_name = "Spell Tome: Frost Nova"
+description = "Adept Destruction spell. Read it to learn the spell."
+item_type = 6
+weight = 1.0
+value = 240
+loot_tags = PackedStringArray("mage", "library")
+ingredient_effects = PackedStringArray()
+teaches_spell = "frost_nova"

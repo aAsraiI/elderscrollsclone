@@ -113,6 +113,13 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 		# The way out is a door with a lit lantern, facing into the room
 		var spot := door.position - Vector3(0, 1.3, 0)
 		var inward := first.bounds().get_center() - spot
+		# square to the wall it is set in (the room's middle is seldom straight ahead of it)
+		inward = Vector3(signf(inward.x), 0.0, 0.0) if absf(inward.x) > absf(inward.z) else Vector3(0.0, 0.0, signf(inward.z))
+		# and against it: from the spot back to the room's edge, less the wall's half thickness
+		var rb := first.bounds()
+		var to_edge := (spot.x - rb.position.x if inward.x > 0.0 else rb.end.x - spot.x) if inward.x != 0.0 else (spot.z - rb.position.z if inward.z > 0.0 else rb.end.z - spot.z)
+		if to_edge > 0.35 and to_edge < 1.6:
+			spot -= inward * (to_edge - 0.3)
 		DoorLook.dress(first, spot, atan2(inward.x, inward.z), "door/dungeon")
 	root.set_meta("stone_walls", true)  # dungeon walls read as stone (StaticBatch, built shader)
 	return {"root": root, "start": start, "start_yaw": start_yaw, "down_spot": null, "rooms": plan.placed.size(),

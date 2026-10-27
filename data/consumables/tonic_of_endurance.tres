@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_df22j"]
+
+[resource]
+script = ExtResource("1_df22j")
+id = &"tonic_of_endurance"
+display_name = "Tonic of Endurance"
+item_type = 3
+weight = 0.4
+value = 55
+stackable = true
+max_stack = 99
+min_level = 10
+loot_tags = PackedStringArray("alchemist", "hunter")
+use_verb = "Drink"
+effect_group = "potion"
+effect_duration = 120.0
+stamina_regen_bonus = 0.5
+restore_stamina = 30.0
+ingredient_effects = PackedStringArray()

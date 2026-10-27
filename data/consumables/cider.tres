@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_c3y51"]
+
+[resource]
+script = ExtResource("1_c3y51")
+id = &"cider"
+display_name = "Apple Cider"
+item_type = 3
+weight = 0.5
+value = 6
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("tavern", "kitchen")
+use_verb = "Drink"
+heal_amount = 6.0
+effect_duration = 60.0
+stamina_regen_bonus = 0.15
+ingredient_effects = PackedStringArray()

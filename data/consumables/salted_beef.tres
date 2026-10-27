@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_v7xdl"]
+
+[resource]
+script = ExtResource("1_v7xdl")
+id = &"salted_beef"
+display_name = "Salted Beef"
+item_type = 3
+weight = 0.3
+value = 5
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("camp", "kitchen")
+use_verb = "Eat"
+heal_amount = 15.0
+effect_duration = 60.0
+ingredient_effects = PackedStringArray()

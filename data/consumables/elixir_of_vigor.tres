@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_728tc"]
+
+[resource]
+script = ExtResource("1_728tc")
+id = &"elixir_of_vigor"
+display_name = "Elixir of Vigor"
+item_type = 3
+weight = 0.4
+value = 70
+stackable = true
+max_stack = 99
+min_level = 20
+loot_tags = PackedStringArray("alchemist")
+use_verb = "Drink"
+effect_group = "potion"
+heal_amount = 40.0
+restore_stamina = 80.0
+ingredient_effects = PackedStringArray()

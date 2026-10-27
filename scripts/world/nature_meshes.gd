@@ -68,7 +68,10 @@ static func flower_material() -> ShaderMaterial:
 	return _flower_mat
 
 
+## The leafy cards' swaying material; none for a real shrub, which keeps its own
 static func bush_material() -> ShaderMaterial:
+	if bush_mesh() != null and ModelLibrary.has("nature/bush"):
+		return null
 	grass_material()
 	return _bush_mat
 
@@ -229,6 +232,11 @@ static func rock_mesh(variant: int) -> Mesh:
 static func bush_mesh() -> Mesh:
 	if _bush_mesh != null:
 		return _bush_mesh
+	# a real shrub ("nature/bush", Morrowind's) when there is one, about a metre high
+	if ModelLibrary.has("nature/bush"):
+		_bush_mesh = ModelLibrary.merged_mesh("nature/bush", 1.1, 0.05)
+		if _bush_mesh != null:
+			return _bush_mesh
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var rng := RandomNumberGenerator.new()

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_g2qjh"]
+
+[resource]
+script = ExtResource("1_g2qjh")
+id = &"cheese_wheel"
+display_name = "Cheese Wheel"
+item_type = 3
+weight = 2.0
+value = 15
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("kitchen", "tavern")
+use_verb = "Eat"
+heal_amount = 40.0
+effect_duration = 60.0
+ingredient_effects = PackedStringArray()

@@ -30,5 +30,9 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 	door.is_exit = false
 	door.position = Vector3(0.0, 1.3, -2.2 * shape_scale)
 	door.return_offset = Vector3(0.0, -1.2, -4.5 * shape_scale)
+	if root.has_meta("door_at"):
+		# a model's own doorway (a Morrowind cave mouth's, up its rock ramp): you come back out in front of it
+		door.position = root.get_meta("door_at")
+		door.return_offset = Vector3(0.0, -door.position.y + 0.3, -door.position.z - 4.5 * shape_scale)
 	root.add_child(door)
 	return root

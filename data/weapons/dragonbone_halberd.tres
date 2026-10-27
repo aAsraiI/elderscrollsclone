@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_e6jtt"]
+
+[resource]
+script = ExtResource("1_e6jtt")
+id = &"dragonbone_halberd"
+display_name = "Dragonbone Halberd"
+description = "Carved from the bones of great wyrms. Two-handed. An axe blade on a long pole: the reach of a spear with a wide, heavy sweep."
+item_type = 1
+equip_slot = 6
+weight = 19.2
+value = 4875
+governing_skill = "two_handed"
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 88.4
+reach = 3.0
+attack_style = 1
+arc_degrees = 110.0
+attack_cooldown = 1.25
+attack_windup = 0.32
+attack_active = 0.2
+stamina_cost = 16.25
+knockback = 5.0
+poise_damage = 51.0
+combo_length = 2
+two_handed = true
+heavy_charge_time = 0.58
+heavy_windup = 0.24
+heavy_poise_mult = 1.7
+heavy_reach_bonus = 0.4
+animation_set = &"spear"

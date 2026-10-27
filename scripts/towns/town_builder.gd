@@ -44,6 +44,7 @@ static func build(data: TownData, placed: PlacedPOI, map: WorldMap) -> Node3D:
 		_walls(root, layout, placed, map)
 	_gate_signs(root, layout, placed, map)
 	_pier(root, layout, placed, map)
+	ModelLibrary.batch_dressed(root)  # the walls, towers and gates: one draw per model
 	if data.kind == TownData.Kind.CITY and not layout.gates.is_empty():
 		# The carriage to the other cities, just outside the first gate (see Carriage)
 		var gate := layout.gates[0]
@@ -279,6 +280,15 @@ static func window_material() -> StandardMaterial3D:
 		_window_mat.emission_enabled = true
 		_window_mat.emission = Color(1.0, 0.72, 0.4)
 		_window_mat.emission_energy_multiplier = 0.0
+		var glass := MwSurfaces.texture("window")
+		if glass != null:
+			# Morrowind's leaded panes: dark by day, glowing between the lead at night
+			_window_mat.albedo_texture = glass
+			_window_mat.albedo_color = Color(0.75, 0.75, 0.8)
+			_window_mat.emission_texture = glass
+			_window_mat.uv1_triplanar = true
+			_window_mat.uv1_world_triplanar = true
+			_window_mat.uv1_scale = Vector3.ONE * 0.9
 	return _window_mat
 
 
@@ -369,9 +379,25 @@ static func _roof(parent: Node3D, size: Vector3, pos: Vector3, color: Color) -> 
 	var prism := PrismMesh.new()
 	prism.size = size
 	mesh.mesh = prism
-	mesh.material_override = POIBuilder.get_material(color)
+	mesh.material_override = roof_material(color)
 	parent.add_child(mesh)
 	mesh.position = pos
+
+
+static var _roof_mats := {}
+
+
+## A roof's look: its colour with Morrowind's shingles on it (the building shader's roof mode)
+static func roof_material(color: Color) -> Material:
+	var key := color.to_html(false)
+	if not _roof_mats.has(key):
+		var m := ShaderMaterial.new()
+		m.shader = StaticBatch.material().shader
+		m.set_shader_parameter("use_vertex_color", false)
+		m.set_shader_parameter("base_color", color)
+		m.set_shader_parameter("surface", 4)
+		_roof_mats[key] = m
+	return _roof_mats[key]
 
 
 # A field behind the farmhouse: soil, crop rows and a fence
@@ -557,9 +583,13 @@ static func _wall_ring(root: Node3D, layout: TownLayout, placed: PlacedPOI, map:
 		var len := d.length()
 		var yaw := -atan2(d.y, d.x)
 		var gy := POIBuilder.ground_y(placed, map, mid.x, mid.y)
-		POIBuilder.add_box(root, Vector3(len + 0.3, h + 2.0, t), Vector3(mid.x, gy + h * 0.5 - 1.0, mid.y), color, yaw)
+		# drawn a little longer than the piece, so the model's ends always meet the next one's
+		var wall_box := POIBuilder.add_box(root, Vector3(len + (1.4 if ModelLibrary.has("wall/city") and kind != "palisade" else 0.3), h + 2.0, t), Vector3(mid.x, gy + h * 0.5 - 1.0, mid.y), color, yaw)
+		var modelled := ModelLibrary.dress_box(wall_box, "wall/palisade" if kind == "palisade" else "wall/city")
 		var outward := Vector2(mid).normalized()
-		if kind == "palisade":  # the stake points along the top
+		if modelled:
+			pass  # the model has its own stakes or battlements
+		elif kind == "palisade":  # the stake points along the top
 			for k in int(len / 0.9):
 				var p := a.lerp(b, (k + 0.5) / int(len / 0.9))
 				POIBuilder.add_box(root, Vector3(0.35, 0.6, 0.35), Vector3(p.x, gy + h + 0.3, p.y), wood.darkened(0.1), yaw + 0.785, Vector3.ZERO, false)
@@ -567,17 +597,23 @@ static func _wall_ring(root: Node3D, layout: TownLayout, placed: PlacedPOI, map:
 			for k in int(len / 2.0):
 				var p := a.lerp(b, (k + 0.5) / int(len / 2.0)) + outward * (t * 0.5 - 0.25)
 				POIBuilder.add_box(root, Vector3(0.9, 0.9, 0.5), Vector3(p.x, gy + h + 0.45, p.y), stone.darkened(0.05), yaw, Vector3.ZERO, false)
-		if kind == "thick":  # the ditch below a city's walls
+		var bend := absf(prev_dir.angle_to(d)) if prev_dir != Vector2.ZERO else 0.0
+		if modelled and kind != "palisade" and bend > 0.12:
+			# a squared corner piece where the wall turns (never above the wall line), so no wedge shows
+			var joint := POIBuilder.add_box(root, Vector3(t + 0.3, h + 2.0, t + 0.3), Vector3(a.x, gy + h * 0.5 - 1.0, a.y), color, yaw)
+			ModelLibrary.dress_box(joint, "wall/corner")
+		if kind == "thick" and not modelled:  # the ditch below a city's walls
 			var dp := mid + outward * (t * 0.5 + 2.5)
 			POIBuilder.add_box(root, Vector3(len + 0.3, 0.1, 3.5), Vector3(dp.x, POIBuilder.ground_y(placed, map, dp.x, dp.y) + 0.02, dp.y), Color(0.16, 0.18, 0.17), yaw, Vector3.ZERO, false)
 		# towers where the wall turns and along long stretches
 		since_tower += len
 		var turn := absf(prev_dir.angle_to(d)) if prev_dir != Vector2.ZERO else 0.0
 		prev_dir = d
-		if kind != "palisade" and (since_tower > 34.0 or turn > 0.45):
+		var near_gate := layout.gates.any(func(gt: Vector3) -> bool: return Vector2(gt.x, gt.z).distance_to(a) < 12.0)
+		if kind != "palisade" and (since_tower > 34.0 or turn > 0.45) and not near_gate:  # never on top of a gatehouse tower
 			since_tower = 0.0
 			var tw := t + 2.2
-			POIBuilder.add_box(root, Vector3(tw, h + 5.0, tw), Vector3(a.x, gy + (h + 5.0) * 0.5 - 1.0, a.y), stone.darkened(0.12), yaw)
+			ModelLibrary.dress_box(POIBuilder.add_box(root, Vector3(tw, h + 5.0, tw), Vector3(a.x, gy + (h + 5.0) * 0.5 - 1.0, a.y), stone.darkened(0.12), yaw), "wall/tower")
 	# gatehouses: a tower each side and the arch over the road, and a slope up to the walkway
 	for g in layout.gates:
 		var gp := Vector2(g.x, g.z)
@@ -590,35 +626,16 @@ static func _wall_ring(root: Node3D, layout: TownLayout, placed: PlacedPOI, map:
 			continue
 		for side: float in [-1.0, 1.0]:
 			var p := gp + along * side * 6.5
-			POIBuilder.add_box(root, Vector3(5.0, h + 6.0, 5.0), Vector3(p.x, gy + (h + 6.0) * 0.5 - 1.0, p.y), stone.darkened(0.15))
-		POIBuilder.add_box(root, Vector3(t + 1.0, 2.0, 8.2), Vector3(gp.x, gy + h + 0.0, gp.y), stone.darkened(0.08))
-		_wall_slope(root, placed, map, gp, along, h, stone, layout.gates.find(g))
+			ModelLibrary.dress_box(POIBuilder.add_box(root, Vector3(5.0, h + 6.0, 5.0), Vector3(p.x, gy + (h + 6.0) * 0.5 - 1.0, p.y), stone.darkened(0.15)), "wall/tower")
+		var lintel := POIBuilder.add_box(root, Vector3(t + 1.0, 2.0, 8.2), Vector3(gp.x, gy + h + 0.0, gp.y), stone.darkened(0.08))
+		if ModelLibrary.has("wall/arch"):
+			# the arched gateway: drawn from the ground up over the road, solid only above it (the lintel)
+			var arch := POIBuilder.add_box(root, Vector3(t + 1.0, h + 2.0, 8.2), Vector3(gp.x, gy + h * 0.5, gp.y), stone, 0.0, Vector3.ZERO, false)
+			ModelLibrary.dress_box(arch, "wall/arch")
+			for mi in lintel.find_children("*", "MeshInstance3D", false, false):
+				lintel.remove_child(mi)
+				mi.free()  # now, before the town is merged
 
-
-# A slope inside the wall from the ground up to the walkway, beside a gatehouse
-static func _wall_slope(root: Node3D, placed: PlacedPOI, map: WorldMap, gate: Vector2, along: Vector2, h: float, color: Color, n: int) -> void:
-	var inward := -gate.normalized()
-	var foot := gate + inward * 4.5 + along * 9.0
-	var top := gate + inward * 1.2 + along * (9.0 + h * 2.2)
-	var gy0 := POIBuilder.ground_y(placed, map, foot.x, foot.y)
-	var a := Vector3(foot.x, gy0, foot.y)
-	var b := Vector3(top.x, gy0 + h, top.y)
-	var body := StaticBody3D.new()
-	body.name = "WallStairs%d" % n
-	var length := a.distance_to(b)
-	var shape := CollisionShape3D.new()
-	var box := BoxShape3D.new()
-	box.size = Vector3(2.4, 0.4, length)
-	shape.shape = box
-	body.add_child(shape)
-	var mi := MeshInstance3D.new()
-	var bm := BoxMesh.new()
-	bm.size = box.size
-	mi.mesh = bm
-	mi.material_override = POIBuilder.get_material(color.darkened(0.05))
-	body.add_child(mi)
-	root.add_child(body)
-	body.transform = Transform3D(Basis.looking_at(b - a, Vector3.UP), (a + b) * 0.5)
 
 
 # ---------------------------------------------------------------- Alpha 1.14 town dressing
@@ -730,6 +747,19 @@ static func _prop_mesh(file: String) -> Array:
 	if not ResourceLoader.exists(path):
 		return []
 	var p := (load(path) as PackedScene).instantiate() as Node3D
+	# its model when it has one (a Morrowind tree, barrel, crate...): baked as it is, materials and all
+	if p is InteriorProp:
+		(p as InteriorProp).dress()
+	var modelled := p.find_children("*", "MeshInstance3D", true, false).any(func(n): return not ((n as MeshInstance3D).mesh is PrimitiveMesh))
+	if modelled:
+		var baked := ModelLibrary.bake(p)
+		var hulls: Array = []
+		for cs in p.find_children("*", "CollisionShape3D", true, false):
+			if (cs as CollisionShape3D).shape != null:
+				hulls.append([(cs as CollisionShape3D).shape, _local_xf(p, cs as Node3D)])
+		p.free()
+		_prop_meshes[file] = [baked, hulls] if baked != null else []
+		return _prop_meshes[file]
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var shapes: Array = []

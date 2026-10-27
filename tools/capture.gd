@@ -11,6 +11,7 @@ func _init() -> void:
 	var node := scene.instantiate()
 	root.add_child(node)
 	current_scene = node
+	_godmode.call_deferred()  # nothing kills the player while the shot is set up
 	if args.size() > 4:
 		var cam := Camera3D.new()
 		root.add_child(cam)
@@ -40,3 +41,12 @@ func _init() -> void:
 	img.save_png(out)
 	print("saved ", out)
 	quit()
+
+
+func _godmode() -> void:
+	for i in 10:
+		await process_frame
+		var p := get_first_node_in_group("player")
+		if p != null and p.has_node("Stats"):
+			(p.get_node("Stats") as Stats).invulnerable = true
+			return

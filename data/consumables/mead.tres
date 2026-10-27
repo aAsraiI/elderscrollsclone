@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_1v7mt"]
+
+[resource]
+script = ExtResource("1_1v7mt")
+id = &"mead"
+display_name = "Honey Mead"
+item_type = 3
+weight = 0.5
+value = 10
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("tavern", "kitchen")
+use_verb = "Drink"
+heal_amount = 8.0
+effect_duration = 60.0
+stamina_regen_bonus = 0.2
+ingredient_effects = PackedStringArray()

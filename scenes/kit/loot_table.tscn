@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_m7lj8"]
+
+[node name="LootTable" type="StaticBody3D" unique_id=756769706]
+script = ExtResource("1_m7lj8")
+furniture = "prop/table"
+loot_tags = PackedStringArray("kitchen", "tavern")

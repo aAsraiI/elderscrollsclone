@@ -176,14 +176,17 @@ func _animate(_delta: float) -> void:
 			want = "SpellCast_Target"
 	if not _anim.has_animation(want):
 		want = "Idle"
-	if want != _clip:
+	if at >= 0.0:
+		# stepped with the swing or held (the block): no crossfade, which a pause would freeze at the old pose
+		if want != _clip or _anim.current_animation != want:
+			_clip = want
+			_anim.play(want, 0.0)
+		_anim.seek(_anim.get_animation(want).length * clampf(at, 0.0, 1.0), true)
+		_anim.pause()
+		return
+	if want != _clip or not _anim.is_playing():
 		_clip = want
 		_anim.play(want, 0.12)
-	if at >= 0.0:
-		_anim.pause()
-		_anim.seek(_anim.current_animation_length * clampf(at, 0.0, 1.0), true)
-	elif not _anim.is_playing():
-		_anim.play(want)
 
 
 func _third_person() -> bool:

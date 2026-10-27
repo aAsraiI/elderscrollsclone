@@ -46,7 +46,7 @@ func t_data() -> void:
 		counts[p] = int(counts.get(p, 0)) + 1
 	check("over 300 written quests (%d)" % defs.size(), defs.size() >= 300, str(counts))
 	check("ids are unique", defs.size() == QuestBook.ids().size())
-	check("settlement, house, clan, pack, guild and realm quests", counts.get("S", 0) >= 120 and counts.get("H", 0) == 64 and counts.get("V", 0) == 27 and counts.get("W", 0) == 9 and counts.get("G", 0) == 57 and counts.get("R", 0) >= 24, str(counts))
+	check("settlement, house, clan, pack, guild and realm quests", counts.get("S", 0) >= 120 and counts.get("H", 0) == 64 and counts.get("V", 0) == 27 and counts.get("W", 0) == 9 and counts.get("G", 0) == 89 and counts.get("R", 0) >= 24, str(counts))
 	var towns := {}
 	for biome: String in NamedSettlements.LIST:
 		for e: Dictionary in NamedSettlements.LIST[biome]:

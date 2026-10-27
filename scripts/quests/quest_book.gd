@@ -71,6 +71,7 @@ static func defs() -> Dictionary:
 		lists.append_array(QuestDefsGuilds.list())
 		lists.append_array(QuestDefsRealms.list())
 		lists.append_array(QuestDefsMain.list())  # the main quest after the Story (1.17)
+		lists.append_array(QuestDefsGuildArcs.list())  # what comes after the top of each guild (1.17)
 		for d: Dictionary in lists:
 			_defs[d["id"]] = d
 			_order.append(d["id"])

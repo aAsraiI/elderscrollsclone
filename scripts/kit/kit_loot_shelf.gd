@@ -49,7 +49,7 @@ func _fill() -> void:
 	var prefix := "kit/%s/%s" % [owner.scene_file_path.get_file().get_basename() if owner != null else "world", name]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = prefix.hash()
-	var slots := ModelLibrary.surface_slots(self, self, "shelf")
+	var slots := ModelLibrary.surface_slots(self, self, furniture.get_file())  # a table only on its top, shelving on every plank
 	for i in slots.size():
 		var key := "%s/slot_%d" % [prefix, i]
 		if rng.randf() > fill or not WorldState.get_record(WorldItem.taken_key(key)).is_empty():

@@ -605,12 +605,16 @@ static func surfaces(node: Node3D, space: Node3D = null, min_area: float = 0.04)
 
 
 ## Places to set things on `node`'s surfaces, in `space`'s coordinates: [position, room (Vector2), label],
-## one about every 0.45 m along each surface, no higher than `reach`
-static func surface_slots(node: Node3D, space: Node3D, label: String, reach: float = 1.9) -> Array:
+## one about every 0.45 m along each surface, no higher than `reach`. Shelving (shelf, bookcase, rack,
+## display, cupboard) holds things on every plank; anything else (a table, a counter, an altar) only on
+## its top, never on the braces underneath.
+static func surface_slots(node: Node3D, space: Node3D, label: String, reach: float = 2.3) -> Array:
 	var out: Array = []
-	for s: Dictionary in surfaces(node, space):
-		if s["y"] > reach:
-			continue
+	var all := surfaces(node, space).filter(func(s: Dictionary) -> bool: return s["y"] <= reach)
+	var shelving := ["shelf", "bookcase", "rack", "display", "cupboard", "wardrobe", "niche"].any(func(w: String) -> bool: return label.contains(w))
+	if not shelving and not all.is_empty():
+		all = [all.back()]  # the highest: the top
+	for s: Dictionary in all:
 		var r: Rect2 = s["rect"]
 		var along_x := r.size.x >= r.size.y
 		var length := r.size.x if along_x else r.size.y

@@ -5,10 +5,9 @@ extends RefCounted
 
 const TOWNSFOLK_PATH := "res://data/npcs/townsfolk.tres"
 const GUARD_PATH := "res://data/npcs/town_guard.tres"
-## Guards per kind of settlement (village, town, city). The first GATE_POSTS stand watch at the
-## gates, the rest walk rounds.
-const GUARDS := [3, 6, 10]
-const GATE_POSTS := 2
+## Guards per kind of settlement (village, town, city). Two stand watch at every gate, one each side
+## of the road; the rest walk their rounds.
+const GUARDS := [6, 12, 22]  # village, town, city: ample defense (1.17)
 const CLOTHES := [Color(0.45, 0.35, 0.25), Color(0.30, 0.42, 0.30), Color(0.50, 0.30, 0.28), Color(0.32, 0.36, 0.50),
 	Color(0.55, 0.50, 0.38), Color(0.40, 0.30, 0.42), Color(0.28, 0.40, 0.42), Color(0.58, 0.45, 0.30)]
 const GUILD_NAMES := {"fighters": "the Fighters Guild", "mages": "the Mages Guild", "knights": "the Knightly Order"}
@@ -65,8 +64,8 @@ static func generate(town: PlacedPOI, map: WorldMap) -> Array[NpcData]:
 				n.color = NamedSettlements.house_color(b.house).darkened(0.1)
 				n.faction = town.id
 		out.append(n)
-	# at least one guard for every six buildings, so big towns get more
-	var guard_count: int = maxi(GUARDS[clampi(int((town.poi as TownData).kind), 0, 2)], layout.buildings.size() / 6)
+	# at least one guard for every three buildings, so big towns get more
+	var guard_count: int = maxi(GUARDS[clampi(int((town.poi as TownData).kind), 0, 2)], layout.buildings.size() / 3)
 	for i in guard_count:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = ("%s|guard|%d" % [town.id, i]).hash()
@@ -80,7 +79,7 @@ static func generate(town: PlacedPOI, map: WorldMap) -> Array[NpcData]:
 		g.body = guard_body
 		g.level = zone.y + 2
 		g.color = Color(0.35, 0.40, 0.50)
-		g.post = i if i < GATE_POSTS else -1
+		g.post = i if i < layout.gates.size() * 2 else -1  # two at every gate, one each side of the road
 		out.append(g)
 	for n in out:
 		n.talk_lines = lines_for(n, layout, out)

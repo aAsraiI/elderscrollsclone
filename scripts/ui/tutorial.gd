@@ -28,7 +28,7 @@ func _ready() -> void:
 	_panel.offset_bottom = -110
 	_label = Label.new()
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_label.add_theme_font_size_override("font_size", 14)
+	_label.add_theme_font_size_override("font_size", 12)
 	_panel.add_child(_label)
 	_panel.visible = false
 

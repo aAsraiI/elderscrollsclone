@@ -4,8 +4,8 @@ extends CanvasLayer
 ## diamonds point at active quest targets (with the distance), small squares at towns nearby.
 ## Walking into a town shows its name for a moment ("Now entering..."). Created by player.gd.
 
-const WIDTH := 560.0
-const HEIGHT := 30.0
+const WIDTH := 400.0
+const HEIGHT := 22.0
 ## Degrees of view the strip covers, left to right
 const SPAN_DEG := 180.0
 const TOWN_RANGE := 1500.0
@@ -41,11 +41,11 @@ func _ready() -> void:
 	_strip.offset_top = 8
 	_strip.offset_bottom = 8 + HEIGHT + 16
 	add_child(_strip)
-	_banner = _label(40)
+	_banner = _label(28)
 	_banner.offset_top = 150
 	_banner.offset_bottom = 200
 	add_child(_banner)
-	_banner_sub = _label(20)
+	_banner_sub = _label(15)
 	_banner_sub.offset_top = 198
 	_banner_sub.offset_bottom = 226
 	add_child(_banner_sub)
@@ -144,7 +144,7 @@ func draw_strip(c: Control) -> void:
 			continue
 		var big := k % 2 == 0
 		var text: String = names[k]
-		var size := 18 if big else 13
+		var size := 14 if big else 10
 		var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 		var col := Color(1.0, 0.45, 0.4) if k == 0 else Color(1, 1, 1, 0.95 if big else 0.65)
 		c.draw_string(font, Vector2(mid + x - w * 0.5, HEIGHT * 0.5 + size * 0.35), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)

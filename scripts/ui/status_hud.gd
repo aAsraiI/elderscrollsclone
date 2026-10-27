@@ -40,14 +40,14 @@ func _build_ui() -> void:
 	box.position = Vector2(16, 12)
 	_root.add_child(box)
 
-	_time_label = _make_label(18, GOLD)
+	_time_label = _make_label(14, GOLD)
 	box.add_child(_time_label)
-	_date_label = _make_label(14, Color(0.85, 0.82, 0.7))
+	_date_label = _make_label(11, Color(0.85, 0.82, 0.7))
 	box.add_child(_date_label)
-	_list_label = _make_label(15, Color(0.85, 1.0, 0.85))
+	_list_label = _make_label(12, Color(0.85, 1.0, 0.85))
 	box.add_child(_list_label)
 
-	_toast = _make_label(20, Color.WHITE)
+	_toast = _make_label(15, Color.WHITE)
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast.anchor_left = 0.0
 	_toast.anchor_right = 1.0

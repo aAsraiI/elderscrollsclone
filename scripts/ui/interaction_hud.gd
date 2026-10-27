@@ -79,7 +79,7 @@ func _build_ui() -> void:
 	_label.offset_right = 0
 	_label.offset_top = 26
 	_label.offset_bottom = 60
-	_label.add_theme_font_size_override("font_size", 16)
+	_label.add_theme_font_size_override("font_size", 13)
 	_label.add_theme_constant_override("outline_size", 6)
 	_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	_root.add_child(_label)

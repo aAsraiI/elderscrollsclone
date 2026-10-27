@@ -94,9 +94,9 @@ func _process(delta: float) -> void:
 	var n: Dictionary = _queue.pop_front()
 	var size := float(GameSettings.get_value("text_size"))
 	_title.text = tr(String(n["title"])).to_upper()  # text keys: ready for translation
-	_title.add_theme_font_size_override("font_size", roundi(15 * size))
+	_title.add_theme_font_size_override("font_size", roundi(12 * size))
 	_text.text = String(n["text"])
-	_text.add_theme_font_size_override("font_size", roundi(19 * size))
+	_text.add_theme_font_size_override("font_size", roundi(15 * size))
 	var bad := Color(0.95, 0.55, 0.2) if bool(GameSettings.get_value("colorblind_markers")) else Color(0.95, 0.45, 0.4)
 	_text.add_theme_color_override("font_color", bad if n["error"] else Color(0.95, 0.93, 0.88))
 	_panel.visible = true

@@ -221,11 +221,11 @@ func _goal_for(r: Resident, act: int) -> Dictionary:
 	var pick := ("%s|%d" % [d.id, clock.day if clock != null else 1]).hash() & 0x7FFFFFFF
 	match act:
 		NpcData.Activity.PATROL:
-			if d.post >= 0 and d.post < layout.gates.size():
-				# a gate post: just inside the gate, beside the road
-				var gate := layout.gates[d.post]
+			if d.post >= 0 and d.post / 2 < layout.gates.size():
+				# a gate post: just inside the gate, one each side of the road
+				var gate := layout.gates[d.post / 2]
 				var inward := -gate.normalized()
-				var side := Vector3(-inward.z, 0.0, inward.x) * (4.0 if d.post == 0 else -4.0)
+				var side := Vector3(-inward.z, 0.0, inward.x) * (4.0 if d.post % 2 == 0 else -4.0)
 				return {"outside": gate + inward * 6.0 + side}
 			return {"patrol": true}
 		NpcData.Activity.SLEEP:
@@ -239,7 +239,7 @@ func _goal_for(r: Resident, act: int) -> Dictionary:
 				var home := world.get_building(d.home_id)
 				if home != null:
 					return {"outside": layout.get_trade_spot(home)}  # the woodpile, the drying rack, the shore
-			return {"outside": layout.get_plaza_spot(pick)}
+			return _leisure_goal(r, layout)  # no work of their own: about the town, not standing on the square
 	return _leisure_goal(r, layout)
 
 
@@ -278,7 +278,9 @@ func _leisure_goal(r: Resident, layout: TownLayout) -> Dictionary:
 					shops.append(b.id)
 	# Weights for each kind of outing
 	var w := {
-		"plaza": 3.0 + (3.0 if market else 0.0), "chat": 3.0, "stroll": 2.5, "doorstep": 1.5,
+		# the square only now and then (a crowd there is heavy to draw, 1.17); the streets, doorsteps and other
+		# people's houses the rest of the time
+		"plaza": 0.8 + (1.5 if market else 0.0), "chat": 1.6, "stroll": 3.5, "doorstep": 2.5, "visit": 2.0, "yard": 1.8,
 		"inn": (3.5 if evening else 0.8), "temple": (4.0 if rest_day and h < 13.0 else 0.6), "errand": (2.0 if h >= 8.0 and h < 17.0 else 0.0),
 		"home": 1.0,
 	}
@@ -301,7 +303,7 @@ func _leisure_goal(r: Resident, layout: TownLayout) -> Dictionary:
 		w["home"] *= 2.0
 		w["stroll"] *= 0.5
 	if raining:
-		for k in ["plaza", "chat", "stroll", "doorstep", "bench", "water", "stall"]:
+		for k in ["plaza", "chat", "stroll", "doorstep", "bench", "water", "stall", "visit", "yard"]:
 			w[k] *= 0.15
 		w["inn"] *= 2.0
 		w["home"] *= 3.0
@@ -348,9 +350,26 @@ func _leisure_goal(r: Resident, layout: TownLayout) -> Dictionary:
 			var sd: Dictionary = stalls[rng.randi() % stalls.size()]
 			var sp: Vector3 = sd["pos"]
 			return {"outside": sp - Vector3(sp.x, 0, sp.z).normalized() * 1.8, "pose": &"talk"}
+		"visit":
+			# outside someone else's house, talking at their door
+			var houses := layout.buildings.filter(func(b: BuildingPlot) -> bool: return b.id != d.home_id and b.kind in [BuildingPlot.Kind.HOUSE, BuildingPlot.Kind.FARM])
+			if not houses.is_empty():
+				var other: BuildingPlot = houses[rng.randi() % houses.size()]
+				var od := other.get_door_local()
+				return {"outside": od + (od - other.local_pos).normalized() * 2.2 + Vector3(rng.randf_range(-1.0, 1.0), 0, 0), "pose": &"talk"}
+		"yard":
+			# busy beside their own house: chopping, sweeping, mending
+			if home != null:
+				var hd := home.get_door_local()
+				var out := (hd - home.local_pos).normalized()
+				return {"outside": hd + out * 2.0 + out.cross(Vector3.UP) * rng.randf_range(2.0, 3.5) * (1.0 if rng.randf() < 0.5 else -1.0), "pose": &"work" if rng.randf() < 0.7 else &"sweep"}
 		"chat":
-			# A few gathering spots on the square: whoever picks the same one ends up talking
+			# A few gathering spots, most along the streets and a few on the square: whoever picks the same one
+			# ends up talking
 			var spot := layout.get_plaza_spot(((day * 7 + r.slot) * 13 + rng.randi_range(0, 3) * 211) & 0x7FFFFFFF)
+			if not layout.streets.is_empty() and rng.randf() < 0.7:
+				var cs := layout.streets[((day * 5 + r.slot) * 7 + rng.randi_range(0, 2)) % layout.streets.size()]
+				spot = cs.a.lerp(cs.b, 0.25 + 0.5 * float((day + r.slot) % 3) / 2.0)
 			var jitter := Vector3(rng.randf_range(-1.2, 1.2), 0.0, rng.randf_range(-1.2, 1.2))
 			return {"outside": spot + jitter, "pose": &"talk"}
 		"stroll":
@@ -359,6 +378,10 @@ func _leisure_goal(r: Resident, layout: TownLayout) -> Dictionary:
 				var p := s.a.lerp(s.b, rng.randf_range(0.15, 0.85))
 				var side := (s.b - s.a).normalized().cross(Vector3.UP) * s.half_width * 0.8 * (1.0 if rng.randf() < 0.5 else -1.0)
 				return {"outside": p + side, "pose": &""}
+	# nothing else to do: up and down a street (the square only if the town has no streets)
+	if not layout.streets.is_empty():
+		var s2 := layout.streets[rng.randi() % layout.streets.size()]
+		return {"outside": s2.a.lerp(s2.b, rng.randf_range(0.15, 0.85)), "pose": &""}
 	return {"outside": layout.get_plaza_spot(rng.randi() & 0xFFFF), "pose": &"talk" if rng.randf() < 0.4 else &""}
 
 

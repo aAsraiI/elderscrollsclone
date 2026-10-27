@@ -19,7 +19,8 @@ extends CanvasLayer
 @export var show_enemy_bar := true
 
 const GOLD := Color(1.0, 0.85, 0.35)
-const BAR_W := 340.0
+const BAR_W := 170.0
+const HIDE_HIT_MARKERS := true
 
 # Draws markers, rings and the bar on top of everything else on this layer
 class Overlay extends Control:
@@ -170,7 +171,7 @@ func _build_ui() -> void:
 	_toast.anchor_bottom = 0.5
 	_toast.offset_top = 70
 	_toast.offset_bottom = 104
-	_toast.add_theme_font_size_override("font_size", 22)
+	_toast.add_theme_font_size_override("font_size", 16)
 	_toast.add_theme_constant_override("outline_size", 6)
 	_toast.add_theme_color_override("font_outline_color", Color.BLACK)
 	_toast.modulate.a = 0.0
@@ -331,8 +332,8 @@ func draw_overlay(c: Control) -> void:
 		if charged:
 			c.draw_arc(center, 20.0 + _ready_pulse * 8.0, 0.0, TAU, 48, Color(GOLD, 0.8 * _ready_pulse), 2.0, true)
 
-	# Hit markers: four little ticks around the crosshair that flick outward and fade
-	for m in _markers:
+	# Hit markers: none since 1.17 (the screen stays clear); the list is still kept for tests and sounds
+	for m in ([] if HIDE_HIT_MARKERS else _markers):
 		var t := float(m["life"]) / float(m["max"])
 		var inner := 7.0 + (1.0 - t) * 6.0
 		var outer := inner + float(m["size"])
@@ -366,7 +367,7 @@ func _draw_enemy_bar(c: Control, t: MeleeCombat) -> void:
 	var max_hp := maxf(s.get_stat("max_health"), 1.0)
 	var hp := clampf(s.health / max_hp, 0.0, 1.0)
 	var x := (c.size.x - BAR_W) * 0.5
-	var y := 52.0
+	var y := 44.0
 	var fade := clampf(_bar_time / 0.5, 0.0, 1.0)
 	var enemy_name := "Enemy"
 	if t.body != null and "display_name" in t.body:
@@ -374,12 +375,12 @@ func _draw_enemy_bar(c: Control, t: MeleeCombat) -> void:
 		if "level" in t.body:
 			enemy_name += "   Lv %d" % int(t.body.get("level"))
 	var font := ThemeDB.fallback_font
-	c.draw_string_outline(font, Vector2(x, y - 8.0), enemy_name, HORIZONTAL_ALIGNMENT_CENTER, BAR_W, 18, 5, Color(0, 0, 0, fade))
-	c.draw_string(font, Vector2(x, y - 8.0), enemy_name, HORIZONTAL_ALIGNMENT_CENTER, BAR_W, 18, Color(1, 1, 1, fade))
-	c.draw_rect(Rect2(x - 2.0, y - 2.0, BAR_W + 4.0, 16.0), Color(0, 0, 0, 0.7 * fade))
-	c.draw_rect(Rect2(x, y, BAR_W, 12.0), Color(0.12, 0.05, 0.05, 0.9 * fade))
-	c.draw_rect(Rect2(x, y, BAR_W * hp, 12.0), Color(0.75, 0.13, 0.13, fade))
+	c.draw_string_outline(font, Vector2(x, y - 5.0), enemy_name, HORIZONTAL_ALIGNMENT_CENTER, BAR_W, 12, 3, Color(0, 0, 0, fade))
+	c.draw_string(font, Vector2(x, y - 5.0), enemy_name, HORIZONTAL_ALIGNMENT_CENTER, BAR_W, 12, Color(1, 1, 1, fade))
+	c.draw_rect(Rect2(x - 1.0, y - 1.0, BAR_W + 2.0, 7.0), Color(0, 0, 0, 0.7 * fade))
+	c.draw_rect(Rect2(x, y, BAR_W, 5.0), Color(0.12, 0.05, 0.05, 0.9 * fade))
+	c.draw_rect(Rect2(x, y, BAR_W * hp, 5.0), Color(0.75, 0.13, 0.13, fade))
 	if t.max_poise > 0.0 and t.staggerable:
 		var poise_ratio := clampf(t.poise / t.max_poise, 0.0, 1.0)
 		var poise_color := Color(1.0, 0.75, 0.2, 0.9 * fade) if not t.is_stunned() else Color(1.0, 0.4, 0.2, fade)
-		c.draw_rect(Rect2(x, y + 14.0, BAR_W * poise_ratio, 3.0), poise_color)
+		c.draw_rect(Rect2(x, y + 7.0, BAR_W * poise_ratio, 2.0), poise_color)

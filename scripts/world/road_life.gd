@@ -84,9 +84,7 @@ func spawn_group(kind: String) -> Array:
 		for q in pts:
 			route.append(q + Vector3(float(i) * 1.2, 0.1, 0.0))
 		e.follow_route(route, false, WALK)
-		e.route_finished.connect(func() -> void:
-			if is_instance_valid(e):
-				e.queue_free())
+		e.route_finished.connect(_arrive.bind(e), CONNECT_ONE_SHOT)
 		members.append(e)
 	if members.is_empty():
 		return []
@@ -218,3 +216,33 @@ func _cleanup(p: Node3D) -> void:
 
 func _player() -> Node3D:
 	return get_tree().get_first_node_in_group("player") as Node3D
+
+
+## The end of the road: into the town on into its streets, then gone only where you are not watching
+## (a traveller never blinks out in front of you on arrival, 1.17)
+func _arrive(e: Enemy) -> void:
+	if not is_instance_valid(e) or e.is_dead():
+		return
+	var town := world.get_nearest_town(e.global_position) if world != null else null
+	if town != null and town.town != null and not town.town.streets.is_empty() and Vector2(town.position.x - e.global_position.x, town.position.z - e.global_position.z).length() < 220.0:
+		var s := town.town.streets[absi(e.get_instance_id()) % town.town.streets.size()]
+		var local := s.a.lerp(s.b, 0.5)
+		var dest := town.position + Basis(Vector3.UP, town.yaw) * local
+		dest.y = world.get_height_at(dest.x, dest.z) + 0.1
+		e.follow_route(PackedVector3Array([e.global_position, dest]), false, WALK)
+		e.route_finished.connect(_fade_out.bind(e, 0), CONNECT_ONE_SHOT)
+		return
+	_fade_out(e, 0)
+
+
+# Gone once out of sight (behind you, round a corner, far off), or after two minutes in any case
+func _fade_out(e: Enemy, waited: int) -> void:
+	if not is_instance_valid(e) or e.is_dead():
+		return
+	var cam := get_viewport().get_camera_3d()
+	var seen := cam != null and cam.is_position_in_frustum(e.global_position + Vector3.UP) and cam.global_position.distance_to(e.global_position) < 70.0
+	if not seen or waited >= 120 or QuestTargets.is_critical(e):
+		if not QuestTargets.is_critical(e):
+			e.queue_free()
+		return
+	get_tree().create_timer(1.0).timeout.connect(_fade_out.bind(e, waited + 1))

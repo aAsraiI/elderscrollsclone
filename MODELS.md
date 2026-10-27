@@ -216,6 +216,10 @@ entrances are Morrowind's natural cave mouths with a door set in; tomb doorways 
 Bushes are Morrowind shrubs (`nature/bush`). People come in six looks each from an import, mixing
 Morrowind's races, faces and hair (`MwImport.VARIANTS`). Shields hang on Morrowind's shield bone.
 
+Your own arms in first person are Morrowind's too (1.17): the import builds first-person arms for every
+race and sex (`fp/<race>_<m|f>`), and `FirstPersonArms` plays Morrowind's first-person clips in step with
+your swings, blocks and casts, with the weapon on its weapon bone and the shield on its shield bone.
+
 ## The builder kit
 
 `scenes/kit/` holds pieces to drop into scenes you build by hand (dungeons, towers, POIs). They show

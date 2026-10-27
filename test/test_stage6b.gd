@@ -176,11 +176,11 @@ func t_world() -> void:
 			guards += 1
 			if r.data.post >= 0:
 				posted += 1
-				var gate := town.town.get_gates_world()[r.data.post]
+				var gate := town.town.get_gates_world()[r.data.post / 2]  # two guards at every gate (1.17)
 				var body_ok := r.node != null and is_instance_valid(r.node) and Vector2(r.node.global_position.x - gate.x, r.node.global_position.z - gate.z).length() < 15.0
-				check("a gate guard stands by gate %d" % r.data.post, body_ok, "%s vs gate %s" % [str(r.node.global_position) if r.node != null and is_instance_valid(r.node) else "no body", gate])
+				check("a gate guard stands by gate %d" % (r.data.post / 2), body_ok, "%s vs gate %s" % [str(r.node.global_position) if r.node != null and is_instance_valid(r.node) else "no body", gate])
 	check("more guards: %d in a %s" % [guards, (town.poi as TownData).display_name.to_lower()], guards == Residents.GUARDS[int((town.poi as TownData).kind)] and guards >= 3)
-	check("two of them stand watch at the gates", posted == 2)
+	check("two stand watch at every gate (%d)" % posted, posted == mini(town.town.gates.size() * 2, guards))
 
 	# ---- who leads what
 	var city: PlacedPOI = null

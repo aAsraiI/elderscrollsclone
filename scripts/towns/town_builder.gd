@@ -133,7 +133,8 @@ static func _building(root: Node3D, b: BuildingPlot, layout: TownLayout, placed:
 			_roof(holder, Vector3(s.x + 0.8, roof_h, s.z + 0.8), Vector3(0.0, lift + s.y + roof_h * 0.5, 0.0), roof)
 
 	# the door, the windows (they light up at night: the town's lit-window mesh), shutters, a porch
-	_part(holder, "door", Vector3(0.0, lift, front))
+	# a door you can see from down the street; inns, shops, guilds and temples hang a lantern by it too
+	DoorLook.dress(holder, Vector3(0.0, lift, front), PI, "door/building", b.kind in [BuildingPlot.Kind.INN, BuildingPlot.Kind.SHOP, BuildingPlot.Kind.GUILD_HALL, BuildingPlot.Kind.TEMPLE])
 	var lit: Array = root.get_meta("lit_windows", [])
 	var shutters := rng.randf() < style.shutters
 	for side in [-1.0, 1.0]:
@@ -223,6 +224,8 @@ static func _timber(holder: Node3D, s: Vector3, lift: float, color: Color) -> vo
 		var n := maxi(int(length / 1.8), 2)
 		for i in n + 1:
 			var t := -length * 0.5 + length * i / n
+			if side == 0 and absf(t) < 1.1:
+				continue  # never up through the front door
 			var at := Vector3(t, lift + s.y * 0.5, sign * face) if along_x else Vector3(sign * face, lift + s.y * 0.5, t)
 			POIBuilder.add_box(holder, Vector3(0.18, s.y, 0.08) if along_x else Vector3(0.08, s.y, 0.18), at, color, 0.0, Vector3.ZERO, false)
 		for y in [0.15, s.y * 0.5, s.y - 0.15]:
@@ -660,6 +663,7 @@ static func _dressing(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: 
 					light.distance_fade_begin = 45.0
 					light.distance_fade_length = 15.0
 	_multi(root, many)
+	DoorLook.batch(root)  # every door model in the town in one draw
 
 
 # A village's wooden watchtower: four posts, a platform with a rail, a roof, a slope up

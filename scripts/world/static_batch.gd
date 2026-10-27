@@ -22,6 +22,7 @@ static func material() -> ShaderMaterial:
 
 ## Merges what it can under `root` (in or out of the scene tree). Returns how many boxes it merged.
 static func merge(root: Node3D) -> int:
+	var stone_hint := root.has_meta("stone_walls")  # a dungeon: what is not wood is stone (vertex alpha tells the shader)
 	var found: Array = []  # [MeshInstance3D, Transform3D relative to root]
 	_collect(root, Transform3D.IDENTITY, found)
 	if found.size() < 2:
@@ -38,6 +39,8 @@ static func merge(root: Node3D) -> int:
 		var n: PackedVector3Array = src[Mesh.ARRAY_NORMAL]
 		var idx: PackedInt32Array = src[Mesh.ARRAY_INDEX]
 		var color := (mi.material_override as StandardMaterial3D).albedo_color
+		if stone_hint:
+			color.a = 0.5
 		var normal_basis := xf.basis.inverse().transposed()
 		var base := verts.size()
 		for i in v.size():
@@ -133,6 +136,10 @@ static func _mergeable(mi: MeshInstance3D) -> bool:
 ## under a script of its own (doors, levers, chests, people). Collision is left as it is. A root
 ## with no room modules (a building interior) is merged as one room. Returns how many parts merged.
 static func merge_interior(root: Node3D) -> int:
+	var stone_hint := root.has_meta("stone_walls")
+	for p in root.find_children("*", "StaticBody3D", true, false):
+		if p is InteriorProp:
+			(p as InteriorProp).dress()  # models in first: only props without one are merged as boxes
 	var rooms: Array[Node3D] = []
 	for c in root.get_children():
 		if c is RoomModule:
@@ -157,6 +164,8 @@ static func merge_interior(root: Node3D) -> int:
 			var n: PackedVector3Array = src[Mesh.ARRAY_NORMAL]
 			var idx: PackedInt32Array = src[Mesh.ARRAY_INDEX]
 			var color := (mi.material_override as StandardMaterial3D).albedo_color
+			if stone_hint:
+				color.a = 0.5
 			var normal_basis := xf.basis.inverse().transposed()
 			var base := verts.size()
 			for i in v.size():

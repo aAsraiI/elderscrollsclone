@@ -110,6 +110,11 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 		door.target_floor = -1
 		first.add_child(door)
 		door.position = (exit_mark.position if exit_mark != null else Vector3(0, 0, -first.bounds().size.z * 0.5 + 0.6)) + Vector3(0, 1.3, 0)
+		# The way out is a door with a lit lantern, facing into the room
+		var spot := door.position - Vector3(0, 1.3, 0)
+		var inward := first.bounds().get_center() - spot
+		DoorLook.dress(first, spot, atan2(inward.x, inward.z), "door/dungeon")
+	root.set_meta("stone_walls", true)  # dungeon walls read as stone (StaticBatch, built shader)
 	return {"root": root, "start": start, "start_yaw": start_yaw, "down_spot": null, "rooms": plan.placed.size(),
 		"chests": totals["chests"], "enemies": totals["enemies"], "boss": totals["boss"], "floor": 0, "floors": 1,
 		"props": totals["props"], "features": features, "signature": plan.summary(), "plan": plan, "handmade": scene,

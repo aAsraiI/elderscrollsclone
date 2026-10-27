@@ -136,6 +136,8 @@ static func _place_prop(room: RoomModule, s: SpawnSocket, theme: String, rng: Ra
 	var prop := (load(e.path) as PackedScene).instantiate() as Node3D
 	room.add_child(prop)
 	prop.transform = s.transform
+	if prop is InteriorProp:
+		(prop as InteriorProp).dress()  # its model in now, so what is set on it sits on the model
 	if s.kind != SpawnSocket.Kind.WALL_DECORATION and e.snap == InteriorProp.Snap.FLOOR and not s.tags.has("tabletop"):
 		prop.rotate_y(rng.randf_range(-0.15, 0.15))  # never quite straight
 	taken.append([at, e.radius])

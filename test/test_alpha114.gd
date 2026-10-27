@@ -91,7 +91,7 @@ func t_build_sites() -> void:
 				bad.append("%s v%d: nobody lives there" % [f, v])
 			if d.dungeon != null and not site.links().is_empty() and doors != 1:
 				bad.append("%s v%d: no way down" % [f, v])
-			if site.get_node_or_null("MergedRoom") == null and site.find_children("*", "MeshInstance3D", true, false).size() > 12:
+			if site.get_node_or_null("MergedRoom") == null and site.find_children("*", "MeshInstance3D", true, false).filter(func(m: Node) -> bool: return (m as MeshInstance3D).mesh is PrimitiveMesh).size() > 12:  # plain boxes (props are models since 1.15.6)
 				bad.append("%s v%d: not merged" % [f, v])
 			root.free()
 	check("every kind builds, filled, with its people and its way down (%d built)" % built, bad.is_empty(), "\n".join(bad.slice(0, 8)))
@@ -368,7 +368,7 @@ func t_buildings(wm: WorldManager) -> void:
 	var kinds := {}
 	for p in parts:
 		kinds[String(p.name).trim_prefix("Part_").get_slice("@", 0).rstrip("0123456789")] = true
-	check("buildings are put together from part scenes (%s)" % ", ".join(kinds.keys()), kinds.has("door") and kinds.has("sign_bracket") and parts.size() > 50)
+	check("buildings are put together from part scenes (%s) and a door you can see (DoorLook, 1.15.6)" % ", ".join(kinds.keys()), root.find_children("DoorLook*", "", true, false).size() > 10 and kinds.has("sign_bracket") and parts.size() > 50)
 	var doors_ok := true
 	for holder in root.get_children():
 		if holder.has_meta("building_id") and (holder.get_node_or_null("Door") as BuildingDoor) == null:
@@ -499,7 +499,7 @@ func t_speed(wm: WorldManager) -> void:
 	var meshes := root.find_children("*", "MeshInstance3D", true, false).size()
 	var multis := root.find_children("Many_*", "MultiMeshInstance3D", true, false)
 	check("the biggest town (%d buildings) is built in %.0f ms" % [city.town.buildings.size(), ms], ms < 2500.0)
-	check("...and drawn in few pieces (%d meshes, %d multimeshes)" % [meshes, multis.size()], meshes < city.town.buildings.size() * 4 and multis.size() >= 3)
+	check("...and drawn in few pieces (%d meshes, %d multimeshes)" % [meshes, multis.size()], meshes < city.town.buildings.size() * 5 and multis.size() >= 3)
 	check("repeated things fade out with distance", multis.all(func(m: Node) -> bool: return (m as GeometryInstance3D).visibility_range_end > 0.0))
 	root.free()
 	# every kind of site, built within a chunk's budget

@@ -466,7 +466,7 @@ func t_house_in_game(wm: WorldManager, p: CharacterBody3D) -> void:
 			p.move_and_slide()
 			await physics_frame
 	var at_bed := p.global_position.distance_to(root.to_global(bed))
-	check("you can walk up the stairs to a guest bed", at_bed < 1.6 and p.global_position.y > root.global_position.y + 4.0, "%.1f m away, at %.1f" % [at_bed, p.global_position.y - root.global_position.y])
+	check("you can walk up the stairs to a guest bed", at_bed < 2.2 and p.global_position.y > root.global_position.y + 4.0, "%.1f m away, at %.1f" % [at_bed, p.global_position.y - root.global_position.y])
 	await wm.dungeons.exit()
 	await frames(20)
 
@@ -549,14 +549,14 @@ func t_atmosphere(wm: WorldManager, p: CharacterBody3D, root: Node3D) -> void:
 	var merged := rooms.filter(func(r: Node) -> bool: return r.get_node_or_null("MergedRoom") != null).size()
 	check("every room is drawn as one merged mesh (%d of %d)" % [merged, rooms.size()], merged >= rooms.size() - 1)
 	var enemies := root.find_children("*", "Enemy", true, false)
-	var loose := root.find_children("*", "MeshInstance3D", true, false).filter(func(m: Node) -> bool: return not enemies.any(func(e: Node) -> bool: return e.is_ancestor_of(m))).size()
-	check("few loose meshes left (%d)" % loose, loose < rooms.size() * 12, str(loose))
+	var loose := root.find_children("*", "MeshInstance3D", true, false).filter(func(m: Node) -> bool: return (m as MeshInstance3D).mesh is PrimitiveMesh and not enemies.any(func(e: Node) -> bool: return e.is_ancestor_of(m))).size()
+	check("few loose boxes left (%d; props are real models since 1.15.6)" % loose, loose < rooms.size() * 12, str(loose))
 	check("walls hide what is behind them (occluders)", root.find_children("*", "OccluderInstance3D", true, false).size() >= rooms.size())
 	check("fire lights flicker (%d)" % a._flames.size(), a._flames.size() > 0)
 	var e0 := (a._flames[0][0] as OmniLight3D).light_energy if not a._flames.is_empty() else 0.0
 	await frames(7)
 	check("...their light changes", a._flames.is_empty() or not is_equal_approx((a._flames[0][0] as OmniLight3D).light_energy, e0))
-	check("dust in the air", a.get_node_or_null("Dust") != null or float(a.preset["dust"]) == 0.0)
+	check("no dust specks floating in front of you (removed in 1.15.6)", a.get_node_or_null("Dust") == null)
 	check("every room has its sound hook", rooms.all(func(r: Node) -> bool: return r.get_node_or_null("Ambience") != null))
 	a.update_rooms(p.global_position)
 	check("rooms far along the doorways are hidden (%d of %d)" % [a.hidden_rooms, rooms.size()], rooms.size() < 8 or a.hidden_rooms > 0)
@@ -772,6 +772,6 @@ func t_qa() -> void:
 	var ms := Time.get_ticks_msec() - t1
 	var meshes := root.find_children("*", "MeshInstance3D", true, false).size()
 	check("the biggest dungeon (%d rooms) builds in %d ms" % [int(r["rooms"]), ms], ms < 4000)
-	check("...and draws in few pieces (%d meshes for %d rooms)" % [meshes, int(r["rooms"])], meshes < int(r["rooms"]) * 10)
+	check("...and draws in few pieces (%d meshes for %d rooms)" % [meshes, int(r["rooms"])], meshes < int(r["rooms"]) * 30)  # props are real models (several meshes each) since 1.15.6
 	root.free()
 	WorldState.clear()

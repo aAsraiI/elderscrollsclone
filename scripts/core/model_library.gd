@@ -346,7 +346,8 @@ static func relative_transform(root: Node, n: Node) -> Transform3D:
 ## Collision that follows the model's own shape: one convex hull per mesh, added to `body`.
 ## The shapes are cached per key and size, so a hundred barrels share their hulls.
 static func add_collision(body: CollisionObject3D, model: Node3D, cache_key: String = "") -> void:
-	var rel := relative_transform(body, model)
+	# the body need not hold the model (a prop's ModelBody sits beside it): both from the top of the tree
+	var rel := relative_transform(null, body).affine_inverse() * relative_transform(null, model)
 	var shapes: Array = []
 	var ck := cache_key + "|" + str(rel.basis.get_scale().snappedf(0.001)) if cache_key != "" else ""
 	if ck != "" and _shapes.has(ck):

@@ -94,6 +94,16 @@ static func _placeholder_or_model(root: Node3D, item: ItemData) -> void:
 		ModelLibrary.replace_meshes(root, key, "long")
 
 
+## Built-in look-alikes for keys only the Morrowind import fills
+const NEAR := {"item/paper": "item/scroll", "item/bottle": "clutter/bottle", "item/pitcher": "clutter/pitcher",
+	"item/inkwell": "clutter/bottle", "item/ring": "item/gem", "item/amulet": "item/gem", "item/crown": "item/gem",
+	"item/pearl": "item/gem", "item/heart": "item/gem", "item/ore": "item/gem", "item/ingot": "item/gold",
+	"item/pelt": "item/sack", "item/mask": "item/idol", "item/lamp": "item/candlestick", "item/small_chest": "item/urn",
+	"item/salt": "item/bowl", "item/egg": "food/potato", "item/root": "food/potato", "item/cabbage": "food/onion",
+	"item/leek": "food/onion", "item/herb": "food/apple", "item/bone": "clutter/skull", "item/broom": "item/shovel",
+	"item/pickaxe": "item/shovel", "item/tongs": "item/hammer", "item/lute": "item/idol", "item/rope": "item/sack"}
+
+
 ## ModelLibrary keys for an item, best first: its own id, then what kind of thing it is
 static func model_keys(item: ItemData) -> Array:
 	var out: Array = ["item/" + String(item.id)]
@@ -110,13 +120,28 @@ static func model_keys(item: ItemData) -> Array:
 		return out
 	match item.item_type:
 		ItemData.ItemType.ARMOR:
+			var worn := "armor" if item.governing_skill in ["heavy_armor", "light_armor"] else "clothing"
 			match item.equip_slot:
 				ItemData.EquipSlot.HEAD:
 					out.append("armor/helmet_heavy" if item.governing_skill == "heavy_armor" else "armor/helmet")
+					out.append_array(["item/hood", "item/cloth"] if worn == "clothing" else ["item/iron_helmet"])
+				ItemData.EquipSlot.CHEST:
+					if worn == "clothing":
+						out.append("item/robe" if n.contains("robe") or n.contains("garb") else ("item/fine_shirt" if n.contains("fine") or n.contains("noble") else "item/shirt"))
+						out.append_array(["item/shirt", "item/cloth"])
+					else:
+						out.append_array(["item/iron_cuirass", "item/iron_chestplate"])
+				ItemData.EquipSlot.HANDS:
+					out.append_array(["item/gloves", "item/cloth"] if worn == "clothing" else ["item/iron_gauntlets"])
+				ItemData.EquipSlot.LEGS:
+					out.append_array(["item/cloth"] if worn == "clothing" else ["item/iron_greaves"])
+				ItemData.EquipSlot.FEET:
+					out.append_array(["item/fine_shoes" if n.contains("fine") else "item/shoes", "item/shoes"] if worn == "clothing" else ["item/iron_boots"])
 				ItemData.EquipSlot.RING:
-					out.append("item/ring")
+					out.append_array(["item/ring", "item/gem"])
 				ItemData.EquipSlot.AMULET:
-					out.append("item/amulet")
+					out.append_array(["item/amulet", "item/ring", "item/gem"])
+			out.append("item/sack")  # never nothing: a bundle until there is a model of its own
 			return out
 		ItemData.ItemType.CONSUMABLE:
 			if item.id == &"gold" or n.begins_with("gold"):
@@ -125,10 +150,19 @@ static func model_keys(item: ItemData) -> Array:
 				out.append("item/potion_" + _potion_kind(n))
 				out.append("item/potion")
 			else:
+				for pair in [["soup", "item/bowl"], ["stew", "item/bowl"], ["porridge", "item/bowl"], ["broth", "item/bowl"],
+						["ale", "item/tankard"], ["mead", "item/tankard"], ["beer", "item/tankard"], ["wine", "item/bottle"],
+						["milk", "item/pitcher"], ["water", "item/bottle"], ["juice", "item/bottle"], ["pie", "item/plate"],
+						["roast", "food/meat"], ["steak", "food/meat"], ["venison", "food/meat"], ["ham", "food/meat"],
+						["salmon", "food/fish"], ["trout", "food/fish"], ["cake", "food/bread"], ["roll", "food/bread"],
+						["berr", "food/apple"], ["cabbage", "item/cabbage"], ["leek", "item/leek"]]:
+					if n.contains(pair[0]):
+						out.append(pair[1])
 				for food in ["apple", "onion", "potato", "bread", "cheese", "meat", "fish", "pear", "carrot"]:
 					if n.contains(food):
 						out.append("food/" + food)
 				out.append("item/food")
+			out.append("item/sack")
 			return out
 		ItemData.ItemType.KEY:
 			out.append("item/key")
@@ -143,11 +177,47 @@ static func model_keys(item: ItemData) -> Array:
 			["coin", "item/gold"], ["ring", "item/ring"], ["necklace", "item/amulet"], ["amulet", "item/amulet"],
 			["crown", "item/crown"], ["circlet", "item/crown"], ["idol", "item/idol"], ["gem", "item/gem"],
 			["ruby", "item/gem"], ["sapphire", "item/gem"], ["emerald", "item/gem"], ["diamond", "item/gem"],
-			["amethyst", "item/gem"], ["garnet", "item/gem"]]:
+			["amethyst", "item/gem"], ["garnet", "item/gem"],
+			["tome", "item/book"], ["grimoire", "item/book"], ["spell", "item/book"], ["scripture", "item/book"], ["codex", "item/book"],
+			["deed", "item/paper"], ["contract", "item/paper"], ["letter", "item/paper"], ["note", "item/paper"], ["map", "item/paper"],
+			["tablet", "item/book"], ["arrow", "item/arrow"], ["bolt", "item/arrow"], ["lockpick", "item/lockpick"],
+			["tongs", "item/tongs"], ["rope", "item/rope"], ["lute", "item/lute"], ["inkwell", "item/inkwell"],
+			["bottle", "item/bottle"], ["flask", "item/bottle"], ["vial", "item/bottle"], ["jug", "item/pitcher"],
+			["pitcher", "item/pitcher"], ["dice", "item/bone"], ["horn", "item/bone"], ["finger", "item/bone"],
+			["fang", "item/bone"], ["claw", "item/bone"], ["torc", "item/amulet"], ["locket", "item/amulet"],
+			["pearl", "item/pearl"], ["heart", "item/heart"], ["mask", "item/mask"], ["censer", "item/lamp"],
+			["bell", "item/candlestick"], ["reliquary", "item/small_chest"], ["chest", "item/small_chest"],
+			["disc", "item/idol"], ["astrolabe", "item/idol"], ["sandglass", "item/idol"], ["prism", "item/gem"],
+			["keystone", "item/idol"], ["wheel", "item/idol"], ["shard", "item/gem"], ["crystal", "item/gem"],
+			["boss", "weapon/shield"], ["hide", "item/pelt"], ["strips", "item/pelt"], ["salt", "item/salt"],
+			["dust", "item/salt"], ["meal", "item/salt"], ["flower", "item/herb"], ["root", "item/root"],
+			["lily", "item/herb"], ["moss", "item/herb"], ["cap", "item/mushroom"], ["egg", "item/egg"],
+			["honey", "item/urn"], ["butter", "item/bowl"], ["fat", "item/bowl"], ["feather", "item/feather"],
+			["fish", "food/fish"], ["meat", "food/meat"], ["potato", "food/potato"], ["carrot", "food/potato"],
+			["leek", "food/onion"], ["garlic", "food/onion"], ["cabbage", "food/onion"], ["milk", "item/pitcher"]]:
 		if n.contains(pair[0]):
 			out.append(pair[1])
 	if item.item_type == ItemData.ItemType.INGREDIENT:
 		out.append("item/ingredient")
+	# the nearest built-in model for each, for when Morrowind is not imported
+	var near: Array = []
+	for k in out:
+		if NEAR.has(k):
+			near.append(NEAR[k])
+	out.append_array(near)
+	# Whatever is left still shows as something, by what kind of thing it is (the built-in models always have these)
+	match item.item_type:
+		ItemData.ItemType.BOOK:
+			out.append("item/book")
+		ItemData.ItemType.INGREDIENT, ItemData.ItemType.MATERIAL:
+			out.append_array(["item/ingredient", "item/food"])
+		ItemData.ItemType.SOUL_GEM:
+			out.append("item/gem")
+		ItemData.ItemType.TOOL:
+			out.append("item/hammer")
+	if n.contains("arrow") or n.contains("bolt"):
+		out.append("weapon/spear")  # a long thin thing, fitted to the arrow's size
+	out.append_array(["item/idol", "item/sack"])
 	return out
 
 

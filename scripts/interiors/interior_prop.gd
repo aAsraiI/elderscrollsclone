@@ -24,6 +24,18 @@ enum Snap { FLOOR, WALL, CEILING }
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
+	dress()
+
+
+var _dressed := false
+
+
+## Swaps the boxes for a model (or fits the collision to the boxes). Runs once: StaticBatch calls it
+## before merging a room, so a prop is never merged into plain boxes with its old oversized collision.
+func dress() -> void:
+	if _dressed:
+		return
+	_dressed = true
 	# A real model for this prop (ModelLibrary "prop/<scene name>", then its first tag) replaces the
 	# boxes, with collision from the model's own shape
 	var keys: Array = []

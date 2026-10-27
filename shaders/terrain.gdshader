@@ -54,6 +54,14 @@ float fbm(vec2 p) {
 	return v;
 }
 
+// The same texture looked up twice, turned and scaled against itself, and blended by a slow noise: the
+// ground never shows one tile repeating in rows
+vec3 mw_untiled(sampler2D t, vec2 p) {
+	vec2 q = mat2(vec2(0.799, 0.602), vec2(-0.602, 0.799)) * p * 0.73 + vec2(0.31, 0.57);
+	float w = smoothstep(0.3, 0.7, fbm(p * 0.09 + 5.0));
+	return mix(mw_detail(t, p), mw_detail(t, q), w);
+}
+
 void vertex() {
 	world_n = (MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz;
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -76,8 +84,8 @@ void fragment() {
 	vec3 flat_col = c * (0.82 + big * 0.36) * (0.92 + fine * 0.16);
 	flat_col = mix(flat_col, earth * (0.85 + fine * 0.2), bare * detail);
 	if (mw_surfaces) {
-		vec3 g = mw_detail(mw_grass, wpos.xz * 0.22);
-		vec3 e = mw_detail(mw_earth, wpos.xz * 0.22);
+		vec3 g = mw_untiled(mw_grass, wpos.xz * 0.22);
+		vec3 e = mw_untiled(mw_earth, wpos.xz * 0.22);
 		flat_col *= mix(g, e, bare * detail);
 	}
 	// Slopes: the land's rock, tinted toward the biome, in layers
@@ -86,7 +94,7 @@ void fragment() {
 	rock *= 0.78 + strata * 0.3 + noise(vec2(wpos.x + wpos.z, wpos.y) * 3.0) * 0.08;
 	if (mw_surfaces) {
 		vec2 ruv = nrm.y > 0.6 ? wpos.xz : (abs(nrm.x) > abs(nrm.z) ? wpos.zy : wpos.xy);
-		rock *= mw_detail(mw_rock, ruv * 0.18);
+		rock *= mw_untiled(mw_rock, ruv * 0.18);
 	}
 	float slope = 1.0 - smoothstep(0.62, 0.8, nrm.y + (mid - 0.5) * 0.12);
 	vec3 col = mix(flat_col, rock, slope * detail);

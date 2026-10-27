@@ -103,16 +103,16 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			work = Vector3(w * 0.5 - 1.6, 0.0, -0.8)
 			_hearth(root, Vector3(w * 0.5 - 0.5, 0.0, 0.0))
 			stations.append(_station(root, "cooking_pot", Vector3(w * 0.5 - 1.4, 0.0, 1.4)))
-			POIBuilder.add_box(root, Vector3(1.6, 1.8, 0.45), Vector3(w * 0.5 - 1.3, 0.9, d * 0.5 - 0.3), WOOD)
+			_furn(root, "wardrobe", Vector3(1.6, 1.8, 0.45), Vector3(w * 0.5 - 1.3, 0.9, d * 0.5 - 0.3), WOOD, PI)
 			if b.kind == BuildingPlot.Kind.FARM:
 				for i in 3:
-					POIBuilder.add_box(root, Vector3(0.7, 0.9, 0.7), Vector3(-w * 0.5 + 0.6 + float(i) * 0.8, 0.45, -d * 0.5 + 1.0), DARK_WOOD)
+					_furn(root, "crate", Vector3(0.7, 0.9, 0.7), Vector3(-w * 0.5 + 0.6 + float(i) * 0.8, 0.45, -d * 0.5 + 1.0), DARK_WOOD)
 			chests += _chest(root, b, 0, "%s's Chest" % NameGen.first_name(b.owner_name), Vector3(-w * 0.5 + 0.8, 0.35, d * 0.5 - 2.7), _home_loot(), interior_seed)
 		BuildingPlot.Kind.SHOP:
-			POIBuilder.add_box(root, Vector3(w * 0.6, 1.0, 0.7), Vector3(0.0, 0.5, d * 0.1), WOOD)
-			POIBuilder.add_box(root, Vector3(w - 1.5, 2.4, 0.5), Vector3(0.0, 1.2, d * 0.5 - 0.3), DARK_WOOD)
+			_furn(root, "counter", Vector3(w * 0.6, 1.0, 0.7), Vector3(0.0, 0.5, d * 0.1), WOOD, PI)
+			_furn(root, "bookcase", Vector3(w - 1.5, 2.4, 0.5), Vector3(0.0, 1.2, d * 0.5 - 0.3), DARK_WOOD, PI)
 			for i in 4:
-				POIBuilder.add_box(root, Vector3(0.6, 0.6, 0.6), Vector3(-w * 0.5 + 0.7, 0.3 + float(i % 2) * 0.6, -d * 0.2 + float(i / 2) * 0.7), WOOD.lightened(0.1))
+				_furn(root, "crate", Vector3(0.6, 0.6, 0.6), Vector3(-w * 0.5 + 0.7, 0.3 + float(i % 2) * 0.6, -d * 0.2 + float(i / 2) * 0.7), WOOD.lightened(0.1))
 			work = Vector3(0.0, 0.0, d * 0.1 + 1.0)
 			beds.append(_bed(root, Vector3(w * 0.5 - 0.8, 0.0, -d * 0.5 + 1.6)))
 			chests += _chest(root, b, 0, "Merchant Chest", Vector3(w * 0.25, 0.35, d * 0.5 - 1.1), _shop_loot(), interior_seed)
@@ -121,8 +121,8 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			elif b.trade == "jeweler":
 				stations.append(_station(root, "workbench", Vector3(-w * 0.5 + 0.5, 0.0, d * 0.3), PI * 0.5))
 		BuildingPlot.Kind.INN:
-			POIBuilder.add_box(root, Vector3(0.7, 1.1, d * 0.45), Vector3(-w * 0.5 + 1.8, 0.55, d * 0.05), WOOD)
-			POIBuilder.add_box(root, Vector3(0.5, 2.0, d * 0.45), Vector3(-w * 0.5 + 0.3, 1.0, d * 0.05), DARK_WOOD)
+			_furn(root, "counter", Vector3(0.7, 1.1, d * 0.45), Vector3(-w * 0.5 + 1.8, 0.55, d * 0.05), WOOD, PI * 0.5)
+			_furn(root, "keg_rack", Vector3(0.5, 2.0, d * 0.45), Vector3(-w * 0.5 + 0.3, 1.0, d * 0.05), DARK_WOOD, PI * 0.5)
 			for i in 3:
 				seats.append_array(_table(root, Vector3(w * 0.05 + float(i % 2) * w * 0.25, 0.0, -d * 0.2 + float(i) * d * 0.15), 4))
 			_hearth(root, Vector3(w * 0.5 - 0.5, 0.0, -d * 0.15))
@@ -140,19 +140,18 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			stations.append(_station(root, "tanning_rack", Vector3(-w * 0.5 + 0.3, 0.0, -d * 0.5 + 2.0), PI * 0.5))
 			stations.append(_station(root, "grindstone", Vector3(-w * 0.25, 0.0, -d * 0.5 + 0.8)))
 			stations.append(_station(root, "workbench", Vector3(w * 0.2, 0.0, -d * 0.5 + 0.6)))
-			POIBuilder.add_box(root, Vector3(0.5, 0.6, 0.4), Vector3(0.0, 0.3, 0.6), STONE.darkened(0.4))
-			POIBuilder.add_box(root, Vector3(1.0, 0.15, 0.4), Vector3(0.0, 0.68, 0.6), Color(0.22, 0.22, 0.25))
-			POIBuilder.add_box(root, Vector3(2.4, 1.8, 0.3), Vector3(-w * 0.5 + 1.5, 0.9, d * 0.5 - 0.2), DARK_WOOD)
+			_furn(root, "anvil", Vector3(1.0, 0.75, 0.4), Vector3(0.0, 0.375, 0.6), Color(0.22, 0.22, 0.25))
+			_furn(root, "rack", Vector3(2.4, 1.8, 0.3), Vector3(-w * 0.5 + 1.5, 0.9, d * 0.5 - 0.2), DARK_WOOD, PI)
 			work = Vector3(0.0, 0.0, 1.5)
 			beds.append(_bed(root, Vector3(w * 0.5 - 0.8, 0.0, -d * 0.5 + 1.6)))
 			chests += _chest(root, b, 0, "Smith's Chest", Vector3(-w * 0.5 + 0.8, 0.35, 0.0), _shop_loot(), interior_seed)
 		BuildingPlot.Kind.TEMPLE:
-			POIBuilder.add_box(root, Vector3(2.6, 1.1, 1.0), Vector3(0.0, 0.55, d * 0.5 - 1.3), STONE.lightened(0.3))
+			_furn(root, "altar", Vector3(2.6, 1.1, 1.0), Vector3(0.0, 0.55, d * 0.5 - 1.3), STONE.lightened(0.3), PI)
 			POIBuilder.add_box(root, Vector3(0.5, 0.5, 0.5), Vector3(0.0, 1.5, d * 0.5 - 1.3), Color(1.0, 0.85, 0.5), 0.7, Vector3(0.4, 0.0, 0.4), false, true)
 			var rows := int((d - 5.0) / 1.6)
 			for i in rows:
 				for side in [-1.0, 1.0]:
-					POIBuilder.add_box(root, Vector3(w * 0.32, 0.5, 0.45), Vector3(side * w * 0.24, 0.25, -d * 0.5 + 3.0 + float(i) * 1.6), WOOD)
+					_furn(root, "bench", Vector3(w * 0.32, 0.5, 0.45), Vector3(side * w * 0.24, 0.25, -d * 0.5 + 3.0 + float(i) * 1.6), WOOD)
 			work = Vector3(0.0, 0.0, d * 0.5 - 2.4)
 			beds.append(_bed(root, Vector3(-w * 0.5 + 0.8, 0.0, -d * 0.5 + 1.6)))
 			for i in rows:
@@ -161,16 +160,16 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			stations.append(_station(root, "alchemy_lab", Vector3(w * 0.5 - 0.45, 0.0, -d * 0.5 + 2.0), PI * 0.5))
 		BuildingPlot.Kind.GUILD_HALL:
 			if not arena:
-				POIBuilder.add_box(root, Vector3(1.2, 0.8, d * 0.45), Vector3(0.0, 0.4, d * 0.05), WOOD)
+				_furn(root, "table", Vector3(1.2, 0.8, d * 0.45), Vector3(0.0, 0.4, d * 0.05), WOOD)
 				for side in [-1.0, 1.0]:
-					POIBuilder.add_box(root, Vector3(0.4, 0.45, d * 0.45), Vector3(side * 1.0, 0.23, d * 0.05), DARK_WOOD)
+					_furn(root, "bench", Vector3(0.4, 0.45, d * 0.45), Vector3(side * 1.0, 0.225, d * 0.05), DARK_WOOD)
 			var banner: Color = TownBuilder.GUILD_COLORS.get(b.guild, CLOTH)
 			for x in [-w * 0.25, w * 0.25]:
 				POIBuilder.add_box(root, Vector3(1.2, 2.4, 0.06), Vector3(x, h * 0.55, d * 0.5 - 0.05), banner, 0.0, Vector3.ZERO, false)
 			match b.guild:
 				"fighters":
 					for i in 2:
-						POIBuilder.add_box(root, Vector3(0.35, 1.7, 0.35), Vector3(w * 0.5 - 1.2, 0.85, -d * 0.2 + float(i) * 2.0), Color(0.6, 0.5, 0.3))
+						_furn(root, "training_dummy", Vector3(0.6, 1.7, 0.6), Vector3(w * 0.5 - 1.2, 0.85, -d * 0.2 + float(i) * 2.0), Color(0.6, 0.5, 0.3), -PI * 0.5)
 					# The arena: a sand pit ringed by a low wall (open toward the door), the gong
 					# at its near edge, benches for the crowd along the side walls
 					var pit := Vector3(0.0, 0.0, d * 0.5 - 6.5)
@@ -186,7 +185,7 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 					stations.append(pit)
 					stations.append(pit + Vector3(2.2, 0.0, -5.6))
 					for side in [-1.0, 1.0]:
-						POIBuilder.add_box(root, Vector3(0.6, 0.45, 8.0), Vector3(side * (w * 0.5 - 0.6), 0.23, pit.z), WOOD)
+						_furn(root, "bench", Vector3(0.6, 0.45, 8.0), Vector3(side * (w * 0.5 - 0.6), 0.225, pit.z), WOOD)
 				"antiquarians":
 					stations.append(_station(root, "grindstone", Vector3(-w * 0.3, 0.0, -d * 0.5 + 0.8)))
 					stations.append(_station(root, "workbench", Vector3(w * 0.25, 0.0, -d * 0.5 + 0.6)))
@@ -197,14 +196,14 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 					case.rotation.y = PI * 0.5
 				"mages":
 					for side in [-1.0, 1.0]:
-						POIBuilder.add_box(root, Vector3(0.5, 2.6, d * 0.5), Vector3(side * (w * 0.5 - 0.3), 1.3, 0.0), DARK_WOOD)
+						_furn(root, "bookcase", Vector3(0.5, 2.6, d * 0.5), Vector3(side * (w * 0.5 - 0.3), 1.3, 0.0), DARK_WOOD, -side * PI * 0.5)
 					POIBuilder.add_box(root, Vector3(0.4, 0.4, 0.4), Vector3(0.0, 1.2, d * 0.35), Color(0.4, 0.6, 1.0), 0.5, Vector3(0.4, 0.0, 0.4), false, true)
 					stations.append(_station(root, "spell_altar", Vector3(w * 0.25, 0.0, -d * 0.5 + 1.2)))
 					stations.append(_station(root, "enchanter", Vector3(-w * 0.25, 0.0, -d * 0.5 + 1.2)))
 					stations.append(_station(root, "alchemy_lab", Vector3(w * 0.2, 0.0, d * 0.5 - 0.6)))
 				_:
 					for i in 2:
-						POIBuilder.add_box(root, Vector3(0.7, 1.9, 0.5), Vector3(w * 0.5 - 0.8, 0.95, -d * 0.2 + float(i) * 2.0), Color(0.62, 0.62, 0.66))
+						_furn(root, "armor_stand", Vector3(0.7, 1.9, 0.5), Vector3(w * 0.5 - 0.8, 0.95, -d * 0.2 + float(i) * 2.0), Color(0.62, 0.62, 0.66), -PI * 0.5)
 			work = Vector3(0.0, 0.0, d * 0.05 + d * 0.225 + 0.8)
 			beds.append(_bed(root, Vector3(-w * 0.5 + 0.8, 0.0, -d * 0.5 + 1.6)))
 			for i in 4:
@@ -219,16 +218,15 @@ static func build(b: BuildingPlot, interior_seed: int, level: int = 5, today: in
 			var banner := NamedSettlements.house_color(b.house)
 			var dais_w := minf(w * 0.5, 7.0)
 			POIBuilder.add_box(root, Vector3(dais_w, 0.4, 2.6), Vector3(0.0, 0.2, d * 0.5 - 1.3), STONE.darkened(0.1))
-			POIBuilder.add_box(root, Vector3(1.2, 0.6, 1.0), Vector3(0.0, 0.7, d * 0.5 - 1.0), DARK_WOOD)
-			POIBuilder.add_box(root, Vector3(1.2, 1.8, 0.25), Vector3(0.0, 1.5, d * 0.5 - 0.45), DARK_WOOD)
+			_furn(root, "throne", Vector3(1.2, 2.0, 1.0), Vector3(0.0, 1.4, d * 0.5 - 0.85), DARK_WOOD, PI)
 			for x in [-dais_w * 0.35, dais_w * 0.35]:
 				POIBuilder.add_box(root, Vector3(1.2, minf(h * 0.55, 3.4), 0.06), Vector3(x, h * 0.55, d * 0.5 - 0.05), banner, 0.0, Vector3.ZERO, false)
 			# A long table down the hall for council and petitioners (not in a reeve's small house)
 			if b.seat_type != "reeve":
 				var table_d := maxf(d - 7.5, 2.0)
-				POIBuilder.add_box(root, Vector3(1.4, 0.8, table_d), Vector3(0.0, 0.4, 0.0), WOOD)
+				_furn(root, "table", Vector3(1.4, 0.8, table_d), Vector3(0.0, 0.4, 0.0), WOOD)
 				for side in [-1.0, 1.0]:
-					POIBuilder.add_box(root, Vector3(0.4, 0.45, table_d), Vector3(side * 1.1, 0.23, 0.0), DARK_WOOD)
+					_furn(root, "bench", Vector3(0.4, 0.45, table_d), Vector3(side * 1.1, 0.225, 0.0), DARK_WOOD)
 				for i in 4:
 					seats.append(Vector3(1.6 * (1.0 if i % 2 == 0 else -1.0), 0.0, (float(i / 2) - 0.5) * minf(table_d * 0.5, 3.0)))
 			else:
@@ -671,26 +669,52 @@ static func _station(root: Node3D, kind: String, at: Vector3, yaw: float = 0.0) 
 	return at
 
 
+## A piece of furniture: a box the size of the space it takes, swapped for its model ("prop/<kind>")
+## when there is one. A long space (pews, a counter, wall shelving, a hall table) is filled with as many
+## real-size models as fit along it, rather than one stretched or one lost in the middle.
+static func _furn(root: Node3D, kind: String, size: Vector3, center: Vector3, color: Color, yaw: float = 0.0) -> void:
+	var key := "prop/" + kind
+	var count := 1
+	if String(ModelLibrary.entry(key).get("fit", "")) == "real":
+		var probe := ModelLibrary.instance(key)
+		if probe != null:
+			var pb := ModelLibrary.bounds(probe)
+			probe.free()
+			count = clampi(roundi(maxf(size.x, size.z) / maxf(maxf(pb.size.x, pb.size.z), 0.3)), 1, 12)
+	# `size` and the row run along the world's axes; each piece is turned by `yaw` to face the room
+	var along_x := size.x >= size.z
+	var piece := Vector3(size.x / count, size.y, size.z) if along_x else Vector3(size.x, size.y, size.z / count)
+	if absf(sin(yaw)) > 0.5:
+		piece = Vector3(piece.z, piece.y, piece.x)  # in the turned piece's own axes
+	for i in count:
+		var off := (float(i) + 0.5) / float(count) - 0.5
+		var c := center + (Vector3(size.x * off, 0.0, 0.0) if along_x else Vector3(0.0, 0.0, size.z * off))
+		var holder := Node3D.new()
+		holder.name = "Decor_" + kind
+		holder.position = Vector3(c.x, center.y - size.y * 0.5, c.z)
+		holder.rotation.y = yaw
+		root.add_child(holder, true)
+		POIBuilder.add_box(holder, piece, Vector3(0.0, size.y * 0.5, 0.0), color)
+		ModelLibrary.replace_meshes(holder, key)
+
+
 static func _bed(root: Node3D, at: Vector3) -> Vector3:
-	POIBuilder.add_box(root, Vector3(1.0, 0.5, 2.0), at + Vector3(0.0, 0.25, 0.0), DARK_WOOD)
-	POIBuilder.add_box(root, Vector3(0.9, 0.12, 1.5), at + Vector3(0.0, 0.56, -0.2), CLOTH, 0.0, Vector3.ZERO, false)
-	POIBuilder.add_box(root, Vector3(0.7, 0.15, 0.35), at + Vector3(0.0, 0.58, 0.75), Color(0.85, 0.82, 0.75), 0.0, Vector3.ZERO, false)
+	_furn(root, "bed", Vector3(1.0, 0.65, 2.0), at + Vector3(0.0, 0.325, 0.0), DARK_WOOD)
 	return at
 
 
 static func _table(root: Node3D, at: Vector3, stools: int) -> Array[Vector3]:
 	var out: Array[Vector3] = []
-	POIBuilder.add_box(root, Vector3(1.4, 0.08, 0.9), at + Vector3(0.0, 0.78, 0.0), WOOD)
-	POIBuilder.add_box(root, Vector3(0.9, 0.74, 0.5), at + Vector3(0.0, 0.37, 0.0), DARK_WOOD)
+	_furn(root, "table", Vector3(1.4, 0.82, 0.9), at + Vector3(0.0, 0.41, 0.0), WOOD)
 	for i in stools:
 		var a := float(i) / float(stools) * TAU
-		POIBuilder.add_box(root, Vector3(0.4, 0.45, 0.4), at + Vector3(cos(a) * 1.0, 0.23, sin(a) * 0.8), DARK_WOOD)
+		_furn(root, "stool", Vector3(0.4, 0.45, 0.4), at + Vector3(cos(a) * 1.0, 0.225, sin(a) * 0.8), DARK_WOOD)
 		out.append(at + Vector3(cos(a) * 1.5, 0.0, sin(a) * 1.25))  # a place to stand by the table
 	return out
 
 
 static func _hearth(root: Node3D, at: Vector3) -> void:
-	POIBuilder.add_box(root, Vector3(0.8, 1.3, 1.8), at + Vector3(0.0, 0.65, 0.0), STONE)
+	_furn(root, "hearth", Vector3(0.8, 1.3, 1.8), at + Vector3(0.0, 0.65, 0.0), STONE)
 	POIBuilder.add_box(root, Vector3(0.3, 0.4, 0.9), at + Vector3(-0.3, 0.35, 0.0), Color(1.0, 0.5, 0.15), 0.0, Vector3.ZERO, false, true)
 	var fire := OmniLight3D.new()
 	fire.light_color = Color(1.0, 0.55, 0.25)

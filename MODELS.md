@@ -154,8 +154,7 @@ merged in Blender first.
 ## Still boxes
 
 Armour worn on bodies (people use whole-body models that show their own clothes and armour), worn
-armour lying on the ground except shields, keys, ingots, ore, pelts, rings and amulets, buildings and
-walls (made by the building kit), and these props: anvil, armour stand, bedroll, brazier, cage, cart,
+armour lying on the ground without the Morrowind import (it shows as a bundle), buildings and walls (made by the building kit), and these props: anvil, armour stand, bedroll, brazier, cage, cart,
 chain, crop rows, crystal, drying rack, flower box, fountain, fungus, gravestone, grave cross, hay,
 hearth, keg rack, lamp post, log pile, market stall, mine cart, pickaxes, rails, ritual circle, rope,
 rowboat, sarcophagus, shield wall, stalactite, stalagmite, stone bench, support beams, tapestry, tent,
@@ -169,8 +168,39 @@ scene in dungeons, `RoomFiller`): a tavern of a given size looks the same wherev
 variants. Only the loot changes from room to room. Every surface keeps what kind of surface it is and
 takes loot from its own leveled table (`RoomDecorator.SURFACE_TAGS`): books on bookcases, weapons and
 armour on racks, food and drink on tables, jewellery and relics on altars, plinths and in niches, tools
-and supplies on barrels and crates. Each kind of room also sets out fixed clutter (`RoomDecorator.CLUTTER`,
-`clutter/<name>` models) that is part of the room, not loot.
+and supplies on barrels and crates. Each kind of room also sets out fixed clutter (`RoomDecorator.CLUTTER`) in the same places every
+time. Plates, cups, tankards, candles, books, scrolls, bottles, skulls, bones, urns, bread and the like
+are real items you can pick up (`RoomDecorator.CLUTTER_ITEMS`, owned like the room's loot; once taken
+they stay gone). Baskets, cloth and spoons stay part of the room.
+
+## Every item has a model
+
+`ItemModels.model_keys()` gives each item a chain of keys, best first: its own (`item/<id>`), then what
+kind of thing it is by name (soup and stew in a bowl, spell tomes and scripture as books, deeds and
+contracts as paper, arrows, lockpicks, salts, herbs, roots, pelts, hearts, masks...), then the nearest
+built-in model (`ItemModels.NEAR`), then one by item type, and last a sack, so nothing is ever left
+without one. The Morrowind import has a model for nearly every item (`MwCatalog.ITEMS` and
+`MwCatalog.ITEM_IDS`: arrows by material, clothing, ingredients and materials by look-alike).
+
+## Collision
+
+A model's collision is a hull per mesh, placed where the model is drawn even when its body sits beside
+it (a prop's `ModelBody`). Props from room scenes (`InteriorProp`) put their model in as soon as they are
+placed (`dress()`), before anything is set on them or the room is merged, so what lies on an altar or a
+shelf rests on the model and no prop keeps an old oversized box. The player is a 0.3 m capsule, like the
+people, so pews and furniture rows can be walked between.
+
+## Doors
+
+Town doors and the way out of dungeons (`DoorLook`) are a door model (`door/building`, `door/dungeon`)
+in a light wooden frame with a lit lantern beside it, standing just out from the wall.
+
+## Textures
+
+Built things blend two textures of each kind (`mw_stone` / `mw_stone2`, wood, plaster) in broad soft
+patches with a second, offset lookup, and the ground samples each texture twice, turned against itself,
+so nothing repeats tile by tile. Interior materials keep their own colour; the Morrowind texture on them
+is made nearly grey with its contrast softened at import (`MwSurfaces._soften`) and only adds grain.
 
 ## The look of the world
 

@@ -63,6 +63,9 @@ const WALK := 1.1  # half-width of the walkway kept clear from each door
 ## the doors / openings. Returns {"pieces": n, "slots": n, "items": n, "containers": n}.
 static func decorate(root: Node3D, room: Rect2, theme: String, level: int, room_seed: int, owner: String, save_prefix: String,
 		doors: Array[Vector3] = [], restock_days: int = 0, today: int = 1, height: float = 3.0) -> Dictionary:
+	for p in root.find_children("*", "StaticBody3D", true, false):
+		if p is InteriorProp:
+			(p as InteriorProp).dress()  # props in the room scene get their models before their tops are measured
 	var t: Dictionary = THEMES.get(theme, THEMES["home"])
 	# Two seeds: the room's own picks the loot; the layout (furniture, clutter) comes from the theme, the
 	# room's size and one of LAYOUTS variants, so rooms of a kind look alike wherever they are
@@ -116,7 +119,7 @@ static func decorate(root: Node3D, room: Rect2, theme: String, level: int, room_
 			break
 	# things that belong in the room: plates and cups on tables, books and bottles on shelves, candles,
 	# bones in crypts... the same in every room of this kind (they are part of the layout, not loot)
-	var clutter := _place_clutter(root, theme, slots, layout)
+	var clutter := _place_clutter(root, theme, slots, layout, save_prefix, owner, restock_days, today)
 	# loot on every surface, from that surface's own table at the room's level
 	var tags := PackedStringArray(t["tags"])
 	var tables := {}
@@ -223,30 +226,68 @@ static func surface_tags(kind: String, room_tags: PackedStringArray) -> PackedSt
 
 
 # Clutter on the surfaces: about half of them get one or two small things, picked by the layout seed
-static func _place_clutter(root: Node3D, theme: String, slots: Array, layout: RandomNumberGenerator) -> int:
+# The clutter you can pick up: what each kind of clutter is as an item. The rest (baskets, cloth,
+# spoons) stays a fixed part of the room.
+const CLUTTER_ITEMS := {
+	"plate": "res://data/clutter/plate.tres", "plate_metal": "res://data/clutter/plate.tres",
+	"bowl": "res://data/clutter/bowl.tres", "bowl_redware": "res://data/clutter/bowl.tres",
+	"cup": "res://data/clutter/cup.tres", "tankard": "res://data/clutter/tankard.tres",
+	"pitcher": "res://data/clutter/tankard.tres", "goblet": "res://data/clutter/silver_goblet.tres",
+	"candle": "res://data/clutter/candlestick.tres",
+	"book": "res://data/clutter/old_book.tres", "book_2": "res://data/clutter/old_book.tres",
+	"book_3": "res://data/clutter/ledger.tres", "book_open": "res://data/clutter/torn_journal.tres",
+	"scroll": "res://data/clutter/blank_scroll.tres", "paper": "res://data/clutter/blank_scroll.tres",
+	"inkwell": "res://data/clutter/inkwell.tres", "quill": "res://data/clutter/quill.tres",
+	"skull": "res://data/clutter/skull.tres", "bone": "res://data/clutter/old_bone.tres",
+	"urn": "res://data/clutter/burial_urn.tres", "hammer": "res://data/clutter/smith_hammer.tres",
+	"bottle": "res://data/misc/empty_bottle.tres", "bottle_2": "res://data/misc/empty_bottle.tres",
+	"bottle_3": "res://data/misc/empty_bottle.tres", "flask": "res://data/misc/empty_bottle.tres",
+	"beaker": "res://data/misc/empty_bottle.tres", "bread": "res://data/consumables/bread.tres",
+}
+
+
+static func _place_clutter(root: Node3D, theme: String, slots: Array, layout: RandomNumberGenerator, save_prefix: String = "", owner: String = "", restock_days: int = 0, today: int = 1) -> int:
 	var kinds: Array = CLUTTER.get(theme, CLUTTER.get(theme.get_slice("_", 0), CLUTTER["home"]))
-	var have: Array = kinds.filter(func(k): return ModelLibrary.has("clutter/" + String(k)))
+	var have: Array = kinds.filter(func(k): return ModelLibrary.has("clutter/" + String(k)) or CLUTTER_ITEMS.has(k))
 	if have.is_empty():
 		return 0
 	var n := 0
-	for slot: Array in slots:
+	for si in slots.size():
+		var slot: Array = slots[si]
 		if layout.randf() > 0.55:
 			continue
 		var room_for: Vector2 = slot[1]
 		for j in (1 if layout.randf() < 0.6 else 2):
-			var key := "clutter/" + String(have[layout.randi() % have.size()])
-			var m := ModelLibrary.fitted(key, AABB(Vector3(-0.1, 0.0, -0.1), Vector3(0.2, 0.25, 0.2)))
+			var kind := String(have[layout.randi() % have.size()])
+			# off to one side of the surface, leaving the middle for loot
+			var reach := minf(room_for.x, room_for.y) * 0.32
+			var a := layout.randf() * TAU
+			var off := Vector3(cos(a), 0.0, sin(a)) * reach * layout.randf_range(0.6, 1.0)
+			var at := (slot[0] as Vector3) + off
+			var yaw := layout.randf() * TAU
+			var item_path: String = CLUTTER_ITEMS.get(kind, "")
+			if item_path != "" and save_prefix != "" and ResourceLoader.exists(item_path):
+				# a real item, owned like the room's loot: once taken it stays gone until the room restocks
+				var key := "%s/clutter_%d_%d" % [save_prefix, si, j]
+				var taken := WorldState.get_record(WorldItem.taken_key(key))
+				if not taken.is_empty():
+					if restock_days <= 0 or today - int(taken.get("day", today)) < restock_days:
+						continue
+					WorldState.erase_record(WorldItem.taken_key(key))
+				var w := WorldItem.place(load(item_path) as ItemData, 1, root, at, key, owner)
+				w.rotation.y = yaw
+				n += 1
+				continue
+			if not ModelLibrary.has("clutter/" + kind):
+				continue
+			var m := ModelLibrary.fitted("clutter/" + kind, AABB(Vector3(-0.1, 0.0, -0.1), Vector3(0.2, 0.25, 0.2)))
 			if m == null:
 				continue
 			m.name = "Clutter"
 			for light in m.find_children("*", "Light3D", true, false):
 				light.queue_free()  # the flame still glows; a room of candles does not need a light each
-			# off to one side of the surface, leaving the middle for loot
-			var reach := minf(room_for.x, room_for.y) * 0.32
-			var a := layout.randf() * TAU
-			var off := Vector3(cos(a), 0.0, sin(a)) * reach * layout.randf_range(0.6, 1.0)
-			m.position = (slot[0] as Vector3) + off
-			m.rotation.y = layout.randf() * TAU
+			m.position = at
+			m.rotation.y = yaw
 			root.add_child(m)
 			n += 1
 	return n
@@ -269,12 +310,12 @@ static func _pick(table: Array[LootEntry], rng: RandomNumberGenerator) -> ItemDa
 static func _existing_surfaces(root: Node3D, room: Rect2) -> Array:
 	var out: Array = []
 	for c in root.get_children():
-		if not c is StaticBody3D or c is MuseumCase or c.name == "Chest" or not room.has_point(Vector2((c as Node3D).position.x, (c as Node3D).position.z)):
+		var decor := c is Node3D and String(c.name).begins_with("Decor_")  # furniture an interior builder put in
+		if not (c is StaticBody3D or decor) or c is MuseumCase or c.name == "Chest" or not room.has_point(Vector2((c as Node3D).position.x, (c as Node3D).position.z)):
 			continue
-		var b := ModelLibrary.bounds(c as Node3D)
-		b.position += (c as Node3D).position
+		var b := (c as Node3D).transform * ModelLibrary.bounds(c as Node3D)  # in the room's space, turned as it stands
 		var top := b.end.y
-		if c is InteriorProp and (c as InteriorProp).tags.has("shelf"):
+		if (c is InteriorProp and (c as InteriorProp).tags.has("shelf")) or (decor and (String(c.name).contains("shelf") or String(c.name).contains("bookcase"))):
 			# a shelf prop (1.13 rooms): one thing on each plank, just in front of its back board
 			var fwd := (c as Node3D).basis * Vector3(0, 0, -0.05)
 			for f: float in [0.33, 0.63]:  # its planks, wherever its model puts them

@@ -1,13 +1,13 @@
 class_name InteriorAtmosphere
 extends Node3D
 ## The mood inside a stitched dungeon or a building: the theme's light and fog (PRESETS), fire
-## lights that flicker, dust drifting in the air round the player, a sound hook per room (silent
+## lights that flicker, a sound hook per room (silent
 ## until the sound exists), and rooms far from you along the doorway graph hidden so big dungeons
 ## stay fast. DungeonManager adds one to every interior it builds and applies its fog and ambient.
 ##
 ## The preset's "dark" is how dark the place is for sneaking (Stealth.light_level's base).
 
-## theme -> {ambient, fog (colour), density, dark, dust, sound}
+## theme -> {ambient, fog (colour), density, dark, dust (no longer drawn), sound}
 const PRESETS := {
 	"fort": {"ambient": Color(0.06, 0.05, 0.045), "fog": Color(0.10, 0.09, 0.08), "density": 0.02, "dark": 0.2, "dust": 0.6, "sound": "wind"},
 	"crypt": {"ambient": Color(0.035, 0.035, 0.05), "fog": Color(0.06, 0.07, 0.09), "density": 0.04, "dark": 0.12, "dust": 1.0, "sound": "chant"},
@@ -31,7 +31,6 @@ var preset: Dictionary = {}
 var plan: DungeonAssembler
 var rooms: Array[RoomModule] = []
 var _flames: Array = []  # [OmniLight3D, base energy, phase]
-var _dust: CPUParticles3D
 var _clock := 0.0
 var _player_room := -1
 var _adjacent := {}  # room index -> [room indices]
@@ -52,7 +51,6 @@ static func make(root: Node3D, p_theme: String, p_plan: DungeonAssembler = null)
 	root.add_child(a)
 	a._find_flames(root)
 	a._sound_hooks()
-	a._make_dust()
 	if p_plan != null:
 		for l: Array in p_plan.links:
 			a._adjacent[int(l[0])] = a._adjacent.get(int(l[0]), []) + [int(l[2])]
@@ -92,37 +90,6 @@ func _sound_hooks() -> void:
 		player.position = Vector3(0, 2.0, 0)
 
 
-func _make_dust() -> void:
-	var amount := int(48.0 * float(preset.get("dust", 0.0)))
-	if amount <= 0:
-		return
-	_dust = CPUParticles3D.new()
-	_dust.name = "Dust"
-	_dust.amount = amount
-	_dust.lifetime = 9.0
-	_dust.preprocess = 9.0
-	_dust.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-	_dust.emission_box_extents = Vector3(7, 2.5, 7)
-	_dust.direction = Vector3(0.3, 0.1, 0.2)
-	_dust.spread = 180.0
-	_dust.gravity = Vector3(0, -0.01, 0)
-	_dust.initial_velocity_min = 0.02
-	_dust.initial_velocity_max = 0.08
-	_dust.scale_amount_min = 0.015
-	_dust.scale_amount_max = 0.03
-	var mesh := QuadMesh.new()
-	mesh.size = Vector2(1, 1)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(0.9, 0.85, 0.7, 0.35)
-	mesh.material = mat
-	_dust.mesh = mesh
-	_dust.local_coords = false
-	add_child(_dust)
-
-
 func _process(delta: float) -> void:
 	_clock += delta
 	for f: Array in _flames:
@@ -133,8 +100,6 @@ func _process(delta: float) -> void:
 	var p := get_tree().get_first_node_in_group("player") as Node3D
 	if p == null:
 		return
-	if _dust != null:
-		_dust.global_position = p.global_position + Vector3(0, 1.5, 0)
 	if plan != null and int(_clock * 5.0) != int((_clock - delta) * 5.0):
 		update_rooms(p.global_position)
 

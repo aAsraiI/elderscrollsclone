@@ -55,7 +55,7 @@ func t_decorator() -> void:
 	var again := _items(room).map(func(w: WorldItem) -> String: return "%s@%s" % [w.item.display_name, w.position.snapped(Vector3.ONE * 0.01)])
 	check("the same room is furnished the same way every time", first == again and first.size() > 0)
 	var items := _items(room)
-	check("things are owned, frozen and remembered by slot", items.all(func(w: WorldItem) -> bool: return w.owner_id == "house_1" and w.start_frozen and w.slot_id.begins_with("t/same/slot_")))
+	check("things are owned, frozen and remembered by slot", items.all(func(w: WorldItem) -> bool: return w.owner_id == "house_1" and w.start_frozen and (w.slot_id.begins_with("t/same/slot_") or w.slot_id.begins_with("t/same/clutter_"))))  # clutter is real items too (1.15.6)
 	check("owned things say Steal", (items[0] as WorldItem).get_prompt().begins_with("Steal"))
 	var path_clear := true
 	for c in room.get_children():

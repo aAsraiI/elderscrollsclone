@@ -17,6 +17,9 @@ global uniform bool mw_surfaces;
 global uniform sampler2D mw_stone : source_color, repeat_enable, filter_linear_mipmap;
 global uniform sampler2D mw_wood : source_color, repeat_enable, filter_linear_mipmap;
 global uniform sampler2D mw_plaster : source_color, repeat_enable, filter_linear_mipmap;
+global uniform sampler2D mw_stone2 : source_color, repeat_enable, filter_linear_mipmap;
+global uniform sampler2D mw_wood2 : source_color, repeat_enable, filter_linear_mipmap;
+global uniform sampler2D mw_plaster2 : source_color, repeat_enable, filter_linear_mipmap;
 
 vec3 mw_detail(sampler2D t, vec2 uv) {
 	// against the texture's own average (its smallest mipmap): light and dark, and a little of its hue
@@ -88,8 +91,10 @@ void fragment() {
 	float fine = noise(wpos * 9.0);
 	float k = 1.0;
 	float rough = 0.92;
-	bool stone = hsv.y < 0.16 && hsv.z > 0.18;
-	bool wood = !stone && hsv.x > 0.03 && hsv.x < 0.13 && hsv.y > 0.25 && hsv.z < 0.62;
+	// Wood is a strong warm brown (doors, beams, balconies, fences); grey is stone, and so is everything
+	// else in a dungeon (StaticBatch marks its boxes in the vertex alpha), where the walls are brownish greys
+	bool wood = hsv.x > 0.02 && hsv.x < 0.14 && hsv.y > 0.45 && hsv.z < 0.66;
+	bool stone = !wood && ((hsv.y < 0.16 && hsv.z > 0.18) || (use_vertex_color && COLOR.a < 0.75));
 	if (stone) {
 		float bl = blocks(uv);
 		float per_block = hash(floor(vec3(uv / vec2(1.1, 0.5) + vec2(mod(floor(uv.y / 0.5), 2.0) * 0.5, 0.0), 0.0)));
@@ -112,7 +117,18 @@ void fragment() {
 	vec3 drift = vec3(1.0) + (vec3(noise(wpos * 0.15), noise(wpos * 0.15 + 7.0), noise(wpos * 0.15 + 13.0)) - 0.5) * 0.08;
 	vec3 tex = vec3(1.0);
 	if (mw_surfaces) {
-		tex = stone ? mw_detail(mw_stone, uv * 0.45) : (wood ? mw_detail(mw_wood, uv * 0.7) : mw_detail(mw_plaster, uv * 0.5));
+		// Two textures of each kind, blended in broad soft patches across the world, and a second lookup of
+		// each at another scale and offset, so a wall is never one tile repeated edge to edge
+		float patch = smoothstep(0.35, 0.65, fbm(wpos * 0.07 + 3.0));
+		vec2 uv2 = uv * 0.61 + vec2(0.37, 0.71);
+		if (stone) {
+			tex = mix(mw_detail(mw_stone, uv * 0.45), mw_detail(mw_stone2, uv2 * 0.45), patch);
+		} else if (wood) {
+			tex = mix(mw_detail(mw_wood, uv * 0.7), mw_detail(mw_wood2, uv2 * 0.7), patch);
+		} else {
+			tex = mix(mw_detail(mw_plaster, uv * 0.5), mw_detail(mw_plaster2, uv2 * 0.5), patch);
+		}
+		tex = mix(vec3(1.0), tex, 0.8) * (0.86 + fbm(wpos * 0.21 + 11.0) * 0.28);  // softer detail, broad light and dark
 		k = mix(k, 1.0, 0.6);  // the texture brings its own blocks and grain
 	}
 	vec3 col = c * mix(1.0, k, detail) * mix(vec3(1.0), drift, detail);

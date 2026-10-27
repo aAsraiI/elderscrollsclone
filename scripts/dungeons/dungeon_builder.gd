@@ -109,6 +109,7 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 		half[secret] = Vector2(size * 0.28, size * 0.28)
 
 	var root := Node3D.new()
+	root.set_meta("stone_walls", true)  # brownish-grey walls read as stone, not plaster or wood
 	root.name = "Dungeon"
 	var wc := data.wall_color
 	var fc := data.floor_color
@@ -159,6 +160,8 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 	root.add_child(door)
 	door.position = exit_pos + Vector3(0.0, 1.3, 0.0)
 	_door_frame(root, exit_pos, exit_dir, Color(0.35, 0.25, 0.15) if f == 0 else wc.lightened(0.15))
+	# The way out (or up) is a door with a lit lantern, facing into the room
+	DoorLook.dress(root, exit_pos + Vector3(exit_dir.x, 0.0, exit_dir.y) * 0.4, atan2(-float(exit_dir.x), -float(exit_dir.y)), "door/dungeon")
 	var start := exit_pos - Vector3(exit_dir.x, 0.0, exit_dir.y) * 2.2 + Vector3(0.0, 0.1, 0.0)
 	var start_yaw := atan2(float(exit_dir.x), float(exit_dir.y))  # facing away from the door, into the room
 

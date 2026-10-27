@@ -22,7 +22,7 @@ const PROPS := {
 	"prop/skull_pile": ["f/furn_bone_skull_01.nif", "m/misc_skull00.nif"],
 	"prop/bookshelf": ["f/furn_com_bookshelf_01.nif"],
 	"prop/bookcase": ["f/furn_com_bookshelf_02.nif", "f/furn_com_bookshelf_01.nif"],
-	"prop/shelf": ["f/furn_com_shelf_01.nif"],
+	"prop/shelf": ["f/furn_de_bookshelf_01.nif", "f/furn_com_bookshelf_01.nif"],  # standing shelves (furn_com_shelf is a small wall shelf)
 	"prop/boulder": ["f/terrain_rock_wg_01.nif"],
 	"prop/bucket": ["f/furn_bucket10.nif", "m/misc_com_bucket_01.nif"],
 	"prop/cage": ["o/contain_ropecage_01.nif"],
@@ -34,7 +34,8 @@ const PROPS := {
 	"prop/sconce": ["l/light_com_sconce_01.nif"],
 	"prop/lamp_post": ["l/light_de_streetlight_01.nif"],
 	"prop/cart": ["f/furn_cart00.nif"],
-	"prop/broken_cart": ["f/furn_cart00.nif"],
+	"prop/broken_cart": ["f/furn_guarcart00.nif", "f/furn_cart00.nif"],
+	"prop/broken_pillar": ["x/ex_dae_pillar_02_ruin.nif"],
 	"prop/cauldron": ["f/furn_com_cauldron_01.nif", "o/contain_couldron10.nif"],
 	"prop/chair": ["f/furn_com_chair_01.nif", "f/furn_de_chair_01.nif"],
 	"prop/stool": ["f/furn_com_stool_01.nif", "f/furn_de_stool_01.nif"],
@@ -47,6 +48,10 @@ const PROPS := {
 	"prop/wardrobe": ["o/contain_com_closet_01.nif"],
 	"prop/display": ["o/contain_com_drawers_01.nif"],
 	"prop/rack": ["f/furn_uni_weaponrack_01.nif"],
+	"prop/counter": ["f/furn_com_bar_01.nif", "f/furn_de_bar_01.nif"],
+	"door/building": ["d/ex_imp_loaddoor_01.nif", "d/ex_common_door_01.nif", "d/ex_nord_door_01.nif"],
+	"door/dungeon": ["d/ex_cave_door_01.nif", "d/in_impsmall_d_cave_01.nif", "d/door_cavern_doors00.nif"],
+	"prop/rope_coil": ["m/misc_ropecoil00.nif", "x/ex_coiled_rope.nif"],
 	"prop/weapon_rack": ["f/furn_uni_weaponrack_01.nif"],
 	"prop/keg_rack": ["f/furn_com_kegstand.nif", "f/furn_de_kegstand.nif"],
 	"prop/log_pile": ["f/furn_logpile10.nif"],
@@ -163,6 +168,72 @@ const ITEMS := {
 	"weapon/staff": ["w/w_staff00.nif"],
 	"weapon/bow": ["w/w_longbow.nif"],
 	"weapon/shield": ["a/shield_iron.nif", "a/shield_steel.nif"],
+	"item/arrow": ["w/w_iron_arrow.nif", "w/w_arrow01.nif"],
+	"item/shirt": ["c/c_common_wool01shirtgnd.nif", "c/c_common_wool02shirtgnd.nif"],
+	"item/fine_shirt": ["c/c_common_nordic01shirtgnd.nif", "c/c_common_wool02shirtgnd.nif"],
+	"item/robe": ["c/c_common_wool01_robe_gnd.nif", "c/c_common_robe3blk_gnd.nif"],
+	"item/shoes": ["c/c_shoes_common1_gnd.nif", "c/c_m_shoe_common01_gnd.nif"],
+	"item/fine_shoes": ["c/c_m_shoe_expens_1_gnd.nif", "c/c_shoes_common2_gnd.nif"],
+	"item/gloves": ["c/c_glove_common1_gnd.nif"],
+	"item/cloth": ["m/misc_foldedcloth00.nif", "m/misc_cloth10.nif"],
+	"item/hood": ["m/misc_foldedcloth00.nif"],
+	"item/lockpick": ["m/pick_apprentice_01.nif", "m/probe_apprentice_01.nif"],
+	"item/tongs": ["m/misc_prongs00.nif"],
+	"item/rope": ["m/misc_ropecoil00.nif"],
+	"item/lute": ["m/misc_de_lute_01.nif"],
+	"item/inkwell": ["m/misc_inkwell.nif"],
+	"item/bottle": ["m/misc_com_bottle_01.nif", "m/misc_com_bottle_02.nif"],
+	"item/pitcher": ["m/misc_com_pitcher_metal_01.nif", "m/misc_redware_pitcher.nif"],
+	"item/paper": ["m/misc_paper_plain_01.nif", "m/text_scroll_02.nif"],
+	"item/pearl": ["n/ingred_pearl_01.nif"],
+	"item/heart": ["n/ingred_daedra_heart_01.nif"],
+	"item/mask": ["m/misc_vivec_ashmask_01.nif"],
+	"item/lamp": ["m/misc_redware_lamp.nif"],
+	"item/small_chest": ["m/misc_chest_small_01.nif"],
+	"item/salt": ["n/ingred_ash_salts_01.nif"],
+	"item/herb": ["n/ingred_stoneflower_01.nif", "n/ingred_heather_01.nif"],
+	"item/root": ["n/ingred_trama_root_01.nif"],
+	"item/mushroom": ["n/ingred_russula_01.nif", "n/ingred_coprinus_01.nif"],
+	"item/egg": ["m/misc_kwamaegg_gold_01.nif"],
+	"item/feather": ["n/ingred_racer_plumes_01.nif"],
+	"item/cabbage": ["n/ingred_scrib_cabbage_01.nif"],
+	"item/leek": ["n/ingred_marshmerrow_01.nif"],
+	"food/potato": ["n/ingred_ash_yam_01.nif"],
+	"food/onion": ["n/ingred_ash_yam_01.nif"],
+}
+
+## The game's ingredients and materials that have a close Morrowind match of their own
+const ITEM_IDS := {
+	"ash_salt": "n/ingred_ash_salts_01.nif", "fire_salts": "n/ingred_fire_salts_01.nif",
+	"void_salt": "n/ingred_void_salts_01.nif", "storm_crystal": "n/ingred_raw_glass_01.nif",
+	"bone_meal": "n/ingred_blonemeal_01.nif", "bear_claw": "n/ingred_lloramor_spines_01.nif",
+	"wolf_fang": "n/ingred_lloramor_spines_01.nif", "hawk_feather": "n/ingred_racer_plumes_01.nif",
+	"crawler_eye": "n/ingred_kwama_cuttle_01.nif", "spider_egg": "n/ingred_bc_ampoule_pod.nif",
+	"venom_sac": "n/ingred_bc_spore_pod.nif", "river_scale": "n/ingred_scales_01.nif",
+	"troll_fat": "n/ingred_dreugh_wax_01.nif", "wisp_dust": "n/ingred_vampire_dust_01.nif",
+	"glowcap": "n/ingred_bc_hypha_facia.nif", "bloodmoss": "n/ingred_red_lichen_01.nif",
+	"nightshade": "n/ingred_bm_belladonna_01.nif", "lavender": "n/ingred_heather_01.nif",
+	"thistle": "n/ingred_bittergreen_01.nif", "blue_mountain_flower": "n/ingred_stoneflower_01.nif",
+	"red_mountain_flower": "n/ingred_fire_petal_01.nif", "frost_mirriam": "n/ingred_bm_holly_01.nif",
+	"cactus_flower": "n/ingred_bc_coda_flower.nif", "juniper_berries": "n/ingred_comberry_01.nif",
+	"snowberries": "n/ingred_bm_holly_01.nif", "mandrake_root": "n/ingred_trama_root_01.nif",
+	"sandroot": "n/ingred_corkbulb_root_01.nif", "swamp_lily": "n/ingred_horn_lily_bulb_01.nif",
+	"wild_garlic": "n/ingred_marshmerrow_01.nif", "animal_hide": "n/ingred_guar_hide_01.nif",
+	"leather": "n/ingred_netch_leather_01.nif", "leather_strips": "n/ingred_netch_leather_01.nif",
+	"bear_pelt": "n/ingred_hide_brnbear.nif", "wolf_pelt": "n/ingred_hide_grywolf.nif",
+	"cabbage": "n/ingred_scrib_cabbage_01.nif", "carrot": "n/ingred_ash_yam_01.nif",
+	"potato": "n/ingred_ash_yam_01.nif", "leek": "n/ingred_marshmerrow_01.nif",
+	"egg": "m/misc_kwamaegg_gold_01.nif", "honey": "m/misc_pot_redware_01.nif",
+	"milk": "m/misc_redware_pitcher.nif", "butter": "m/misc_redware_bowl.nif",
+	"salt": "m/misc_silverware_bowl.nif", "raw_fish": "n/ingred_crabmeat_01.nif",
+	"raw_meat": "n/ingred_hound_meat_01.nif", "obsidian_shard": "n/ingred_raw_glass_01.nif",
+	"glacier_pearl": "n/ingred_pearl_01.nif", "runed_mask": "m/misc_vivec_ashmask_01.nif",
+	"quiet_ash_censer": "m/misc_redware_lamp.nif", "gilded_reliquary": "m/misc_chest_small_02.nif",
+	"ember_heart": "n/ingred_daedra_heart_01.nif", "construct_heart": "m/misc_dwrv_gear00.nif",
+	"bronze_sky_disc": "m/misc_dwrv_artifact40.nif", "drowned_astrolabe": "m/misc_dwrv_artifact30.nif",
+	"vault_keystone": "m/misc_dwrv_ark_cube00.nif", "tongs": "m/misc_prongs00.nif",
+	"rope": "m/misc_ropecoil00.nif", "inkwell": "m/misc_inkwell.nif", "lute": "m/misc_de_lute_01.nif",
+	"empty_bottle": "m/misc_com_bottle_03.nif", "lockpick": "m/pick_apprentice_01.nif",
 }
 
 ## Morrowind's weapons lie with the blade toward -Z and the grip at the origin: stood up, blade +Y, as the
@@ -249,6 +320,10 @@ static func statics(data: MwData) -> Dictionary:
 			out[key] = {"file": f, "fit": "long" if key.begins_with("weapon/") else "real"}
 			if key in ["weapon/staff", "weapon/bow"]:
 				out[key]["rot"] = WEAPON_ROT
+	for id in ITEM_IDS:
+		var f := data.find(_paths([ITEM_IDS[id]]))
+		if f != "":
+			out["item/" + id] = {"file": f, "fit": "real"}
 	# Every weapon and piece of armour, by its material
 	for item in ItemCatalog.all_items():
 		var f := _for_item(data, item)
@@ -273,6 +348,8 @@ static func _for_item(data: MwData, item: ItemData) -> String:
 		return ""
 	var mw: String = MATERIALS[mat]
 	var tries: Array = []
+	if kind == "arrow":
+		return data.find(["meshes/w/w_%s_arrow.nif" % mw, "meshes/w/w_iron_arrow.nif", "meshes/w/w_arrow01.nif"])
 	if kind == "shield":
 		tries = ["meshes/a/shield_%s.nif" % mw, "meshes/a/towershield_%s.nif" % mw, "meshes/a/shield_steel.nif", "meshes/a/shield_iron.nif"]
 	elif WEAPON_NAMES.has(kind):

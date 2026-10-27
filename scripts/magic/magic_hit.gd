@@ -74,6 +74,7 @@ static func after_hit(caster: Node, victim: Node3D, info: DamageInfo) -> void:
 
 ## Floating text over a creature (Resisted, Absorbed, ...)
 static func popup(host: Node3D, text: String, color: Color) -> void:
+	return  # no floating text over creatures (1.17)
 	if host == null or not is_instance_valid(host) or not host.is_inside_tree():
 		return
 	var scene := host.get_tree().current_scene

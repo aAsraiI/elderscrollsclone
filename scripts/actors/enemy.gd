@@ -1662,6 +1662,7 @@ func _flash() -> void:
 
 # Floating damage number
 func _popup(text: String, pos: Vector3, color: Color, size: int = 48) -> void:
+	return  # no floating numbers or shouts over heads (1.17): the screen stays clear
 	var host: Node = get_tree().current_scene if get_tree().current_scene != null else get_parent()
 	if host == null:
 		return

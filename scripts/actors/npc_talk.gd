@@ -2,8 +2,8 @@ class_name NpcTalk
 extends Node
 ## Lets you talk to an NPC: add it under a body (the Enemy does this for friendly and neutral NPCs).
 ## It sets the body up like a chest: interactable meta + physics layer 3, so the interaction ray
-## finds it and shows "[E] Talk to <name>". Each press says the next line in a speech bubble above
-## the head. A real dialogue system can replace say() later.
+## finds it and shows "[E] Talk to <name>". Talking opens the dialogue window; without one, each press
+## moves on to the next line (no speech bubbles over heads since 1.17: the screen stays clear).
 
 const INTERACTABLE_LAYER := 4  # physics layer 3
 
@@ -14,6 +14,8 @@ const INTERACTABLE_LAYER := 4  # physics layer 3
 var _index := 0
 var _bubble: Label3D
 var _bubble_left := 0.0
+## The last thing said (no longer shown over the head)
+var last_line := ""
 
 
 static func attach(body: Node, name_shown: String, line_list: PackedStringArray) -> NpcTalk:
@@ -50,25 +52,7 @@ func interact(_actor: Inventory) -> void:
 
 
 func say(text: String) -> void:
-	var host := get_parent() as Node3D
-	if host == null:
-		return
-	if _bubble == null or not is_instance_valid(_bubble):
-		_bubble = Label3D.new()
-		_bubble.font_size = 40
-		_bubble.pixel_size = 0.005
-		_bubble.outline_size = 12
-		_bubble.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		_bubble.no_depth_test = true
-		_bubble.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		_bubble.width = 700.0
-		var scale_y := 1.0
-		if "body_scale" in host:
-			scale_y = float(host.get("body_scale"))
-		_bubble.position = Vector3(0.0, 2.5 * scale_y, 0.0)
-		host.add_child(_bubble)
-	_bubble.text = "%s: %s" % [speaker, text]
-	_bubble_left = bubble_seconds
+	last_line = "%s: %s" % [speaker, text]  # no bubble over the head (1.17); kept for whoever asks
 
 
 func _process(delta: float) -> void:

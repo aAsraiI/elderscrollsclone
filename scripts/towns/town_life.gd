@@ -761,6 +761,7 @@ func _lie_down(e: Enemy, bed: Vector3) -> void:
 		e.body.pose = &"sleep"
 	var zzz := Label3D.new()
 	zzz.name = "Zzz"
+	zzz.visible = false  # nothing floats over a sleeper's head (1.17)
 	zzz.text = "Zzz"
 	zzz.font_size = 36
 	zzz.pixel_size = 0.006

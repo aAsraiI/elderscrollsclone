@@ -301,13 +301,10 @@ func t_dispositions() -> void:
 	check("talking is on the interactable physics layer", (wanderer.collision_layer & 4) != 0)
 	check("the prompt names the NPC", talk != null and talk.get_prompt() == "Talk to Wanderer", talk.get_prompt() if talk != null else "")
 	talk.interact(null)
-	var bubble: Label3D = null
-	for c in wanderer.get_children():
-		if c is Label3D:
-			bubble = c
-	check("talking shows a speech bubble with a line", bubble != null and bubble.text.begins_with("Wanderer: "))
+	var bubbles := wanderer.get_children().filter(func(c: Node) -> bool: return c is Label3D).size()
+	check("talking says a line, with no bubble over the head (1.17)", bubbles == 0 and talk.last_line.begins_with("Wanderer: "))
 	talk.interact(null)
-	check("pressing again says the next line", bubble != null and bubble.text != "" and talk._index == 2)
+	check("pressing again says the next line", talk._index == 2)
 	check("hostile enemies cannot be talked to", bandit.get_node_or_null("NpcTalk") == null)
 
 	# provoking

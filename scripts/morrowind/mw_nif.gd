@@ -263,6 +263,75 @@ func _record(type: String, r: Dictionary) -> bool:
 				_skip(nverts * 12)
 		"NiSequenceStreamHelper":
 			_object_net(r)
+		# Particles (flames, smoke, sparks): read so the rest of the file can be, drawn as a glow
+		"NiAutoNormalParticles", "NiRotatingParticles", "NiParticles":
+			_av_object(r)
+			r["data"] = _ref()
+			r["skin"] = _ref()
+			r["particles"] = true
+		"NiAutoNormalParticlesData", "NiRotatingParticlesData", "NiParticlesData":
+			_geometry_data(r)
+			_s.get_u16()  # particle count
+			r["radius"] = _s.get_float()
+			_s.get_u16()  # active
+			if _bool():
+				_skip((r["vertices"] as PackedVector3Array).size() * 4)
+			if type == "NiRotatingParticlesData" and _bool():
+				_skip((r["vertices"] as PackedVector3Array).size() * 16)
+		"NiParticleSystemController", "NiBSPArrayController":
+			_time_controller(r)
+			_skip(24 + 12 + 16 + 4 + 4 + 4 + 1 + 4 + 4 + 4 + 2 + 12)
+			r["emitter"] = _ref()
+			_skip(2 + 4 + 2 + 4 + 4)
+			var count := _s.get_u16()
+			_s.get_u16()
+			_skip(count * 40)
+			_skip(4)
+			r["modifier"] = _ref()
+			r["collider"] = _ref()
+			_s.get_u8()
+		"NiGravity":
+			_particle_modifier(r)
+			_skip(4 + 4 + 4 + 12 + 12)
+		"NiParticleGrowFade":
+			_particle_modifier(r)
+			_skip(8)
+		"NiParticleColorModifier":
+			_particle_modifier(r)
+			r["data"] = _ref()
+		"NiParticleRotation":
+			_particle_modifier(r)
+			_skip(1 + 12 + 4)
+		"NiParticleBomb":
+			_particle_modifier(r)
+			_skip(16 + 4 + 12 + 12)
+		"NiPlanarCollider":
+			_particle_modifier(r)
+			_skip(4 + 8 + 12 + 12 + 12 + 12 + 4)
+		"NiSphericalCollider":
+			_particle_modifier(r)
+			_skip(4 + 4 + 12)
+		"NiTextureEffect":
+			_av_object(r)
+			_skip(_s.get_u32() * 4)  # affected nodes
+			_skip(36 + 12 + 16)
+			r["texture"] = _ref()
+			_skip(1 + 16 + 4 + 2)
+		"NiPointLight", "NiAmbientLight", "NiDirectionalLight", "NiSpotLight":
+			_av_object(r)
+			_skip(_s.get_u32() * 4)
+			r["dimmer"] = _s.get_float()
+			_skip(12)
+			var c := _vec3()
+			r["color"] = Color(c.x, c.y, c.z)
+			_skip(12)
+			if type == "NiPointLight" or type == "NiSpotLight":
+				_skip(12)
+			if type == "NiSpotLight":
+				_skip(8)
+		"NiVertWeightsExtraData":
+			r["next"] = _ref()
+			_skip(_s.get_u32())
 		_:
 			return false
 	return true
@@ -303,6 +372,11 @@ func _bounding_volume() -> void:
 				_bounding_volume()
 		5:
 			_skip(16 + 12)
+
+
+func _particle_modifier(r: Dictionary) -> void:
+	r["next"] = _ref()
+	r["controller"] = _ref()
 
 
 func _time_controller(r: Dictionary) -> void:

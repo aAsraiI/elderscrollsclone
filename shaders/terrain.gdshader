@@ -12,6 +12,21 @@ uniform vec3 rock_color : source_color = vec3(0.36, 0.34, 0.31);
 uniform float detail : hint_range(0.0, 1.0) = 1.0;
 uniform float mute : hint_range(0.0, 1.0) = 0.4;
 
+// Morrowind's ground textures (MwSurfaces, project shader globals), when imported: their detail and shading on
+// the biome's own colour
+global uniform bool mw_surfaces;
+global uniform sampler2D mw_grass : source_color, repeat_enable, filter_linear_mipmap;
+global uniform sampler2D mw_earth : source_color, repeat_enable, filter_linear_mipmap;
+global uniform sampler2D mw_rock : source_color, repeat_enable, filter_linear_mipmap;
+
+// A texture's look without its overall brightness (so it shades a colour rather than replacing it)
+vec3 mw_detail(sampler2D t, vec2 uv) {
+	// against the texture's own average (its smallest mipmap): light and dark, and a little of its hue
+	vec3 mean = max(textureLod(t, vec2(0.5), 16.0).rgb, vec3(0.03));
+	vec3 d = texture(t, uv).rgb / mean;
+	return clamp(mix(vec3(dot(d, vec3(0.3333))), d, 0.3), 0.25, 2.0);
+}
+
 varying vec3 world_n;
 varying vec3 wpos;
 
@@ -60,10 +75,19 @@ void fragment() {
 	float bare = smoothstep(0.58, 0.72, mid) * (0.4 + green * 0.6);
 	vec3 flat_col = c * (0.82 + big * 0.36) * (0.92 + fine * 0.16);
 	flat_col = mix(flat_col, earth * (0.85 + fine * 0.2), bare * detail);
+	if (mw_surfaces) {
+		vec3 g = mw_detail(mw_grass, wpos.xz * 0.22);
+		vec3 e = mw_detail(mw_earth, wpos.xz * 0.22);
+		flat_col *= mix(g, e, bare * detail);
+	}
 	// Slopes: the land's rock, tinted toward the biome, in layers
 	vec3 rock = mix(rock_color, c * 0.7, 0.3);
 	float strata = noise(vec2(wpos.y * 1.6 + fbm(wpos.xz * 0.08) * 3.0, 0.5));
 	rock *= 0.78 + strata * 0.3 + noise(vec2(wpos.x + wpos.z, wpos.y) * 3.0) * 0.08;
+	if (mw_surfaces) {
+		vec2 ruv = nrm.y > 0.6 ? wpos.xz : (abs(nrm.x) > abs(nrm.z) ? wpos.zy : wpos.xy);
+		rock *= mw_detail(mw_rock, ruv * 0.18);
+	}
 	float slope = 1.0 - smoothstep(0.62, 0.8, nrm.y + (mid - 0.5) * 0.12);
 	vec3 col = mix(flat_col, rock, slope * detail);
 	// Snow on flat, upward faces

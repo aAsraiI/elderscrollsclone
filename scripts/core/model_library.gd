@@ -224,6 +224,8 @@ static func fitted(key: String, target: AABB, mode: String = "") -> Node3D:
 			s = _longest(target.size) / maxf(_longest(box.size), 0.0001)
 		"width":
 			s = maxf(target.size.x, target.size.z) / maxf(maxf(box.size.x, box.size.z), 0.0001)
+		"real":
+			s = 1.0  # its own size in metres (Morrowind models come that way)
 		"fill":
 			# As tall as the old piece (so things set on top still sit on it), but not much wider
 			s = minf(target.size.y / maxf(box.size.y, 0.0001), 1.2 * minf(target.size.x / maxf(box.size.x, 0.0001),
@@ -253,7 +255,7 @@ static func _longest(v: Vector3) -> float:
 static func bounds(node: Node3D) -> AABB:
 	var out := AABB()
 	var first := true
-	for mi in node.find_children("*", "VisualInstance3D", true, false):
+	for mi in node.find_children("*", "GeometryInstance3D", true, false):  # lights do not count
 		var vi := mi as VisualInstance3D
 		if vi is GPUParticles3D or vi is CPUParticles3D or vi is Label3D or _hidden(vi, node):
 			continue

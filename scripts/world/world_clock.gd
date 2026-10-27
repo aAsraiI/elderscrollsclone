@@ -26,9 +26,11 @@ signal day_started
 @export var debug_keys := true
 
 const ACTION := "debug_time"
-const NIGHT_AMBIENT := 0.10
+const NIGHT_AMBIENT := 0.05
+## Daylight from the sky itself (shadows stay dark rather than washed out)
+const DAY_AMBIENT := 0.6
 const NIGHT_SKY := 0.03
-const DAY_FOG := Color(0.70, 0.78, 0.88)
+const DAY_FOG := Color(0.52, 0.56, 0.6)
 const NIGHT_FOG := Color(0.02, 0.03, 0.06)
 
 var hour := 8.0
@@ -184,7 +186,7 @@ func apply_now() -> void:
 		if _sky_mat != null:
 			_env.background_energy_multiplier = lerpf(0.6, 1.0, day_factor) * float(w.get("sky", 1.0))  # the shader darkens the night itself
 			_update_sky(elevation, day_factor, w)
-		_env.ambient_light_energy = lerpf(NIGHT_AMBIENT, 1.0, day_factor) * float(w.get("ambient", 1.0)) + float(w.get("flash", 0.0))
+		_env.ambient_light_energy = lerpf(NIGHT_AMBIENT, DAY_AMBIENT, day_factor) * float(w.get("ambient", 1.0)) + float(w.get("flash", 0.0))
 		if _base_fog < 0.0:
 			_base_fog = _env.fog_density
 		if _env.fog_enabled:
@@ -355,6 +357,17 @@ func _update_sky(elevation: float, day_factor: float, w: Dictionary) -> void:
 	_sky_mat.set_shader_parameter("cloud_dark", clampf((1.0 - float(w.get("sun", 1.0))) * 1.2, 0.0, 1.0))
 	_sky_mat.set_shader_parameter("time_of_world", hours)
 	_sky_mat.set_shader_parameter("moon_phase", get_moon_phase())
+	# Morrowind's sky pictures for this weather, when they have been imported (MwSky)
+	var weather := Weather.get_instance(get_tree())
+	var clouds := MwSky.texture(MwSky.WEATHER.get(weather.current if weather != null else Weather.Kind.CLEAR, "tx_sky_clear"))
+	_sky_mat.set_shader_parameter("mw_clouds_on", clouds != null)
+	if clouds != null:
+		_sky_mat.set_shader_parameter("mw_clouds", clouds)
+	var stars := MwSky.texture(MwSky.STARS)
+	_sky_mat.set_shader_parameter("mw_stars_on", stars != null)
+	if stars != null:
+		_sky_mat.set_shader_parameter("mw_stars", stars)
+		_sky_mat.set_shader_parameter("mw_nebula", MwSky.texture(MwSky.NEBULA) if MwSky.texture(MwSky.NEBULA) != null else stars)
 	for m in [["moon_dir", 0.0, 0.7], ["moon2_dir", 2.2, 0.45]]:
 		var a := (hour + 12.0 + float(m[1])) / 24.0 * TAU - PI * 0.5
 		_sky_mat.set_shader_parameter(m[0], Vector3(cos(a), sin(a) * float(m[2]) + 0.15, -0.45).normalized())

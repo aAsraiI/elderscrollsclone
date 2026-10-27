@@ -6,10 +6,11 @@
 script = ExtResource("1_wvxof")
 id = &"lantern"
 display_name = "Lantern"
-description = "Worth a few coins to the right buyer."
+description = "A travelling lantern. Wear it on your belt (the Lantern slot) and it lights the way around you, though it also makes you easier to see."
+item_type = 9
+equip_slot = 10
 weight = 1.0
-value = 10
+value = 20
 stackable = true
 max_stack = 99
-junk = true
-loot_tags = PackedStringArray("mine", "home", "camp")
+loot_tags = PackedStringArray("mine", "home", "camp", "shop", "tools")

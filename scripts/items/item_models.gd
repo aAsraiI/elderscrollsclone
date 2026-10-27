@@ -56,8 +56,11 @@ static func build_world(item: ItemData) -> Node3D:
 	return root
 
 
-## The box around every mesh under `node`, in node's own space
+## The box around every mesh under `node`, in node's own space (lights and glows do not count)
 static func get_bounds(node: Node3D) -> AABB:
+	var shapes := ModelLibrary.bounds(node)
+	if shapes.size.length() > 0.0:
+		return shapes
 	var out := AABB()
 	var first := true
 	for mi in node.find_children("*", "VisualInstance3D", true, false):

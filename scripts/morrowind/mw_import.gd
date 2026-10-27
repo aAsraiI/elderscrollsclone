@@ -29,6 +29,13 @@ const CLIPS := {"idle": "Idle", "idle_combat": "Idle1h", "idle_combat_2h": "Idle
 	"death": "Death1", "cast": "SpellCast_Target", "aim": "BowAndArrow_Shoot", "sit": "Idle9", "kneel": "Idle9",
 	"lie": "Knockout", "work": "Idle8", "chop": "WeaponOneHand_Chop", "talk": "Idle2", "drink": "Idle3", "stun": "Hit2"}
 
+## The same for Morrowind's creatures (their clips are named Attack1..3)
+const CREATURE_CLIPS := {"idle": "Idle", "idle_combat": "Idle", "idle_combat_2h": "Idle", "walk": "WalkForward",
+	"run": "RunForward", "attack": "Attack1", "attack_alt": "Attack2", "attack2h": "Attack3", "attack_unarmed": "Attack1",
+	"bash": "Attack2", "block": "Idle", "hit": "Hit1", "death": "Death1", "cast": "SpellCast_Target", "aim": "Attack1",
+	"sit": "Idle", "kneel": "Idle", "lie": "Knockout", "work": "Idle2", "chop": "Attack1", "talk": "Idle2", "drink": "Idle3",
+	"stun": "Hit2"}
+
 const TAG := "morrowind"
 
 
@@ -45,12 +52,15 @@ static func run(data_files: String, progress: Callable = Callable()) -> Dictiona
 		out["problems"].append("No Morrowind.esm in " + data_files)
 		return out
 	var dir := models_dir()
-	DirAccess.make_dir_recursive_absolute(dir)
+	DirAccess.make_dir_recursive_absolute(dir.path_join("textures"))
+	data.texture_dir = dir.path_join("textures")
 	var manifest := _read_manifest(dir)
+	var statics := MwCatalog.statics(data)
+	var total := CAST.size() + MwCatalog.CREATURES.size() + statics.size()
 	var i := 0
 	for key in CAST:
 		if progress.is_valid():
-			progress.call(i, CAST.size(), key)
+			progress.call(i, total, key)
 		i += 1
 		var builder := MwCharacter.new(data)
 		var spec: Dictionary = CAST[key]
@@ -75,9 +85,68 @@ static func run(data_files: String, progress: Callable = Callable()) -> Dictiona
 			"run_speed": maxf(builder.speeds.get("RunForward", 300.0) * s, 1.5)}
 		out["made"].append(key)
 		node.free()
+	# Skies: the clouds for each weather and the night sky
+	MwSky.convert(data, dir.path_join("textures"))
+	MwSurfaces.convert(data, dir.path_join("textures"))
+	# Creatures, with their own animations
+	for key in MwCatalog.CREATURES:
+		if progress.is_valid():
+			progress.call(i, total, key)
+		i += 1
+		var pair: Array = MwCatalog.CREATURES[key]
+		var nif_path := data.find(["meshes/" + String(pair[0])])
+		if nif_path == "":
+			continue  # Tribunal or Bloodmoon not installed
+		var builder := MwCharacter.new(data)
+		var node := builder.build_creature(nif_path, data.find(["meshes/" + String(pair[1])]))
+		if node == null:
+			out["problems"].append_array(Array(builder.problems).map(func(p): return "%s: %s" % [key, p]))
+			continue
+		if not _save(node, dir, key, out):
+			continue
+		var e := {"path": _file(key), "source": TAG, "fit": "creature", "clips": CREATURE_CLIPS,
+			"scale": MwCatalog.CREATURE_SCALE.get(key, 1.0),
+			"walk_speed": maxf(builder.speeds.get("WalkForward", 120.0) * MwCharacter.SCALE, 0.5),
+			"run_speed": maxf(builder.speeds.get("RunForward", 300.0) * MwCharacter.SCALE, 1.5)}
+		if key in MwCatalog.ARMED:
+			e["hands"] = {"r": "Bip01 R Hand", "l": "Bip01 L Hand"}
+			e["grip"] = "auto"
+		manifest[key] = e
+		out["made"].append(key)
+	# Everything that does not move: furniture, clutter, items, weapons, armour, trees, rocks
+	for key in statics:
+		if progress.is_valid():
+			progress.call(i, total, key)
+		i += 1
+		var builder := MwCharacter.new(data)
+		var node := builder.build_static(String(statics[key]["file"]))
+		if node == null:
+			out["problems"].append_array(Array(builder.problems).map(func(p): return "%s: %s" % [key, p]))
+			continue
+		if not _save(node, dir, key, out):
+			continue
+		manifest[key] = {"path": _file(key), "source": TAG, "fit": statics[key]["fit"]}
+		if statics[key].has("rot"):
+			manifest[key]["rot"] = statics[key]["rot"]
+		out["made"].append(key)
 	_write_manifest(dir, manifest)
 	ModelLibrary.reload()
 	return out
+
+
+static func _file(key: String) -> String:
+	return key.replace("/", "__") + ".scn"
+
+
+# Saves a built model into the models folder (and frees it); false if it could not be saved
+static func _save(node: Node3D, dir: String, key: String, out: Dictionary) -> bool:
+	_own(node, node)
+	var ps := PackedScene.new()
+	var ok := ps.pack(node) == OK and ResourceSaver.save(ps, dir.path_join(_file(key)), ResourceSaver.FLAG_COMPRESS) == OK
+	if not ok:
+		out["problems"].append("%s: could not save" % key)
+	node.free()
+	return ok
 
 
 ## Takes the imported Morrowind people back out of the models folder
@@ -91,6 +160,12 @@ static func remove() -> int:
 			DirAccess.remove_absolute(dir.path_join(String(e["path"])))
 			manifest.erase(key)
 			n += 1
+	var tex_dir := dir.path_join("textures")
+	if DirAccess.dir_exists_absolute(tex_dir):
+		for f in DirAccess.get_files_at(tex_dir):
+			DirAccess.remove_absolute(tex_dir.path_join(f))
+	MwSky.forget()
+	MwSurfaces.forget()
 	_write_manifest(dir, manifest)
 	ModelLibrary.reload()
 	return n

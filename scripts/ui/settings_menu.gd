@@ -180,7 +180,7 @@ func _build_ui() -> void:
 # Models: people made from your own copy of Morrowind (MwImport)
 func _build_models_page(grid: GridContainer) -> void:
 	var about := Label.new()
-	about.text = "Use Morrowind's people: if you own Morrowind, the game can build its townsfolk, guards, fighters, archers, mages and brutes from your copy (its races, faces, hair, clothes, armour and animations). They are saved in your own models folder, never in the game itself. Point it at Morrowind's \"Data Files\" folder."
+	about.text = "Use Morrowind's look: if you own Morrowind, the game can build its people, creatures, furniture, clutter, weapons, armour, items, trees, rocks, skies and ground and wall textures from your copy. They are saved in your own models folder, never in the game itself. Point it at Morrowind's \"Data Files\" folder."
 	about.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	about.custom_minimum_size = Vector2(560, 0)
 	grid.add_child(about)
@@ -193,10 +193,10 @@ func _build_models_page(grid: GridContainer) -> void:
 	row.add_theme_constant_override("separation", 8)
 	grid.add_child(row)
 	var import := Button.new()
-	import.text = "Import Morrowind people"
+	import.text = "Import from Morrowind"
 	row.add_child(import)
 	var remove := Button.new()
-	remove.text = "Remove them"
+	remove.text = "Remove Morrowind's look"
 	row.add_child(remove)
 	var status := Label.new()
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -204,7 +204,7 @@ func _build_models_page(grid: GridContainer) -> void:
 	grid.add_child(status)
 	var show_count := func() -> void:
 		var n := MwImport.count()
-		status.text = "%d Morrowind people in use." % n if n > 0 else "Using the game's own people."
+		status.text = "%d Morrowind models in use." % n if n > 0 else "Using the game's own models."
 		remove.disabled = n == 0
 	show_count.call()
 	import.pressed.connect(func() -> void:
@@ -212,12 +212,12 @@ func _build_models_page(grid: GridContainer) -> void:
 			status.text = "No Morrowind.esm in that folder. Choose Morrowind's \"Data Files\" folder."
 			return
 		import.disabled = true
-		status.text = "Building people from Morrowind..."
+		status.text = "Building from Morrowind (about half a minute)..."
 		await get_tree().process_frame
 		await get_tree().process_frame
 		var r := MwImport.run(path.text.strip_edges())
 		import.disabled = false
-		status.text = "Made %d people. People already standing around change when you next enter a place or load a game." % r["made"].size()
+		status.text = "Made %d models. What is already around you changes when you next enter a place or load a game." % r["made"].size()
 		if not r["problems"].is_empty():
 			status.text += " (%d parts could not be built.)" % r["problems"].size()
 		remove.disabled = r["made"].is_empty())

@@ -35,6 +35,9 @@ var cast_color := Color(1.0, 0.5, 0.2)
 ## 0..1 how far a bow is drawn (enemy archers)
 var bow_draw := 0.0
 
+## Enemy types that are walking dead (skeleton bodies when there is no model for the type itself)
+const UNDEAD := ["skeleton", "skeleton_knight", "crypt_warden", "barrow_wight", "wight_lord", "vault_guardian", "vault_sentinel"]
+
 ## A real model drawn instead of the boxes (ModelBody), when ModelLibrary has one
 var model_body: ModelBody
 var _model_checked := false
@@ -134,7 +137,10 @@ func model_keys() -> Array:
 	var pick := _rng.randi()
 	var is_player := not (enemy is Enemy) and not (enemy is Horse)
 	var prefix := "people/"
-	if lower.contains("skeleton") or lower.contains("wight") or lower.contains("warden") or lower.contains("sentinel") or lower.contains("guardian"):
+	# Undead and monsters by what they are (their type), so a "Road Warden" or a "Guardian of the Gate" is
+	# still a person; names only for those without a type
+	var what := id if id != "" else lower
+	if what in UNDEAD or (id == "" and (lower.contains("skeleton") or lower.contains("wight"))):
 		if style == Enemy.Style.MAGE:
 			out.append("people/skeleton_mage")
 		elif style == Enemy.Style.ARCHER:
@@ -142,9 +148,9 @@ func model_keys() -> Array:
 		elif heavy or lower.contains("knight") or lower.contains("lord"):
 			out.append("people/skeleton_warrior")
 		out.append("people/skeleton")
-	elif lower.contains("ghoul") or lower.contains("drowned") or lower.contains("zombie") or lower.contains("risen"):
+	elif what in ["grave_ghoul", "drowned_sailor"] or lower.begins_with("risen ") or (id == "" and (lower.contains("ghoul") or lower.contains("zombie"))):
 		out.append("people/zombie")
-	elif lower.contains("troll") or lower.contains("giant") or lower.contains("werewolf"):
+	elif what in ["cave_troll", "forest_troll", "frost_giant", "werewolf"]:
 		out.append("people/brute")
 	if style == Enemy.Style.MAGE or lower.contains("priest") or lower.contains("cultist") or lower.contains("hag") or lower.contains("mage"):
 		out.append(prefix + "mage")

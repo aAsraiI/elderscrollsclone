@@ -6,7 +6,7 @@ extends Resource
 ## BOOK = spell tomes, MATERIAL = ore, ingots, leather, raw food, SOUL_GEM, TOOL = pickaxe (added at
 ## the end so old item files keep their numbers)
 enum ItemType { MISC, WEAPON, ARMOR, CONSUMABLE, INGREDIENT, KEY, BOOK, MATERIAL, SOUL_GEM, TOOL }
-enum EquipSlot { NONE, HEAD, CHEST, HANDS, LEGS, FEET, MAIN_HAND, OFF_HAND, RING, AMULET }
+enum EquipSlot { NONE, HEAD, CHEST, HANDS, LEGS, FEET, MAIN_HAND, OFF_HAND, RING, AMULET, LANTERN }
 ## SINGLE = one target (a few rays close together, nearest target wins).
 ## ARC = the swing sweeps a fan of rays across arc_degrees and hits everything it touches.
 enum AttackStyle { SINGLE, ARC }

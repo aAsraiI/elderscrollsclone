@@ -27,7 +27,7 @@ const CLIPS := ["Idle", "Idle2", "Idle3", "Idle4", "Idle5", "Idle6", "Idle7", "I
 	"Idle2w", "Idlehh", "Idlespell", "Hit1", "Hit2", "Death1", "Death2", "Knockout", "WalkForward", "RunForward",
 	"WalkBack", "WeaponOneHand_Chop", "WeaponOneHand_Slash", "WeaponOneHand_Thrust", "WeaponTwoHand_Chop",
 	"WeaponTwoHand_Slash", "WeaponTwoWide_Chop", "HandToHand_Chop", "HandToHand_Slash", "Shield_Block",
-	"SpellCast_Target", "SpellCast_Self", "BowAndArrow_Shoot", "Idle1s"]
+	"SpellCast_Target", "SpellCast_Self", "BowAndArrow_Shoot", "Idle1s", "Attack1", "Attack2", "Attack3", "Death3"]
 
 var data: MwData
 var problems := PackedStringArray()
@@ -91,6 +91,186 @@ func build(spec: Dictionary) -> Node3D:
 	root.add_child(player)
 	_add_clips(player, data.nif(kf_path))
 	return root
+
+
+## Any Morrowind mesh that does not move (furniture, a barrel, a sword, a rock, a tree), at its real
+## size, standing up and facing -Z. Light meshes (candles, lanterns, sconces) get a light where
+## Morrowind puts theirs. null if it cannot be read.
+func build_static(path: String) -> Node3D:
+	var nif := data.nif(path)
+	if nif == null:
+		problems.append("could not read " + path)
+		return null
+	var root := Node3D.new()
+	root.name = "MwStatic"
+	root.rotation = Vector3(-PI * 0.5, 0.0, 0.0)
+	root.scale = Vector3.ONE * SCALE
+	var shapes: Array = []
+	for r in nif.roots:
+		_collect_shapes(nif, r, Transform3D.IDENTITY, [], shapes)
+	for s in shapes:
+		var shape: Dictionary = nif.records[s[0]]
+		var mesh := _mesh(nif, shape, s[2], false)
+		if mesh == null:
+			continue
+		var mi := MeshInstance3D.new()
+		mi.name = String(shape["name"]).validate_node_name()
+		mi.mesh = mesh
+		mi.transform = s[1]
+		root.add_child(mi)
+	if root.get_child_count() == 0:
+		root.free()
+		problems.append("nothing to draw in " + path)
+		return null
+	# Flames and embers (Morrowind draws them as particles): a small glow where they come from
+	for flame_at in _find_particles(nif):
+		var flame := MeshInstance3D.new()
+		flame.name = "Flame"
+		var q := QuadMesh.new()
+		q.size = Vector2(4.0, 6.0)
+		flame.mesh = q
+		var fm := StandardMaterial3D.new()
+		fm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		fm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+		fm.billboard_keep_scale = true  # or it would ignore the model's size and be metres across
+		fm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		fm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		fm.albedo_color = Color(1.0, 0.62, 0.25, 0.9)
+		fm.albedo_texture = _flame_texture()
+		flame.material_override = fm
+		flame.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		flame.transform = Transform3D(Basis.IDENTITY, flame_at.origin + Vector3(0, 0, 2.0))
+		root.add_child(flame)
+	for light_at in _find_nodes(nif, "AttachLight"):
+		var light := OmniLight3D.new()
+		light.name = "Light"
+		light.light_color = Color(1.0, 0.72, 0.42)
+		light.light_energy = 1.1
+		light.omni_range = 4.5 / SCALE
+		light.shadow_enabled = false
+		light.transform = light_at
+		root.add_child(light)
+	return root
+
+
+# Where the particle emitters are, within the file
+func _find_particles(nif: MwNif) -> Array:
+	var out: Array = []
+	var walk := func(walk_fn: Callable, idx: int, xf: Transform3D) -> void:
+		if idx < 0 or idx >= nif.records.size():
+			return
+		var r: Dictionary = nif.records[idx]
+		if r.get("particles", false):
+			out.append(xf * _xf(r))
+			return
+		if not r.has("children") or int(r.get("flags", 0)) & 1:
+			return
+		var here := xf * _xf(r)
+		for c in r["children"]:
+			walk_fn.call(walk_fn, c, here)
+	for r in nif.roots:
+		walk.call(walk, r, Transform3D.IDENTITY)
+	return out
+
+
+static var _flame_tex: Texture2D
+
+
+# A soft round glow, bright in the middle
+static func _flame_texture() -> Texture2D:
+	if _flame_tex == null:
+		var g := Gradient.new()
+		g.set_color(0, Color(1, 1, 1, 1))
+		g.set_color(1, Color(1, 1, 1, 0))
+		var t := GradientTexture2D.new()
+		t.gradient = g
+		t.fill = GradientTexture2D.FILL_RADIAL
+		t.fill_from = Vector2(0.5, 0.6)
+		t.fill_to = Vector2(0.5, 0.05)
+		t.width = 32
+		t.height = 32
+		_flame_tex = t
+	return _flame_tex
+
+
+# Where nodes with this name are, within the file
+func _find_nodes(nif: MwNif, wanted: String) -> Array:
+	var out: Array = []
+	var walk := func(walk_fn: Callable, idx: int, xf: Transform3D) -> void:
+		if idx < 0 or idx >= nif.records.size():
+			return
+		var r: Dictionary = nif.records[idx]
+		if not r.has("children"):
+			return
+		var here := xf * _xf(r)
+		if String(r["name"]) == wanted:
+			out.append(here)
+		for c in r["children"]:
+			walk_fn.call(walk_fn, c, here)
+	for r in nif.roots:
+		walk.call(walk, r, Transform3D.IDENTITY)
+	return out
+
+
+## A Morrowind creature (rat, guar, kwama, atronach...): its own skeleton and skin from the .nif,
+## its animations from the matching x<name>.kf, cut into clips like a person's.
+func build_creature(path: String, kf_path: String) -> Node3D:
+	var nif := data.nif(path)
+	if nif == null:
+		problems.append("could not read " + path)
+		return null
+	var root := Node3D.new()
+	root.name = "MwCreature"
+	root.rotation = Vector3(-PI * 0.5, 0.0, 0.0)
+	root.scale = Vector3.ONE * SCALE
+	_skel = Skeleton3D.new()
+	_skel.name = "Skeleton3D"
+	root.add_child(_skel)
+	for r in nif.roots:
+		_add_bones(nif, r, -1, true)
+	_skel.reset_bone_poses()
+	# Shapes: skinned ones bind to the bones by name, the rest hang from the node they sit under
+	for r in nif.roots:
+		_creature_shapes(nif, r, "", Transform3D.IDENTITY, [])
+	var player := AnimationPlayer.new()
+	player.name = "AnimationPlayer"
+	root.add_child(player)
+	_add_clips(player, data.nif(kf_path) if kf_path != "" else null)
+	# Two-legged creatures on Morrowind's own skeleton (skeletons, draugr, goblins) share the people's
+	# animations for whatever their own file leaves out
+	if _skel.find_bone("Bip01 Spine1") >= 0 and _skel.find_bone("Bip01 L Thigh") >= 0:
+		_add_clips(player, data.nif("meshes/xbase_anim.kf"))
+	if _skel.get_child_count() == 0:
+		root.free()
+		problems.append("nothing to draw in " + path)
+		return null
+	return root
+
+
+func _creature_shapes(nif: MwNif, idx: int, bone: String, xf: Transform3D, props: Array) -> void:
+	if idx < 0 or idx >= nif.records.size():
+		return
+	var r: Dictionary = nif.records[idx]
+	if r["type"] == "RootCollisionNode" or not r.has("flags") or int(r["flags"]) & 1:
+		return
+	var my_props: Array = props + Array(r.get("properties", []))
+	if r["type"] == "NiTriShape":
+		if int(r["skin"]) >= 0:
+			_add_skinned(nif, r, my_props)
+		elif bone != "":
+			_add_rigid(nif, r, xf * _xf(r), my_props, bone, false)
+		return
+	if not r.has("children"):
+		return
+	# A node that is a bone starts a new local space
+	var name := String(r["name"])
+	var next_bone := bone
+	var next_xf := xf * _xf(r)
+	if _skel.find_bone(name) >= 0:
+		next_bone = name
+		next_xf = Transform3D.IDENTITY
+	for c in r["children"]:
+		_creature_shapes(nif, c, next_bone, next_xf, my_props)
 
 
 # ---------------------------------------------------------------- skeleton
@@ -374,13 +554,19 @@ func _add_clips(player: AnimationPlayer, kf: MwNif) -> void:
 			tracks.append([bone_names[i], kf.records[r["data"]]])
 		i += 1
 		c = int(r.get("next", -1))
-	var lib := AnimationLibrary.new()
-	var ranges := clip_ranges(keys)
+	var lib: AnimationLibrary = player.get_animation_library("") if player.has_animation_library("") else AnimationLibrary.new()
+	# Names as Morrowind spells them, whatever the capitals ("Walkforward", "KnockOut")
+	var ranges := {}
+	var found := clip_ranges(keys)
+	for k in found:
+		ranges[String(k).to_lower()] = found[k]
 	for clip in CLIPS:
-		if ranges.has(clip):
+		var r = ranges.get(String(clip).to_lower())
+		if r != null and not lib.has_animation(clip):
 			_clip_name = clip
-			lib.add_animation(clip, _clip(tracks, ranges[clip][0], ranges[clip][1]))
-	player.add_animation_library("", lib)
+			lib.add_animation(clip, _clip(tracks, r[0], r[1]))
+	if not player.has_animation_library(""):
+		player.add_animation_library("", lib)
 
 
 ## Clip name -> [start, stop] from Morrowind's text keys ("Idle: Start", "WeaponOneHand: Chop Start"...)

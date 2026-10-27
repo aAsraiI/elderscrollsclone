@@ -81,6 +81,8 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	collision_mask |= ENEMY_LAYER  # so you can't walk through enemies
 	_ensure_helpers()  # player.tscn has them all; this only fills in any that were removed
+	if get_node_or_null("LanternLight") == null:
+		LanternLight.attach(self)
 	add_to_group("settings_listener")
 	GameSettings.apply(get_tree())  # also calls apply_settings() below
 
@@ -96,6 +98,8 @@ func _ready() -> void:
 		give_test_loadout = false
 		spawn_test_enemy = false
 		CharacterSetup.apply(self, CharacterSetup.pending, not SaveSession.has_pending())
+		if not SaveSession.has_pending():
+			$Inventory.add_item(load("res://data/clutter/lantern.tres"))  # a new character starts with a lantern
 	else:
 		$Inventory.add_item(sword)
 		$Inventory.add_item(armor)

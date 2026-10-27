@@ -5,7 +5,7 @@ extends SceneTree
 
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
-	var bsa := MwBsa.open(args[0].path_join("Morrowind.bsa"))
+	var bsa := MwBsa.open(args[0].path_join(OS.get_environment("MW_BSA") if OS.get_environment("MW_BSA") != "" else "Morrowind.bsa"))
 	match args[1]:
 		"list":
 			var n := 0

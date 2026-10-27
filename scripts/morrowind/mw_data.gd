@@ -71,6 +71,31 @@ func read(path: String) -> PackedByteArray:
 	return PackedByteArray()
 
 
+var _all_names: PackedStringArray = []
+
+
+## The first archived file matching any of the patterns, tried in order ("meshes\w\w_*_longsword.nif",
+## with * and ?; case does not matter; "/" works for "\"). "" if none.
+func find(patterns: Array) -> String:
+	if _all_names.is_empty():
+		var seen := {}
+		for b in _bsas:
+			for n in b.names():
+				seen[n] = true
+		_all_names = PackedStringArray(seen.keys())
+		_all_names.sort()
+	for p in patterns:
+		var pat := String(p).to_lower().replace("/", "\\")
+		if not pat.contains("*") and not pat.contains("?"):
+			if has(pat):
+				return pat
+			continue
+		for n in _all_names:
+			if n.match(pat):
+				return n
+	return ""
+
+
 ## A parsed .nif / .kf (cached), or null
 func nif(path: String) -> MwNif:
 	path = path.to_lower().replace("/", "\\")
@@ -84,8 +109,26 @@ func nif(path: String) -> MwNif:
 	return _nifs[path]
 
 
+## Where converted textures are saved, so every model made in one import shares them ("" = kept in memory)
+var texture_dir := ""
+var _textures := {}
+
+
 ## A texture by the name a .nif gives it (they say .tga / .bmp; the files are mostly .dds)
 func texture(name: String) -> Texture2D:
+	var stem := name.to_lower().get_basename().get_file()
+	if _textures.has(stem):
+		return _textures[stem]
+	var tex := _load_texture(name)
+	if tex != null and texture_dir != "":
+		var p := texture_dir.path_join(stem.validate_filename() + ".res")
+		if ResourceSaver.save(tex, p, ResourceSaver.FLAG_COMPRESS) == OK:
+			tex.take_over_path(p)
+	_textures[stem] = tex
+	return tex
+
+
+func _load_texture(name: String) -> Texture2D:
 	var stem := name.to_lower().get_basename()
 	for ext in [".dds", "." + name.get_extension().to_lower(), ".tga", ".bmp"]:
 		var p: String = "textures\\" + stem + ext

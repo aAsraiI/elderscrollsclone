@@ -27,13 +27,19 @@ func frames(n: int) -> void:
 
 func _run() -> void:
 	await process_frame
+	# The built-in models first (this PC may have your own or Morrowind's in the models folder)
+	ModelLibrary.only_builtin(true)
 	t_library()
 	t_items()
 	t_props()
 	t_nature()
+	ModelLibrary.only_builtin(false)
 	t_user_folder()
 	t_morrowind()
+	t_morrowind_world()
 	t_turned_rooms()
+	t_rooms()
+	await t_prop_collision()
 	await t_in_game()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
@@ -213,6 +219,86 @@ func t_morrowind() -> void:
 	stand.free()
 
 
+func t_morrowind_world() -> void:
+	print("-- Morrowind's things, creatures and skies")
+	var folder := MwData.find_install()
+	if folder == "":
+		print("SKIP  Morrowind is not installed here")
+		return
+	var data := MwData.open(folder)
+	var found := MwCatalog.statics(data)
+	check("the catalogue finds hundreds of Morrowind models (%d)" % found.size(), found.size() > 200)
+	check("for furniture, clutter, weapons and armour", found.has("prop/barrel") and found.has("clutter/plate") and found.has("item/steel_sword") and found.has("item/iron_helmet"))
+	var b := MwCharacter.new(data)
+	var barrel := b.build_static(String(found["prop/barrel"]["file"]))
+	var box := ModelLibrary.bounds(_wrap(barrel))
+	check("a Morrowind barrel at its real size (%.2f m tall)" % box.size.y, box.size.y > 0.6 and box.size.y < 1.4)
+	barrel.get_parent().free()
+	var candle := b.build_static("meshes/l/light_com_candle_06.nif")
+	check("a candle reads (particles included) with its light and flame", candle != null and candle.find_children("*", "OmniLight3D", true, false).size() >= 1 and candle.find_child("Flame", true, false) != null)
+	if candle != null:
+		candle.free()
+	var rat := b.build_creature(data.find(["meshes/r/rust rat.nif"]), data.find(["meshes/r/xrust rat.kf"]))
+	var clips := (rat.get_node("AnimationPlayer") as AnimationPlayer).get_animation_list() if rat else PackedStringArray()
+	check("a rat walks, runs, bites and dies (%d clips)" % clips.size(), clips.has("WalkForward") and clips.has("Attack1") and clips.has("Death1"))
+	if rat != null:
+		rat.free()
+	var skel := b.build_creature(data.find(["meshes/r/skeleton.nif"]), data.find(["meshes/r/xskeleton.kf"]))
+	var sclips := (skel.get_node("AnimationPlayer") as AnimationPlayer).get_animation_list() if skel else PackedStringArray()
+	check("a skeleton borrows people's clips it lacks", sclips.has("Idle") and sclips.has("WalkForward") and sclips.has("WeaponOneHand_Chop"))
+	if skel != null:
+		skel.free()
+	var tex := data.texture("tx_sky_clear.tga")
+	check("Morrowind's sky and ground textures read", tex != null and data.texture("tx_ai_grass_01.tga") != null)
+
+
+func _wrap(n: Node3D) -> Node3D:
+	var w := Node3D.new()
+	w.add_child(n)
+	return w
+
+
+func t_rooms() -> void:
+	print("-- rooms")
+	var room := Rect2(-3.0, -2.5, 6.0, 5.0)
+	var layouts: Array = []
+	var loot: Array = []
+	for seed_value in [3, 6]:  # both variant 0 of LAYOUTS = 3
+		var root := Node3D.new()
+		RoomDecorator.decorate(root, room, "tavern", 4, seed_value, "", "test/room_%d" % seed_value)
+		var pieces := root.get_children().filter(func(c): return String(c.name).begins_with("Decor_")).map(func(c): return "%s@%s" % [String(c.name).trim_suffix("2").trim_suffix("3"), (c as Node3D).position.snappedf(0.01)])
+		pieces.sort()
+		layouts.append(pieces)
+		loot.append(root.find_children("*", "WorldItem", true, false).map(func(w): return String((w as WorldItem).item.id)))
+		root.free()
+	check("two taverns of a size share a layout (%d pieces)" % layouts[0].size(), layouts[0] == layouts[1] and layouts[0].size() >= 3)
+	check("but their loot is their own", loot[0] != loot[1] or loot[0].is_empty())
+	var tags := RoomDecorator.surface_tags("rack", PackedStringArray(["weapon", "armor", "camp", "tavern"]))
+	check("racks hold weapons and armour (%s)" % ", ".join(tags), not tags.has("tavern") and tags.has("weapon"))
+	var shelf := RoomDecorator.surface_tags("bookcase", PackedStringArray(["camp"]))
+	check("a surface with nothing of its own takes the room's loot", shelf == PackedStringArray(["camp"]))
+
+
+# A prop without a model gets collision the size of what you see (the old scenes' boxes were often far
+# deeper than the prop)
+func t_prop_collision() -> void:
+	print("-- prop collision")
+	ModelLibrary.only_builtin(true)
+	var anvil := (load("res://scenes/interiors/props/anvil.tscn") as PackedScene).instantiate() as Node3D
+	root.add_child(anvil)
+	await process_frame
+	var seen := ModelLibrary.bounds(anvil)
+	var solid := AABB()
+	var first := true
+	for cs in anvil.find_children("*", "CollisionShape3D", false, false):
+		var a := ModelLibrary.relative_transform(anvil, cs) * (cs as CollisionShape3D).shape.get_debug_mesh().get_aabb()
+		solid = a if first else solid.merge(a)
+		first = false
+	check("an anvil's collision fits it (%s vs %s)" % [solid.size.snappedf(0.01), seen.size.snappedf(0.01)], not first and solid.size.z <= seen.size.z * 1.1 + 0.02 and solid.size.x <= seen.size.x * 1.1 + 0.02)
+	anvil.free()
+	ModelLibrary.only_builtin(false)
+
+
 # Dungeon rooms are placed turned, and their enemies with them: facing must be in world terms
 func t_turned_rooms() -> void:
 	print("-- enemies in turned rooms")
@@ -278,3 +364,14 @@ func t_in_game() -> void:
 	check("and still drawn", mb.model.is_visible_in_tree())
 	var searchable := rag != null and rag.parts.has("remains") and (rag.parts["remains"] as Node).has_meta("interactable")
 	check("and can be searched", searchable)
+	# The lantern slot: wearing a lantern lights the way
+	var lantern_node := p.get_node_or_null("LanternLight") as LanternLight
+	check("you carry a lantern light", lantern_node != null and not lantern_node.is_lit())
+	var lantern := load("res://data/clutter/lantern.tres") as ItemData
+	var inv := p.get_node("Inventory") as Inventory
+	var eq := p.get_node("Equipment") as Equipment
+	inv.add_item(lantern)
+	check("a lantern goes in the Lantern slot", lantern.equip_slot == ItemData.EquipSlot.LANTERN and eq.equip(lantern))
+	check("and lights up around you", lantern_node != null and lantern_node.is_lit() and lantern_node.get_node("Light").visible)
+	eq.unequip(ItemData.EquipSlot.LANTERN)
+	check("taking it off puts it out", lantern_node != null and not lantern_node.is_lit())

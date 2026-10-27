@@ -70,18 +70,33 @@ Name each file after its key with `/` written as `__`: `prop__barrel.glb`, `crea
 To turn, fit, hide parts or name clips, add a `models.json` in that folder in the same format as
 `data/models/models.json` (paths relative to that folder).
 
-### Morrowind's people (if you own Morrowind)
+### Morrowind's look (if you own Morrowind)
 
 Morrowind's models belong to Bethesda, so none are included, and they must never be put into this
-project or a release. If you own the game, the game can build its people from **your own copy**:
+project or a release. If you own the game, the game can build almost all of its look from **your own
+copy**:
 
-**Settings > Models > Import Morrowind people.** The folder is found by itself for Steam and GOG
-installs; otherwise paste the path of Morrowind's `Data Files` folder. It takes about ten seconds.
-People already standing around change when you next enter a place or load a game.
-**Remove them** puts the game's own people back.
+**Settings > Models > Import from Morrowind.** The folder is found by itself for Steam and GOG installs;
+otherwise paste the path of Morrowind's `Data Files` folder. It takes about half a minute and makes
+around 330 models. What is already around you changes when you next enter a place or load a game.
+**Remove Morrowind's look** puts the game's own back.
 
-It builds 12 people (`MwImport.CAST` in `scripts/morrowind/mw_import.gd`), each from a Morrowind race,
-face, hair and outfit:
+What it makes (the lists are in `scripts/morrowind/mw_catalog.gd`, `MwCatalog`):
+
+| What | From Morrowind |
+| --- | --- |
+| People | 12 people from its races, faces, hair, clothes and armour (below) |
+| Creatures | 32: rats, wolves, nix-hounds, kagouti, bears, guar (sheep, cows and your mount), kwama, shalk, cliff racers, dreugh, atronachs, spriggans, ice trolls, frost giants, draugr, skeletons, bonelords, goblins, Dwemer centurions... each with its own animations |
+| Furniture and containers | about 70: beds, bunks, benches, chairs, stools, tables, shelves, bookshelves, cupboards, closets, drawers, barrels, crates, sacks, urns, chests, kegs, weapon racks, anvils, altars, wells, tapestries, banners, candles, sconces, braziers, firepits, logs, carts, webs, bones... at their real size, with collision from their own shape |
+| Clutter | 35 small things set out on tables and shelves: plates, bowls, cups, goblets, tankards, pitchers, bottles, flasks, cutlery, baskets, candles, books, scrolls, paper, inkwells, quills, skulls, bones, bread... |
+| Items | potions, coins, books, scrolls, gems, cups, plates, lanterns, tools, food, keys, rings and amulets |
+| Weapons and armour | every weapon and armour piece by its material (iron, steel, silver; obsidian = glass, ebon = ebony, dragonbone = daedric, starforged = dwemer, hide = Nordic fur, leather = netch...), held in the hand and lying on the ground |
+| Nature | trees for each kind of land, rocks |
+| Skies | its cloud pictures for every weather (clear, cloudy, overcast, rain, thunder, fog, ash storm) and its night sky of stars and nebulae |
+| Ground and walls | its grass, earth and rock on the land; stone, wood and plaster on everything built; and the walls, floors and cave rock of interiors |
+
+Lights and flames come along: a candle, lantern or sconce gets a real light where Morrowind puts its own,
+and a small glowing flame. The people are built like this (`MwImport.CAST` in `scripts/morrowind/mw_import.gd`):
 
 | Look | Morrowind person |
 | --- | --- |
@@ -100,16 +115,18 @@ sit in their hands (worked out from the hand bones). To dress people differently
 `MwImport.CAST` (any armour or clothing id from Morrowind.esm, Tribunal or Bloodmoon) and import again.
 
 How it works (`scripts/morrowind/`): `MwBsa` reads the .bsa archives, `MwNif` reads .nif and .kf files
-(NetImmerse 4.0.0.2), `MwEsm` reads races, body parts, armour and clothing from the .esm files, `MwData`
+(NetImmerse 4.0.0.2, particles and lights included), `MwEsm` reads races, body parts, armour and clothing from the .esm files, `MwData`
 puts them together with loose files and DDS textures, and `MwCharacter` builds a person: the race's
 skeleton (`base_anim.nif`, female and beast versions too), each body part, clothing or armour piece on
 its slot (left parts are the right ones mirrored, as in Morrowind), and the animation timeline in
-`xbase_anim.kf` cut into clips by its text keys. `MwImport` saves them as `.scn` files in your models
-folder with a `models.json` entry each. From a command line:
+`xbase_anim.kf` cut into clips by its text keys (`build_static` and `build_creature` do the same for
+furniture, items and creatures; two-legged creatures borrow the people's clips they lack). `MwSky` and
+`MwSurfaces` convert the skies and the ground and wall textures (the land and building shaders read them
+through the project's shader globals). `MwImport` saves everything as `.scn` and `.res` files in your models
+folder (textures shared in `textures/`) with a `models.json` entry each. From a command line:
 `godot --headless --path . -s res://tools/import_morrowind.gd -- ["<Data Files>"] [remove]`.
 
-Creatures, furniture and items from Morrowind are not imported; for one-off models you can still
-convert them yourself:
+For anything else from Morrowind (a particular statue, a building piece) you can still convert it yourself:
 
 1. Install [Blender](https://www.blender.org/) and the
    [NifTools Blender add-on](https://github.com/niftools/blender_niftools_addon), which opens `.nif` files.
@@ -144,3 +161,18 @@ hearth, keg rack, lamp post, log pile, market stall, mine cart, pickaxes, rails,
 rowboat, sarcophagus, shield wall, stalactite, stalagmite, stone bench, support beams, tapestry, tent,
 throne, training dummy, weapon heap, well. Also pine, dead and cactus trees, bushes, frost bears,
 and fire and ice spirits. Give any of them a key in models.json (or your models folder) and it changes.
+
+## Rooms, clutter and loot
+
+Rooms are laid out from a few templates per kind of room (`RoomDecorator.LAYOUTS`, and per module
+scene in dungeons, `RoomFiller`): a tavern of a given size looks the same wherever it is, in one of three
+variants. Only the loot changes from room to room. Every surface keeps what kind of surface it is and
+takes loot from its own leveled table (`RoomDecorator.SURFACE_TAGS`): books on bookcases, weapons and
+armour on racks, food and drink on tables, jewellery and relics on altars, plinths and in niches, tools
+and supplies on barrels and crates. Each kind of room also sets out fixed clutter (`RoomDecorator.CLUTTER`,
+`clutter/<name>` models) that is part of the room, not loot.
+
+## The look of the world
+
+`WorldManager.grade()` keeps the fog for the far distance only and gives deeper shadows and richer
+colour; nights are darker (`WorldClock.NIGHT_AMBIENT`, `DAY_AMBIENT`).

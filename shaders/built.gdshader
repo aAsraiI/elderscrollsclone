@@ -11,6 +11,20 @@ uniform vec3 base_color : source_color = vec3(0.5);
 uniform float detail : hint_range(0.0, 1.0) = 1.0;
 uniform float wetness = 0.0;
 
+// Morrowind's wall textures (MwSurfaces, project shader globals), when imported: their detail and shading on
+// the colour each box was given
+global uniform bool mw_surfaces;
+global uniform sampler2D mw_stone : source_color, repeat_enable, filter_linear_mipmap;
+global uniform sampler2D mw_wood : source_color, repeat_enable, filter_linear_mipmap;
+global uniform sampler2D mw_plaster : source_color, repeat_enable, filter_linear_mipmap;
+
+vec3 mw_detail(sampler2D t, vec2 uv) {
+	// against the texture's own average (its smallest mipmap): light and dark, and a little of its hue
+	vec3 mean = max(textureLod(t, vec2(0.5), 16.0).rgb, vec3(0.03));
+	vec3 d = texture(t, uv).rgb / mean;
+	return clamp(mix(vec3(dot(d, vec3(0.3333))), d, 0.3), 0.25, 2.0);
+}
+
 varying vec3 wpos;
 varying vec3 wnrm;
 
@@ -96,7 +110,13 @@ void fragment() {
 	// Grime collects low down and in the hollows; a little colour drift breaks up flat boxes
 	k *= mix(1.0, 0.8 + grime * 0.25, detail);
 	vec3 drift = vec3(1.0) + (vec3(noise(wpos * 0.15), noise(wpos * 0.15 + 7.0), noise(wpos * 0.15 + 13.0)) - 0.5) * 0.08;
+	vec3 tex = vec3(1.0);
+	if (mw_surfaces) {
+		tex = stone ? mw_detail(mw_stone, uv * 0.45) : (wood ? mw_detail(mw_wood, uv * 0.7) : mw_detail(mw_plaster, uv * 0.5));
+		k = mix(k, 1.0, 0.6);  // the texture brings its own blocks and grain
+	}
 	vec3 col = c * mix(1.0, k, detail) * mix(vec3(1.0), drift, detail);
+	col *= tex;
 	col *= 1.0 - wetness * 0.2;
 	ALBEDO = col;
 	ROUGHNESS = mix(rough, 0.35, wetness);

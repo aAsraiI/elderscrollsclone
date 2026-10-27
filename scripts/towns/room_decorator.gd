@@ -64,8 +64,12 @@ const WALK := 1.1  # half-width of the walkway kept clear from each door
 static func decorate(root: Node3D, room: Rect2, theme: String, level: int, room_seed: int, owner: String, save_prefix: String,
 		doors: Array[Vector3] = [], restock_days: int = 0, today: int = 1, height: float = 3.0) -> Dictionary:
 	var t: Dictionary = THEMES.get(theme, THEMES["home"])
+	# Two seeds: the room's own picks the loot; the layout (furniture, clutter) comes from the theme, the
+	# room's size and one of LAYOUTS variants, so rooms of a kind look alike wherever they are
 	var rng := RandomNumberGenerator.new()
 	rng.seed = room_seed
+	var layout := RandomNumberGenerator.new()
+	layout.seed = ("%s|%d|%d|%d" % [theme, roundi(room.size.x * 2.0), roundi(room.size.y * 2.0), absi(room_seed) % LAYOUTS]).hash()
 	var grid := Occupancy.new(room)
 	grid.mark_existing(root)
 	for d in doors:
@@ -75,26 +79,28 @@ static func decorate(root: Node3D, room: Rect2, theme: String, level: int, room_
 	var pieces := 0
 	# wall pieces: a few tries per wall meter
 	var wall: Array = t["wall"]
+	if not DUNGEON_THEMES.has(theme) and not wall.has("shelf"):
+		wall = wall + ["shelf"]  # every room people live in has somewhere to put things
 	var perimeter := (room.size.x + room.size.y) * 2.0
-	var want := int(perimeter / 2.6)
+	var want := int(perimeter / 2.0)
 	for i in want * 3:
 		if pieces >= want or wall.is_empty():
 			break
-		var kind: String = wall[rng.randi() % wall.size()]
-		if _try_wall_piece(root, grid, room, kind, rng, slots, height):
+		var kind: String = wall[layout.randi() % wall.size()]
+		if _try_wall_piece(root, grid, room, kind, layout, slots, height):
 			pieces += 1
 	# middle pieces
 	for kind: String in t["middle"]:
 		for attempt in 12:
-			var at := Vector2(rng.randf_range(room.position.x + 1.6, room.end.x - 1.6), rng.randf_range(room.position.y + 1.6, room.end.y - 1.6))
-			if _middle_piece(root, grid, kind, at, rng.randf() * TAU if kind == "campfire" else (0.0 if rng.randf() < 0.5 else PI * 0.5), slots):
+			var at := Vector2(layout.randf_range(room.position.x + 1.6, room.end.x - 1.6), layout.randf_range(room.position.y + 1.6, room.end.y - 1.6))
+			if _middle_piece(root, grid, kind, at, layout.randf() * TAU if kind == "campfire" else (0.0 if layout.randf() < 0.5 else PI * 0.5), slots):
 				pieces += 1
 				break
 	# containers
 	var containers := 0
 	for c: Array in t["containers"]:
 		for attempt in 10:
-			var at := Vector2(rng.randf_range(room.position.x + 0.6, room.end.x - 0.6), rng.randf_range(room.position.y + 0.6, room.end.y - 0.6))
+			var at := Vector2(layout.randf_range(room.position.x + 0.6, room.end.x - 0.6), layout.randf_range(room.position.y + 0.6, room.end.y - 0.6))
 			var size := Vector2(0.9, 0.7)
 			if not grid.is_free(at, size, 0.1):
 				continue
@@ -108,8 +114,16 @@ static func decorate(root: Node3D, room: Rect2, theme: String, level: int, room_
 			chest.position = Vector3(at.x, 0.35, at.y)
 			containers += 1
 			break
-	# loot on every surface
+	# things that belong in the room: plates and cups on tables, books and bottles on shelves, candles,
+	# bones in crypts... the same in every room of this kind (they are part of the layout, not loot)
+	var clutter := _place_clutter(root, theme, slots, layout)
+	# loot on every surface, from that surface's own table at the room's level
 	var tags := PackedStringArray(t["tags"])
+	var tables := {}
+	var table_for := func(kind: String) -> Array[LootEntry]:
+		if not tables.has(kind):
+			tables[kind] = ItemCatalog.tag_loot(surface_tags(kind, tags), level, 1.0)
+		return tables[kind]
 	var table := ItemCatalog.tag_loot(tags, level, 1.0)
 	var fill: float = t["fill"]
 	fill = maxf(fill, minf(0.85, 3.5 / maxf(slots.size(), 1.0)))  # a small room still has a few things about
@@ -122,7 +136,8 @@ static func decorate(root: Node3D, room: Rect2, theme: String, level: int, room_
 			if restock_days <= 0 or today - int(taken.get("day", today)) < restock_days:
 				return false
 			WorldState.erase_record(WorldItem.taken_key(key))  # restocked
-		var item := _pick(table, rng)
+		var own: Array[LootEntry] = table_for.call(String(slot[2]) if slot.size() > 2 else "")
+		var item := _pick(own if not own.is_empty() else table, rng)
 		if item == null:
 			return false
 		var at: Vector3 = slot[0]
@@ -148,7 +163,93 @@ static func decorate(root: Node3D, room: Rect2, theme: String, level: int, room_
 			break
 		if place.call(i):
 			items += 1
-	return {"pieces": pieces, "slots": slots.size(), "items": items, "containers": containers}
+	return {"pieces": pieces, "slots": slots.size(), "items": items, "containers": containers, "clutter": clutter}
+
+
+## Variants of each kind of room (layouts repeat across rooms of the same kind and size)
+const LAYOUTS := 3
+const DUNGEON_THEMES := ["cave", "camp", "crypt", "barrow", "mine", "fort", "ruin", "vault", "ice", "ashen", "sewer"]
+
+## Which loot suits a kind of surface (crossed with the room's own tags; the room's tags alone when
+## nothing matches): books on bookcases, weapons on racks, food on tables, treasure on altars
+const SURFACE_TAGS := {
+	"shelf": ["kitchen", "alchemist", "alchemy", "tools", "clothes", "home", "library", "mine", "camp", "tavern"],
+	"bookcase": ["library", "mage", "temple"],
+	"table": ["kitchen", "tavern", "home", "alchemy", "alchemist", "camp", "rich_home"],
+	"rack": ["weapon", "weapons", "armor", "smithy", "hunter"],
+	"display": ["jewelry", "jeweler", "shop", "rich_home", "vault"],
+	"plinth": ["jewelry", "jeweler", "vault", "ruin", "temple", "crypt"],
+	"altar": ["temple", "vault", "jewelry", "ruin", "ashen"],
+	"niche": ["crypt", "barrow", "ruin", "jewelry"],
+	"sarcophagus": ["crypt", "barrow", "jewelry", "vault"],
+	"bench": ["smithy", "alchemist", "alchemy", "tools"],
+	"barrel": ["kitchen", "tavern", "camp", "mine", "tools"],
+	"crate": ["tools", "mine", "camp", "kitchen", "smithy", "shop"],
+	"cart": ["mine", "tools", "camp"],
+}
+
+## Clutter by room theme (ModelLibrary "clutter/<name>" keys; missing ones are skipped)
+const CLUTTER := {
+	"home": ["plate", "bowl", "cup", "candle", "basket", "pitcher", "spoon", "cloth"],
+	"rich_home": ["plate_metal", "goblet", "candle", "book", "bottle_2", "pitcher", "cloth"],
+	"farm": ["bowl", "basket", "cup", "bread", "candle"],
+	"tavern": ["tankard", "plate", "bottle", "bottle_3", "cup", "candle", "pitcher", "bread"],
+	"shop": ["basket", "bottle", "cloth", "candle", "book_2"],
+	"smithy": ["hammer", "tankard", "candle", "cloth"],
+	"temple": ["candle", "book", "book_open", "scroll", "goblet", "urn"],
+	"alchemist": ["flask", "beaker", "bottle", "bottle_2", "bowl_redware", "book", "candle"],
+	"library": ["book", "book_2", "book_3", "book_open", "scroll", "inkwell", "quill", "candle", "paper"],
+	"guild": ["tankard", "candle", "book", "plate"],
+	"camp": ["cup", "bowl", "bone", "bottle", "candle"],
+	"cave": ["bone", "skull", "bowl"],
+	"crypt": ["skull", "bone", "candle", "urn"],
+	"barrow": ["skull", "bone", "urn"],
+	"mine": ["cup", "bottle", "candle", "hammer"],
+	"fort": ["tankard", "plate", "candle", "book_2"],
+	"ruin": ["skull", "urn", "bone"],
+	"vault": ["goblet", "urn", "book_3"],
+	"sewer": ["bottle", "bone", "cup"],
+}
+
+
+## The loot tags for a kind of surface in a room with these tags
+static func surface_tags(kind: String, room_tags: PackedStringArray) -> PackedStringArray:
+	var suits: Array = SURFACE_TAGS.get(kind, [])
+	var out := PackedStringArray()
+	for tag in room_tags:
+		if suits.has(tag):
+			out.append(tag)
+	return out if not out.is_empty() else room_tags
+
+
+# Clutter on the surfaces: about half of them get one or two small things, picked by the layout seed
+static func _place_clutter(root: Node3D, theme: String, slots: Array, layout: RandomNumberGenerator) -> int:
+	var kinds: Array = CLUTTER.get(theme, CLUTTER.get(theme.get_slice("_", 0), CLUTTER["home"]))
+	var have: Array = kinds.filter(func(k): return ModelLibrary.has("clutter/" + String(k)))
+	if have.is_empty():
+		return 0
+	var n := 0
+	for slot: Array in slots:
+		if layout.randf() > 0.55:
+			continue
+		var room_for: Vector2 = slot[1]
+		for j in (1 if layout.randf() < 0.6 else 2):
+			var key := "clutter/" + String(have[layout.randi() % have.size()])
+			var m := ModelLibrary.fitted(key, AABB(Vector3(-0.1, 0.0, -0.1), Vector3(0.2, 0.25, 0.2)))
+			if m == null:
+				continue
+			m.name = "Clutter"
+			for light in m.find_children("*", "Light3D", true, false):
+				light.queue_free()  # the flame still glows; a room of candles does not need a light each
+			# off to one side of the surface, leaving the middle for loot
+			var reach := minf(room_for.x, room_for.y) * 0.32
+			var a := layout.randf() * TAU
+			var off := Vector3(cos(a), 0.0, sin(a)) * reach * layout.randf_range(0.6, 1.0)
+			m.position = (slot[0] as Vector3) + off
+			m.rotation.y = layout.randf() * TAU
+			root.add_child(m)
+			n += 1
+	return n
 
 
 # One item from the list, by its chance (the chances act as weights here)
@@ -170,21 +271,21 @@ static func _existing_surfaces(root: Node3D, room: Rect2) -> Array:
 	for c in root.get_children():
 		if not c is StaticBody3D or c is MuseumCase or c.name == "Chest" or not room.has_point(Vector2((c as Node3D).position.x, (c as Node3D).position.z)):
 			continue
-		var b := ItemModels.get_bounds(c as Node3D)
+		var b := ModelLibrary.bounds(c as Node3D)
 		b.position += (c as Node3D).position
 		var top := b.end.y
 		if c is InteriorProp and (c as InteriorProp).tags.has("shelf"):
 			# a shelf prop (1.13 rooms): one thing on each plank, just in front of its back board
 			var fwd := (c as Node3D).basis * Vector3(0, 0, -0.05)
-			for y: float in [0.62, 1.22]:
-				out.append([Vector3(b.get_center().x, y + (c as Node3D).position.y, b.get_center().z) + fwd, Vector2(0.5, 0.3)])
+			for f: float in [0.33, 0.63]:  # its planks, wherever its model puts them
+				out.append([Vector3(b.get_center().x, b.position.y + b.size.y * f, b.get_center().z) + fwd, Vector2(0.5, 0.3), "shelf"])
 			continue
 		if top < 0.6 or top > 1.5 or b.size.x * b.size.z < 0.25 or b.size.x > room.size.x * 0.9 or b.size.z > room.size.y * 0.9:
 			continue
-		out.append([Vector3(b.get_center().x, top, b.get_center().z), Vector2(b.size.x, b.size.z)])
+		out.append([Vector3(b.get_center().x, top, b.get_center().z), Vector2(b.size.x, b.size.z), "table"])
 		if b.size.x * b.size.z > 1.0:  # a long counter holds two things
 			var off := Vector3(b.size.x * 0.25, 0.0, 0.0) if b.size.x > b.size.z else Vector3(0.0, 0.0, b.size.z * 0.25)
-			out.append([Vector3(b.get_center().x, top, b.get_center().z) + off, Vector2(b.size.x, b.size.z) * 0.5])
+			out.append([Vector3(b.get_center().x, top, b.get_center().z) + off, Vector2(b.size.x, b.size.z) * 0.5, "table"])
 	return out
 
 
@@ -345,11 +446,16 @@ static func _build_piece(root: Node3D, kind: String, at: Vector3, yaw: float, sl
 				_cyl(holder, 0.3, 0.1, Vector3(x, 0.3, s.y * 0.42), DARK_WOOD, true)
 				_cyl(holder, 0.3, 0.1, Vector3(x, 0.3, -s.y * 0.42), DARK_WOOD, true)
 			tops.append([Vector3(0.0, 0.9, 0.0), Vector2(1.0, 0.6)])
-	# A real model for this piece (ModelLibrary "prop/<kind>") replaces its boxes
-	ModelLibrary.replace_meshes(holder, "prop/" + kind)
+	# A real model for this piece (ModelLibrary "prop/<kind>") replaces its boxes; its surfaces move to
+	# the model's own heights (a shelf's planks, a table top) in proportion
+	var old_top := ModelLibrary.bounds(holder).end.y
+	var heights := 1.0
+	if ModelLibrary.replace_meshes(holder, "prop/" + kind) != null and old_top > 0.05:
+		heights = ModelLibrary.bounds(holder).end.y / old_top
 	for top: Array in tops:
 		var p: Vector3 = top[0]
-		slots.append([at + p.rotated(Vector3.UP, yaw), top[1]])
+		p.y *= heights
+		slots.append([at + p.rotated(Vector3.UP, yaw), top[1], kind])
 
 
 static func _cyl(parent: Node3D, radius: float, h: float, pos: Vector3, color: Color, sideways: bool = false) -> void:
@@ -428,7 +534,7 @@ class Occupancy:
 			var cp := (c as Node3D).position
 			if not rect.has_point(Vector2(cp.x, cp.z)):
 				continue  # outside this room (walls stand just outside it)
-			var b := ItemModels.get_bounds(c as Node3D)
+			var b := ModelLibrary.bounds(c as Node3D)
 			b.position += (c as Node3D).position
 			if b.end.y <= 0.05 or b.position.y > 2.0:
 				continue  # floor, ceiling, beams

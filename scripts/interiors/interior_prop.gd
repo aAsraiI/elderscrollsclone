@@ -34,3 +34,40 @@ func _ready() -> void:
 	var key := ModelLibrary.first(keys)
 	if key != "":
 		ModelLibrary.replace_meshes(self, key)
+	else:
+		_fit_collision()
+
+
+# Without a model the boxes stay, but the collision is made to fit what you see (the old prop scenes'
+# shapes were often far deeper than the prop): one box per part, or one around them all when there
+# are many small parts. Props made without collision (banners, cobwebs) stay without.
+func _fit_collision() -> void:
+	var shapes := find_children("*", "CollisionShape3D", false, false)
+	if shapes.is_empty():
+		return
+	var parts: Array[AABB] = []
+	for mi in find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if m.mesh == null or not m.visible or ModelLibrary._glows(m):
+			continue
+		parts.append(ModelLibrary.relative_transform(self, m) * m.get_aabb())
+	if parts.is_empty():
+		return
+	if parts.size() > 8:
+		var all := parts[0]
+		for p in parts:
+			all = all.merge(p)
+		parts = [all]
+	for cs in shapes:
+		remove_child(cs)
+		cs.queue_free()
+	for p in parts:
+		if p.size.length() < 0.02:
+			continue
+		var cs := CollisionShape3D.new()
+		cs.name = "FittedShape"
+		var box := BoxShape3D.new()
+		box.size = p.size.max(Vector3.ONE * 0.04)
+		cs.shape = box
+		cs.position = p.get_center()
+		add_child(cs)

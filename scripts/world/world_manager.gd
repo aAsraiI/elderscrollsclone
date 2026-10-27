@@ -512,6 +512,26 @@ func _add_wall(pos: Vector3, size: Vector3) -> void:
 	body.position = pos
 
 
+## The world's look: clear air with the fog kept for the far distance, deeper shadows and richer
+## colour (Morrowind's rather than a pale haze). Applied to whichever environment the scene uses.
+static func grade(env: Environment) -> void:
+	if env == null or env.has_meta("graded"):
+		return  # once: worlds are rebuilt on the same environment
+	env.set_meta("graded", true)
+	env.fog_density *= FOG_SCALE
+	env.fog_light_color = Color(0.52, 0.56, 0.6)
+	env.adjustment_enabled = true
+	env.adjustment_saturation = 1.12
+	env.adjustment_contrast = 1.12
+	env.adjustment_brightness = 0.9
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.tonemap_white = 5.0
+
+
+## How much of the old fog is kept (it hid the land from a few hundred metres)
+const FOG_SCALE := 0.45
+
+
 func _setup_environment() -> void:
 	var host: Node = get_parent() if get_parent() != null else self
 	if host.find_children("*", "WorldEnvironment", true, false).is_empty():
@@ -530,6 +550,9 @@ func _setup_environment() -> void:
 		we.name = "WorldEnvironment"
 		we.environment = env
 		add_child(we)
+	for we in host.find_children("*", "WorldEnvironment", true, false):
+		grade((we as WorldEnvironment).environment)
+	MwSurfaces.apply()  # Morrowind's ground and walls, when imported
 	if host.find_children("*", "DirectionalLight3D", true, false).is_empty():
 		var sun := DirectionalLight3D.new()
 		sun.name = "Sun"

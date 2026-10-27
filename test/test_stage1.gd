@@ -356,7 +356,7 @@ func t_clock() -> void:
 	check("midnight rolls the day over", clock.day == 4 and absf(clock.hour - 0.5) < 0.001 and days == [4], "%d %f %s" % [clock.day, clock.hour, str(days)])
 	clock.set_time(13.0)
 	var dir_noon := -sun.global_transform.basis.z
-	check("midday: full light, sun high, sky bright", sun.light_energy > 0.95 and dir_noon.y < -0.6 and env.ambient_light_energy > 0.95 and env.background_energy_multiplier > 0.95, "%f %s %f" % [sun.light_energy, str(dir_noon), env.ambient_light_energy])
+	check("midday: full light, sun high, sky bright", sun.light_energy > 0.95 and dir_noon.y < -0.6 and absf(env.ambient_light_energy - WorldClock.DAY_AMBIENT) < 0.05 and env.background_energy_multiplier > 0.95, "%f %s %f" % [sun.light_energy, str(dir_noon), env.ambient_light_energy])
 	clock.set_time(0.0)
 	check("midnight: sun off, sky and ambient dark", sun.light_energy < 0.01 and env.ambient_light_energy < 0.12 and env.background_energy_multiplier < 0.05, "%f %f" % [sun.light_energy, env.ambient_light_energy])
 	check("midnight fog is dark", env.fog_light_color.v < 0.1)

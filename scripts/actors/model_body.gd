@@ -117,7 +117,7 @@ func _fit_hitbox() -> void:
 			cs.rotation = Vector3(PI * 0.5, 0.0, 0.0)
 			cs.position = Vector3(0.0, maxf(cap.radius, box.get_center().y), box.get_center().z)
 		else:
-			cap.radius = clampf(minf(box.size.x, box.size.z) * 0.45, 0.2, 1.2)
+			cap.radius = clampf(minf(box.size.x, box.size.z) * 0.45, 0.3, 1.2)  # arms at the sides count too
 			cap.height = maxf(box.size.y, cap.radius * 2.0 + 0.01)
 			cs.rotation = Vector3.ZERO
 			cs.position = Vector3(0.0, box.position.y + cap.height * 0.5, 0.0)
@@ -135,6 +135,8 @@ func _fit(old: AABB) -> void:
 	match mode:
 		"long":
 			s = maxf(old.size.x, old.size.z) / maxf(maxf(box.size.x, box.size.z), 0.0001)
+		"real", "creature":
+			s = 1.0  # already in metres (Morrowind's own size); the body's own scale still applies
 		_:
 			s = old.size.y / box.size.y
 	s *= float(entry.get("scale", 1.0))

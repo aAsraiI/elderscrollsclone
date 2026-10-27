@@ -17,6 +17,12 @@ uniform vec3 night_top : source_color = vec3(0.012, 0.015, 0.03);
 uniform vec3 night_horizon : source_color = vec3(0.04, 0.045, 0.06);
 uniform vec3 dusk_horizon : source_color = vec3(0.85, 0.42, 0.22);
 uniform vec3 ground : source_color = vec3(0.12, 0.11, 0.1);
+// Morrowind's own clouds for the weather and its night sky (MwSky), when they have been imported
+uniform bool mw_clouds_on = false;
+uniform sampler2D mw_clouds : source_color, repeat_enable, filter_linear_mipmap;
+uniform bool mw_stars_on = false;
+uniform sampler2D mw_stars : source_color, repeat_enable, filter_linear_mipmap;
+uniform sampler2D mw_nebula : source_color, repeat_enable, filter_linear_mipmap;
 
 // A hash without sin(), which loses precision on GPUs and shows up as square blocks
 float hash(vec2 p) {
@@ -67,12 +73,19 @@ void sky() {
 	// Night: stars, the Ribbon, and the moons
 	float night = 1.0 - day;
 	if (night > 0.01 && up > 0.0) {
-		vec2 sp = dir.xz / (up + 0.25) * 140.0;
-		float star = step(0.9975, hash(floor(sp)));
-		float twinkle = 0.6 + 0.4 * sin(TIME * 2.0 + hash(floor(sp) + 3.0) * 40.0);
-		col += vec3(0.9, 0.92, 1.0) * star * twinkle * night * h;
-		float band = exp(-pow(dot(dir, normalize(vec3(0.4, 0.3, 0.86))) * 4.0, 2.0));
-		col += vec3(0.16, 0.13, 0.2) * band * fbm(dir.xz * 6.0) * night * 0.6;
+		if (mw_stars_on) {
+			// Morrowind's star field and nebulae, laid over the dome
+			vec2 uv = dir.xz / (up + 0.35) * 0.55 + vec2(time_of_world * 0.002, 0.0);
+			col += texture(mw_stars, uv).rgb * night * smoothstep(0.0, 0.2, up) * 1.4;
+			col += texture(mw_nebula, uv * 0.6 + vec2(0.3, 0.1)).rgb * night * smoothstep(0.0, 0.3, up) * 0.7;
+		} else {
+			vec2 sp = dir.xz / (up + 0.25) * 140.0;
+			float star = step(0.9975, hash(floor(sp)));
+			float twinkle = 0.6 + 0.4 * sin(TIME * 2.0 + hash(floor(sp) + 3.0) * 40.0);
+			col += vec3(0.9, 0.92, 1.0) * star * twinkle * night * h;
+			float band = exp(-pow(dot(dir, normalize(vec3(0.4, 0.3, 0.86))) * 4.0, 2.0));
+			col += vec3(0.16, 0.13, 0.2) * band * fbm(dir.xz * 6.0) * night * 0.6;
+		}
 		// the shadow disc slides off as the moon waxes (0 new, 0.5 full) and back on the other side
 		float phase = (moon_phase < 0.5 ? 1.0 : -1.0) * 2.2 * min(moon_phase, 1.0 - moon_phase) * 2.0;
 		col += moon(dir, moon_dir, 0.035, vec3(0.92, 0.9, 0.84), phase) * night;
@@ -84,7 +97,14 @@ void sky() {
 		col += LIGHT0_COLOR * (smoothstep(0.03, 0.025, sd) * 4.0 + exp(-sd * 9.0) * 0.35 * (0.4 + dusk)) * day;
 	}
 	// Clouds: a drifting layer, lit by the day, dark under storms
-	if (up > 0.0) {
+	if (up > 0.0 && mw_clouds_on) {
+		// Morrowind's cloud picture for this weather, drifting across a dome, lit by the time of day
+		vec2 uv = dir.xz / (up + 0.18) * 0.35 + vec2(time_of_world * 0.012, time_of_world * 0.005);
+		vec3 tex = texture(mw_clouds, uv).rgb;
+		vec3 lit = mix(vec3(0.06, 0.065, 0.08), mix(vec3(1.0), dusk_horizon * 1.2, dusk * 0.55), day);
+		float amount = smoothstep(0.0, 0.2, up) * clamp(0.55 + cloud_cover * 0.6, 0.0, 1.0);
+		col = mix(col, tex * lit * mix(1.0, 0.45, cloud_dark), amount);
+	} else if (up > 0.0) {
 		vec2 cp = dir.xz / (up + 0.12) * 1.6 + vec2(time_of_world * 0.05, time_of_world * 0.02);
 		float c = fbm(cp);
 		float cover = smoothstep(1.0 - cloud_cover - 0.15, 1.0 - cloud_cover + 0.25, c);

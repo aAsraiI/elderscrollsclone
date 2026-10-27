@@ -77,7 +77,7 @@ func _physics_process(delta: float) -> void:
 			_goal = Vector3.INF
 		else:
 			v = to.normalized() * 9.0
-			rotation.y = lerp_angle(rotation.y, atan2(-to.x, -to.z), clampf(delta * 5.0, 0.0, 1.0))
+			global_rotation.y = lerp_angle(global_rotation.y, atan2(-to.x, -to.z), clampf(delta * 5.0, 0.0, 1.0))
 	velocity.x = move_toward(velocity.x, v.x, 20.0 * delta)
 	velocity.z = move_toward(velocity.z, v.z, 20.0 * delta)
 	move_and_slide()

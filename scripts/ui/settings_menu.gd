@@ -107,6 +107,7 @@ func _build_ui() -> void:
 	for o: Dictionary in GameSettings.OPTIONS:
 		if not tab_names.has(o["tab"]):
 			tab_names.append(o["tab"])
+	tab_names.append("Models")
 	tab_names.append("Controls")
 	for tab_name in tab_names:
 		_tabs.add_tab(tab_name)
@@ -121,6 +122,10 @@ func _build_ui() -> void:
 		grid.add_theme_constant_override("v_separation", 8)
 		scroll.add_child(grid)
 		_pages.append(scroll)
+		if tab_name == "Models":
+			grid.columns = 1
+			_build_models_page(grid)
+			continue
 		if tab_name == "Controls":
 			for r: Array in Bindings.REBINDABLE:
 				var what := Label.new()
@@ -170,6 +175,56 @@ func _build_ui() -> void:
 	back.custom_minimum_size = Vector2(100, 0)
 	back.pressed.connect(close)
 	buttons.add_child(back)
+
+
+# Models: people made from your own copy of Morrowind (MwImport)
+func _build_models_page(grid: GridContainer) -> void:
+	var about := Label.new()
+	about.text = "Use Morrowind's people: if you own Morrowind, the game can build its townsfolk, guards, fighters, archers, mages and brutes from your copy (its races, faces, hair, clothes, armour and animations). They are saved in your own models folder, never in the game itself. Point it at Morrowind's \"Data Files\" folder."
+	about.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	about.custom_minimum_size = Vector2(560, 0)
+	grid.add_child(about)
+	var path := LineEdit.new()
+	path.text = MwData.find_install()
+	path.placeholder_text = "...\\Morrowind\\Data Files"
+	path.custom_minimum_size = Vector2(560, 0)
+	grid.add_child(path)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	grid.add_child(row)
+	var import := Button.new()
+	import.text = "Import Morrowind people"
+	row.add_child(import)
+	var remove := Button.new()
+	remove.text = "Remove them"
+	row.add_child(remove)
+	var status := Label.new()
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status.custom_minimum_size = Vector2(560, 0)
+	grid.add_child(status)
+	var show_count := func() -> void:
+		var n := MwImport.count()
+		status.text = "%d Morrowind people in use." % n if n > 0 else "Using the game's own people."
+		remove.disabled = n == 0
+	show_count.call()
+	import.pressed.connect(func() -> void:
+		if MwData.open(path.text.strip_edges()) == null:
+			status.text = "No Morrowind.esm in that folder. Choose Morrowind's \"Data Files\" folder."
+			return
+		import.disabled = true
+		status.text = "Building people from Morrowind..."
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var r := MwImport.run(path.text.strip_edges())
+		import.disabled = false
+		status.text = "Made %d people. People already standing around change when you next enter a place or load a game." % r["made"].size()
+		if not r["problems"].is_empty():
+			status.text += " (%d parts could not be built.)" % r["problems"].size()
+		remove.disabled = r["made"].is_empty())
+	remove.pressed.connect(func() -> void:
+		var n := MwImport.remove()
+		show_count.call()
+		status.text = "Removed %d. %s" % [n, status.text])
 
 
 func _show_page(index: int) -> void:

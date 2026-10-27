@@ -107,6 +107,9 @@ func _try_model() -> void:
 ## The ModelLibrary keys this body would use, best first
 func model_keys() -> Array:
 	var out: Array = []
+	# A look chosen by hand (a quest NPC, a test): meta "model_key" on the owner
+	if enemy != null and enemy.has_meta("model_key"):
+		out.append(String(enemy.get_meta("model_key")))
 	var id := ""
 	if enemy is Enemy:
 		id = (enemy as Enemy).enemy_id

@@ -14,7 +14,8 @@ extends Node3D
 
 const ROLE_CLIPS := {
 	"idle": ["Idle", "Idle_A", "Unarmed_Idle", "Standing", "ZombieIdle", "Flying", "Slime_Idle"],
-	"idle_combat": ["Idle_Combat", "2H_Melee_Idle", "Idle_swordRight", "Idle"],
+	"idle_combat": ["Idle_Combat", "Idle_swordRight", "Idle1h", "Idle"],
+	"idle_combat_2h": ["2H_Melee_Idle", "Idle2c", "Idle_Combat", "Idle"],
 	"walk": ["Walking_A", "Walking_D_Skeletons", "Walk", "Walking", "ZombieWalk", "WalkSlow", "Flying"],
 	"run": ["Running_A", "Run", "Running", "ZombieRun", "Skeleton_Running", "Walk", "Flying"],
 	"attack": ["1H_Melee_Attack_Slice_Diagonal", "1H_Melee_Attack_Chop", "SwordSlash", "Run_swordAttack", "Attack", "ZombieBite", "Bite", "Punch"],
@@ -169,9 +170,15 @@ func _find_clips() -> void:
 
 static func _match(names: PackedStringArray, want: String) -> String:
 	var w := want.to_lower()
+	# The exact name first ("Idle" must not find "2H_Melee_Idle"), then the same with a rig or
+	# character prefix ("HumanArmature|Man_Walk"), then any name holding it
 	for n in names:
 		var short := String(n).get_slice("|", String(n).get_slice_count("|") - 1).to_lower()
-		if short == w or short.ends_with("_" + w) or short.trim_prefix("man_").trim_prefix("female_") == w:
+		if short == w:
+			return n
+	for n in names:
+		var short := String(n).get_slice("|", String(n).get_slice_count("|") - 1).to_lower()
+		if short.trim_prefix("man_").trim_prefix("female_") == w or short.ends_with("_" + w):
 			return n
 	for n in names:
 		if String(n).to_lower().contains(w):
@@ -192,9 +199,13 @@ func _hang_hands() -> void:
 	if skel == null:
 		return
 	var hands: Dictionary = entry.get("hands", {})
+	var auto := String(entry.get("grip", "")) == "auto" or String(entry.get("source", "")) == "morrowind"
+	if String(entry.get("source", "")) == "morrowind":
+		hands = {"r": "Bip01 R Hand", "l": "Bip01 L Hand"}  # imports from before 1.15.4 named the weapon bones
 	for side in ["r", "l"]:
 		var bone_name := String(hands.get(side, ""))
-		if bone_name == "" or skel.find_bone(bone_name) < 0:
+		var bone := skel.find_bone(bone_name) if bone_name != "" else -1
+		if bone < 0:
 			continue
 		var att := BoneAttachment3D.new()
 		att.name = "Hand_" + side
@@ -202,10 +213,15 @@ func _hang_hands() -> void:
 		skel.add_child(att)
 		var holder := Node3D.new()
 		holder.name = "Holder"
-		var rot: Array = entry.get("grip_rot_" + side, [0, 0, 0])
-		holder.rotation_degrees = Vector3(rot[0], rot[1], rot[2])
-		# Undo the model's scale so weapons keep their real size
-		holder.scale = Vector3.ONE / maxf(model.scale.x, 0.0001)
+		# Undo every scale between the body and the skeleton, so weapons keep their real size
+		var skel_scale := ModelLibrary.relative_transform(self, skel).basis.get_scale()
+		var unscale := Basis.from_scale(Vector3.ONE / skel_scale.max(Vector3.ONE * 0.00001))
+		var fitted = _auto_grip(skel, bone, side) if auto else null
+		if fitted != null:
+			holder.transform = Transform3D((fitted as Transform3D).basis.orthonormalized() * unscale, (fitted as Transform3D).origin)
+		else:
+			var rot: Array = entry.get("grip_rot_" + side, [0, 0, 0])
+			holder.transform = Transform3D(Basis.from_euler(Vector3(deg_to_rad(rot[0]), deg_to_rad(rot[1]), deg_to_rad(rot[2]))) * unscale, Vector3.ZERO)
 		att.add_child(holder)
 		var g: Node3D = body.grip if side == "r" else body.off_grip
 		if g != null:
@@ -214,6 +230,53 @@ func _hang_hands() -> void:
 			g.position = Vector3.ZERO
 			g.rotation = Vector3.ZERO
 			g.visible = true
+
+
+## A grip worked out from the hand's own bones, for models with finger and thumb bones ("grip":
+## "auto"): it sits in the palm, between the wrist and the knuckles; a weapon's handle runs across
+## the fist with the blade out of the index-finger side (the grip's -Z) and its edge along the knuckles (X);
+## a shield lies flat on the back of the left hand. In the hand bone's own space; null without fingers.
+func _auto_grip(skel: Skeleton3D, hand: int, side: String) -> Variant:
+	var finger := _find_below(skel, hand, ["finger1", "middlehand", "finger2", "fingers", "index", "middle"])
+	var thumb := _find_below(skel, hand, ["thumb", "finger0"])
+	if thumb < 0 and skel.get_bone_parent(hand) >= 0:
+		thumb = _find_below(skel, skel.get_bone_parent(hand), ["thumb"])  # some rigs hang it off the forearm
+	if finger < 0 or thumb < 0:
+		return null
+	var hand_rest := skel.get_bone_global_rest(hand)
+	var h := hand_rest.origin
+	var f := skel.get_bone_global_rest(finger).origin
+	var fwd := (f - h).normalized()
+	# Across the fist: from the outer fingers to the index finger when the hand has both (a thumb
+	# can sit under the palm, as Morrowind's do), else toward the thumb
+	var across := skel.get_bone_global_rest(thumb).origin - h
+	var outer := _find_below(skel, hand, ["finger2", "finger3", "ring", "pinky"])
+	if outer >= 0 and outer != finger:
+		across = f - skel.get_bone_global_rest(outer).origin
+	across = (across - fwd * across.dot(fwd)).normalized()
+	if fwd.length() < 0.5 or across.length() < 0.5:
+		return null
+	var x := fwd
+	# Right: the blade comes out of the thumb side. Left: the shield faces out from the back of the hand.
+	var z := -across if side == "r" else across.cross(fwd).normalized()
+	var y := z.cross(x).normalized()
+	return hand_rest.affine_inverse() * Transform3D(Basis(x, y, z), h + (f - h) * 0.55)
+
+
+# The first bone under `from` (breadth first) whose name holds one of `names`, tried in order
+static func _find_below(skel: Skeleton3D, from: int, names: Array) -> int:
+	var order: Array[int] = []
+	var queue: Array[int] = [from]
+	while not queue.is_empty():
+		var b: int = queue.pop_front()
+		if b != from:
+			order.append(b)
+		queue.append_array(Array(skel.get_bone_children(b)))
+	for n in names:
+		for b in order:
+			if skel.get_bone_name(b).to_lower().contains(String(n)):
+				return b
+	return -1
 
 
 func _skeleton() -> Skeleton3D:
@@ -309,7 +372,11 @@ func animate(delta: float, speed: float) -> void:
 			&"chop": _play("chop", 0.6); return
 			&"talk": _play("talk"); return
 			&"drink": _play("drink"); return
-	_play("idle_combat" if fighting else "idle")
+	if fighting:
+		var main: ItemData = e.equipment.get_main_hand() if e != null and e.equipment != null else null
+		_play("idle_combat_2h" if main != null and main.two_handed else "idle_combat")
+		return
+	_play("idle")
 
 
 func _attack_role_for(combat: MeleeCombat) -> String:

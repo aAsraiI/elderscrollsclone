@@ -24,6 +24,8 @@ static var _scenes := {}             # path -> PackedScene, or Node3D template f
 static var _shapes := {}             # cache key -> Array of [ConvexPolygonShape3D]
 static var _meshes := {}             # cache key -> ArrayMesh (merged, for MultiMesh use)
 static var _user_dirs: PackedStringArray = []
+## false: only the built-in models (tools that check them turn this off with only_builtin)
+static var _use_user_models := true
 
 
 static func _load() -> void:
@@ -36,12 +38,12 @@ static func _load() -> void:
 		_user_dirs.append(OS.get_executable_path().get_base_dir().path_join("models"))
 	_user_dirs.append(ProjectSettings.globalize_path("user://models"))
 	for dir in _user_dirs:
-		if not DirAccess.dir_exists_absolute(dir):
+		if not _use_user_models or not DirAccess.dir_exists_absolute(dir):
 			continue
 		_read_manifest(dir.path_join("models.json"), dir)
 		for f in DirAccess.get_files_at(dir):
 			var ext := f.get_extension().to_lower()
-			if ext in ["glb", "gltf", "fbx"]:
+			if ext in ["glb", "gltf", "fbx", "scn", "tscn", "res"]:
 				var key := f.get_basename().replace("__", "/")
 				var e: Dictionary = _entries.get(key, {}).duplicate()
 				e["path"] = dir.path_join(f)
@@ -71,6 +73,12 @@ static func _read_manifest(path: String, base: String) -> void:
 		e["path"] = p
 		e["user"] = not base.begins_with("res://")
 		_entries[key] = e
+
+
+## Use only the built-in models (true), or your own models folder too (false)
+static func only_builtin(on: bool) -> void:
+	_use_user_models = not on
+	reload()
 
 
 ## Forget everything loaded (after dropping new files in the models folder)
@@ -119,7 +127,8 @@ static func instance(key: String) -> Node3D:
 	holder.name = "Model"
 	holder.set_meta("model_key", key)
 	var rot: Array = e.get("rot", [0, 0, 0])
-	model.rotation_degrees = Vector3(rot[0], rot[1], rot[2])
+	# On top of any turn the file itself has (the Morrowind importer stands its people up this way)
+	model.transform = Transform3D(Basis.from_euler(Vector3(deg_to_rad(rot[0]), deg_to_rad(rot[1]), deg_to_rad(rot[2]))), Vector3.ZERO) * model.transform
 	holder.add_child(model)
 	if e.has("texture"):
 		_texture(holder, String(e["texture"]), String(e["path"]).get_base_dir())
@@ -161,6 +170,12 @@ static func _instantiate(path: String) -> Node3D:
 	var out: Node3D = null
 	if path.begins_with("res://"):
 		var ps := load(path) as PackedScene
+		_scenes[path] = ps
+		if ps != null:
+			out = ps.instantiate() as Node3D
+	elif path.get_extension().to_lower() in ["scn", "tscn", "res"]:
+		# A user model saved as a Godot scene (the Morrowind importer makes these)
+		var ps := ResourceLoader.load(path) as PackedScene
 		_scenes[path] = ps
 		if ps != null:
 			out = ps.instantiate() as Node3D

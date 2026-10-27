@@ -32,6 +32,8 @@ func _run() -> void:
 	t_props()
 	t_nature()
 	t_user_folder()
+	t_morrowind()
+	t_turned_rooms()
 	await t_in_game()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
@@ -141,6 +143,9 @@ func t_user_folder() -> void:
 	print("-- your own models")
 	var dir := ProjectSettings.globalize_path("user://models")
 	DirAccess.make_dir_recursive_absolute(dir)
+	# Whatever is already there (your own models, a Morrowind import) is put back afterwards
+	var json_path := dir.path_join("models.json")
+	var kept := FileAccess.get_file_as_string(json_path) if FileAccess.file_exists(json_path) else ""
 	# A glb of our own, made from a built-in model, saved under a key's name
 	var src := ModelLibrary.instance("prop/bucket")
 	var doc := GLTFDocument.new()
@@ -159,9 +164,74 @@ func t_user_folder() -> void:
 	var rot: Array = ModelLibrary.entry("prop/test_crate_turned").get("rot", [0, 0, 0])
 	check("a models.json there adds keys too", rot.size() == 3 and is_equal_approx(float(rot[1]), 90.0))
 	DirAccess.remove_absolute(path)
-	DirAccess.remove_absolute(dir.path_join("models.json"))
+	DirAccess.remove_absolute(json_path)
+	if kept != "":
+		FileAccess.open(json_path, FileAccess.WRITE).store_string(kept)
 	ModelLibrary.reload()
 	check("removing them puts things back", not ModelLibrary.has("prop/test_crate"))
+
+
+func t_morrowind() -> void:
+	print("-- Morrowind people")
+	var keys := [[0.0, "Idle: Start"], [2.0, "Idle: Stop\r\n"], [3.0, "WeaponOneHand: Chop Start"],
+		[3.5, "WeaponOneHand: Chop Hit"], [3.8, "WeaponOneHand: Chop Large Follow Stop"],
+		[4.0, "WeaponOneHand: Chop Small Follow Stop"], [5.0, "Idle2: Start"], [5.5, "Idle2: Loop Start"],
+		[6.0, "Idle2: Loop Stop"], [7.0, "Idle2: Stop"]]
+	var r := MwCharacter.clip_ranges(keys)
+	check("text keys become clips (%s)" % str(r.keys()), r.get("Idle") == [0.0, 2.0] and r.get("WeaponOneHand_Chop") == [3.0, 3.8] and r.get("Idle2") == [5.0, 7.0] and not r.has("Idle2_Loop"))
+	var folder := MwData.find_install()
+	if folder == "":
+		print("SKIP  Morrowind is not installed here: the import itself is not tried")
+		return
+	var data := MwData.open(folder)
+	check("your copy of Morrowind opens (%d races, %d items)" % [data.esm.races.size(), data.esm.wearables.size()], data.esm.races.size() >= 10 and data.esm.wearables.size() > 500)
+	var b := MwCharacter.new(data)
+	var t := Time.get_ticks_msec()
+	var person := b.build(MwImport.CAST["people/knight"])
+	check("a knight is built (%d ms, problems: %s)" % [Time.get_ticks_msec() - t, ", ".join(b.problems)], person != null and b.problems.is_empty())
+	if person == null:
+		return
+	var stand := Node3D.new()
+	root.add_child(stand)
+	stand.add_child(person)
+	var skel := person.get_node("Skeleton3D") as Skeleton3D
+	check("on Morrowind's skeleton (%d bones)" % skel.get_bone_count(), skel.find_bone("Bip01 Head") >= 0 and skel.find_bone("Weapon Bone") >= 0)
+	var meshes := person.find_children("*", "MeshInstance3D", true, false)
+	var textured := meshes.filter(func(m): return ((m as MeshInstance3D).mesh.surface_get_material(0) as BaseMaterial3D).albedo_texture != null)
+	check("wearing its parts, textured (%d of %d)" % [textured.size(), meshes.size()], meshes.size() >= 10 and textured.size() == meshes.size())
+	var player := person.get_node("AnimationPlayer") as AnimationPlayer
+	var clips := player.get_animation_list()
+	var missing := MwImport.CLIPS.values().filter(func(c): return not clips.has(c))
+	check("every clip the game asks for is there", missing.is_empty(), ", ".join(missing))
+	player.play("WalkForward")
+	player.seek(0.3, true)
+	var box := ModelLibrary.bounds(stand)
+	check("it stands up (%.2f m tall, %.2f deep)" % [box.size.y, box.size.z], box.size.y > 1.6 and box.size.y < 2.4 and box.size.z < 1.0)
+	var head := ModelLibrary.relative_transform(stand, skel) * skel.get_bone_global_pose(skel.find_bone("Bip01 Head")).origin
+	check("head on top", head.y > box.position.y + box.size.y * 0.8)
+	check("walks in place (forward motion taken out)", b.speeds.get("WalkForward", 0.0) > 20.0)
+	stand.free()
+
+
+# Dungeon rooms are placed turned, and their enemies with them: facing must be in world terms
+func t_turned_rooms() -> void:
+	print("-- enemies in turned rooms")
+	for turn in [PI, PI * 0.5, -0.7]:
+		var room := Node3D.new()
+		room.rotation.y = turn
+		root.add_child(room)
+		var e := Enemy.create()
+		room.add_child(e)
+		var to := Vector3(1.0, 0.0, 0.3).normalized()
+		for i in 60:
+			e._face(to, 0.1)
+		var fwd := -e.global_basis.z
+		check("in a room turned %.1f it faces its target (off by %.0f deg)" % [turn, rad_to_deg(fwd.angle_to(to))], fwd.angle_to(to) < 0.05)
+		check("and knows it does", e._facing_error(to) < 0.05)
+		for i in 60:
+			e._face(-to, 0.1)  # fleeing: facing the way it runs
+		check("running away it faces away", (-e.global_basis.z).angle_to(-to) < 0.05)
+		room.free()
 
 
 func t_in_game() -> void:

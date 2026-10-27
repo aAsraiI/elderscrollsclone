@@ -46,6 +46,9 @@ func _init() -> void:
 			if foot < 0:
 				foot = s.find_bone("Foot.L")
 				toe = s.find_bone("Foot.L_end")
+			if foot < 0:
+				foot = s.find_bone("Bip01 L Foot")
+				toe = s.find_bone("Bip01 L Toe0")
 			if foot >= 0 and toe >= 0:
 				var xf := ModelLibrary.relative_transform(holder, s)
 				var dir := (xf * s.get_bone_global_pose(toe).origin) - (xf * s.get_bone_global_pose(foot).origin)

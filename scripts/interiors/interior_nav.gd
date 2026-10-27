@@ -123,7 +123,7 @@ func _give_roles(nav_seed: int) -> void:
 				var way_in := _way_in(i)
 				if way_in != Vector3.INF:
 					var to := way_in - enemy.global_position
-					enemy.rotation.y = atan2(-to.x, -to.z)
+					enemy.global_rotation.y = atan2(-to.x, -to.z)
 			elif tags.has("ambush") or side_rooms.has(i):
 				_ambusher(enemy, i)
 			elif patrol_left > 0 and plan.placed[i].entry.role in [RoomModule.Role.CORRIDOR, RoomModule.Role.JUNCTION] and not _adjacent.get(i, []).is_empty():

@@ -66,14 +66,50 @@ Put them in a **models** folder; they win over the built-in ones, and the game r
 - in the game's data folder: `%APPDATA%\Godot\app_userdata\ELDERSCROLLSCLONE\models`
 
 Name each file after its key with `/` written as `__`: `prop__barrel.glb`, `creature__wolf.glb`,
-`weapon__sword.gltf`, `people__knight.glb`. Formats: `.glb`, `.gltf` or `.fbx`. To turn, fit, hide parts or
-name clips, add a `models.json` in that folder in the same format as `data/models/models.json`
-(paths relative to that folder).
+`weapon__sword.gltf`, `people__knight.glb`. Formats: `.glb`, `.gltf`, `.fbx`, or a Godot scene (`.scn`).
+To turn, fit, hide parts or name clips, add a `models.json` in that folder in the same format as
+`data/models/models.json` (paths relative to that folder).
 
-### Models from a game you own (for example Morrowind)
+### Morrowind's people (if you own Morrowind)
 
-Morrowind's models belong to Bethesda, so they are **not** included and must never be put into this
-project or a release. You can use your own copy for yourself:
+Morrowind's models belong to Bethesda, so none are included, and they must never be put into this
+project or a release. If you own the game, the game can build its people from **your own copy**:
+
+**Settings > Models > Import Morrowind people.** The folder is found by itself for Steam and GOG
+installs; otherwise paste the path of Morrowind's `Data Files` folder. It takes about ten seconds.
+People already standing around change when you next enter a place or load a game.
+**Remove them** puts the game's own people back.
+
+It builds 12 people (`MwImport.CAST` in `scripts/morrowind/mw_import.gd`), each from a Morrowind race,
+face, hair and outfit:
+
+| Look | Morrowind person |
+| --- | --- |
+| `people/man_1..3` | Imperial, Nord and Dark Elf men in shirts, pants and shoes |
+| `people/woman_1..3` | Breton, Imperial and Dark Elf women in shirts, skirts and shoes |
+| `people/fighter_a` | Nord in Nordic fur armour with iron gauntlets |
+| `people/fighter_b` | Redguard in boiled netch leather and chitin greaves |
+| `people/knight` | Imperial in full Imperial steel armour |
+| `people/archer` | Wood Elf in chitin armour |
+| `people/mage` | High Elf in a common robe |
+| `people/brute` | Orc in iron armour |
+
+They play Morrowind's own animations (idles, walk, run, one- and two-handed chops and slashes,
+hand-to-hand, shield block, spell casting, bow, getting hit, knockout, death), and weapons and shields
+sit in their hands (worked out from the hand bones). To dress people differently, change the item ids in
+`MwImport.CAST` (any armour or clothing id from Morrowind.esm, Tribunal or Bloodmoon) and import again.
+
+How it works (`scripts/morrowind/`): `MwBsa` reads the .bsa archives, `MwNif` reads .nif and .kf files
+(NetImmerse 4.0.0.2), `MwEsm` reads races, body parts, armour and clothing from the .esm files, `MwData`
+puts them together with loose files and DDS textures, and `MwCharacter` builds a person: the race's
+skeleton (`base_anim.nif`, female and beast versions too), each body part, clothing or armour piece on
+its slot (left parts are the right ones mirrored, as in Morrowind), and the animation timeline in
+`xbase_anim.kf` cut into clips by its text keys. `MwImport` saves them as `.scn` files in your models
+folder with a `models.json` entry each. From a command line:
+`godot --headless --path . -s res://tools/import_morrowind.gd -- ["<Data Files>"] [remove]`.
+
+Creatures, furniture and items from Morrowind are not imported; for one-off models you can still
+convert them yourself:
 
 1. Install [Blender](https://www.blender.org/) and the
    [NifTools Blender add-on](https://github.com/niftools/blender_niftools_addon), which opens `.nif` files.
@@ -85,7 +121,7 @@ project or a release. You can use your own copy for yourself:
 4. Save it into your models folder named after the key it should replace, for example
    `prop__barrel.glb` or `creature__wolf.glb`.
 
-Static models (furniture, rocks, weapons, items) work straight away. Creatures and people need a model
+Static models (furniture, rocks, weapons, items) work straight away. Creatures need a model
 with its own animations; Morrowind keeps those in separate `x*.nif` / `.kf` files, so they need to be
 merged in Blender first.
 

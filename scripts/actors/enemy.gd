@@ -1414,7 +1414,8 @@ func _face(to_target: Vector3, delta: float) -> void:
 	if to_target.length() < 0.01:
 		return
 	var yaw := atan2(-to_target.x, -to_target.z)
-	rotation.y = lerp_angle(rotation.y, yaw, clampf(turn_speed * delta, 0.0, 1.0))
+	# In world terms: a dungeon room or a town can be turned, and its people with it
+	global_rotation.y = lerp_angle(global_rotation.y, yaw, clampf(turn_speed * delta, 0.0, 1.0))
 
 
 # On the move: face the way it is actually going (velocity lags the wish, and walls bend it), so the

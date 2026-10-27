@@ -345,6 +345,8 @@ static func _build_piece(root: Node3D, kind: String, at: Vector3, yaw: float, sl
 				_cyl(holder, 0.3, 0.1, Vector3(x, 0.3, s.y * 0.42), DARK_WOOD, true)
 				_cyl(holder, 0.3, 0.1, Vector3(x, 0.3, -s.y * 0.42), DARK_WOOD, true)
 			tops.append([Vector3(0.0, 0.9, 0.0), Vector2(1.0, 0.6)])
+	# A real model for this piece (ModelLibrary "prop/<kind>") replaces its boxes
+	ModelLibrary.replace_meshes(holder, "prop/" + kind)
 	for top: Array in tops:
 		var p: Vector3 = top[0]
 		slots.append([at + p.rotated(Vector3.UP, yaw), top[1]])

@@ -35,7 +35,7 @@ static func build_view(item: ItemData) -> Node3D:
 			model.scale = Vector3.ONE * item.view_scale
 			root.add_child(model)
 			return root
-	_placeholder(root, item)
+	_placeholder_or_model(root, item)
 	return root
 
 
@@ -52,7 +52,7 @@ static func build_world(item: ItemData) -> Node3D:
 			model.scale = Vector3.ONE * item.world_scale
 			root.add_child(model)
 			return root
-	_placeholder(root, item)
+	_placeholder_or_model(root, item)
 	return root
 
 
@@ -79,6 +79,83 @@ static func _relative_transform(root: Node3D, n: Node3D) -> Transform3D:
 			t = (cur as Node3D).transform * t
 		cur = cur.get_parent()
 	return t
+
+
+# ---------------------------------------------------------------- library models
+
+## The placeholder's space, filled by a ModelLibrary model when there is one for this item
+static func _placeholder_or_model(root: Node3D, item: ItemData) -> void:
+	_placeholder(root, item)
+	var key := ModelLibrary.first(model_keys(item))
+	if key != "":
+		ModelLibrary.replace_meshes(root, key, "long")
+
+
+## ModelLibrary keys for an item, best first: its own id, then what kind of thing it is
+static func model_keys(item: ItemData) -> Array:
+	var out: Array = ["item/" + String(item.id)]
+	var n := item.display_name.to_lower()
+	var anim := String(item.animation_set)
+	if item.item_type == ItemData.ItemType.WEAPON or item.equip_slot == ItemData.EquipSlot.OFF_HAND:
+		if item.is_bow:
+			out.append("weapon/bow")
+		if anim != "":
+			out.append("weapon/" + anim)
+		if item.secondary_action == ItemData.SecondaryAction.BLOCK and item.item_type != ItemData.ItemType.WEAPON:
+			out.append("weapon/shield")
+		out.append("weapon/greatsword" if item.two_handed else "weapon/sword")
+		return out
+	match item.item_type:
+		ItemData.ItemType.ARMOR:
+			match item.equip_slot:
+				ItemData.EquipSlot.HEAD:
+					out.append("armor/helmet_heavy" if item.governing_skill == "heavy_armor" else "armor/helmet")
+				ItemData.EquipSlot.RING:
+					out.append("item/ring")
+				ItemData.EquipSlot.AMULET:
+					out.append("item/amulet")
+			return out
+		ItemData.ItemType.CONSUMABLE:
+			if item.id == &"gold" or n.begins_with("gold"):
+				out.append("item/gold")
+			elif item.effect_group == "potion":
+				out.append("item/potion_" + _potion_kind(n))
+				out.append("item/potion")
+			else:
+				for food in ["apple", "onion", "potato", "bread", "cheese", "meat", "fish", "pear", "carrot"]:
+					if n.contains(food):
+						out.append("food/" + food)
+				out.append("item/food")
+			return out
+		ItemData.ItemType.KEY:
+			out.append("item/key")
+			return out
+	for pair in [["book", "item/book"], ["journal", "item/book"], ["ledger", "item/book"], ["tome", "item/book"],
+			["scroll", "item/scroll"], ["quill", "item/scroll"], ["ingot", "item/ingot"], ["ore", "item/ore"],
+			["pelt", "item/pelt"], ["leather", "item/pelt"], ["tankard", "item/tankard"], ["goblet", "item/goblet"],
+			["chalice", "item/goblet"], ["cup", "item/tankard"], ["plate", "item/plate"], ["bowl", "item/bowl"],
+			["candlestick", "item/candlestick"], ["lantern", "item/lantern"], ["skull", "item/skull"],
+			["bone", "item/bone"], ["urn", "item/urn"], ["bucket", "item/bucket"], ["pickaxe", "item/pickaxe"],
+			["shovel", "item/shovel"], ["hammer", "item/hammer"], ["broom", "item/broom"], ["sack", "item/sack"],
+			["coin", "item/gold"], ["ring", "item/ring"], ["necklace", "item/amulet"], ["amulet", "item/amulet"],
+			["crown", "item/crown"], ["circlet", "item/crown"], ["idol", "item/idol"], ["gem", "item/gem"],
+			["ruby", "item/gem"], ["sapphire", "item/gem"], ["emerald", "item/gem"], ["diamond", "item/gem"],
+			["amethyst", "item/gem"], ["garnet", "item/gem"]]:
+		if n.contains(pair[0]):
+			out.append(pair[1])
+	if item.item_type == ItemData.ItemType.INGREDIENT:
+		out.append("item/ingredient")
+	return out
+
+
+static func _potion_kind(n: String) -> String:
+	if n.contains("heal") or n.contains("health"):
+		return "health"
+	if n.contains("magicka") or n.contains("mana"):
+		return "magicka"
+	if n.contains("stamina"):
+		return "stamina"
+	return "other"
 
 
 # ---------------------------------------------------------------- placeholders

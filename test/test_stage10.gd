@@ -200,9 +200,10 @@ func t_in_game() -> void:
 	e.stats.modify_vital("health", -99999.0)
 	await physics(5)
 	var rag := e.get_node_or_null("Ragdoll") as Ragdoll
-	check("the dead fall as ragdolls", rag != null and rag.parts.size() >= 10, str(rag.parts.size() if rag != null else 0))
+	var whole := rag != null and e.body != null and e.body.model_body != null and rag.parts.has("remains")
+	check("the dead fall as ragdolls (or a model lying as one piece)", rag != null and (rag.parts.size() >= 10 or whole), str(rag.parts.size() if rag != null else 0))
 	if rag != null:
-		var part: RigidBody3D = rag.parts["spine"]
+		var part: RigidBody3D = rag.parts.get("spine", rag.parts.get("remains"))
 		# Let the body finish falling, then stand beside it on solid ground. (The hold point follows
 		# the camera: a player dropped in mid-air falls during the test and drags the limb back down.)
 		for i in 120:

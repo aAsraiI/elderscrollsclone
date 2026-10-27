@@ -35,6 +35,10 @@ var cast_color := Color(1.0, 0.5, 0.2)
 ## 0..1 how far a bow is drawn (enemy archers)
 var bow_draw := 0.0
 
+## A real model drawn instead of the boxes (ModelBody), when ModelLibrary has one
+var model_body: ModelBody
+var _model_checked := false
+
 var bones: Dictionary = {}       # name -> Node3D
 var grip: Node3D                 # right hand: weapons hang here (blade along -Z)
 var off_grip: Node3D             # left forearm: shields hang here
@@ -82,7 +86,86 @@ static func build_for(e: Node3D, p_kind: Kind, seed_value: int) -> CreatureBody:
 			b._build_crawler(e.placeholder_color)
 		Kind.SPIRIT:
 			b._build_spirit(e.placeholder_color)
+	if p_kind != Kind.HUMANOID:
+		b._try_model()  # people wait for their gear (dress) to pick theirs
 	return b
+
+
+# ---------------------------------------------------------------- real models
+
+## Picks a model for this body from ModelLibrary (its enemy type first, then by what it is).
+## Without one the boxes stay.
+func _try_model() -> void:
+	if _model_checked:
+		return
+	_model_checked = true
+	var key := ModelLibrary.first(model_keys())
+	if key != "":
+		model_body = ModelBody.attach(self, key)
+
+
+## The ModelLibrary keys this body would use, best first
+func model_keys() -> Array:
+	var out: Array = []
+	var id := ""
+	if enemy is Enemy:
+		id = (enemy as Enemy).enemy_id
+		if id != "":
+			out.append("creature/" + id)
+	elif enemy is Horse:
+		out.append("creature/horse")
+	if kind != Kind.HUMANOID:
+		return out
+	var lower := String(enemy.display_name).to_lower() if enemy != null else ""
+	var style := -1
+	if enemy is Enemy:
+		style = (enemy as Enemy).style
+	var equipment: Equipment = enemy.equipment if enemy != null else null
+	var heavy := false
+	var has_weapon := false
+	if equipment != null:
+		var chest: ItemData = equipment.get_equipped(ItemData.EquipSlot.CHEST)
+		heavy = chest != null and chest.governing_skill == "heavy_armor"
+		has_weapon = equipment.get_main_hand() != null
+	var hostile: bool = enemy is Enemy and (enemy as Enemy).disposition == Enemy.Disposition.HOSTILE
+	var pick := _rng.randi()
+	var is_player := not (enemy is Enemy) and not (enemy is Horse)
+	var prefix := "people/"
+	if lower.contains("skeleton") or lower.contains("wight") or lower.contains("warden") or lower.contains("sentinel") or lower.contains("guardian"):
+		if style == Enemy.Style.MAGE:
+			out.append("people/skeleton_mage")
+		elif style == Enemy.Style.ARCHER:
+			out.append("people/skeleton_rogue")
+		elif heavy or lower.contains("knight") or lower.contains("lord"):
+			out.append("people/skeleton_warrior")
+		out.append("people/skeleton")
+	elif lower.contains("ghoul") or lower.contains("drowned") or lower.contains("zombie") or lower.contains("risen"):
+		out.append("people/zombie")
+	elif lower.contains("troll") or lower.contains("giant") or lower.contains("werewolf"):
+		out.append("people/brute")
+	if style == Enemy.Style.MAGE or lower.contains("priest") or lower.contains("cultist") or lower.contains("hag") or lower.contains("mage"):
+		out.append(prefix + "mage")
+	if heavy:
+		out.append(prefix + "knight")
+	if style == Enemy.Style.ARCHER:
+		out.append(prefix + "archer")
+	if hostile or has_weapon or is_player:
+		out.append(prefix + ("fighter_a" if pick % 2 == 0 else "fighter_b"))
+	var first_name := String(enemy.display_name).get_slice(" ", 0) if enemy != null else ""
+	var woman := first_name in NameGen.FEMININE if first_name in NameGen.FIRST else pick % 2 == 1
+	if is_player:
+		woman = int((enemy.get_meta("character", {}) as Dictionary).get("sex", 0)) == 1
+	out.append(prefix + ("woman_%d" if woman else "man_%d") % (1 + (pick / 2) % 3))
+	out.append(prefix + "man_1")
+	out.append("people/man_1")
+	if is_player:
+		# "player/<look>" (your own model for yourself) before the shared people models
+		var own: Array = []
+		for k in out:
+			if String(k).begins_with("people/"):
+				own.append("player/" + String(k).trim_prefix("people/"))
+		out = own + ["player/body"] + out
+	return out
 
 
 ## Which kind of body an enemy type gets (by its EnemyData id)
@@ -237,6 +320,7 @@ func _build_humanoid(cloth: Color) -> void:
 func dress(equipment: Equipment) -> void:
 	if kind != Kind.HUMANOID or equipment == null:
 		return
+	_try_model()
 	for b in bones.values():
 		for c in (b as Node3D).get_children():
 			if c.has_meta("armor_piece"):
@@ -312,9 +396,16 @@ func set_weapons(main: ItemData, off: ItemData) -> void:
 			if c.has_meta("weapon_model"):
 				c.queue_free()
 		if off != null:
-			if off.secondary_action == ItemData.SecondaryAction.BLOCK and off.item_type != ItemData.ItemType.WEAPON:
+			if off.secondary_action == ItemData.SecondaryAction.BLOCK and off.item_type != ItemData.ItemType.WEAPON and ModelLibrary.first(ItemModels.model_keys(off)) != "":
+				var held := ItemModels.build_view(off)
+				held.set_meta("weapon_model", true)
+				off_grip.add_child(held)
+			elif off.secondary_action == ItemData.SecondaryAction.BLOCK and off.item_type != ItemData.ItemType.WEAPON:
 				var shield := _part(off_grip, _box(Vector3(0.55, 0.65, 0.06)), Vector3.ZERO, _metal_for(off))
 				shield.set_meta("weapon_model", true)
+			elif model_body != null and model_body.left_holder() != null:
+				var w := _weapon_model(off)
+				model_body.left_holder().add_child(w)
 			elif bones.has("l_hand"):
 				var w := _weapon_model(off)
 				w.position = Vector3(0, -0.06, 0)
@@ -331,6 +422,12 @@ func _metal_for(item: ItemData) -> StandardMaterial3D:
 func _weapon_model(w: ItemData) -> Node3D:
 	var root := Node3D.new()
 	root.set_meta("weapon_model", true)
+	if w.view_scene != null or ModelLibrary.first(ItemModels.model_keys(w)) != "":
+		# The same model the player holds: its blade runs up +Y from the grip, here it points along -Z
+		var held := ItemModels.build_view(w)
+		held.rotation.x = -PI * 0.5
+		root.add_child(held)
+		return root
 	var metal := _metal_for(w)
 	var wood := _mat(Color(0.35, 0.22, 0.12))
 	var length := clampf(w.reach * 0.42, 0.35, 1.5)
@@ -516,6 +613,8 @@ func set_glow(amount: float, color: Color) -> void:
 func flash() -> void:
 	_flash = 0.18
 	_flinch = 1.0
+	if model_body != null:
+		model_body.flinch()
 
 
 func _update_emission(delta: float) -> void:
@@ -545,6 +644,8 @@ func _process(delta: float) -> void:
 	var cam := get_viewport().get_camera_3d()
 	if cam != null:
 		var d2 := cam.global_position.distance_squared_to(global_position)
+		if model_body != null:
+			model_body.set_far(d2 > LOD_FAR * LOD_FAR)
 		if d2 > LOD_FAR * LOD_FAR:
 			return
 		if d2 > LOD_NEAR * LOD_NEAR:
@@ -555,6 +656,11 @@ func _process(delta: float) -> void:
 			_lod_timer = 0.25
 	var v: Vector3 = enemy.velocity
 	_speed = lerpf(_speed, Vector2(v.x, v.z).length(), clampf(delta * 8.0, 0.0, 1.0))
+	if not _model_checked and kind == Kind.HUMANOID:
+		_try_model()
+	if model_body != null:
+		model_body.animate(delta, _speed)
+		return
 	match kind:
 		Kind.HUMANOID, Kind.SPIRIT:
 			_animate_humanoid(delta)

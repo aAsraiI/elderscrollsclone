@@ -230,6 +230,16 @@ static func _tree_parts(style: int) -> Array:
 	return _tree_meshes[style]
 
 
+## The ModelLibrary tree for a style ("tree/broadleaf", "tree/pine", "tree/dead", "tree/cactus"),
+## as one mesh as tall as the box tree it replaces; null when there is none
+static func _tree_model(style: int) -> ArrayMesh:
+	var key := "tree/" + String(BiomeData.TreeStyle.keys()[style]).to_lower()
+	if not ModelLibrary.has(key):
+		return null
+	var height: float = {BiomeData.TreeStyle.PINE: 7.8, BiomeData.TreeStyle.DEAD: 4.6, BiomeData.TreeStyle.CACTUS: 2.8}.get(style, 5.8)
+	return ModelLibrary.merged_mesh(key, height, 0.15)
+
+
 # Each kind of tree is drawn as two batches (trunks, crowns); trunks block you, crowns don't
 func _add_trees(trees: Dictionary) -> void:
 	for style: int in trees:
@@ -240,6 +250,21 @@ func _add_trees(trees: Dictionary) -> void:
 			continue
 		var parts := _tree_parts(style)
 		var trunk_h: float = parts[2]
+		var model_mesh := _tree_model(style)
+		if model_mesh != null:
+			# A real tree model: one batch, its own materials, the same size the old tree was
+			var mm := MultiMesh.new()
+			mm.transform_format = MultiMesh.TRANSFORM_3D
+			mm.mesh = model_mesh
+			mm.instance_count = pos.size()
+			for k in pos.size():
+				var rot := Basis(Vector3.UP, float(k) * 2.39996) * scales[k]
+				mm.set_instance_transform(k, Transform3D(rot, pos[k]))
+			var mmi := MultiMeshInstance3D.new()
+			mmi.name = "Trees%d" % style
+			mmi.multimesh = mm
+			mmi.visibility_range_end = 900.0
+			add_child(mmi)
 		var crown_color: Color = group["color"]
 		var trunk_color := Color(0.33, 0.24, 0.15) if style != BiomeData.TreeStyle.CACTUS else crown_color
 		var crown_y := trunk_h + (2.6 if style == BiomeData.TreeStyle.PINE else (1.6 if style == BiomeData.TreeStyle.BROADLEAF else 0.0))
@@ -247,7 +272,7 @@ func _add_trees(trees: Dictionary) -> void:
 			crown_y = trunk_h * 0.75
 		elif style == BiomeData.TreeStyle.CACTUS:
 			crown_y = trunk_h * 0.55
-		for part in 2:
+		for part in (0 if model_mesh != null else 2):
 			var mm := MultiMesh.new()
 			mm.transform_format = MultiMesh.TRANSFORM_3D
 			mm.mesh = parts[part]

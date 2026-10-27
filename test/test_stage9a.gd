@@ -238,7 +238,8 @@ func t_models() -> void:
 		var it := ItemCatalog.get_weapon(ItemCatalog.WEAPON_KINDS.find(k), 0)
 		var m := ItemModels.build_view(it)
 		var size := ItemModels.get_bounds(m).size
-		check("%s has its own shape" % it.display_name, m.get_child_count() >= 2 and size.y > 0.4)
+		var real := not m.find_children("*", "", true, false).filter(func(n): return n.has_meta("model_key")).is_empty()
+		check("%s has its own shape" % it.display_name, (m.get_child_count() >= 2 or real) and size.y > 0.4)
 		m.free()
 	for piece in ItemCatalog.ARMOR_PIECES:
 		var m := ItemModels.build_world(ItemCatalog.get_armor(2, piece, false))

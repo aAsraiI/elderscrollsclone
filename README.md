@@ -20,7 +20,8 @@ test sword and a practice enemy, open `scenes/game/game.tscn` and press F6.
 | `scenes/player/` | The player, with every HUD, menu and ability as a node you can select |
 | `scenes/actors/` | `enemy.tscn`: every creature and NPC starts as a copy of it |
 | `scripts/<area>/` | Code by area: `actors`, `audio`, `character`, `combat`, `core`, `crafting`, `dialogue`, `dungeons`, `factions`, `items`, `magic`, `player`, `quests`, `realms`, `save`, `towns`, `trade`, `ui`, `world` |
-| `data/` | Content as `.tres` resources: items, enemies, factions, merchants, spawns, world settings |
+| `data/` | Content as `.tres` resources: items, enemies, factions, merchants, spawns, world settings; `data/models/models.json` says which 3D model each thing uses |
+| `assets/models/` | The 3D models (all CC0, see `assets/models/CREDITS.md`); how they are used and how to add your own: `MODELS.md` |
 | `ui/` | The UI theme |
 | `tools/` | Editor tools that generate content (`generate_*.gd`, `build_*.gd`) `check_scripts.gd`, and `run_tests.ps1` |
 | `test/` | Gameplay test suites (run headless) |

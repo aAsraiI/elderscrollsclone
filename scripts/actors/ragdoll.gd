@@ -50,6 +50,9 @@ static func create(e: Enemy, body: CreatureBody, impulse: Vector3 = Vector3.ZERO
 	r.name = "Ragdoll"
 	r.enemy = e
 	e.add_child(r)
+	if body.model_body != null:
+		r._build_model_corpse(body, impulse, lying)
+		return r
 	if lying:
 		# Saved corpses come back flat on their back, a little above the ground
 		body.rotation = Vector3(-PI * 0.5, 0.0, 0.0)
@@ -140,6 +143,44 @@ func _build(body: CreatureBody, table: Dictionary, impulse: Vector3) -> void:
 	_start_y = root_part.global_position.y if root_part != null else 0.0
 	body.visible = false
 	body.set_process(false)
+	_push(impulse)
+
+
+# A real model plays its death clip and then lies as one piece, its collision fitted to how it lies
+func _build_model_corpse(body: CreatureBody, impulse: Vector3, lying: bool) -> void:
+	var mb := body.model_body
+	mb.die(lying)
+	var rb := RigidBody3D.new()
+	rb.name = "Part_remains"
+	rb.top_level = true
+	rb.collision_layer = PART_LAYER
+	rb.collision_mask = WORLD_MASK
+	rb.mass = 40.0 * body.scale.x
+	rb.linear_damp = 0.6
+	rb.angular_damp = 4.0
+	rb.lock_rotation = true  # the death clip lays it down; physics only slides and drags it
+	rb.set_meta("ragdoll_owner", enemy)
+	enemy.add_child(rb)
+	rb.global_transform = Transform3D(Basis(Vector3.UP, body.global_rotation.y), body.global_position)
+	# A flat box the size of the body lying down (the clip is still playing, so guess from standing)
+	var box := ModelLibrary.bounds(mb)
+	var s := body.scale.x
+	var long := maxf(box.size.y, maxf(box.size.x, box.size.z)) * s
+	var shape := CollisionShape3D.new()
+	var bs := BoxShape3D.new()
+	var lying_down := body.kind == CreatureBody.Kind.HUMANOID
+	bs.size = Vector3(maxf(box.size.x * s, 0.3), 0.3 * s, long * 0.85) if lying_down else Vector3(maxf(box.size.x, 0.2) * s, maxf(box.size.y * s * 0.6, 0.2), maxf(box.size.z * s, 0.3))
+	shape.shape = bs
+	shape.position = Vector3(0.0, bs.size.y * 0.5, 0.0)
+	rb.add_child(shape)
+	var keep := body.global_transform
+	enemy.remove_child(body)
+	rb.add_child(body)
+	body.global_transform = keep
+	body.set_process(false)
+	parts["remains"] = rb
+	root_part = rb
+	_start_y = rb.global_position.y
 	_push(impulse)
 
 

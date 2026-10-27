@@ -187,6 +187,12 @@ static func flower_mesh() -> ArrayMesh:
 
 ## Three lumpy rocks (low spheres pulled out of shape), colored per instance
 static func rock_mesh(variant: int) -> Mesh:
+	# Real rock models ("nature/rock_0".."nature/rock_2") when there are any, at the old rocks' size
+	var model_key := "nature/rock_%d" % (variant % 3)
+	if ModelLibrary.has(model_key):
+		var m := ModelLibrary.merged_mesh(model_key, 0.8, 0.1)
+		if m != null:
+			return m
 	if _rock_meshes.is_empty():
 		for v in 3:
 			var sphere := SphereMesh.new()

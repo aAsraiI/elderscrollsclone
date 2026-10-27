@@ -19,3 +19,18 @@ enum Snap { FLOOR, WALL, CEILING }
 @export_range(0, 2) var wealth_min := 0
 @export_range(0, 2) var wealth_max := 2
 @export var weight := 1.0
+
+
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
+	# A real model for this prop (ModelLibrary "prop/<scene name>", then its first tag) replaces the
+	# boxes, with collision from the model's own shape
+	var keys: Array = []
+	if scene_file_path != "":
+		keys.append("prop/" + scene_file_path.get_file().get_basename())
+	for t in tags:
+		keys.append("prop/" + t)
+	var key := ModelLibrary.first(keys)
+	if key != "":
+		ModelLibrary.replace_meshes(self, key)

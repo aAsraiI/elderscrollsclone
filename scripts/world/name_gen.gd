@@ -12,6 +12,9 @@ const FIRST := ["Brenna", "Aldric", "Maren", "Tobin", "Isolde", "Garrick", "Wren
 	"Bram", "Hilde", "Corwin", "Edda", "Fenn", "Greta", "Halvard", "Ingrid", "Jory", "Kestrel", "Lorn",
 	"Mira", "Nils", "Orla", "Piers", "Rowan", "Sigrid", "Tamsin", "Ulric", "Vera", "Willem", "Yara",
 	"Dagny", "Emeric", "Freya", "Gideon", "Hesper", "Ivo", "Juniper", "Kael", "Linnea"]
+## The first names above that belong to women (bodies pick a woman's model for these)
+const FEMININE := ["Brenna", "Maren", "Isolde", "Wren", "Lysa", "Hilde", "Edda", "Greta", "Ingrid", "Kestrel",
+	"Mira", "Orla", "Sigrid", "Tamsin", "Vera", "Yara", "Dagny", "Freya", "Hesper", "Juniper", "Linnea"]
 const LAST := ["Ashford", "Barrow", "Coldwater", "Dunmore", "Elwood", "Fenwick", "Greaves", "Hollis",
 	"Ironside", "Kettle", "Larkin", "Merrow", "Northcott", "Oakes", "Penhale", "Quarry", "Redfern",
 	"Stroud", "Thatcher", "Underhill", "Vance", "Whitlock", "Yew", "Brandt", "Carver", "Dale"]

@@ -1,8 +1,9 @@
 class_name HitFX
 extends RefCounted
 ## Marks a hit leaves in the world (MeleeCombat calls these for everyone, player and enemies):
-##   blood   a short spray where a blade or claw lands, and a dark stain on the ground beneath
-##           (a Decal that fades after a minute; skeletons, spirits and constructs don't bleed)
+##   blood   droplets streaking from where a blade or claw lands, a fine mist, and a dark stain on the
+##           ground beneath (Morrowind's blood texture when imported)
+##           (the stain a Decal that fades after a minute; skeletons, spirits and constructs don't bleed)
 ##   sparks  a burst of hot sparks where a blow is blocked or parried
 ## At most MAX_STAINS stains exist at once; the oldest goes first.
 
@@ -27,17 +28,42 @@ static func blood(tree: SceneTree, at: Vector3, dir: Vector3, amount: float) -> 
 	if tree == null or tree.current_scene == null or DisplayServer.get_name() == "headless":
 		return
 	var scene := tree.current_scene
-	var p := _burst(maxi(int(10.0 + amount * 18.0), 6), 0.5, _blood_material(), Vector3(0.035, 0.035, 0.035))
-	var pm := p.process_material as ParticleProcessMaterial
-	pm.direction = (dir if dir.length() > 0.01 else Vector3.UP).normalized() + Vector3(0, 0.4, 0)
-	pm.spread = 35.0
-	pm.initial_velocity_min = 1.5
-	pm.initial_velocity_max = 2.5 + amount * 1.5
+	var along := (dir if dir.length() > 0.01 else Vector3.UP).normalized()
+	# droplets that streak along their flight, thrown with the blow and falling
+	var drops := _burst(maxi(int(14.0 + amount * 30.0), 8), 0.8, _blood_streak(), Vector3(0.025, 0.09, 1.0), true)
+	var pm := drops.process_material as ParticleProcessMaterial
+	pm.direction = along + Vector3(0, 0.35, 0)
+	pm.spread = 30.0
+	pm.initial_velocity_min = 1.8
+	pm.initial_velocity_max = 3.2 + amount * 2.5
 	pm.gravity = Vector3(0, -9.8, 0)
-	scene.add_child(p)
-	p.global_position = at
-	p.emitting = true
-	tree.create_timer(1.2, false).timeout.connect(p.queue_free)
+	pm.scale_min = 0.5
+	pm.scale_max = 1.3
+	scene.add_child(drops)
+	drops.global_position = at
+	drops.emitting = true
+	# a fine red mist where it landed
+	var mist := _burst(maxi(int(4.0 + amount * 6.0), 3), 0.45, _blood_mist(), Vector3(0.22, 0.22, 1.0))
+	var mm := mist.process_material as ParticleProcessMaterial
+	mm.direction = along
+	mm.spread = 50.0
+	mm.initial_velocity_min = 0.3
+	mm.initial_velocity_max = 0.9
+	mm.gravity = Vector3(0, -0.6, 0)
+	mm.scale_min = 0.7
+	mm.scale_max = 1.6 + amount
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 0.8))
+	fade.set_color(1, Color(1, 1, 1, 0))
+	var ft := GradientTexture1D.new()
+	ft.gradient = fade
+	mm.color_ramp = ft
+	scene.add_child(mist)
+	mist.global_position = at
+	mist.emitting = true
+	tree.create_timer(1.4, false).timeout.connect(func() -> void:
+		drops.queue_free()
+		mist.queue_free())
 	_stain(tree, at, amount)
 
 
@@ -52,7 +78,12 @@ static func sparks(tree: SceneTree, at: Vector3) -> void:
 		_spark_mat.emission_enabled = true
 		_spark_mat.emission = Color(1.0, 0.6, 0.2)
 		_spark_mat.emission_energy_multiplier = 4.0
-	var p := _burst(18, 0.35, _spark_mat, Vector3(0.025, 0.025, 0.12))
+		_spark_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		_spark_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_spark_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		var mw := MwVfx.texture("vfx_alpha_spark")
+		_spark_mat.albedo_texture = mw if mw != null else SpellFX.soft_texture()
+	var p := _burst(22, 0.35, _spark_mat, Vector3(0.03, 0.16, 1.0), true)
 	var pm := p.process_material as ParticleProcessMaterial
 	pm.direction = Vector3.UP
 	pm.spread = 80.0
@@ -74,7 +105,8 @@ static func sparks(tree: SceneTree, at: Vector3) -> void:
 		flash.queue_free())
 
 
-static func _burst(amount: int, life: float, mat: Material, size: Vector3) -> GPUParticles3D:
+# size.z == 1: a flat sprite (size.x by size.y) that faces you; `streak`: stretched along its flight
+static func _burst(amount: int, life: float, mat: Material, size: Vector3, streak: bool = false) -> GPUParticles3D:
 	var p := GPUParticles3D.new()
 	p.one_shot = true
 	p.explosiveness = 0.95
@@ -85,19 +117,54 @@ static func _burst(amount: int, life: float, mat: Material, size: Vector3) -> GP
 	pm.scale_min = 0.6
 	pm.scale_max = 1.3
 	p.process_material = pm
-	var mesh := BoxMesh.new()
-	mesh.size = size
+	var mesh: PrimitiveMesh
+	if size.z == 1.0:
+		var q := QuadMesh.new()
+		q.size = Vector2(size.x, size.y)
+		mesh = q
+	else:
+		var b := BoxMesh.new()
+		b.size = size
+		mesh = b
 	mesh.material = mat
 	p.draw_pass_1 = mesh
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if streak:
+		p.transform_align = GPUParticles3D.TRANSFORM_ALIGN_Z_BILLBOARD_Y_TO_VELOCITY
 	return p
 
 
-static func _blood_material() -> StandardMaterial3D:
+# Morrowind's blood (tx_blood) when imported, else a soft dark red
+static func _blood_streak() -> StandardMaterial3D:
 	if _blood_mat == null:
 		_blood_mat = StandardMaterial3D.new()
-		_blood_mat.albedo_color = Color(0.32, 0.02, 0.02)
-		_blood_mat.roughness = 0.3
+		_blood_mat.albedo_color = Color(0.45, 0.03, 0.03)
+		_blood_mat.roughness = 0.25
+		_blood_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_blood_mat.albedo_texture = SpellFX.soft_texture()
+		_blood_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		var mw := MwVfx.texture("tx_blood")
+		if mw != null:
+			_blood_mat.detail_enabled = true
+			_blood_mat.detail_albedo = mw
+			_blood_mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
 	return _blood_mat
+
+
+static var _mist_mat: StandardMaterial3D
+
+
+static func _blood_mist() -> StandardMaterial3D:
+	if _mist_mat == null:
+		_mist_mat = StandardMaterial3D.new()
+		_mist_mat.albedo_color = Color(0.35, 0.02, 0.02, 0.55)
+		_mist_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_mist_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_mist_mat.albedo_texture = SpellFX.soft_texture()
+		_mist_mat.vertex_color_use_as_albedo = true
+		_mist_mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+		_mist_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	return _mist_mat
 
 
 # A dark stain on whatever is below the hit

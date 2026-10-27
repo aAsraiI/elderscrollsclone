@@ -29,6 +29,12 @@ var aim_origin: Node3D
 ## Enemies set this: where to aim (null = straight ahead of aim_origin)
 var aim_target: Node3D
 var is_player := false
+## Which hand casts ("left" = the off hand, "right" instead of a weapon): where its light shows
+var hand := "left"
+## Both hands are casting the same spell at once (Skyrim's dual casting): stronger, and dearer
+var dual := false
+const DUAL_POWER := 1.6
+const DUAL_COST := 2.0
 
 var _spell: SpellData
 var _charge := 0.0
@@ -139,7 +145,7 @@ func get_current_spell() -> SpellData:
 
 func get_cost(spell: SpellData) -> float:
 	var level := skills.get_level(spell.get_school()) if skills != null else 0
-	return spell.get_cost(level)
+	return spell.get_cost(level) * (DUAL_COST if dual else 1.0)
 
 
 ## Spell strength multiplier for this caster
@@ -149,6 +155,8 @@ func get_power(spell: SpellData) -> float:
 		p += stats.get_stat("spell_power") + stats.get_stat("power_" + String(spell.get_school()))
 	if not is_player and host is Enemy:
 		p += float((host as Enemy).level) * 0.0  # enemy spells are scaled when they are made
+	if dual:
+		p *= DUAL_POWER
 	return maxf(p, 0.1)
 
 

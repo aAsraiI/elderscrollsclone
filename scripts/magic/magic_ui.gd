@@ -13,6 +13,7 @@ var _details: RichTextLabel
 var _effects: RichTextLabel
 var _equipped: Label
 var _equip_button: Button
+var _right_button: Button
 var _fav_button: Button
 var _forget_button: Button
 var _is_open := false
@@ -79,6 +80,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_equip_selected()
 	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F:
 		_fav_selected()
+	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
+		_right_selected()
 	else:
 		return
 	get_viewport().set_input_as_handled()
@@ -152,7 +155,8 @@ func _build_ui() -> void:
 	side.add_child(_details)
 	var buttons := HBoxContainer.new()
 	side.add_child(buttons)
-	_equip_button = _button(buttons, "Equip (E)", _equip_selected)
+	_equip_button = _button(buttons, "Left hand (E)", _equip_selected)
+	_right_button = _button(buttons, "Right hand (R)", _right_selected)
 	_fav_button = _button(buttons, "Favorite (F)", _fav_selected)
 	_forget_button = _button(buttons, "Forget", _forget_selected)
 	side.add_child(UITheme.heading("Active effects", 14))
@@ -203,7 +207,8 @@ func _refresh() -> void:
 	if select != null:
 		select.select(0)
 	var eq := _book.get_equipped()
-	_equipped.text = "Off hand: %s" % (eq.display_name if eq != null else "nothing")
+	var rh := _book.get_right()
+	_equipped.text = "Left hand: %s     Right hand: %s" % [eq.display_name if eq != null else "nothing", rh.display_name if rh != null else "your weapon"]
 	_update_details()
 	_update_effects()
 
@@ -220,6 +225,7 @@ func _selected() -> String:
 func _update_details() -> void:
 	var s := _book.get_spell(_selected()) if _book != null else null
 	_equip_button.disabled = s == null
+	_right_button.disabled = s == null
 	_fav_button.disabled = s == null
 	_forget_button.disabled = s == null or not s.custom
 	if s == null:
@@ -234,7 +240,8 @@ func _update_details() -> void:
 		if String(d.get("desc", "")) != "":
 			t += "[color=gray]%s: %s[/color]\n" % [d["name"], d["desc"]]
 	_details.text = t
-	_equip_button.text = "Unequip (E)" if s.id == _book.equipped_id else "Equip (E)"
+	_equip_button.text = "Unequip left (E)" if s.id == _book.equipped_id else "Left hand (E)"
+	_right_button.text = "Unequip right (R)" if s.id == _book.right_id else "Right hand (R)"
 
 
 func _update_effects() -> void:
@@ -248,6 +255,18 @@ func _update_effects() -> void:
 	if not poison.is_empty():
 		lines.append("[color=#8f8]Weapon poisoned:[/color] %s (%d hits)" % [poison.get("name", ""), int(poison.get("hits", 0))])
 	_effects.text = "\n".join(lines) if not lines.is_empty() else "[color=gray]None[/color]"
+
+
+## Puts the selected spell in the right hand (or takes it out): the weapon goes back in the bag
+func _right_selected() -> void:
+	var id := _selected()
+	if id == "" or _book == null:
+		return
+	if _book.right_id == id:
+		_book.unequip_right()
+	else:
+		_book.equip_right(id)
+	_refresh()
 
 
 func _equip_selected() -> void:

@@ -133,6 +133,7 @@ static func run(data_files: String, progress: Callable = Callable()) -> Dictiona
 	# Skies: the clouds for each weather and the night sky
 	MwSky.convert(data, dir.path_join("textures"))
 	MwSurfaces.convert(data, dir.path_join("textures"))
+	MwVfx.convert(data, dir.path_join("textures"))
 	# Creatures, with their own animations
 	for key in MwCatalog.CREATURES:
 		if progress.is_valid():
@@ -212,6 +213,7 @@ static func remove() -> int:
 			DirAccess.remove_absolute(tex_dir.path_join(f))
 	MwSky.forget()
 	MwSurfaces.forget()
+	MwVfx.forget()
 	_write_manifest(dir, manifest)
 	ModelLibrary.reload()
 	return n

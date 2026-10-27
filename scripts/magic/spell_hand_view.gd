@@ -1,6 +1,6 @@
 class_name SpellHandView
 extends Node3D
-## Your left hand in first person while a spell is in the off hand: it glows in the spell's color,
+## Your left hand in first person while a spell is in the off hand (without Morrowind's arms): it glows in the spell's color,
 ## swells while charging, throws itself forward when the spell goes off, and streams particles while
 ## a spray spell runs. Lives under the camera (MagicUI adds it).
 
@@ -75,7 +75,9 @@ func _process(delta: float) -> void:
 	_time += delta
 	var spell := _book.get_equipped() if _book != null else null
 	var tp := get_parent().get_parent().get_parent().get_node_or_null("ThirdPerson")
-	visible = spell != null and not (tp != null and tp.third)
+	var arms := get_parent().get_node_or_null("FirstPersonArms") as FirstPersonArms
+	# Morrowind's arms show the spell on their own hands
+	visible = spell != null and not (tp != null and tp.third) and not (arms != null and arms.active)
 	if spell == null:
 		if _spray != null:
 			_spray.emitting = false

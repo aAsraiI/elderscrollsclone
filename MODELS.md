@@ -217,8 +217,15 @@ Bushes are Morrowind shrubs (`nature/bush`). People come in six looks each from 
 Morrowind's races, faces and hair (`MwImport.VARIANTS`). Shields hang on Morrowind's shield bone.
 
 Your own arms in first person are Morrowind's too (1.17): the import builds first-person arms for every
-race and sex (`fp/<race>_<m|f>`), and `FirstPersonArms` plays Morrowind's first-person clips in step with
-your swings, blocks and casts, with the weapon on its weapon bone and the shield on its shield bone.
+race and sex (`fp/<race>_<m|f>`), with the weapon on its weapon bone and the shield on its shield bone.
+Since 1.18 the moves are Skyrim's kind: `FirstPersonArms` poses each arm on its own, Morrowind's clips for
+idles, finger grips and the shield block (the left hand's mirrored from the right's, `ClipTools`), and
+our own paths for everything else (`SWINGS`: slashes, backhands, power chops, two-handed sweeps, thrusts,
+punches, weapon blocks, spell hands, the bow), reached with arm IK. Edit a path's grip points and blade
+angles there; `tools/capture_fp.gd` shoots a strip of frames of any move to check it.
+
+The import also converts Morrowind's spell and blood textures (`MwVfx`): each element and school gets its
+own glow, sparks and cloud for the hand glow, projectiles, bursts and sprays, and blood uses its blood.
 
 ## The builder kit
 

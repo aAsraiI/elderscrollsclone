@@ -276,6 +276,11 @@ func _ensure_helpers() -> void:
 		var caster := SpellCaster.new()
 		caster.name = "SpellCaster"
 		add_child(caster)
+	if get_node_or_null("SpellCasterRight") == null:
+		var right := SpellCaster.new()  # the right hand's spell, instead of a weapon (Skyrim style)
+		right.name = "SpellCasterRight"
+		right.hand = "right"
+		add_child(right)
 	for extra in [["Afflictions", Afflictions], ["Survival", Survival], ["Powers", Powers], ["NightVision", NightVision], ["ThirdPerson", ThirdPerson], ["Swimming", Swimming], ["Rider", Rider], ["SoundFX", SoundFX], ["Tutorial", Tutorial], ["Followers", Followers], ["RangedCombat", RangedCombat], ["CouncilUI", CouncilUI], ["DebugConsole", DebugConsole], ["Homestead", Homestead]]:
 		if get_node_or_null(extra[0]) == null:
 			var n: Node = extra[1].new()

@@ -2,7 +2,8 @@ class_name Spellbook
 extends Node
 ## What the player knows: spells (premade and self-made), enchantments learned by disenchanting,
 ## alchemy effects discovered on each ingredient, the favorites list (Q) and the Mark spot.
-## Also which spell sits in the off hand. Lives under the Player (player.gd adds it).
+## Also which spells are in your hands: one in the off hand (right mouse button) and, like Skyrim, one in
+## the right hand instead of a weapon (left mouse button). Lives under the Player (player.gd adds it).
 ##
 ## Equipping a spell empties the off hand (a shield or second dagger goes back in the bag) and
 ## takes a two-handed weapon out of the main hand; equipping something in the off hand puts the
@@ -10,10 +11,14 @@ extends Node
 
 signal changed
 signal equipped_changed(spell: SpellData)
+## The right hand's spell changed (null = none)
+signal right_changed(spell: SpellData)
 signal learned(spell: SpellData)
 
 var spells: Dictionary = {}          # id -> SpellData
 var equipped_id := ""
+## The spell in the right hand instead of a weapon ("" = none)
+var right_id := ""
 var enchantments: Dictionary = {}    # effect id (String) -> true
 ## Ingredient resource path -> Array of effect indices (0..3) you know
 var alchemy_known: Dictionary = {}
@@ -55,6 +60,8 @@ func knows(id: String) -> bool:
 func forget(id: String) -> void:
 	if not spells.has(id):
 		return
+	if right_id == id:
+		unequip_right()
 	if equipped_id == id:
 		unequip_spell()
 	spells.erase(id)
@@ -127,11 +134,41 @@ func unequip_spell() -> void:
 
 
 func _on_equipped(slot: int, item: ItemData) -> void:
+	if right_id != "" and slot == ItemData.EquipSlot.MAIN_HAND and item != null:
+		unequip_right()  # a weapon in the right hand puts its spell away
 	if equipped_id == "":
 		return
 	if slot == ItemData.EquipSlot.OFF_HAND or (slot == ItemData.EquipSlot.MAIN_HAND and item != null and item.two_handed):
 		unequip_spell()
 
+
+
+## The spell in the right hand (null = a weapon or an empty hand there)
+func get_right() -> SpellData:
+	return spells.get(right_id)
+
+
+## Puts a spell in the right hand: the main-hand weapon goes back in the bag (and a two-handed one
+## takes the off hand with it)
+func equip_right(id: String) -> bool:
+	if not spells.has(id) or get_parent().has_meta("beast_form"):
+		return false
+	if _equipment != null:
+		var main := _equipment.get_equipped(ItemData.EquipSlot.MAIN_HAND)
+		if main != null:
+			_equipment.unequip(ItemData.EquipSlot.MAIN_HAND)
+	right_id = id
+	right_changed.emit(get_right())
+	changed.emit()
+	return true
+
+
+func unequip_right() -> void:
+	if right_id == "":
+		return
+	right_id = ""
+	right_changed.emit(null)
+	changed.emit()
 
 # ---------------------------------------------------------------- enchantments and alchemy
 
@@ -208,7 +245,7 @@ func to_dict() -> Dictionary:
 	var list: Array = []
 	for id in spells:
 		list.append((spells[id] as SpellData).to_dict())
-	return {"spells": list, "equipped": equipped_id, "enchantments": enchantments.keys(),
+	return {"spells": list, "equipped": equipped_id, "right": right_id, "enchantments": enchantments.keys(),
 		"alchemy": alchemy_known.duplicate(true), "favorites": favorites.duplicate(), "quick_slots": quick_slots.duplicate(), "mark": mark.duplicate()}
 
 
@@ -234,5 +271,7 @@ func from_dict(data: Dictionary) -> void:
 	var eq := String(data.get("equipped", ""))
 	if spells.has(eq):
 		equipped_id = eq
+	right_id = String(data.get("right", "")) if spells.has(String(data.get("right", ""))) else ""
+	right_changed.emit(get_right())
 	equipped_changed.emit(get_equipped())
 	changed.emit()

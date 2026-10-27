@@ -2,7 +2,8 @@ class_name PlayerCombat
 extends Node
 ## Mouse input for the player's combat.
 ##   Left click   TAP = light attack (tap again for a combo), HOLD = charge, release = heavy attack
-##   Right click  hold = the off-hand action: block (shield), slam (two-handed hammer),
+##                (a power attack: you lunge a step into it); with a spell in the right hand, casts it
+##   Right click  hold = the off-hand action: block (shield or weapon), slam (two-handed hammer), a spell,
 ##                or an attack with the off-hand weapon (second dagger)
 ##   While blocking: left click = shield bash.  Right click while charging = cancel the charge.
 ## Setup: add a Node named PlayerCombat as a child of the Player and attach this script.
@@ -32,6 +33,19 @@ func _ready() -> void:
 		return
 	# The parent is still setting up its children right now, so add the helpers a moment later
 	_spawn_helpers.call_deferred()
+	combat.phase_changed.connect(_on_phase_changed)
+
+
+## A power attack carries you into it: a short step forward as the blow lands (as in Skyrim)
+const LUNGE := 4.5
+
+
+func _on_phase_changed(phase: int, _duration: float) -> void:
+	var body := get_parent() as CharacterBody3D
+	if body == null or phase != MeleeCombat.Phase.ACTIVE or not combat.is_heavy_action():
+		return
+	var ahead := -body.global_basis.z
+	body.velocity += Vector3(ahead.x, 0.0, ahead.z).normalized() * LUNGE
 
 
 func _spawn_helpers() -> void:
@@ -76,10 +90,21 @@ func _unhandled_input(event: InputEvent) -> void:
 		var grabber := get_parent().get_node_or_null("Head/RayCast3D/Grabber") as Grabber
 		if grabber != null and grabber.throw():
 			return
+		var right_spell := _right_spell()
+		if right_spell != null:
+			# a spell in the right hand: left click casts it (hold to charge, let go to cast)
+			_casting_right = true
+			if not combat.is_busy() and not combat.is_stunned():
+				_begin(_right_caster(), _caster(), right_spell)
+			return
 		_primary_held = true
 		_break_invisibility()
 		combat.begin_charge()
 	elif event.is_action_released("attack"):
+		if _casting_right:
+			_casting_right = false
+			_release(_right_caster())
+			return
 		if _primary_held:
 			_primary_held = false
 			combat.release_charge()
@@ -89,14 +114,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			# A spell in the off hand: right click casts it (hold to charge, let go to cast)
 			_casting = true
 			if not combat.is_busy() and not combat.is_stunned():
-				_caster().begin_cast(spell)
+				_begin(_caster(), _right_caster(), spell)
 			return
 		_secondary_held = true
 		combat.secondary_press()
 	elif event.is_action_released("secondary_attack"):
 		if _casting:
 			_casting = false
-			_caster().release_cast()
+			_release(_caster())
 			return
 		if _secondary_held:
 			_secondary_held = false
@@ -105,10 +130,16 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(_delta: float) -> void:
 	var captured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	if _casting_right and (not captured or not Input.is_action_pressed("attack")):
+		_casting_right = false
+		if captured:
+			_release(_right_caster())
+		elif _right_caster() != null:
+			_right_caster().cancel()
 	if _casting and (not captured or not Input.is_action_pressed("secondary_attack")):
 		_casting = false
 		if captured:
-			_caster().release_cast()
+			_release(_caster())
 		else:
 			_caster().cancel()
 	if _primary_held:
@@ -135,12 +166,17 @@ func _notification(what: int) -> void:
 		if _casting:
 			_casting = false
 			_caster().cancel()
+		if _casting_right:
+			_casting_right = false
+			if _right_caster() != null:
+				_right_caster().cancel()
 		if _secondary_held:
 			_secondary_held = false
 			combat.secondary_release()
 
 
 var _zoomed := false
+var _casting_right := false
 
 
 func _zoom(on: bool) -> void:
@@ -159,6 +195,33 @@ func _equipped_spell() -> SpellData:
 
 func _caster() -> SpellCaster:
 	return get_parent().get_node_or_null("SpellCaster") as SpellCaster
+
+
+func _right_caster() -> SpellCaster:
+	return get_parent().get_node_or_null("SpellCasterRight") as SpellCaster
+
+
+func _right_spell() -> SpellData:
+	var book := get_parent().get_node_or_null("Spellbook") as Spellbook
+	return book.get_right() if book != null else null
+
+
+# Starts a cast in one hand; the same spell already charging in the other makes both a dual cast
+func _begin(caster: SpellCaster, other: SpellCaster, spell: SpellData) -> void:
+	if caster == null:
+		return
+	var both := other != null and other.is_charging() and other.get_current_spell() != null and other.get_current_spell().id == spell.id
+	caster.dual = both
+	if both:
+		other.dual = true
+	caster.begin_cast(spell)
+
+
+func _release(caster: SpellCaster) -> void:
+	if caster == null:
+		return
+	caster.release_cast()
+	caster.dual = false
 
 
 func _break_invisibility() -> void:

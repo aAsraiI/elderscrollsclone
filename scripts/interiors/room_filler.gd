@@ -35,7 +35,8 @@ static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 		else:
 			rng.seed = ("%s|%d|%s" % [template, variant, s.name]).hash()
 		var always := s.kind in [SpawnSocket.Kind.BOSS] or (s.kind == SpawnSocket.Kind.CHEST and s.tags.has("boss"))
-		if not always and rng.randf() > clampf(s.chance * density, 0.0, 1.0):
+		var boost := 1.6 if s.kind in [SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT] else 1.0  # dungeons hold plenty to find (1.16)
+		if not always and rng.randf() > clampf(s.chance * density * boost, 0.0, 1.0):
 			continue
 		if bool(ctx.get("props_only", false)) and s.kind in [SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT, SpawnSocket.Kind.ENEMY, SpawnSocket.Kind.BOSS]:
 			continue  # the editor preview: furniture only

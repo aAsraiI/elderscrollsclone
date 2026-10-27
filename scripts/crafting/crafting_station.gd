@@ -3,7 +3,8 @@ extends StaticBody3D
 ## A workstation: forge, smelter, tanning rack, workbench, grindstone, cooking pot, alchemy lab,
 ## arcane enchanter or altar of spellmaking. Press E to use it (opens the CraftingUI).
 ## Placed by InteriorBuilder in smithies, inns, homes, temples, alchemists and guild halls.
-## Its model is built from boxes, like the rest of the furniture.
+## It is built from models (LOOKS: a table, forge, oven or altar with its tools and apparatus set on it,
+## fixed in place, not things you can take), or from boxes when those models are missing.
 
 const INTERACTABLE_LAYER := 4
 const WORLD_LAYER := 1
@@ -88,6 +89,8 @@ func _light(at: Vector3, color: Color, energy: float = 1.0) -> void:
 
 
 func _build_model() -> void:
+	if _build_from_models():
+		return
 	var wood := Color(0.4, 0.27, 0.15)
 	var dark := Color(0.25, 0.17, 0.1)
 	var stone := Color(0.38, 0.37, 0.36)
@@ -150,3 +153,73 @@ func _build_model() -> void:
 			_box(Vector3(1.5, 0.86, 0.7), Vector3(0, 0.43, 0), dark)
 			_box(Vector3(0.3, 0.1, 0.2), Vector3(-0.4, 0.99, 0), metal)
 			_box(Vector3(0.1, 0.25, 0.1), Vector3(0.5, 1.05, 0), metal)
+
+
+## Each station as models: [key, where (x, z; y = 0 on the floor, "top" on the first piece's top), the
+## space it takes, fit mode]. The first piece is the base; without its model the station stays boxes.
+const LOOKS := {
+	"alchemy_lab": [["prop/table", "floor", Vector3(0, 0, 0), Vector3(1.6, 0.9, 0.8), "fill"],
+		["station/alembic", "top", Vector3(-0.55, 0, 0.05), Vector3(0.3, 0.32, 0.3), "contain"],
+		["station/retort", "top", Vector3(-0.15, 0, -0.1), Vector3(0.28, 0.3, 0.28), "contain"],
+		["station/calcinator", "top", Vector3(0.25, 0, 0.05), Vector3(0.26, 0.28, 0.3), "contain"],
+		["station/mortar", "top", Vector3(0.6, 0, -0.15), Vector3(0.14, 0.15, 0.14), "contain"],
+		["clutter/bottle", "top", Vector3(0.62, 0, 0.18), Vector3(0.09, 0.24, 0.09), "contain"],
+		["clutter/flask", "top", Vector3(0.05, 0, 0.22), Vector3(0.09, 0.18, 0.09), "contain"]],
+	"enchanter": [["prop/table", "floor", Vector3(0, 0, 0), Vector3(1.6, 0.9, 0.8), "fill"],
+		["station/soulgem", "top", Vector3(0.45, 0, 0.0), Vector3(0.14, 0.14, 0.14), "contain"],
+		["station/soulgem", "top", Vector3(0.62, 0, 0.12), Vector3(0.1, 0.1, 0.1), "contain"],
+		["clutter/book_open", "top", Vector3(-0.1, 0, 0.0), Vector3(0.4, 0.08, 0.3), "contain"],
+		["clutter/candle", "top", Vector3(-0.6, 0, -0.15), Vector3(0.1, 0.25, 0.1), "contain"],
+		["clutter/quill", "top", Vector3(0.15, 0, 0.18), Vector3(0.2, 0.05, 0.2), "contain"]],
+	"workbench": [["prop/table", "floor", Vector3(0, 0, 0), Vector3(1.6, 0.9, 0.8), "fill"],
+		["item/hammer", "top", Vector3(-0.45, 0, 0.0), Vector3(0.4, 0.08, 0.4), "contain"],
+		["item/tongs", "top", Vector3(0.0, 0, 0.12), Vector3(0.45, 0.06, 0.45), "contain"],
+		["prop/rope_coil", "top", Vector3(0.5, 0, -0.1), Vector3(0.35, 0.12, 0.35), "contain"],
+		["clutter/candle", "top", Vector3(0.65, 0, 0.2), Vector3(0.1, 0.22, 0.1), "contain"]],
+	"grindstone": [["prop/table", "floor", Vector3(0, 0, 0), Vector3(0.9, 0.75, 0.6), "fill"],
+		["item/ingot", "top", Vector3(-0.2, 0, 0.0), Vector3(0.3, 0.08, 0.2), "contain"],
+		["item/hammer", "top", Vector3(0.2, 0, 0.05), Vector3(0.35, 0.08, 0.35), "contain"]],
+	"forge": [["station/forge", "floor", Vector3(0, 0, 0), Vector3(1.4, 1.1, 1.2), "contain"],
+		["station/bellows", "floor", Vector3(0.85, 0, 0.2), Vector3(0.5, 0.5, 0.8), "contain"]],
+	"smelter": [["station/oven", "floor", Vector3(0, 0, 0), Vector3(1.2, 1.6, 1.2), "contain"],
+		["station/coal", "floor", Vector3(0.75, 0, 0.3), Vector3(0.6, 0.35, 0.6), "contain"]],
+	"tanning_rack": [["station/hide_rack", "floor", Vector3(0, 0, 0), Vector3(1.6, 1.8, 0.4), "contain"]],
+	"cooking_pot": [["prop/campfire", "floor", Vector3(0, 0, 0), Vector3(0.9, 0.3, 0.9), "contain"],
+		["prop/cauldron", "floor", Vector3(0, 0.12, 0), Vector3(0.6, 0.55, 0.6), "contain"]],
+	"spell_altar": [["prop/altar", "floor", Vector3(0, 0, 0), Vector3(1.2, 1.0, 0.8), "fill"],
+		["clutter/book_open", "top", Vector3(0.0, 0, 0.0), Vector3(0.4, 0.08, 0.3), "contain"],
+		["clutter/candle", "top", Vector3(-0.42, 0, 0.0), Vector3(0.1, 0.25, 0.1), "contain"],
+		["clutter/candle", "top", Vector3(0.42, 0, 0.0), Vector3(0.1, 0.25, 0.1), "contain"]],
+}
+## Their glow (the forge's fire, the enchanter's gem...): kept whatever they are made of
+const GLOWS := {"forge": [Vector3(0, 1.3, 0), Color(1.0, 0.5, 0.2), 1.4], "smelter": [Vector3(0, 0.5, -0.9), Color(1.0, 0.5, 0.2), 1.0],
+	"cooking_pot": [Vector3(0, 0.4, 0), Color(1.0, 0.55, 0.25), 0.8], "enchanter": [Vector3(0.55, 1.3, 0), Color(0.6, 0.4, 1.0), 0.9],
+	"spell_altar": [Vector3(0, 1.4, 0), Color(0.5, 0.7, 1.0), 1.1]}
+
+
+func _build_from_models() -> bool:
+	var look: Array = LOOKS.get(kind, [])
+	if look.is_empty() or not ModelLibrary.has(String(look[0][0])):
+		return false
+	var top := 0.0
+	for i in look.size():
+		var part: Array = look[i]
+		var key := String(part[0])
+		if not ModelLibrary.has(key):
+			continue
+		var at: Vector3 = part[2]
+		var size: Vector3 = part[3]
+		var base_y := top if part[1] == "top" else at.y
+		var m := ModelLibrary.fitted(key, AABB(Vector3(at.x - size.x * 0.5, base_y, at.z - size.z * 0.5), size), String(part[4]))
+		if m == null:
+			continue
+		for l in m.find_children("*", "Light3D", true, false):
+			l.queue_free()  # one light for the station (GLOWS), not one per candle
+		m.name = "Look_" + key.get_file()
+		add_child(m)
+		if i == 0:
+			top = ModelLibrary.bounds(self).end.y
+	if GLOWS.has(kind):
+		var g: Array = GLOWS[kind]
+		_light(g[0], g[1], g[2])
+	return true

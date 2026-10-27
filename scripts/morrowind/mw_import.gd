@@ -126,8 +126,9 @@ static func run(data_files: String, progress: Callable = Callable()) -> Dictiona
 		if not _save(node, dir, key, out):
 			continue
 		manifest[key] = {"path": _file(key), "source": TAG, "fit": statics[key]["fit"]}
-		if statics[key].has("rot"):
-			manifest[key]["rot"] = statics[key]["rot"]
+		for extra in ["rot", "scale", "align", "anchor"]:
+			if statics[key].has(extra):
+				manifest[key][extra] = statics[key][extra]
 		out["made"].append(key)
 	_write_manifest(dir, manifest)
 	ModelLibrary.reload()

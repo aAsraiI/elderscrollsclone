@@ -38,17 +38,17 @@ const THEMES := {
 	"guild_merchants": {"wall": ["shelf", "crate", "crate", "barrel"], "middle": ["table"], "tags": ["shop", "jeweler"], "fill": 0.5, "containers": []},
 	"guild": {"wall": ["rack", "shelf", "bookcase"], "middle": ["table"], "tags": ["weapon", "library", "tavern"], "fill": 0.45, "containers": []},
 	# dungeons
-	"cave": {"wall": ["crate", "sack", "barrel"], "middle": ["campfire"], "tags": ["camp", "cave"], "fill": 0.35, "containers": [["Sack", ["camp", "cave"]]]},
-	"camp": {"wall": ["crate", "barrel", "rack", "sack"], "middle": ["table", "campfire"], "tags": ["camp", "weapon", "tavern"], "fill": 0.45, "containers": [["Crate", ["camp", "weapon"]]]},
-	"crypt": {"wall": ["niche", "urn", "niche"], "middle": ["sarcophagus"], "tags": ["crypt"], "fill": 0.4, "containers": [["Burial Urn", ["crypt"]]]},
-	"barrow": {"wall": ["niche", "urn", "niche", "rack"], "middle": ["sarcophagus"], "tags": ["barrow", "crypt"], "fill": 0.4, "containers": [["Burial Urn", ["barrow"]]]},
-	"mine": {"wall": ["crate", "barrel", "rack", "sack"], "middle": ["cart"], "tags": ["mine", "tools"], "fill": 0.45, "containers": [["Ore Crate", ["mine"]]]},
-	"fort": {"wall": ["rack", "crate", "barrel", "shelf"], "middle": ["table"], "tags": ["weapon", "armor", "camp", "tavern"], "fill": 0.45, "containers": [["Footlocker", ["camp", "weapon"]]]},
-	"ruin": {"wall": ["plinth", "rubble", "plinth"], "middle": ["altar"], "tags": ["ruin", "crypt"], "fill": 0.35, "containers": []},
-	"vault": {"wall": ["plinth", "plinth", "shelf"], "middle": ["altar"], "tags": ["vault", "ruin", "jeweler"], "fill": 0.45, "containers": [["Vault Coffer", ["vault"]]]},
-	"ice": {"wall": ["rubble", "niche", "crate"], "middle": ["altar"], "tags": ["ice", "crypt"], "fill": 0.35, "containers": []},
-	"ashen": {"wall": ["plinth", "urn", "rubble"], "middle": ["altar"], "tags": ["ashen", "ashlands", "vault"], "fill": 0.4, "containers": []},
-	"sewer": {"wall": ["crate", "barrel", "sack"], "middle": [], "tags": ["camp", "shop", "kitchen"], "fill": 0.35, "containers": [["Smuggler's Crate", ["shop", "jewelry"]]]},
+	"cave": {"wall": ["crate", "sack", "barrel"], "middle": ["campfire"], "tags": ["camp", "cave"], "fill": 0.55, "containers": [["Sack", ["camp", "cave"]], ["Crate", ["camp", "mine"]]]},
+	"camp": {"wall": ["crate", "barrel", "rack", "sack"], "middle": ["table", "campfire"], "tags": ["camp", "weapon", "tavern"], "fill": 0.65, "containers": [["Crate", ["camp", "weapon"]], ["Sack", ["camp", "tavern"]]]},
+	"crypt": {"wall": ["niche", "urn", "niche"], "middle": ["sarcophagus"], "tags": ["crypt"], "fill": 0.60, "containers": [["Burial Urn", ["crypt"]], ["Burial Urn", ["crypt", "jewelry"]]]},
+	"barrow": {"wall": ["niche", "urn", "niche", "rack"], "middle": ["sarcophagus"], "tags": ["barrow", "crypt"], "fill": 0.60, "containers": [["Burial Urn", ["barrow"]], ["Chest", ["barrow", "weapon"]]]},
+	"mine": {"wall": ["crate", "barrel", "rack", "sack"], "middle": ["cart"], "tags": ["mine", "tools"], "fill": 0.65, "containers": [["Ore Crate", ["mine"]], ["Sack", ["mine", "tools"]]]},
+	"fort": {"wall": ["rack", "crate", "barrel", "shelf"], "middle": ["table"], "tags": ["weapon", "armor", "camp", "tavern"], "fill": 0.65, "containers": [["Footlocker", ["camp", "weapon"]], ["Footlocker", ["armor", "camp"]]]},
+	"ruin": {"wall": ["plinth", "rubble", "plinth"], "middle": ["altar"], "tags": ["ruin", "crypt"], "fill": 0.55, "containers": [["Chest", ["ruin", "jewelry"]], ["Burial Urn", ["ruin"]]]},
+	"vault": {"wall": ["plinth", "plinth", "shelf"], "middle": ["altar"], "tags": ["vault", "ruin", "jeweler"], "fill": 0.65, "containers": [["Vault Coffer", ["vault"]], ["Vault Coffer", ["vault", "jewelry"]]]},
+	"ice": {"wall": ["rubble", "niche", "crate"], "middle": ["altar"], "tags": ["ice", "crypt"], "fill": 0.55, "containers": [["Chest", ["ice", "crypt"]], ["Burial Urn", ["ice"]]]},
+	"ashen": {"wall": ["plinth", "urn", "rubble"], "middle": ["altar"], "tags": ["ashen", "ashlands", "vault"], "fill": 0.60, "containers": [["Burial Urn", ["ashen"]], ["Chest", ["ashen", "vault"]]]},
+	"sewer": {"wall": ["crate", "barrel", "sack"], "middle": [], "tags": ["camp", "shop", "kitchen"], "fill": 0.55, "containers": [["Smuggler's Crate", ["shop", "jewelry"]], ["Sack", ["camp", "kitchen"]]]},
 }
 
 const WOOD := Color(0.45, 0.31, 0.18)
@@ -315,6 +315,19 @@ static func _existing_surfaces(root: Node3D, room: Rect2) -> Array:
 			continue
 		var b := (c as Node3D).transform * ModelLibrary.bounds(c as Node3D)  # in the room's space, turned as it stands
 		var top := b.end.y
+		if b.size.x > room.size.x * 0.9 or b.size.z > room.size.y * 0.9:
+			continue  # a wall or a floor, not furniture
+		var shelf := (c is InteriorProp and (c as InteriorProp).tags.has("shelf")) or (decor and (String(c.name).contains("shelf") or String(c.name).contains("bookcase")))
+		var holds := shelf
+		for word in ["table", "counter", "altar", "desk", "plinth", "display", "sarcophagus", "cupboard", "bar"]:
+			if String(c.name).to_lower().contains(word) or (c is InteriorProp and (c as InteriorProp).tags.has(word)):
+				holds = true
+		if holds:
+			# its own planks and tops, read from what you see (a model's shelves are wherever it puts them)
+			var on_it := ModelLibrary.surface_slots(c as Node3D, root, "shelf" if shelf else "table")
+			if not on_it.is_empty():
+				out.append_array(on_it)
+				continue
 		if (c is InteriorProp and (c as InteriorProp).tags.has("shelf")) or (decor and (String(c.name).contains("shelf") or String(c.name).contains("bookcase"))):
 			# a shelf prop (1.13 rooms): one thing on each plank, just in front of its back board
 			var fwd := (c as Node3D).basis * Vector3(0, 0, -0.05)
@@ -493,6 +506,11 @@ static func _build_piece(root: Node3D, kind: String, at: Vector3, yaw: float, sl
 	var heights := 1.0
 	if ModelLibrary.replace_meshes(holder, "prop/" + kind) != null and old_top > 0.05:
 		heights = ModelLibrary.bounds(holder).end.y / old_top
+		# what can be set on it is read from the model itself: each plank, the table top, the altar
+		var on_model := ModelLibrary.surface_slots(holder, root, kind) if not tops.is_empty() else []
+		if not on_model.is_empty():
+			slots.append_array(on_model)
+			return
 	for top: Array in tops:
 		var p: Vector3 = top[0]
 		p.y *= heights

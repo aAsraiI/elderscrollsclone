@@ -45,7 +45,9 @@ func dress() -> void:
 		keys.append("prop/" + t)
 	var key := ModelLibrary.first(keys)
 	if key != "":
-		ModelLibrary.replace_meshes(self, key)
+		# prop scenes face -Z (their sockets' way); Morrowind's furniture is made facing +Z
+		var turn := PI if String(ModelLibrary.entry(key).get("source", "")) == "morrowind" else 0.0
+		ModelLibrary.replace_meshes(self, key, "", null, turn)
 	else:
 		_fit_collision()
 

@@ -266,7 +266,7 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 			var tmp := rooms[i]
 			rooms[i] = rooms[j]
 			rooms[j] = tmp
-		var per_floor := rng.randi_range(mini(data.chests_min, data.chests_max), maxi(data.chests_min, data.chests_max)) + cells.size() / 10
+		var per_floor := rng.randi_range(mini(data.chests_min, data.chests_max), maxi(data.chests_min, data.chests_max)) + 1 + cells.size() / 6  # plenty to find (1.16)
 		chest_count = mini(per_floor, rooms.size())
 		for i in chest_count:
 			var r := rooms[i]

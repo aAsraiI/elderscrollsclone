@@ -199,10 +199,12 @@ static func _instantiate(path: String) -> Node3D:
 ##   "height"   as tall as the box, centred on its floor
 ##   "long"     its longest side as long as the box's longest side
 ## The model's bottom sits on the box's bottom, centred across.
-static func fitted(key: String, target: AABB, mode: String = "") -> Node3D:
+static func fitted(key: String, target: AABB, mode: String = "", turn: float = 0.0) -> Node3D:
 	var holder := instance(key)
 	if holder == null:
 		return null
+	if turn != 0.0:
+		(holder.get_child(0) as Node3D).rotate_y(turn)  # facing the other way from how the model was made
 	var e := entry(key)
 	if mode == "":
 		mode = String(e.get("fit", "fill"))
@@ -415,7 +417,7 @@ static func _hull_points(pts: PackedVector3Array) -> PackedVector3Array:
 ## Swaps the box meshes of `holder` for the model `key`: the model is fitted into the space the old
 ## meshes took up, the old meshes and box shapes are removed, and the nearest physics body gets
 ## collision from the model's shape. Returns the model, or null (and changes nothing) without one.
-static func replace_meshes(holder: Node3D, key: String, mode: String = "", body: CollisionObject3D = null) -> Node3D:
+static func replace_meshes(holder: Node3D, key: String, mode: String = "", body: CollisionObject3D = null, turn: float = 0.0) -> Node3D:
 	if not has(key):
 		return null
 	# The plain parts go; flames, glows and anything marked keep_mesh stay
@@ -431,7 +433,7 @@ static func replace_meshes(holder: Node3D, key: String, mode: String = "", body:
 		old = b if i == 0 else old.merge(b)
 	if old.size.length() < 0.001:
 		return null
-	var model := fitted(key, old, mode)
+	var model := fitted(key, old, mode, turn)
 	if model == null:
 		return null
 	if body == null and holder is CollisionObject3D:
@@ -456,7 +458,7 @@ static func replace_meshes(holder: Node3D, key: String, mode: String = "", body:
 			sb.name = "ModelBody"
 			holder.add_child(sb)
 			body = sb
-		add_collision(body, model, key + "|" + str(old.size.snappedf(0.01)))
+		add_collision(body, model, key + "|" + str(old.size.snappedf(0.01)) + "|" + str(snappedf(turn, 0.01)))
 	return model
 
 
@@ -538,3 +540,86 @@ static func tint(node: Node, color: Color) -> void:
 			mat = mat.duplicate() as BaseMaterial3D
 			mat.albedo_color = mat.albedo_color * color
 			m.set_surface_override_material(si, mat)
+
+
+## The flat tops something can be set on (a table top, each plank of a shelf, an altar), read from the
+## meshes under `node`: upward-facing faces grouped by height. In `space`'s coordinates (node itself
+## when null). Each is {"y", "rect" (Rect2 over x and z), "area"}, lowest first; the floor and slivers
+## are left out, and so is a plank with too little room above it to set anything on.
+static func surfaces(node: Node3D, space: Node3D = null, min_area: float = 0.04) -> Array:
+	if space == null:
+		space = node
+	var to_space := relative_transform(null, space).affine_inverse() * relative_transform(null, node)
+	var groups := {}  # height step -> {"y", "min", "max", "area"}
+	for mi in node.find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if m.mesh == null or not m.visible or _glows(m) or _skeleton_of(m) != null:
+			continue
+		var xf := to_space * relative_transform(node, m)
+		for s in m.mesh.get_surface_count():
+			var arrays := m.mesh.surface_get_arrays(s)
+			var v: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+			var count := idx.size() if not idx.is_empty() else v.size()
+			for t in range(0, count - 2, 3):
+				var a := xf * v[idx[t] if not idx.is_empty() else t]
+				var b := xf * v[idx[t + 1] if not idx.is_empty() else t + 1]
+				var c := xf * v[idx[t + 2] if not idx.is_empty() else t + 2]
+				var n := (b - a).cross(c - a)
+				var area := n.length() * 0.5
+				if area < 0.00005:
+					continue
+				n = n / (area * 2.0)
+				if absf(n.y) < 0.9:
+					continue  # upward or downward (models are not always wound the same way): which one shows below
+				var y := (a.y + b.y + c.y) / 3.0
+				var step := roundi(y / 0.04)
+				if not groups.has(step):
+					groups[step] = {"y": y, "min": Vector2(INF, INF), "max": Vector2(-INF, -INF), "area": 0.0, "up": 0.0}
+				var g: Dictionary = groups[step]
+				for p in [a, b, c]:
+					g["min"] = Vector2(minf(g["min"].x, p.x), minf(g["min"].y, p.z))
+					g["max"] = Vector2(maxf(g["max"].x, p.x), maxf(g["max"].y, p.z))
+				g["y"] = maxf(g["y"], y)
+				g["area"] += area
+	var base := bounds(node)
+	var floor_y := (to_space * base).position.y
+	var out: Array = []
+	for step in groups:
+		var g: Dictionary = groups[step]
+		if g["area"] < min_area or g["y"] < floor_y + 0.12:
+			continue
+		out.append({"y": g["y"], "rect": Rect2(g["min"], g["max"] - g["min"]), "area": g["area"]})
+	out.sort_custom(func(p, q): return p["y"] < q["y"])
+	# a face whose underside is another plank just above is the bottom of that plank, or has no room above
+	var keep: Array = []
+	for i in out.size():
+		var crowded := false
+		for j in range(i + 1, out.size()):
+			if out[j]["y"] - out[i]["y"] < 0.14 and (out[j]["rect"] as Rect2).intersects(out[i]["rect"]):
+				crowded = true
+				break
+		if not crowded:
+			keep.append(out[i])
+	return keep
+
+
+## Places to set things on `node`'s surfaces, in `space`'s coordinates: [position, room (Vector2), label],
+## one about every 0.45 m along each surface, no higher than `reach`
+static func surface_slots(node: Node3D, space: Node3D, label: String, reach: float = 1.9) -> Array:
+	var out: Array = []
+	for s: Dictionary in surfaces(node, space):
+		if s["y"] > reach:
+			continue
+		var r: Rect2 = s["rect"]
+		var along_x := r.size.x >= r.size.y
+		var length := r.size.x if along_x else r.size.y
+		var depth := r.size.y if along_x else r.size.x
+		if depth < 0.12 or length < 0.15:
+			continue
+		var n := clampi(int(length / 0.45), 1, 6)
+		for i in n:
+			var f := (float(i) + 0.5) / float(n)
+			var p := Vector2(r.position.x + r.size.x * f, r.get_center().y) if along_x else Vector2(r.get_center().x, r.position.y + r.size.y * f)
+			out.append([Vector3(p.x, s["y"], p.y), Vector2(length / n * 0.9, depth * 0.8) if along_x else Vector2(depth * 0.8, length / n * 0.9), label])
+	return out

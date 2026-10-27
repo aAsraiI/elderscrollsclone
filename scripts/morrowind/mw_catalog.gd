@@ -11,8 +11,8 @@ extends RefCounted
 const PROPS := {
 	"prop/barrel": ["o/contain_barrel_01.nif"],
 	"prop/barrels": ["o/contain_barrel10.nif", "o/contain_barrel_01.nif"],
-	"prop/bed": ["f/furn_com_bed_01.nif"],
-	"prop/bed_rich": ["f/furn_com_bed_05.nif", "f/furn_com_bed_03.nif"],
+	"prop/bed": ["f/furn_com_bed_03.nif", "f/furn_com_bed_05.nif"],
+	"prop/bed_rich": ["f/furn_com_bed_01.nif", "f/furn_com_bed_05.nif"],  # the canopy bed
 	"prop/bunk": ["f/furn_com_bunk_01.nif"],
 	"prop/bedroll": ["f/active_de_bedroll.nif", "f/furn_bedmat_01.nif"],
 	"prop/bedroll_out": ["f/active_de_bedroll.nif", "f/furn_bedmat_01.nif"],
@@ -40,7 +40,8 @@ const PROPS := {
 	"prop/chair": ["f/furn_com_chair_01.nif", "f/furn_de_chair_01.nif"],
 	"prop/stool": ["f/furn_com_stool_01.nif", "f/furn_de_stool_01.nif"],
 	"prop/throne": ["f/furn_de_chair_02.nif", "f/furn_com_chair_03.nif"],
-	"prop/chest": ["o/contain_com_chest_01.nif"],
+	"prop/chest": ["o/contain_com_chest_01.nif", "o/contain_com_chest_02.nif"],
+	"prop/chest_rich": ["o/contain_de_chest_01.nif", "o/contain_dwrv_chest10.nif", "o/contain_com_chest_02.nif"],
 	"prop/cobweb": ["f/furn_web00.nif"],
 	"prop/crate": ["o/contain_crate_01.nif"],
 	"prop/crates": ["o/contain_crate_02.nif", "o/contain_crate_01.nif"],
@@ -85,6 +86,19 @@ const PROPS := {
 	"prop/street_tree": ["f/flora_tree_wg_01.nif", "f/flora_tree_ai_05.nif"],
 	"prop/sarcophagus": ["f/furn_burial00.nif"],
 	"prop/niche": ["f/furn_burial10.nif"],
+	"prop/stalagmite": ["i/in_mudcave_stal30.nif", "i/in_moldcave_stal30.nif"],
+	"prop/stalactite": ["i/in_mudcave_stal40.nif", "i/in_moldcave_stal40.nif"],
+	"prop/pickaxes": ["w/w_miner_pick.nif", "w/w_pickaxe.nif"],
+	"prop/rowboat": ["x/ex_de_rowboat.nif"],
+	"prop/ritual_circle": ["f/furn_c_t_ritual_01.nif"],
+	"prop/hay_bale": ["m/misc_wheatbundle00.nif"],
+	"prop/hay_pile": ["m/misc_wheatbundle00.nif"],
+	"prop/crop_row": ["f/flora_wickwheat_01.nif", "f/flora_wickwheat_02.nif"],
+	"prop/market_stall": ["f/furn_de_ex_table_03.nif", "f/furn_de_ex_table_02.nif"],
+	"prop/gravestone": ["f/furn_imp_stoneblock_01.nif"],
+	"prop/grave_cross": ["f/furn_imp_stoneblock_01.nif"],
+	"prop/weapon_heap": ["f/furn_dae_rubble_01a.nif"],
+	"prop/shield_wall": ["a/shield_iron.nif", "a/shield_steel.nif"],
 }
 
 ## Small things set on tables and shelves to make rooms lived-in (not taken; clutter/<name>)
@@ -306,14 +320,43 @@ const NATURE := {
 }
 
 
+## Workstation pieces (CraftingStation.LOOKS sets them on a table or beside the base)
+const STATIONS := {
+	"station/alembic": ["m/apparatus_a_alembic_01.nif"],
+	"station/retort": ["m/apparatus_a_retort_01.nif"],
+	"station/calcinator": ["m/apparatus_a_calcinator_01.nif"],
+	"station/mortar": ["m/misc_mortarpestle_01.nif", "m/apparatus_a_spipe_01.nif"],
+	"station/soulgem": ["m/misc_soulgem_grand.nif", "m/misc_soulgem_common.nif"],
+	"station/forge": ["f/furn_de_forge_01.nif"],
+	"station/bellows": ["f/furn_de_bellows_01.nif", "m/misc_bellows10.nif"],
+	"station/oven": ["f/furn_colony_oven01.nif", "f/bm_colony_stoneoven_02.nif"],
+	"station/coal": ["f/furn_coalpile00.nif"],
+	"station/hide_rack": ["f/furn_ex_ashl_guarskin.nif"],
+}
+
+## Morrowind's furniture is made big for its people: these are brought down to ours
+const PROP_SCALE := {"prop/bed": 0.72, "prop/bed_rich": 0.72, "prop/bunk": 0.8}
+## Fitted to the space their box took rather than their own size (cave rock comes in every size)
+const PROP_FIT := {"prop/stalagmite": "fill", "prop/stalactite": "fill", "prop/hay_bale": "fill", "prop/hay_pile": "fill",
+	"prop/gravestone": "fill", "prop/grave_cross": "fill", "prop/weapon_heap": "fill", "prop/crop_row": "fill"}
+# Hanging down from the ceiling
+const PROP_ROT := {"prop/stalactite": [180, 0, 0]}
+
+
 ## Every ModelLibrary key -> the mesh file in your copy (only those it has), plus how to fit it
 static func statics(data: MwData) -> Dictionary:
 	var out := {}
-	for table: Dictionary in [PROPS, CLUTTER, NATURE]:
+	for table: Dictionary in [PROPS, CLUTTER, NATURE, STATIONS]:
 		for key in table:
 			var f := data.find(_paths(table[key]))
 			if f != "":
 				out[key] = {"file": f, "fit": "real"}
+				if PROP_SCALE.has(key):
+					out[key]["scale"] = PROP_SCALE[key]
+				if PROP_FIT.has(key):
+					out[key]["fit"] = PROP_FIT[key]
+				if PROP_ROT.has(key):
+					out[key]["rot"] = PROP_ROT[key]
 	for key in ITEMS:
 		var f := data.find(_paths(ITEMS[key]))
 		if f != "":

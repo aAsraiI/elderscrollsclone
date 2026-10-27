@@ -285,4 +285,19 @@ static func make_chest(chest_name: String, loot: Array[LootEntry], save_id: Stri
 	for e in loot:
 		cc.contents.append(e)
 	body.add_child(cc)
+	var key := container_key(chest_name)
+	if ModelLibrary.has(key):
+		ModelLibrary.replace_meshes(body, key, "", body)  # its model, with collision from its shape
 	return body
+
+
+## Which model a container takes, by what it is called (a sack, an urn, a strongbox...)
+static func container_key(chest_name: String) -> String:
+	var n := chest_name.to_lower()
+	for pair in [["sack", "prop/sack"], ["urn", "prop/urn"], ["barrel", "prop/barrel"], ["cupboard", "prop/cupboard"],
+			["wardrobe", "prop/wardrobe"], ["drawer", "prop/display"], ["bookshelf", "prop/bookcase"], ["crate", "prop/crate"],
+			["coffer", "prop/chest_rich"], ["strongbox", "prop/chest_rich"], ["treasury", "prop/chest_rich"],
+			["king", "prop/chest_rich"], ["boss", "prop/chest_rich"], ["heart", "prop/chest_rich"], ["vault", "prop/chest_rich"]]:
+		if n.contains(pair[0]):
+			return pair[1]
+	return "prop/chest"

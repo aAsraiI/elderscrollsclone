@@ -50,6 +50,8 @@ func _spawn_helpers() -> void:
 			vm.name = "ViewModel"
 			vm.combat = combat
 			cam.add_child(vm)
+			if cam is Camera3D and cam.get_node_or_null("FirstPersonArms") == null:
+				FirstPersonArms.attach(cam as Camera3D)  # Morrowind's first-person arms, when imported
 
 
 func _unhandled_input(event: InputEvent) -> void:

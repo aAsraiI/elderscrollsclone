@@ -93,6 +93,56 @@ func build(spec: Dictionary) -> Node3D:
 	return root
 
 
+
+## The first-person arms (what you see of yourself): Morrowind's first-person skeleton and animations
+## (xbase_anim.1st), the race's first-person hands, and the first-person sleeves and gloves of what is
+## worn (each body part's ".1st"). Turned and scaled like a person; null when the files are missing.
+func build_first_person(spec: Dictionary) -> Node3D:
+	var race := String(spec.get("race", "imperial")).to_lower()
+	var female := bool(spec.get("female", false))
+	var skel_nif := data.nif("meshes/xbase_anim.1st.nif")
+	if skel_nif == null:
+		skel_nif = data.nif("meshes/base_anim.1st.nif")
+	if skel_nif == null:
+		problems.append("no first-person skeleton")
+		return null
+	var root := Node3D.new()
+	root.name = "MwFirstPerson"
+	root.rotation = Vector3(-PI * 0.5, 0.0, 0.0)
+	root.scale = Vector3.ONE * SCALE
+	_skel = Skeleton3D.new()
+	_skel.name = "Skeleton3D"
+	root.add_child(_skel)
+	for r in skel_nif.roots:
+		_add_bones(skel_nif, r, -1, true)
+	_skel.reset_bone_poses()
+	# the race's first-person parts (a woman falls back on a man's for any she lacks)
+	var parts := {}
+	for want_female in ([false, true] if female else [false]):
+		for id in data.esm.bodies:
+			var b: Dictionary = data.esm.bodies[id]
+			if b["race"] == race and b["kind"] == 0 and b["female"] == want_female and String(id).ends_with(".1st"):
+				for slot in PART_SLOTS.get(int(b["part"]), []):
+					parts[slot] = id
+	# sleeves and gloves: the first-person version of each worn part, where there is one
+	for wid in spec.get("wear", []):
+		var w: Dictionary = data.esm.wearables.get(String(wid).to_lower(), {})
+		for s in w.get("slots", []):
+			var part: String = s[2] if female and s[2] != "" else s[1]
+			if data.esm.bodies.has(part + ".1st"):
+				parts[int(s[0])] = part + ".1st"
+	for slot in parts:
+		if not SLOT_BONES.has(slot):
+			continue
+		var body: Dictionary = data.esm.bodies.get(parts[slot], {})
+		if not body.is_empty():
+			_add_part("meshes\\" + String(body["model"]).to_lower(), SLOT_BONES[slot])
+	var player := AnimationPlayer.new()
+	player.name = "AnimationPlayer"
+	root.add_child(player)
+	_add_clips(player, data.nif("meshes/xbase_anim.1st.kf"))
+	return root
+
 ## Any Morrowind mesh that does not move (furniture, a barrel, a sword, a rock, a tree), at its real
 ## size, standing up and facing -Z. Light meshes (candles, lanterns, sconces) get a light where
 ## Morrowind puts theirs. null if it cannot be read.
@@ -281,8 +331,8 @@ func _add_bones(nif: MwNif, idx: int, parent: int, is_root: bool) -> void:
 	var r: Dictionary = nif.records[idx]
 	if not r.has("children"):
 		return
-	var name := String(r["name"])
-	if name == "Bounding Box" or r["type"] == "RootCollisionNode":
+	var name := String(r["name"]).replace(":", "_").replace("/", "_")  # Godot bone names cannot hold these
+	if name == "Bounding Box" or r["type"] == "RootCollisionNode" or name == "":
 		return
 	var me := parent
 	if not is_root and _skel.find_bone(name) < 0:

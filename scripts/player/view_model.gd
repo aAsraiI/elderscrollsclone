@@ -90,7 +90,7 @@ func _find_combat() -> MeleeCombat:
 # ---------------------------------------------------------------- per frame
 
 func _process(delta: float) -> void:
-	visible = combat.is_alive() and not _third_person()  # the hands are only seen in first person
+	visible = combat.is_alive() and not _third_person() and not _arms_shown()  # only in first person, without Morrowind's arms
 	var phase := combat.get_phase()
 	var action_hand := combat.get_action_hand()
 	var retract := _wall_retract() if avoid_walls else 0.0
@@ -303,3 +303,9 @@ func _third_person() -> bool:
 	var p := get_tree().get_first_node_in_group("player")
 	var tp := p.get_node_or_null("ThirdPerson") as ThirdPerson if p != null else null
 	return tp != null and tp.third
+
+
+# Morrowind's first-person arms are in use (they hold the weapons themselves)
+func _arms_shown() -> bool:
+	var arms := get_parent().get_node_or_null("FirstPersonArms") as FirstPersonArms
+	return arms != null and arms.active

@@ -317,6 +317,11 @@ func _record(type: String, r: Dictionary) -> bool:
 			_skip(36 + 12 + 16)
 			r["texture"] = _ref()
 			_skip(1 + 16 + 4 + 2)
+		"NiCamera":
+			# the first-person skeleton's camera: a node, then frustum (6), viewport (4), LOD adjust, the
+			# scene it looks at and its screen polygons (none), which nothing here needs
+			_av_object(r)
+			_skip(24 + 16 + 4 + 4 + 4)
 		"NiPointLight", "NiAmbientLight", "NiDirectionalLight", "NiSpotLight":
 			_av_object(r)
 			_skip(_s.get_u32() * 4)

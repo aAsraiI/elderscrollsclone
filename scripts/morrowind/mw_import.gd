@@ -43,6 +43,10 @@ const TAG := "morrowind"
 ## races, faces and hair at random, so a town is not full of twins (CreatureBody picks one by the person)
 const VARIANTS := 6
 const VARIANT_RACES := ["imperial", "nord", "breton", "redguard", "dark elf", "wood elf", "high elf", "orc"]
+## The game's races -> Morrowind's, for your first-person hands
+const FP_RACES := {"northlander": "nord", "heartlander": "imperial", "sandwalker": "redguard", "marchborn": "breton",
+	"highborn": "high elf", "ashborn": "dark elf", "woodborn": "wood elf", "sandcat": "khajiit", "marshfolk": "argonian",
+	"ironblood": "orc"}
 
 
 # CAST, and each look again in VARIANTS - 1 other races, faces and hair: "people/man_1~v2"...
@@ -114,6 +118,18 @@ static func run(data_files: String, progress: Callable = Callable()) -> Dictiona
 			progress.call(i, total, key)
 		i += 1
 		_build_person(data, String(key), people[key], dir, manifest, out)
+	# Your own arms in first person, for every race and both sexes ("fp/<race>_m", "fp/<race>_f")
+	for race in FP_RACES:
+		for female in [false, true]:
+			var key := "fp/%s_%s" % [race, "f" if female else "m"]
+			var builder := MwCharacter.new(data)
+			var node := builder.build_first_person({"race": FP_RACES[race], "female": female, "wear": ["common_shirt_01"]})
+			if node == null:
+				out["problems"].append_array(Array(builder.problems).map(func(p): return "%s: %s" % [key, p]))
+				continue
+			if _save(node, dir, key, out):
+				manifest[key] = {"path": _file(key), "source": TAG, "fit": "real"}
+				out["made"].append(key)
 	# Skies: the clouds for each weather and the night sky
 	MwSky.convert(data, dir.path_join("textures"))
 	MwSurfaces.convert(data, dir.path_join("textures"))

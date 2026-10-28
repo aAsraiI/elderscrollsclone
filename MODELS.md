@@ -239,6 +239,39 @@ their model in the editor and are Morrowind's when imported (`tools/build_kit.gd
 - `exit_door`: the way out; it always leaves to where the player came in (`KitExitDoor`).
 - `block_*`: a wall, tower, corner, arch, palisade or stone block of any size you set (`KitBlock`).
 - `model`: any model by its key, with collision from its shape (`KitModel`).
+- `morrowind/<type>/<set>/<piece>`: every building piece in your copy of Morrowind (below).
+
+### Morrowind's building pieces
+
+**Settings > Models > Import building pieces** (or
+`godot --headless --path . -s res://tools/import_morrowind.gd -- kit`) converts about 4,300 pieces
+from your own copy into your models folder, like the main import (never into the project; **Remove
+Morrowind's look** takes them out too). Then `tools/build_kit.gd` writes a small scene for each, which
+holds only the piece's key, so drag them in from the FileSystem dock. `-- kit list` only counts them.
+
+They keep Morrowind's own size, so pieces of one set snap together on its grid. Caves, dungeons,
+tombs, castles, towns and rooms get exact collision (`KitModel.exact`), so you can walk inside them; the
+rest get a hull. The lists are `MwKitCatalog.SETS` in `scripts/morrowind/mw_kit_catalog.gd`, most useful
+first:
+
+| Type | Sets |
+| --- | --- |
+| `caves` | mold, mud, bone, lava, ash, ice, cavern (rooms, halls, exits, stalagmites, loose rock) |
+| `dungeons` | imperial_fort, stronghold, stronghold_ruin, sewer, dwemer, daedric, mournhold_ruin, sixth_house |
+| `tombs` | velothi, barrow, ancestral |
+| `castles` | imperial, stronghold, redoran_wall, ghostfence, velothi, daedric, dwemer, ruin |
+| `towns` | common, nord, skaal, colony, hlaalu, redoran, dunmer (docks, rope bridges), ashlander, mournhold, vivec, telvanni, cave_mouths |
+| `rooms` | common, nord, colony, hlaalu, redoran, dunmer, ashlander, mournhold, vivec, telvanni, arena, sotha_sil |
+| `doors` | cave, trapdoors, jail, imperial, nord, common, dungeon, dunmer, other |
+| `lights` | candles, lanterns, sconces, fires, chandeliers, other |
+| `furniture` | common, imperial, nord, dunmer, dwemer, daedric, banners, rugs, shrines, ashlander, other |
+| `containers` | all (`KitContainer` makes one lootable) |
+| `rocks` | ascadian, west_gash, grazelands, bitter_coast, ashlands, molag_amur, coast, solstheim, other |
+| `plants` | trees, logs_roots, solstheim, mushrooms, bitter_coast, grass, other |
+| `clutter` | all |
+
+A place built from these pieces is only there for players who have imported them as well: without
+the import a piece draws nothing and has no collision.
 
 ## The look of the world
 

@@ -96,6 +96,17 @@ func find(patterns: Array) -> String:
 	return ""
 
 
+## Every archived file matching the pattern, sorted (as find)
+func find_all(pattern: String) -> PackedStringArray:
+	find([])  # lists the archives once
+	var pat := pattern.to_lower().replace("/", "\\")
+	var out := PackedStringArray()
+	for n in _all_names:
+		if n.match(pat):
+			out.append(n)
+	return out
+
+
 ## A parsed .nif / .kf (cached), or null
 func nif(path: String) -> MwNif:
 	path = path.to_lower().replace("/", "\\")
@@ -107,6 +118,11 @@ func nif(path: String) -> MwNif:
 			n = null
 		_nifs[path] = n
 	return _nifs[path]
+
+
+## Lets go of a parsed .nif (the kit import reads thousands, each once)
+func forget_nif(path: String) -> void:
+	_nifs.erase(path.to_lower().replace("/", "\\"))
 
 
 ## Where converted textures are saved, so every model made in one import shares them ("" = kept in memory)

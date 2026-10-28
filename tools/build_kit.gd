@@ -2,8 +2,12 @@ extends SceneTree
 ## Writes the builder kit's scenes (scenes/kit/): drop them into any scene you build by hand. Each is
 ## one kit node set up for a common use; change its settings in the Inspector.
 ##   godot --headless --path . -s res://tools/build_kit.gd
+## After the kit import (import_morrowind.gd -- kit) it also writes a scene for each Morrowind piece:
+## scenes/kit/morrowind/<type>/<set>/<piece>.tscn
 
 const DIR := "res://scenes/kit/"
+## Piece types you walk inside or around closely: exact collision (KitModel.exact)
+const EXACT := ["caves", "dungeons", "tombs", "castles", "towns", "rooms"]
 
 
 func _init() -> void:
@@ -38,12 +42,23 @@ func _init() -> void:
 		n += _save(k, "block_" + b[0])
 	# any model
 	n += _save(KitModel.new(), "model")
-	print("kit scenes: ", n)
+	# every Morrowind building piece you imported (MwImport.run_kit), by type and set
+	var pieces := 0
+	for key: String in ModelLibrary.keys():
+		if not key.begins_with("kit/"):
+			continue
+		var k := KitModel.new()
+		k.key = key
+		k.exact = key.get_slice("/", 1) in EXACT
+		var dir := DIR + "morrowind/" + key.get_slice("/", 1) + "/" + key.get_slice("/", 2) + "/"
+		DirAccess.make_dir_recursive_absolute(dir)
+		pieces += _save(k, "morrowind/%s/%s/%s" % [key.get_slice("/", 1), key.get_slice("/", 2), key.get_slice("/", 3)])
+	print("kit scenes: ", n, ", Morrowind pieces: ", pieces)
 	quit()
 
 
 func _save(node: Node, file: String) -> int:
-	node.name = file.to_pascal_case()
+	node.name = file.get_file().to_pascal_case()
 	var ps := PackedScene.new()
 	var ok := ps.pack(node) == OK and ResourceSaver.save(ps, DIR + file + ".tscn") == OK
 	node.free()

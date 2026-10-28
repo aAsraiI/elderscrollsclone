@@ -160,12 +160,42 @@ static func run(data_files: String, progress: Callable = Callable()) -> Dictiona
 		manifest[key] = e
 		out["made"].append(key)
 	# Everything that does not move: furniture, clutter, items, weapons, armour, trees, rocks
+	_build_statics(data, statics, dir, manifest, out, progress, i, total)
+	_write_manifest(dir, manifest)
+	ModelLibrary.reload()
+	return out
+
+
+## The builder kit's pieces (MwKitCatalog: every cave, fort, tomb, castle, town, room, door, light,
+## furniture, rock and plant piece your copy has), apart from run as there are about 2,500 of them.
+## Same models folder and Remove; then tools/build_kit.gd writes their scenes.
+static func run_kit(data_files: String, progress: Callable = Callable()) -> Dictionary:
+	var out := {"made": [], "problems": []}
+	var data := MwData.open(data_files)
+	if data == null:
+		out["problems"].append("No Morrowind.esm in " + data_files)
+		return out
+	var dir := models_dir()
+	DirAccess.make_dir_recursive_absolute(dir.path_join("textures"))
+	data.texture_dir = dir.path_join("textures")
+	var manifest := _read_manifest(dir)
+	var statics := MwKitCatalog.statics(data)
+	_build_statics(data, statics, dir, manifest, out, progress, 0, statics.size())
+	_write_manifest(dir, manifest)
+	ModelLibrary.reload()
+	return out
+
+
+static func _build_statics(data: MwData, statics: Dictionary, dir: String, manifest: Dictionary, out: Dictionary,
+		progress: Callable, i: int, total: int) -> void:
 	for key in statics:
 		if progress.is_valid():
 			progress.call(i, total, key)
 		i += 1
 		var builder := MwCharacter.new(data)
 		var node := builder.build_static(String(statics[key]["file"]))
+		if key.begins_with("kit/"):
+			data.forget_nif(String(statics[key]["file"]))
 		if node == null:
 			out["problems"].append_array(Array(builder.problems).map(func(p): return "%s: %s" % [key, p]))
 			continue
@@ -176,9 +206,6 @@ static func run(data_files: String, progress: Callable = Callable()) -> Dictiona
 			if statics[key].has(extra):
 				manifest[key][extra] = statics[key][extra]
 		out["made"].append(key)
-	_write_manifest(dir, manifest)
-	ModelLibrary.reload()
-	return out
 
 
 static func _file(key: String) -> String:

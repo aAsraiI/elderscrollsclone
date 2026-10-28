@@ -3,7 +3,8 @@ class_name KitModel
 extends StaticBody3D
 ## The builder kit: any model by its ModelLibrary key (a Morrowind piece from your import, or a built-in
 ## one), with collision from its own shape. Drop it into a scene and set Key; it shows in the editor too.
-## Keys: prop/... (furniture), clutter/..., wall/..., nature/..., tree/..., entrance/..., door/... (MODELS.md)
+## Keys: prop/... (furniture), clutter/..., wall/..., nature/..., tree/..., entrance/..., door/...,
+## kit/<type>/<set>/<piece> (every Morrowind building piece, scenes/kit/morrowind) (MODELS.md)
 
 @export var key := "prop/barrel":
 	set(v):
@@ -15,6 +16,12 @@ extends StaticBody3D
 		fit_size = v
 		_rebuild()
 @export var solid := true
+## Collision that is exactly its faces, so you can walk inside it (cave rooms, halls, arches, houses);
+## off, it is a hull around each part (props)
+@export var exact := false:
+	set(v):
+		exact = v
+		_rebuild()
 
 
 func _ready() -> void:
@@ -35,8 +42,12 @@ func _rebuild() -> void:
 		return
 	m.set_meta("kit_built", true)
 	add_child(m)
-	if solid:
-		var before := get_child_count()
-		ModelLibrary.add_collision(self, m, key + "|kit|" + str(fit_size))
-		for i in range(before, get_child_count()):
-			get_child(i).set_meta("kit_built", true)
+	if not solid:
+		return
+	if exact:
+		ModelLibrary.add_trimesh(self, m).set_meta("kit_built", true)
+		return
+	var before := get_child_count()
+	ModelLibrary.add_collision(self, m, key + "|kit|" + str(fit_size))
+	for i in range(before, get_child_count()):
+		get_child(i).set_meta("kit_built", true)

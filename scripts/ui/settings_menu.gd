@@ -195,6 +195,10 @@ func _build_models_page(grid: GridContainer) -> void:
 	var import := Button.new()
 	import.text = "Import from Morrowind"
 	row.add_child(import)
+	var import_kit := Button.new()
+	import_kit.text = "Import building pieces"
+	import_kit.tooltip_text = "Morrowind's cave, fort, tomb, castle, town and room pieces for places built with them (a few minutes)"
+	row.add_child(import_kit)
 	var remove := Button.new()
 	remove.text = "Remove Morrowind's look"
 	row.add_child(remove)
@@ -220,6 +224,18 @@ func _build_models_page(grid: GridContainer) -> void:
 		status.text = "Made %d models. What is already around you changes when you next enter a place or load a game." % r["made"].size()
 		if not r["problems"].is_empty():
 			status.text += " (%d parts could not be built.)" % r["problems"].size()
+		remove.disabled = r["made"].is_empty())
+	import_kit.pressed.connect(func() -> void:
+		if MwData.open(path.text.strip_edges()) == null:
+			status.text = "No Morrowind.esm in that folder. Choose Morrowind's \"Data Files\" folder."
+			return
+		import_kit.disabled = true
+		status.text = "Building Morrowind's building pieces (a few minutes)..."
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var r := MwImport.run_kit(path.text.strip_edges())
+		import_kit.disabled = false
+		status.text = "Made %d building pieces." % r["made"].size()
 		remove.disabled = r["made"].is_empty())
 	remove.pressed.connect(func() -> void:
 		var n := MwImport.remove()

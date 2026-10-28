@@ -6,7 +6,9 @@ extends Node
 ## Hand rules:
 ##   - A two-handed item goes in the main hand and clears the off hand.
 ##   - Anything equipped to the off hand (shield, dual-wield weapon) clears a two-hander.
-##   - A can_dual_wield weapon fills a free hand: main first, then off hand. Wielding the
+##   - A can_dual_wield weapon fills a free hand: main first, then off hand. equip_to() puts any
+##     one-handed weapon in the hand you choose (the inventory: double click = right hand, right
+##     click = left hand). Wielding the
 ##     same dagger in both hands needs two copies in the inventory.
 
 signal equipped(slot: int, item: ItemData)
@@ -102,6 +104,42 @@ func unequip_item(item: ItemData) -> void:
 	for slot in slots.keys():
 		if slots[slot] == item:
 			unequip(slot)
+
+
+## Puts a one-handed weapon in the hand you choose (MAIN_HAND right, OFF_HAND left); again on the
+## same hand takes it off. With only one copy, it moves from the other hand. Anything else equips as usual.
+func equip_to(item: ItemData, slot: int) -> bool:
+	if item == null or not item.is_one_handed_weapon():
+		return equip(item)
+	if slots.get(slot) == item:
+		unequip(slot)
+		return true
+	var other := ItemData.EquipSlot.OFF_HAND if slot == ItemData.EquipSlot.MAIN_HAND else ItemData.EquipSlot.MAIN_HAND
+	if not _may_wear(item):
+		return false
+	if slots.get(other) == item and inventory.get_count(item) < 2:
+		unequip(other)
+	var main: ItemData = slots.get(ItemData.EquipSlot.MAIN_HAND)
+	if slot == ItemData.EquipSlot.OFF_HAND and main != null and main.two_handed:
+		unequip(ItemData.EquipSlot.MAIN_HAND)
+	if slots.has(slot):
+		unequip(slot)
+	slots[slot] = item
+	stats.add_modifiers(_source(slot), item.stat_modifiers)
+	equipped.emit(slot, item)
+	return true
+
+
+# You own it, and nothing forbids you from using it
+func _may_wear(item: ItemData) -> bool:
+	var owner_node := get_parent()
+	if owner_node != null and owner_node.is_in_group("player"):
+		if owner_node.has_meta("beast_form"):
+			return false
+		if CharacterSetup.forbidden(owner_node, item):
+			Locks.toast(get_tree(), "You are forbidden to use %s" % item.display_name, true)
+			return false
+	return inventory.has_item(item)
 
 
 ## Used by the inventory screen. Equips the item; with a second copy of a dual-wield weapon,

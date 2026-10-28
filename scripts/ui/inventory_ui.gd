@@ -204,7 +204,9 @@ func _build_ui() -> void:
 	_tree.set_column_expand(4, false)
 	_tree.set_column_custom_minimum_width(4, 70)
 	_tree.item_selected.connect(_update_details)
-	_tree.item_activated.connect(_activate_selected)  # Enter or double-click
+	_tree.item_activated.connect(_activate_selected)  # Enter or double-click: a one-handed weapon to the right hand
+	_tree.allow_rmb_select = true
+	_tree.item_mouse_selected.connect(_on_item_clicked)  # right click: a one-handed weapon to the left hand
 	_tree.column_title_clicked.connect(_on_column_clicked)
 	_update_column_titles()
 	split.add_child(_tree)
@@ -347,9 +349,8 @@ func _refresh() -> void:
 		var show_e := equipment.is_equipped(item) and not marked.has(item)
 		if show_e:
 			marked.append(item)
-		# "E2" = the same item worn in both hands (a pair of daggers)
-		var worn := equipment.equipped_count(item)
-		row.set_text(0, ("E" if worn < 2 else "E%d" % worn) if show_e else "")
+		# a weapon shows its hand: R, L, or RL for the same one in both (a pair of daggers)
+		row.set_text(0, _worn_mark(item) if show_e else "")
 		row.set_custom_color(0, UITheme.GOLD)
 		row.set_text(1, item.display_name + (" (%d)" % s.count if s.count > 1 else "") + ("  (quest)" if QuestItems.is_quest_item(item) else ""))
 		row.set_custom_color(1, ItemCatalog.rarity_color(item, player_level))
@@ -477,7 +478,11 @@ func _update_details() -> void:
 	else:
 		var equippable := item.equip_slot != ItemData.EquipSlot.NONE
 		_equip_button.disabled = not equippable
-		_equip_button.text = "Unequip (E)" if equipment.is_equipped(item) else "Equip (E)"
+		if item.is_one_handed_weapon():
+			# double click (or E) = right hand, right click = left hand
+			_equip_button.text = "Unequip right (E)" if equipment.get_main_hand() == item else "Right hand (E) · right click: left"
+		else:
+			_equip_button.text = "Unequip (E)" if equipment.is_equipped(item) else "Equip (E)"
 	_drop_button.disabled = false
 
 
@@ -558,7 +563,33 @@ func _toggle_equip_selected() -> void:
 	var item := _selected_item()
 	if item == null or item.equip_slot == ItemData.EquipSlot.NONE:
 		return
+	if item.is_one_handed_weapon():
+		equipment.equip_to(item, ItemData.EquipSlot.MAIN_HAND)
+		return
 	equipment.toggle(item)
+
+
+# Right click on a one-handed weapon: into (or out of) the left hand
+func _on_item_clicked(_at: Vector2, button: int) -> void:
+	if button != MOUSE_BUTTON_RIGHT:
+		return
+	var item := _selected_item()
+	if item == null or not item.is_one_handed_weapon():
+		return
+	# after the click is done: equipping rebuilds the list, which the list must not do while handling the click
+	equipment.equip_to.call_deferred(item, ItemData.EquipSlot.OFF_HAND)
+
+
+# "E", or for a weapon the hand it is in: "R", "L", "RL"
+func _worn_mark(item: ItemData) -> String:
+	if not item.is_one_handed_weapon():
+		return "E"
+	var mark := ""
+	if equipment.get_main_hand() == item:
+		mark += "R"
+	if equipment.get_off_hand() == item:
+		mark += "L"
+	return mark
 
 
 ## Drops one (or the whole stack) in front of you. Items collide with each other, so each

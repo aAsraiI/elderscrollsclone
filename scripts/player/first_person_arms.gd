@@ -3,8 +3,9 @@ extends Node3D
 ## Your own arms in first person (1.17, Skyrim-style in 1.18): the first-person arms of your race and sex
 ## from your Morrowind import ("fp/<race>_<m|f>", MwImport.FP_RACES), placed where Morrowind's eye is.
 ## Each arm is animated on its own, so the hands can do different things at once:
-##   idles, finger grips and the shield block are Morrowind's own first-person clips (the left hand's
-##   made by mirroring the right's, ClipTools)
+##   idles, finger grips and the shield block are Morrowind's own first-person clips; the left hand
+##   always keeps Morrowind's own left-hand poses (its fist when it holds something), never a mirror
+##   of the right's, and holds a weapon where its fist closes (_mirrored_grip)
 ##   everything else is our own: each move is a path the hand or weapon takes in front of you (SWINGS)
 ##   and the arm reaches along it (two-bone IK): a diagonal slash and a backhand that alternate, an
 ##   overhead power chop, wide two-handed sweeps, spear thrusts, punches, weapon blocks; the off hand
@@ -20,8 +21,11 @@ const IDLE := {"one": "Idle1h", "two": "Idle2c", "spear": "Idle2w", "none": "Idl
 ## Seconds into Morrowind's shield block (from its text keys) where the shield is up
 const BLOCK_HELD := 0.333
 const BLEND := 0.12
+## The left hand's fingers whenever it holds something: Morrowind's own left fist (from its bare-fist idle;
+## the left hand is never mirrored from the right, which would bend it out of shape)
+const LEFT_FIST := "Idlehh"
 ## Where the second hand holds a two-handed weapon: this far down the grip from the first (m)
-const GRIP_2H := 0.1
+const GRIP_2H := 0.17
 const GRIP_SPEAR := -0.2  # ahead of the back hand
 
 ## The weapon's path for each move, in front of the eye (metres; x right, y up, -z ahead), as if in the
@@ -84,8 +88,8 @@ const SWINGS := {
 		[0.5, Vector3(0.10, -0.08, -0.52), 0.0], [0.65, Vector3(0.12, -0.10, -0.50), 0.0],
 		[1.0, Vector3(0.20, -0.19, -0.42), 0.0]]},
 	# at the ready with a two-handed weapon or a spear
-	"ready_2h": {"n": Vector3(1, 0, 0), "d": Vector3(-0.3, 0.75, -0.6), "two": GRIP_2H, "keys": [
-		[0.0, Vector3(0.12, -0.17, -0.42), 0.0]]},
+	"ready_2h": {"n": Vector3(1, 0, 0), "d": Vector3(-0.35, 0.8, -0.5), "two": GRIP_2H, "keys": [
+		[0.0, Vector3(0.10, -0.06, -0.44), 0.0]]},
 	"ready_spear": {"n": Vector3(1, 0, 0), "d": Vector3(-0.2, 0.3, -0.93), "two": GRIP_SPEAR, "keys": [
 		[0.0, Vector3(0.12, -0.19, -0.26), 0.0]]},
 	"guard": {"n": Vector3(-1, 0, 0), "d": Vector3(0, 0.9, -0.4), "keys": [
@@ -131,7 +135,7 @@ var _rot_to_skel := Basis()
 var _side_bones := {1: PackedInt32Array(), -1: PackedInt32Array(), 0: PackedInt32Array()}
 var _chain := {}  # side -> [upper arm, forearm, hand]
 var _wb_local := Transform3D()  # the weapon bone on the right hand
-var _left_grip := Transform3D()  # the mirror of it on the left hand (improper: a mirror image)
+var _left_grip := Transform3D()  # where the left fist holds a weapon (see _mirrored_grip)
 var _tracks := {}  # Animation -> {bone: [rot track, pos track]}
 var _mirrors := {}  # clip -> mirrored Animation
 var _ch := {}  # side -> channel {a, t, pa, pt, k}
@@ -218,15 +222,35 @@ func _ready() -> void:
 	active = true
 
 
-# The left hand's grip: where the weapon bone would be if the left hand were the right hand's mirror
+# The left hand's grip, in the left hand's space: the left fist (Morrowind's own, LEFT_FIST) holds a
+# weapon as the right fist holds one in its idle, mirrored. The two hands are not each other's mirror,
+# so each fist is measured from its own finger joints (_fist) and the weapon placed the same way in it.
 func _mirrored_grip() -> Transform3D:
-	var axis := ClipTools.side_axis(_skel)
-	var s := Basis.from_scale(Vector3(-1 if axis == 0 else 1, -1 if axis == 1 else 1, -1 if axis == 2 else 1))
-	var c := ClipTools.center(_skel, axis)
-	var rh := _skel.get_bone_global_rest(_chain[1][2])
-	var lh := _skel.get_bone_global_rest(_chain[-1][2])
-	var corr := Transform3D(ClipTools._m(rh, s, c).affine_inverse().basis * lh.basis, Vector3.ZERO)  # the turn only, as in ClipTools.mirror
-	return corr.affine_inverse() * Transform3D(s, Vector3.ZERO) * _wb_local
+	var right_clip := _clip("Idle1h")
+	var left_clip := _clip(LEFT_FIST)
+	if right_clip == null or left_clip == null:
+		return _wb_local
+	var gr := ClipTools._pose_at(right_clip, _skel, ClipTools._tracks_by_bone(right_clip, _skel), 0.0)
+	var gl := ClipTools._pose_at(left_clip, _skel, ClipTools._tracks_by_bone(left_clip, _skel), 0.0)
+	var wb := _skel.find_bone("Weapon Bone")
+	if wb < 0:
+		return _wb_local
+	var in_fist := _fist(gr, "R").affine_inverse() * gr[wb]  # the weapon, as the right fist holds it
+	var flip := Transform3D(Basis.from_scale(Vector3(1, 1, -1)), Vector3.ZERO)  # the mirror image
+	return gl[_chain[-1][2]].affine_inverse() * _fist(gl, "L") * flip * in_fist * flip
+
+
+# A frame in a hand that holds something, from its bones (however far the fingers curl): at the
+# knuckles, along them from little finger to index, from the wrist out to the knuckles, and the third
+# way round
+func _fist(pose: Array[Transform3D], s: String) -> Transform3D:
+	var roots := Vector3.ZERO
+	for i in [1, 2, 3, 4]:
+		roots += pose[_skel.find_bone("Bip01 %s Finger%d" % [s, i])].origin / 4.0
+	var a := (pose[_skel.find_bone("Bip01 %s Finger1" % s)].origin - pose[_skel.find_bone("Bip01 %s Finger4" % s)].origin).normalized()
+	var b := roots - pose[_skel.find_bone("Bip01 %s Hand" % s)].origin
+	b = (b - a * b.dot(a)).normalized()
+	return Transform3D(Basis(a, b, a.cross(b)), roots)
 
 
 # A node on a bone (at `offset` from it, in the bone's units) that undoes the skeleton's scale, so
@@ -364,11 +388,12 @@ func _animate(delta: float) -> void:
 	var l_t := _idle_t
 	match left:
 		"spell":
-			l_clip = "L:Idlespell"  # the open hand, as the right holds it
+			l_clip = "Idlespell"
 		"weapon":
-			l_clip = "L:Idle1h"
+			l_clip = LEFT_FIST
 	if whole:
-		l_clip = r_clip
+		# a hand that holds something (a two-handed grip, the bow) keeps Morrowind's own left fist
+		l_clip = LEFT_FIST if right in ["two", "spear", "bow"] else r_clip
 	if right == "bow":
 		# the bow in the left hand; the right draws the string back to the cheek and lets go
 		var drawing := _ranged.is_drawing()
@@ -445,6 +470,8 @@ func _animate(delta: float) -> void:
 				swing[1] = {"one": "block", "two": "block_2h", "spear": "block_spear", "none": "guard"}[right]
 				if right == "none" and left == "none":
 					swing[-1] = "guard"
+	if swing[-1] == "" and left == "weapon":
+		swing[-1] = "mirror"  # the second weapon held as the right hand holds the first, mirrored
 	if swing[1] == "" and (right == "two" or right == "spear"):
 		swing[1] = "ready_2h" if right == "two" else "ready_spear"  # held before you, both hands on it
 	# a two-handed weapon's second hand is on the grip: it is the left arm's whole job
@@ -556,23 +583,21 @@ func _weapon_at(swing: String, u: float) -> Array:
 	return [pos, d, n.cross(d).normalized()]
 
 
-# The hand's place (skeleton space) that puts the weapon there; the left hand holds the mirror image
+# The hand's place (skeleton space) that puts the weapon there
 func _hand_for(side: int, grip: Vector3, d: Vector3, e: Vector3) -> Transform3D:
-	var w: Basis
-	var hold: Transform3D
+	var w := Basis(e, d, e.cross(d))
+	var hold := _left_grip
 	if side == 1:
-		w = Basis(e, d, e.cross(d))
 		var wb := _skel.find_bone("Weapon Bone")
 		hold = _skel.get_bone_pose(wb) if wb >= 0 else _wb_local  # as the clip holds it now
-	else:
-		w = Basis(e, d, -e.cross(d))
-		hold = _left_grip
 	var basis := (_rot_to_skel * w) * hold.basis.inverse()
 	var at := _to_skel * grip
 	return Transform3D(basis.orthonormalized(), at - basis * hold.origin)
 
 
 func _reach(swing: Dictionary, u: Dictionary, delta: float) -> void:
+	# the right weapon as its idle holds it (before any swing moves it), for the left hand to mirror
+	var right_idle := _to_skel.affine_inverse() * _skel.get_bone_global_pose(_skel.find_bone("Weapon Bone"))
 	var grip2 := ""  # a two-handed move: the left hand goes to the grip
 	if SWINGS.has(swing[1]) and SWINGS[swing[1]].has("two"):
 		grip2 = swing[1]
@@ -607,6 +632,10 @@ func _reach(swing: Dictionary, u: Dictionary, delta: float) -> void:
 			target = _hand_for(side, grip, d, e)
 			debug[side] = [grip, d]
 			want = 1.0
+		elif name == "mirror":
+			var m := Vector3(-1, 1, 1)
+			target = _hand_for(-1, right_idle.origin * m, right_idle.basis.y.normalized() * m, right_idle.basis.x.normalized() * m)
+			want = 1.0
 		elif name == "shield":
 			var gh := _skel.get_bone_global_pose(_chain[-1][2])
 			target = Transform3D(gh.basis, gh.origin + _to_skel.basis * SHIELD_NUDGE)
@@ -614,7 +643,9 @@ func _reach(swing: Dictionary, u: Dictionary, delta: float) -> void:
 		elif side == -1 and grip2 != "":
 			var at := _weapon_at(grip2, float(u[1]))
 			var d: Vector3 = at[1]
+			# lower down the grip, knuckles the same way as the first hand's
 			target = _hand_for(-1, (at[0] as Vector3) - d * float(SWINGS[grip2]["two"]), d, at[2])
+			debug[-1] = [(at[0] as Vector3) - d * float(SWINGS[grip2]["two"]), d]
 			name = grip2 + ":grip"
 			want = 1.0
 		if name != String(ik["swing"]):

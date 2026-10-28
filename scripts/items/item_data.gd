@@ -128,7 +128,8 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 @export_range(1, 5) var combo_length: int = 3
 ## Needs both hands: equipping it clears the off hand
 @export var two_handed: bool = false
-## Can be held in the off hand too (daggers). Needs two copies in the inventory to wield two.
+## Can be held in the off hand too. Since 1.18 every one-handed weapon can (is_one_handed_weapon());
+## this still marks the ones made for it. Two of the same need two copies in the inventory.
 @export var can_dual_wield: bool = false
 
 @export_group("Heavy attack (hold left click)")
@@ -249,7 +250,7 @@ func get_combat_description() -> String:
 		var style := "Swing arc %d°" % int(arc_degrees) if attack_style == AttackStyle.ARC else "Single target"
 		if two_handed:
 			style += "  ·  Two-handed"
-		elif can_dual_wield:
+		elif can_dual_wield or is_one_handed_weapon():
 			style += "  ·  Can dual wield"
 		t += style + "\n"
 		t += "Stagger %s   Combo x%d\n" % [String.num(poise_damage).trim_suffix(".0"), combo_length]
@@ -263,3 +264,9 @@ func get_combat_description() -> String:
 		SecondaryAction.SLAM:
 			t += "Right click: Slam  x%.1f damage, %.1f m splash, %.0f s cooldown\n" % [secondary_damage_mult, secondary_radius, secondary_cooldown]
 	return t
+
+
+## Can go in either hand (1.18: every one-handed weapon; two of the same need two copies)
+func is_one_handed_weapon() -> bool:
+	return item_type == ItemType.WEAPON and not two_handed and not is_bow \
+			and equip_slot == EquipSlot.MAIN_HAND

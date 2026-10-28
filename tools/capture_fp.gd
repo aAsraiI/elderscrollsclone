@@ -127,7 +127,8 @@ func _init() -> void:
 		if action == "bow" and s == shots / 2:
 			ranged.release()
 		var img := root.get_viewport().get_texture().get_image()
-		img.resize(img.get_width() / 2, img.get_height() / 2)
+		if shots > 1:
+			img.resize(img.get_width() / 2, img.get_height() / 2)
 		frames.append(img)
 		print("shot %d phase %d progress %.2f kind %d" % [s, combat.get_phase(), combat.get_phase_progress(), combat.get_action_kind()])
 		var arms := p.get_node("Head/Camera3D/FirstPersonArms")

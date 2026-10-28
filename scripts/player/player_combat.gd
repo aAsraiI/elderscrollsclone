@@ -1,8 +1,9 @@
 class_name PlayerCombat
 extends Node
 ## Mouse input for the player's combat.
-##   Left click   TAP = light attack (tap again for a combo), HOLD = charge, release = heavy attack
-##                (a power attack: you lunge a step into it); with a spell in the right hand, casts it
+##   Left click   press = the weapon draws back (only when you can swing: no click is saved for later),
+##                release = light attack (again for a combo); hold long enough and the power attack goes
+##                by itself. With a spell in the right hand, casts it
 ##   Right click  hold = the off-hand action: block (shield or weapon), slam (two-handed hammer), a spell,
 ##                or an attack with the off-hand weapon (second dagger)
 ##   While blocking: left click = shield bash.  Right click while charging = cancel the charge.
@@ -33,19 +34,9 @@ func _ready() -> void:
 		return
 	# The parent is still setting up its children right now, so add the helpers a moment later
 	_spawn_helpers.call_deferred()
-	combat.phase_changed.connect(_on_phase_changed)
-
-
-## A power attack carries you into it: a short step forward as the blow lands (as in Skyrim)
-const LUNGE := 4.5
-
-
-func _on_phase_changed(phase: int, _duration: float) -> void:
-	var body := get_parent() as CharacterBody3D
-	if body == null or phase != MeleeCombat.Phase.ACTIVE or not combat.is_heavy_action():
-		return
-	var ahead := -body.global_basis.z
-	body.velocity += Vector3(ahead.x, 0.0, ahead.z).normalized() * LUNGE
+	# Skyrim's way: a click only counts when you can swing, and holding long enough swings heavy by itself
+	combat.buffer_clicks = false
+	combat.auto_power_attack = true
 
 
 func _spawn_helpers() -> void:

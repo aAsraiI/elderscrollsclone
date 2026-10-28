@@ -1,8 +1,8 @@
 class_name ClipTools
 extends RefCounted
 ## Tools for first-person clips made from Morrowind's (FirstPersonArms):
-##   mirror()   the same move done with the other arm (Morrowind only swings right-handed): each bone is
-##              posed where its opposite number was, reflected across the body, in the skeleton's space;
+##   mirror()   the same move done with the other arm (Morrowind only swings right-handed): each bone turns
+##              as its opposite number did, reflected across the body, and keeps its own length;
 ##              a fixed correction per bone keeps its own rest pose exact, so mirrored rigs come out right
 ##   compose()  one clip from two: one arm from the first, the other arm (and nothing else) from the second,
 ##              so the right hand can swing while the left keeps its own idle, cast, or block
@@ -71,8 +71,11 @@ static func mirror(anim: Animation, skel: Skeleton3D, fps: float = 30.0) -> Anim
 		var path := NodePath("Skeleton3D:" + skel.get_bone_name(b))
 		rot_t[b] = out.add_track(Animation.TYPE_ROTATION_3D)
 		out.track_set_path(rot_t[b], path)
-		pos_t[b] = out.add_track(Animation.TYPE_POSITION_3D)
-		out.track_set_path(pos_t[b], path)
+		# Only the middle moves: an arm's or hand's bones keep their own lengths, since the two sides
+		# are not quite each other's mirror (copying the other side's would stretch the skin)
+		if side_of(skel, b) == 0:
+			pos_t[b] = out.add_track(Animation.TYPE_POSITION_3D)
+			out.track_set_path(pos_t[b], path)
 	var steps := maxi(int(ceil(anim.length * fps)), 1)
 	for i in steps + 1:
 		var t := minf(float(i) / fps, anim.length)
@@ -87,7 +90,8 @@ static func mirror(anim: Animation, skel: Skeleton3D, fps: float = 30.0) -> Anim
 			var p := skel.get_bone_parent(b)
 			var local: Transform3D = (mg[p].affine_inverse() * mg[b]) if p >= 0 else mg[b]
 			out.rotation_track_insert_key(rot_t[b], t, local.basis.get_rotation_quaternion())
-			out.position_track_insert_key(pos_t[b], t, local.origin)
+			if pos_t.has(b):
+				out.position_track_insert_key(pos_t[b], t, local.origin)
 	return out
 
 

@@ -169,6 +169,11 @@ const ARC_PITCHES: Array[float] = [0.0, -10.0]
 @export var lunge_speed := 2.5
 ## How much of a hit's knockback shoves the PLAYER's body (enemies handle their own)
 @export var shove_scale := 0.8
+## A click while a swing is still finishing is remembered and fires the moment you are ready.
+## Off for the player (PlayerCombat): a click only counts when you can swing.
+@export var buffer_clicks := true
+## Holding the charge long enough swings heavy by itself, without letting go (the player)
+@export var auto_power_attack := false
 
 var body: Node3D
 ## Current poise (see max_poise)
@@ -253,6 +258,8 @@ func _physics_process(delta: float) -> void:
 		if not _charge_ready_sent and _charge_time >= get_charge_threshold():
 			_charge_ready_sent = true
 			charge_ready.emit()
+			if auto_power_attack:
+				release_charge()  # held long enough: the power attack goes now
 
 	if _stun > 0.0:
 		_stun = maxf(_stun - delta, 0.0)
@@ -295,6 +302,8 @@ func begin_charge() -> bool:
 		return _bash()
 	if _charging:
 		return true
+	if not buffer_clicks and not _can_start(MAIN):
+		return false  # still swinging: the click does nothing, and the weapon stays where it is
 	_charging = true
 	_charge_time = 0.0
 	_charge_ready_sent = false
@@ -677,6 +686,8 @@ func _request(kind: int, hand: int, item: ItemData, pre: float, quiet: bool) -> 
 		return _fail(&"blocking", quiet)
 	if _can_start(hand):
 		return _start(kind, hand, item, pre)
+	if not buffer_clicks:
+		return false
 	# Still busy: remember the click and fire it the moment we are ready
 	_buffer = {"kind": kind, "hand": hand, "item": item, "pre": 0.0, "age": 0.0}
 	return true

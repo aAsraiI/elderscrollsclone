@@ -545,9 +545,16 @@ func t_inventory_ui() -> void:
 	ui._activate_selected()
 	var fx := p.get_node("StatusEffects") as StatusEffects
 	check("Enter / E eats it: one gone, effect running", inv.get_count(stew) == 1 and fx.get_active().size() == 1)
-	check("the sword still equips the old way", select.call(sword) and ui._equip_button.text == "Equip (E)", ui._equip_button.text)
+	check("a one-handed sword offers the right hand", select.call(sword) and ui._equip_button.text.begins_with("Right hand (E)"), ui._equip_button.text)
 	ui._activate_selected()
-	check("sword equipped", eq.is_equipped(sword))
+	check("sword equipped in the right hand", eq.get_main_hand() == sword)
+	select.call(sword)
+	ui._on_item_clicked(Vector2.ZERO, MOUSE_BUTTON_RIGHT)
+	await frames(1)
+	check("right click moves it to the left hand (one copy)", eq.get_off_hand() == sword and eq.get_main_hand() != sword)
+	select.call(sword)
+	ui._activate_selected()
+	check("E puts it back in the right hand", eq.get_main_hand() == sword and eq.get_off_hand() != sword)
 	var names := []
 	for tab in ui._tabs.tab_count:
 		names.append(ui._tabs.get_tab_title(tab))

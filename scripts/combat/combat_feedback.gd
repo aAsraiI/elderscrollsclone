@@ -5,7 +5,7 @@ extends CanvasLayer
 ##   hitstop        the game freezes for a few hundredths of a second on impact
 ##   camera shake   and a roll when you are hit, a FOV punch when you swing
 ##   hit marker     around the crosshair: white = hit, gold = heavy, orange = stagger, red = kill
-##   charge ring    around the crosshair while you hold left click, flashes when it is ready
+##   (no charge ring round the crosshair since 1.18: the weapon drawing back shows it)
 ##   damage vignette + a red arc showing which direction you were hit from
 ##   enemy bar      health (and a thin poise line) of the last enemy you hit
 ##   short messages "PARRY!", "Out of stamina"
@@ -322,15 +322,7 @@ func draw_overlay(c: Control) -> void:
 	if _flash > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, c.size), Color(0.7, 0.85, 1.0, _flash * 0.28))
 
-	# Charge ring: fills while you hold the button, gold and pulsing when a release is a heavy attack
-	var ratio := combat.get_charge_ratio()
-	if ratio > 0.08:
-		var charged := ratio >= 1.0
-		var col := Color.WHITE.lerp(GOLD, ratio)
-		col.a = 0.55 + ratio * 0.45
-		c.draw_arc(center, 20.0, -PI * 0.5, -PI * 0.5 + TAU * ratio, 48, col, 3.0, true)
-		if charged:
-			c.draw_arc(center, 20.0 + _ready_pulse * 8.0, 0.0, TAU, 48, Color(GOLD, 0.8 * _ready_pulse), 2.0, true)
+	# No charge ring round the crosshair since 1.18: the weapon drawing back shows the charge
 
 	# Hit markers: none since 1.17 (the screen stays clear); the list is still kept for tests and sounds
 	for m in ([] if HIDE_HIT_MARKERS else _markers):

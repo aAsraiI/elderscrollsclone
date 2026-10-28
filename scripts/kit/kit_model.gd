@@ -10,7 +10,7 @@ extends StaticBody3D
 	set(v):
 		key = v
 		_rebuild()
-## Its own size in metres (Morrowind's), or fitted into this box when it is set
+## Its own size in metres (Morrowind's), or fitted into this box when set
 @export var fit_size := Vector3.ZERO:
 	set(v):
 		fit_size = v

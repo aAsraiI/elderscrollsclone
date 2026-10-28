@@ -24,21 +24,35 @@ static var _scenes := {}             # path -> PackedScene, or Node3D template f
 static var _shapes := {}             # cache key -> Array of [ConvexPolygonShape3D]
 static var _meshes := {}             # cache key -> ArrayMesh (merged, for MultiMesh use)
 static var _user_dirs: PackedStringArray = []
-## false: only the built-in models (tools that check them turn this off with only_builtin)
-static var _use_user_models := true
+## true: only the built-in models (tools that check them turn this on with only_builtin). false by default
+## so that the editor, which can reset statics to false when it reloads this script, still reads your folder
+static var _builtin_only := false
+
+
+## In the editor: when your models folder's models.json last changed, and when that was checked
+static var _user_stamp := 0
+static var _stamp_checked := 0
 
 
 static func _load() -> void:
+	if _loaded and Engine.is_editor_hint():
+		# The editor stays open across imports: read the models folder again once it has changed
+		var now := Time.get_ticks_msec()
+		if now - _stamp_checked > 1000:
+			_stamp_checked = now
+			if _user_manifest_time() != _user_stamp:
+				reload()
 	if _loaded:
 		return
 	_loaded = true
+	_user_stamp = _user_manifest_time()
 	_read_manifest(MANIFEST, "res://assets/models")
 	_user_dirs = []
 	if not OS.has_feature("editor"):
 		_user_dirs.append(OS.get_executable_path().get_base_dir().path_join("models"))
 	_user_dirs.append(ProjectSettings.globalize_path("user://models"))
 	for dir in _user_dirs:
-		if not _use_user_models or not DirAccess.dir_exists_absolute(dir):
+		if _builtin_only or not DirAccess.dir_exists_absolute(dir):
 			continue
 		_read_manifest(dir.path_join("models.json"), dir)
 		for f in DirAccess.get_files_at(dir):
@@ -49,6 +63,11 @@ static func _load() -> void:
 				e["path"] = dir.path_join(f)
 				e["user"] = true
 				_entries[key] = e
+
+
+static func _user_manifest_time() -> int:
+	var p := ProjectSettings.globalize_path("user://models").path_join("models.json")
+	return FileAccess.get_modified_time(p) if FileAccess.file_exists(p) else 0
 
 
 static func _read_manifest(path: String, base: String) -> void:
@@ -77,7 +96,7 @@ static func _read_manifest(path: String, base: String) -> void:
 
 ## Use only the built-in models (true), or your own models folder too (false)
 static func only_builtin(on: bool) -> void:
-	_use_user_models = not on
+	_builtin_only = on
 	reload()
 
 

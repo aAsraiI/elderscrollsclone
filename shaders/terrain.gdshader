@@ -11,6 +11,8 @@ uniform float wetness = 0.0;
 uniform vec3 rock_color : source_color = vec3(0.36, 0.34, 0.31);
 uniform float detail : hint_range(0.0, 1.0) = 1.0;
 uniform float mute : hint_range(0.0, 1.0) = 0.4;
+// The distant land only (FarLand): nothing is drawn this close to the camera, where the real ground is
+uniform float far_cut = 0.0;
 
 // Morrowind's ground textures (MwSurfaces, project shader globals), when imported: their detail and shading on
 // the biome's own colour
@@ -68,6 +70,9 @@ void vertex() {
 }
 
 void fragment() {
+	if (far_cut > 0.0 && length(wpos.xz - CAMERA_POSITION_WORLD.xz) < far_cut) {
+		discard;
+	}
 	// the biome colours are chosen in sRGB: convert, so the ground is as dark and earthy as picked
 	vec3 c = mix(COLOR.rgb / 12.92, pow((COLOR.rgb + 0.055) / 1.055, vec3(2.4)), step(0.04045, COLOR.rgb));
 	// The art direction (Morrowind-like): muted, earthy, olive rather than bright green

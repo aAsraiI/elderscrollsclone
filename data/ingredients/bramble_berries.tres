@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_x8j2n"]
+
+[resource]
+script = ExtResource("1_x8j2n")
+id = &"bramble_berries"
+display_name = "Bramble Berries"
+description = "An alchemical ingredient, found in hedges and woods. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 4
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "food")
+ingredient_effects = PackedStringArray("restore_health", "restore_stamina", "fortify_health", "damage_magicka")

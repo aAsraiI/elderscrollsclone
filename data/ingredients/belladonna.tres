@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_khsg3"]
+
+[resource]
+script = ExtResource("1_khsg3")
+id = &"belladonna"
+display_name = "Belladonna"
+description = "An alchemical ingredient, found in shaded and dead places. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 14
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist")
+ingredient_effects = PackedStringArray("poison_damage", "invisibility", "damage_magicka", "fortify_sneak")

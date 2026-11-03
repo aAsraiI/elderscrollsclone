@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_pgyw7"]
+
+[resource]
+script = ExtResource("1_pgyw7")
+id = &"ice_lichen"
+display_name = "Ice Lichen"
+description = "An alchemical ingredient, found on frozen peaks. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 11
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist")
+ingredient_effects = PackedStringArray("resist_frost", "frost_damage", "shield", "regenerate_magicka")

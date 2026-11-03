@@ -4,6 +4,7 @@
 [ext_resource type="Resource" path="res://data/encounters/night_werewolf.tres" id="6_rwip1"]
 [ext_resource type="Resource" path="res://data/encounters/night_vampire.tres" id="7_u8k0c"]
 [ext_resource type="Resource" path="res://data/encounters/highland_harpies.tres" id="8_hdd4b"]
+[ext_resource type="Script" path="res://scripts/world/flora_layer.gd" id="9_r6ctu"]
 [ext_resource type="Resource" path="res://data/world/POIs/abandoned_mine_entrance.tres" id="11_yw0kk"]
 [ext_resource type="Resource" path="res://data/world/POIs/barrow_entrance.tres" id="12_ox1p8"]
 [ext_resource type="Resource" path="res://data/world/POIs/fort_ruin_entrance.tres" id="13_imqa2"]
@@ -47,6 +48,105 @@
 [ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
 [ext_resource type="Resource" path="res://data/world/POIs/standing_stones.tres" id="poi_3"]
 [ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
+
+[sub_resource type="Resource" id="Resource_r6ctu"]
+script = ExtResource("9_r6ctu")
+name = "highland pines"
+models = PackedStringArray("kit/plants/trees/flora_tree_bm_01", "kit/plants/trees/flora_tree_bm_03", "kit/plants/trees/flora_tree_bm_04", "kit/plants/trees/flora_tree_bm_06", "tree/pine")
+shape = 1
+color = Color(0.17, 0.28, 0.16, 1)
+density = 14.0
+clump_scale = 360.0
+clumping = 0.75
+max_slope = 36.0
+height = 8.0
+scale_max = 1.2
+sink = 0.25
+
+[sub_resource type="Resource" id="Resource_tebx0"]
+script = ExtResource("9_r6ctu")
+name = "gnarled trees"
+models = PackedStringArray("kit/plants/trees/flora_tree_01", "kit/plants/trees/flora_tree_ai_05")
+color = Color(0.3, 0.38, 0.2, 1)
+density = 3.0
+height = 7.0
+scale_min = 0.35
+scale_max = 0.5
+sink = 0.3
+trunk_radius = 0.35
+
+[sub_resource type="Resource" id="Resource_ls7bt"]
+script = ExtResource("9_r6ctu")
+name = "heather"
+models = PackedStringArray("kit/plants/other/flora_heather_01")
+shape = 11
+size = 2
+color = Color(0.6, 0.38, 0.58, 1)
+density = 480.0
+clumping = 0.65
+height = 0.45
+scale_min = 1.0
+scale_max = 1.6
+solid = false
+
+[sub_resource type="Resource" id="Resource_shmte"]
+script = ExtResource("9_r6ctu")
+name = "juniper"
+models = PackedStringArray("kit/plants/solstheim/flora_bm_shrub_01", "kit/plants/solstheim/flora_bm_shrub_02", "kit/plants/solstheim/flora_bm_shrub_03")
+shape = 4
+size = 1
+color = Color(0.22, 0.32, 0.18, 1)
+density = 32.0
+clump_scale = 100.0
+height = 1.2
+scale_min = 0.55
+scale_max = 0.9
+solid = false
+
+[sub_resource type="Resource" id="Resource_8hu27"]
+script = ExtResource("9_r6ctu")
+name = "tussocks"
+models = PackedStringArray("kit/plants/grass/flora_grass_01", "kit/plants/grass/flora_grass_02", "kit/plants/grass/flora_grass_03")
+shape = 6
+size = 2
+color = Color(0.52, 0.5, 0.3, 1)
+density = 220.0
+clump_scale = 80.0
+clumping = 0.4
+height = 0.6
+scale_min = 0.6
+scale_max = 1.0
+solid = false
+
+[sub_resource type="Resource" id="Resource_m8q1e"]
+script = ExtResource("9_r6ctu")
+name = "tors"
+models = PackedStringArray("kit/rocks/grazelands/terrain_rock_gl_02", "kit/rocks/grazelands/terrain_rock_gl_04", "kit/rocks/grazelands/terrain_rock_gl_06", "kit/rocks/west_gash/terrain_rock_wg_02")
+shape = 10
+size = 3
+color = Color(0.46, 0.44, 0.4, 1)
+density = 2.5
+clump_scale = 260.0
+clumping = 0.6
+max_slope = 60.0
+min_slope = 6.0
+height = 2.0
+scale_min = 0.5
+scale_max = 1.0
+sink = 0.4
+lean = 12.0
+follow_ground = true
+
+[sub_resource type="Resource" id="Resource_48jbe"]
+script = ExtResource("9_r6ctu")
+name = "stumps"
+models = PackedStringArray("kit/plants/trees/flora_bm_treestump_03", "kit/plants/trees/flora_bm_treestump_05")
+shape = 9
+size = 3
+density = 1.5
+height = 0.7
+scale_min = 0.7
+scale_max = 1.0
 
 [sub_resource type="Resource" id="rule_0"]
 script = ExtResource("rule_script")
@@ -326,8 +426,8 @@ border_margin = 40.0
 [sub_resource type="Resource" id="Resource_ql1ns"]
 script = ExtResource("rule_script")
 poi = ExtResource("45_m8q1e")
-count_min = 0.055999999999999994
-count_max = 0.10400000000000001
+count_min = 0.05599999999999999
+count_max = 0.104
 extra_spacing = 40.0
 border_margin = 40.0
 
@@ -344,19 +444,35 @@ script = ExtResource("1_biome")
 id = &"highlands"
 display_name = "Highlands"
 map_color = Color(0.5, 0.55, 0.38, 1)
-blend_distance = 320.0
+blend_distance = 340.0
 base_height = 40.0
 hills_amplitude = 22.0
-hills_scale = 300.0
-mountain_amplitude = 55.0
-mountain_scale = 600.0
-mountain_coverage = 0.45
+hills_scale = 320.0
+mountain_amplitude = 50.0
+mountain_scale = 650.0
+mountain_coverage = 0.42
+ridge_sharpness = 1.6
+swirl = 320.0
+swirl_scale = 850.0
+valley_depth = 18.0
+valley_scale = 1100.0
+valley_width = 0.2
+crag_amplitude = 9.0
+crag_scale = 200.0
+crag_size = 0.2
 ground_color = Color(0.4, 0.45, 0.28, 1)
 ground_color_alt = Color(0.46, 0.44, 0.32, 1)
 steep_color = Color(0.42, 0.4, 0.38, 1)
+high_color = Color(0.4, 0.3, 0.3, 1)
+high_start = 15.0
+high_full = 45.0
+shore_color = Color(0.4, 0.38, 0.3, 1)
 tree_style = 1
 tree_density = 30.0
 tree_color = Color(0.16, 0.32, 0.18, 1)
+flora = Array[ExtResource("9_r6ctu")]([SubResource("Resource_r6ctu"), SubResource("Resource_tebx0"), SubResource("Resource_ls7bt"), SubResource("Resource_shmte"), SubResource("Resource_8hu27"), SubResource("Resource_m8q1e"), SubResource("Resource_48jbe")])
+herbs = PackedStringArray("heather:4", "yarrow:2", "blue_mountain_flower:2", "juniper_berries:2", "red_mountain_flower:2", "thistle:1", "mandrake_root:1", "water_mint:1")
+herb_density = 1.1
 poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_ox1p8"), SubResource("Resource_imqa2"), SubResource("Resource_rwip1"), SubResource("Resource_j2nbg"), SubResource("Resource_kaa6h"), SubResource("Resource_7wa5q"), SubResource("Resource_rxkev"), SubResource("Resource_4xdj6"), SubResource("Resource_ksok1"), SubResource("Resource_uv45p"), SubResource("Resource_jjxd7"), SubResource("Resource_aq5p8"), SubResource("Resource_e1q4i"), SubResource("Resource_bg0w3"), SubResource("Resource_0e3lb"), SubResource("Resource_0yq8g"), SubResource("Resource_ku8he"), SubResource("Resource_vuwet"), SubResource("Resource_veu3j"), SubResource("Resource_tajxu"), SubResource("Resource_0pf3v"), SubResource("Resource_cwoc5"), SubResource("Resource_i0e47"), SubResource("Resource_ne7kq"), SubResource("Resource_01wbe"), SubResource("Resource_as6bj"), SubResource("Resource_qbt27"), SubResource("Resource_xlb2d"), SubResource("Resource_kbb78"), SubResource("Resource_8w2b3"), SubResource("Resource_qbkqy"), SubResource("Resource_ql1ns"), SubResource("Resource_mwwfe")])
 level_min = 10
 level_max = 24

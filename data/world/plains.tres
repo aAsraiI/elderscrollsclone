@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="BiomeData" format=3]
 
 [ext_resource type="Script" path="res://scripts/world/biome_data.gd" id="1_biome"]
+[ext_resource type="Script" path="res://scripts/world/flora_layer.gd" id="7_x7qan"]
 [ext_resource type="Resource" path="res://data/world/POIs/sewers_entrance.tres" id="15_w1swc"]
 [ext_resource type="Resource" path="res://data/world/POIs/barrow_entrance.tres" id="16_r3ovm"]
 [ext_resource type="Resource" path="res://data/world/Sites/bandit_camp.tres" id="17_7ysya"]
@@ -43,6 +44,107 @@
 [ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="poi_5"]
 [ext_resource type="Resource" path="res://data/world/POIs/crypt_entrance.tres" id="poi_6"]
 [ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
+
+[sub_resource type="Resource" id="Resource_x7qan"]
+script = ExtResource("7_x7qan")
+name = "copse oaks"
+models = PackedStringArray("kit/plants/trees/flora_tree_01", "kit/plants/trees/flora_tree_02", "kit/plants/trees/flora_tree_ai_05", "tree/broadleaf")
+color = Color(0.24, 0.4, 0.17, 1)
+density = 9.0
+clump_scale = 260.0
+clumping = 0.85
+max_slope = 24.0
+water = -0.3
+height = 9.0
+scale_min = 0.45
+scale_max = 0.75
+sink = 0.3
+trunk_radius = 0.35
+
+[sub_resource type="Resource" id="Resource_gug8d"]
+script = ExtResource("7_x7qan")
+name = "hedgerow shrubs"
+models = PackedStringArray("kit/plants/other/flora_bush_01", "kit/plants/solstheim/flora_bm_shrub_01", "kit/plants/solstheim/flora_bm_shrub_03")
+shape = 4
+size = 1
+color = Color(0.27, 0.38, 0.17, 1)
+density = 28.0
+clump_scale = 110.0
+clumping = 0.65
+height = 1.5
+scale_min = 0.55
+scale_max = 0.9
+solid = false
+
+[sub_resource type="Resource" id="Resource_ny0k1"]
+script = ExtResource("7_x7qan")
+name = "meadow flowers"
+models = PackedStringArray()
+shape = 11
+size = 2
+color = Color(0.92, 0.78, 0.25, 1)
+density = 240.0
+clump_scale = 70.0
+clumping = 0.75
+height = 0.45
+lean = 6.0
+solid = false
+
+[sub_resource type="Resource" id="Resource_ov12w"]
+script = ExtResource("7_x7qan")
+name = "cornflowers"
+models = PackedStringArray()
+shape = 11
+size = 2
+color = Color(0.35, 0.45, 0.95, 1)
+density = 90.0
+clump_scale = 50.0
+clumping = 0.8
+height = 0.5
+solid = false
+
+[sub_resource type="Resource" id="Resource_ubmtw"]
+script = ExtResource("7_x7qan")
+name = "tall grass"
+models = PackedStringArray("kit/plants/grass/flora_grass_01", "kit/plants/grass/flora_grass_02", "kit/plants/grass/flora_grass_03")
+shape = 6
+size = 2
+color = Color(0.42, 0.5, 0.25, 1)
+density = 260.0
+clump_scale = 60.0
+clumping = 0.55
+height = 0.7
+solid = false
+
+[sub_resource type="Resource" id="Resource_jhapa"]
+script = ExtResource("7_x7qan")
+name = "field stones"
+models = PackedStringArray("kit/rocks/ascadian/terrain_rock_ai_02", "kit/rocks/ascadian/terrain_rock_ai_04", "kit/rocks/ascadian/terrain_rock_ai_06")
+shape = 10
+size = 3
+color = Color(0.5, 0.48, 0.44, 1)
+density = 1.5
+clump_scale = 300.0
+height = 1.2
+scale_min = 0.6
+scale_max = 1.0
+sink = 0.3
+lean = 15.0
+follow_ground = true
+
+[sub_resource type="Resource" id="Resource_fu2cw"]
+script = ExtResource("7_x7qan")
+name = "fallen logs"
+models = PackedStringArray("kit/plants/logs_roots/flora_bm_log_01", "kit/plants/logs_roots/flora_bm_log_02")
+shape = 8
+size = 3
+density = 1.2
+max_slope = 20.0
+height = 4.0
+scale_min = 0.7
+scale_max = 1.0
+lean = 0.0
+follow_ground = true
 
 [sub_resource type="Resource" id="rule_0"]
 script = ExtResource("rule_script")
@@ -289,8 +391,8 @@ border_margin = 40.0
 [sub_resource type="Resource" id="Resource_0ywal"]
 script = ExtResource("rule_script")
 poi = ExtResource("40_ov12w")
-count_min = 0.055999999999999994
-count_max = 0.10400000000000001
+count_min = 0.05599999999999999
+count_max = 0.104
 extra_spacing = 40.0
 border_margin = 40.0
 
@@ -313,10 +415,23 @@ border_margin = 40.0
 [resource]
 script = ExtResource("1_biome")
 id = &"plains"
-blend_distance = 200.0
+blend_distance = 260.0
+base_height = 12.0
 hills_amplitude = 9.0
-hills_scale = 240.0
+hills_scale = 280.0
+swirl = 220.0
+swirl_scale = 700.0
+valley_depth = 7.0
+valley_scale = 950.0
+valley_width = 0.12
+high_color = Color(0.36, 0.42, 0.2, 1)
+high_start = 4.0
+high_full = 14.0
+shore_color = Color(0.5, 0.47, 0.34, 1)
 tree_density = 10.0
 tree_color = Color(0.24, 0.44, 0.18, 1)
+flora = Array[ExtResource("7_x7qan")]([SubResource("Resource_x7qan"), SubResource("Resource_gug8d"), SubResource("Resource_ny0k1"), SubResource("Resource_ov12w"), SubResource("Resource_ubmtw"), SubResource("Resource_jhapa"), SubResource("Resource_fu2cw")])
+herbs = PackedStringArray("red_poppy:3", "yarrow:3", "cornflower:3", "lavender:2", "wild_garlic:2", "bramble_berries:2", "bulbroot:1", "thistle:1", "blue_mountain_flower:1", "water_mint:2", "cattail_root:1")
+herb_density = 1.2
 poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("rule_5"), SubResource("rule_6"), SubResource("Resource_r3ovm"), SubResource("Resource_kphei"), SubResource("Resource_qmb38"), SubResource("Resource_eay81"), SubResource("Resource_ps87v"), SubResource("Resource_x1dsh"), SubResource("Resource_rfcgj"), SubResource("Resource_3qqjl"), SubResource("Resource_k0u2d"), SubResource("Resource_rj7rt"), SubResource("Resource_rd7ta"), SubResource("Resource_b30ys"), SubResource("Resource_v8j6l"), SubResource("Resource_vg5i6"), SubResource("Resource_cbwrt"), SubResource("Resource_51mgi"), SubResource("Resource_2da6y"), SubResource("Resource_pvcn7"), SubResource("Resource_4b413"), SubResource("Resource_v0mc6"), SubResource("Resource_iul8v"), SubResource("Resource_ipjmt"), SubResource("Resource_utvr3"), SubResource("Resource_yahen"), SubResource("Resource_yboh7"), SubResource("Resource_0ywal"), SubResource("Resource_6bkho"), SubResource("Resource_salbl")])
 encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("enc_4")])

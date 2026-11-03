@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_pwq03"]
+
+[resource]
+script = ExtResource("1_pwq03")
+id = &"water_mint"
+display_name = "Water Mint"
+description = "An alchemical ingredient, found beside streams and lakes. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 5
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist")
+ingredient_effects = PackedStringArray("cure_poison", "restore_magicka", "resist_poison", "fortify_charisma")

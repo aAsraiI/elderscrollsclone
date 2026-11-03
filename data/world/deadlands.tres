@@ -10,6 +10,7 @@
 [ext_resource type="Resource" path="res://data/world/POIs/crypt_entrance.tres" id="6_eufsy"]
 [ext_resource type="Resource" path="res://data/world/POIs/ruined_shrine.tres" id="7_3ihvc"]
 [ext_resource type="Resource" path="res://data/encounters/dead_ghouls.tres" id="7_koxu8"]
+[ext_resource type="Script" path="res://scripts/world/flora_layer.gd" id="8_dw3du"]
 [ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="8_j1jv5"]
 [ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="9_loyen"]
 [ext_resource type="Resource" path="res://data/world/POIs/fort_ruin_entrance.tres" id="10_ocdib"]
@@ -35,6 +36,85 @@
 [ext_resource type="Resource" path="res://data/world/Sites/lost_pack.tres" id="32_yqn18"]
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="33_2llix"]
 [ext_resource type="Resource" path="res://data/world/Sites/nest.tres" id="34_u30it"]
+
+[sub_resource type="Resource" id="Resource_dw3du"]
+script = ExtResource("8_dw3du")
+name = "dead trees"
+models = PackedStringArray("kit/plants/trees/flora_treedead_mh_01", "kit/plants/trees/flora_ashtree_04", "kit/plants/trees/flora_ashtree_06", "kit/plants/trees/flora_ashtree_07", "kit/plants/trees/flora_tree_gl_10", "kit/plants/trees/flora_tree_gl_07")
+shape = 2
+color = Color(0.25, 0.23, 0.2, 1)
+density = 14.0
+clump_scale = 200.0
+height = 7.0
+scale_min = 0.5
+scale_max = 0.75
+sink = 0.3
+trunk_radius = 0.25
+
+[sub_resource type="Resource" id="Resource_hwl1y"]
+script = ExtResource("8_dw3du")
+name = "gnarled roots"
+models = PackedStringArray("kit/plants/logs_roots/flora_root_wg_02", "kit/plants/logs_roots/flora_root_wg_04", "kit/plants/logs_roots/flora_root_wg_06", "kit/plants/logs_roots/flora_root_wg_08")
+shape = 8
+size = 3
+density = 7.0
+height = 2.0
+scale_min = 0.45
+scale_max = 0.75
+sink = 0.3
+
+[sub_resource type="Resource" id="Resource_yqn18"]
+script = ExtResource("8_dw3du")
+name = "grave moss"
+models = PackedStringArray("kit/plants/bitter_coast/flora_bc_moss_03", "kit/plants/bitter_coast/flora_bc_moss_07", "kit/plants/bitter_coast/flora_bc_moss_11")
+shape = 4
+size = 3
+color = Color(0.25, 0.27, 0.2, 1)
+density = 40.0
+clump_scale = 80.0
+clumping = 0.6
+height = 0.3
+scale_min = 0.6
+scale_max = 1.0
+follow_ground = true
+solid = false
+
+[sub_resource type="Resource" id="Resource_2llix"]
+script = ExtResource("8_dw3du")
+name = "rotting logs"
+models = PackedStringArray("kit/plants/logs_roots/flora_ash_log_01", "kit/plants/logs_roots/flora_ash_log_02")
+shape = 8
+size = 3
+density = 3.0
+height = 4.0
+scale_min = 0.5
+scale_max = 0.8
+sink = 0.2
+lean = 0.0
+follow_ground = true
+
+[sub_resource type="Resource" id="Resource_u30it"]
+script = ExtResource("8_dw3du")
+name = "pods"
+models = PackedStringArray("kit/plants/other/flora_muckpod_04", "kit/plants/other/flora_muckpod_05")
+shape = 7
+size = 2
+color = Color(0.45, 0.42, 0.35, 1)
+density = 10.0
+height = 0.7
+scale_min = 0.6
+scale_max = 1.0
+solid = false
+
+[sub_resource type="Resource" id="Resource_hd0sp"]
+script = ExtResource("8_dw3du")
+name = "bare giants"
+models = PackedStringArray("kit/plants/trees/flora_tree_gl_03", "kit/plants/trees/flora_tree_gl_05")
+shape = 2
+density = 1.0
+scale_min = 0.4
+scale_max = 0.55
+trunk_radius = 0.6
 
 [sub_resource type="Resource" id="Resource_pg31t"]
 script = ExtResource("5_0r0nr")
@@ -231,8 +311,8 @@ border_margin = 40.0
 [sub_resource type="Resource" id="Resource_64eqq"]
 script = ExtResource("5_0r0nr")
 poi = ExtResource("34_u30it")
-count_min = 0.055999999999999994
-count_max = 0.10400000000000001
+count_min = 0.05599999999999999
+count_max = 0.104
 extra_spacing = 40.0
 border_margin = 40.0
 
@@ -241,16 +321,32 @@ script = ExtResource("10_puq31")
 id = &"deadlands"
 display_name = "Deadlands"
 map_color = Color(0.4, 0.39, 0.35, 1)
-blend_distance = 200.0
-base_height = 8.0
-hills_scale = 160.0
+blend_distance = 240.0
+base_height = 10.0
+hills_amplitude = 7.0
+hills_scale = 200.0
+swirl = 110.0
+swirl_scale = 380.0
+valley_depth = 5.0
+valley_scale = 420.0
+valley_width = 0.12
+pool_depth = 3.0
+pool_scale = 110.0
+pool_coverage = 0.2
+crag_amplitude = 5.0
+crag_scale = 150.0
+crag_size = 0.15
 detail_amplitude = 0.6
 ground_color = Color(0.35, 0.34, 0.3, 1)
 ground_color_alt = Color(0.3, 0.3, 0.27, 1)
 steep_color = Color(0.26, 0.25, 0.23, 1)
+shore_color = Color(0.25, 0.24, 0.21, 1)
 tree_style = 2
 tree_density = 10.0
 tree_color = Color(0.3, 0.28, 0.25, 1)
+flora = Array[ExtResource("8_dw3du")]([SubResource("Resource_dw3du"), SubResource("Resource_hwl1y"), SubResource("Resource_yqn18"), SubResource("Resource_2llix"), SubResource("Resource_u30it"), SubResource("Resource_hd0sp")])
+herbs = PackedStringArray("grave_moss:4", "belladonna:3", "wolfsbane:2", "spore_pod:1", "nightshade:2")
+herb_density = 0.9
 poi_rules = Array[ExtResource("5_0r0nr")]([SubResource("Resource_pg31t"), SubResource("Resource_u7b4k"), SubResource("Resource_xg30r"), SubResource("Resource_hv32u"), SubResource("Resource_4v8qn"), SubResource("Resource_dh2ua"), SubResource("Resource_rl0tb"), SubResource("Resource_5vqf7"), SubResource("Resource_3jjlk"), SubResource("Resource_s2oqk"), SubResource("Resource_4qx1b"), SubResource("Resource_vc6xi"), SubResource("Resource_8kjoq"), SubResource("Resource_h1yk6"), SubResource("Resource_n0dfg"), SubResource("Resource_fubn8"), SubResource("Resource_1jmkj"), SubResource("Resource_ndyor"), SubResource("Resource_1tsk0"), SubResource("Resource_i0e7v"), SubResource("Resource_ujhy3"), SubResource("Resource_fkypy"), SubResource("Resource_jyubn"), SubResource("Resource_jnvga"), SubResource("Resource_e3xh7"), SubResource("Resource_64eqq")])
 level_min = 50
 level_max = 73

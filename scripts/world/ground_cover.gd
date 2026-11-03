@@ -13,7 +13,7 @@ const FLOWER_RANGE := 40.0
 const BUSH_RANGE := 160.0
 const ROCK_RANGE := 260.0
 ## Grass clumps per 32 x 32 m block at full density, for the Grass setting (off, low, medium, high)
-const GRASS_PER_BLOCK: Array[int] = [0, 260, 620, 1150]
+const GRASS_PER_BLOCK: Array[int] = [0, 320, 800, 1400]
 const FLOWER_COLORS := {
 	"temperate": [Color(1.0, 0.85, 0.2), Color(0.95, 0.95, 0.95), Color(0.65, 0.4, 0.9), Color(0.9, 0.25, 0.25), Color(0.4, 0.55, 1.0)],
 	"wet": [Color(0.95, 0.95, 0.95), Color(0.9, 0.6, 0.8), Color(1.0, 0.9, 0.3)],
@@ -21,18 +21,32 @@ const FLOWER_COLORS := {
 	"arid": [Color(1.0, 0.5, 0.2)],
 }
 const STRIDE := 16  # floats per MultiMesh instance: 12 transform + 4 color
+## Thick tufts and thin ground, in patches (made when the script loads; read-only, so threads share it)
+static var _patches := _make_patches()
 
 
-## Thread-safe. verts are chunk-local, colors / biomes per vertex.
-static func scatter(map: WorldMap, coord: Vector2i, chunk_size: float, quads: int, verts: PackedVector3Array,
-		normals: PackedVector3Array, colors: PackedColorArray, biomes: PackedInt32Array, detail: int) -> Dictionary:
+static func _make_patches() -> FastNoiseLite:
+	var n := FastNoiseLite.new()
+	n.frequency = 1.0 / 22.0
+	n.fractal_octaves = 2
+	return n
+
+
+## Thread-safe. `g` is the chunk's vertex grid (see TerrainChunk.build_data / Flora.scatter).
+static func scatter(map: WorldMap, coord: Vector2i, chunk_size: float, quads: int, g: Dictionary, detail: int) -> Dictionary:
 	var out := {}
 	if map.placements.is_empty():
 		return out
+	var verts: PackedVector3Array = g["verts"]
+	var normals: PackedVector3Array = g["normals"]
+	var colors: PackedColorArray = g["colors"]
+	var biomes: PackedInt32Array = g["biomes"]
+	var water: PackedFloat32Array = g["water"]
+	var near: PackedFloat32Array = g["near"]
+	var free: PackedByteArray = g["free"]
+	var roadd: PackedFloat32Array = g["roadd"]
 	var vps := quads + 1
 	var spacing := chunk_size / float(quads)
-	var ox := coord.x * chunk_size
-	var oz := coord.y * chunk_size
 	var rng := RandomNumberGenerator.new()
 	rng.seed = ("%d|cover|%d,%d" % [map.world_seed, coord.x, coord.y]).hash()
 
@@ -42,11 +56,7 @@ static func scatter(map: WorldMap, coord: Vector2i, chunk_size: float, quads: in
 	var steep_count := 0
 	for k in vps * vps:
 		var p := verts[k]
-		var wx := ox + p.x
-		var wz := oz + p.z
-		if biomes[k] < 0 or map.is_under_water(p.y - 0.15) or map.is_on_pad(wx, wz):
-			continue
-		if map.roads != null and map.roads.distance_to(wx, wz, 3.0) < 1.2:
+		if biomes[k] < 0 or water[k] > p.y - 0.15 or free[k] == 0 or roadd[k] < 1.2:
 			continue
 		if normals[k].y < 0.8:
 			ok[k] = 2
@@ -81,7 +91,8 @@ static func scatter(map: WorldMap, coord: Vector2i, chunk_size: float, quads: in
 				if ok[k] != 1:
 					continue
 				var biome: BiomeData = biome_list.get(biomes[k])
-				if biome == null or rng.randf() > biome.get_grass_density():
+				var patch := (_patches.get_noise_2d(coord.x * chunk_size + lx, coord.y * chunk_size + lz) + 1.0) * 0.5
+				if biome == null or rng.randf() > biome.get_grass_density() * lerpf(0.3, 1.25, smoothstep(0.3, 0.7, patch)):
 					continue
 				var y := _height(verts, lx, lz, spacing, vps)
 				var c := colors[k].lightened(0.08).lerp(Color(0.55, 0.7, 0.3), 0.15)
@@ -148,8 +159,8 @@ static func scatter(map: WorldMap, coord: Vector2i, chunk_size: float, quads: in
 		if ok[k] != 1:
 			continue
 		var biome: BiomeData = biome_list.get(biomes[k])
-		if biome == null or rng.randf() > biome.get_grass_density() * 0.45:
-			continue
+		if biome == null or not biome.flora.is_empty() or rng.randf() > biome.get_grass_density() * 0.45:
+			continue  # (a biome with its own Flora has its shrubs there)
 		var y := _height(verts, lx, lz, spacing, vps)
 		var sc := rng.randf_range(0.7, 1.5)
 		var c := colors[k].darkened(0.25).lerp(Color(0.2, 0.35, 0.12), 0.4) * rng.randf_range(0.85, 1.15)
@@ -163,19 +174,29 @@ static func scatter(map: WorldMap, coord: Vector2i, chunk_size: float, quads: in
 	out["boulders"] = boulders
 	out["bushes"] = {"buf": bush_buf, "n": bush_n}
 
-	# ---- things to gather: herbs on flat ground, ore on rocky slopes
+	# ---- things to gather: herbs in small patches of one kind, water herbs along the banks, ore on
+	# rocky slopes
 	var herbs: Array = []
-	var herb_tries := 3
-	for i in herb_tries:
-		var lx := rng.randf() * chunk_size
-		var lz := rng.randf() * chunk_size
-		var k := _nearest(lx, lz, spacing, vps)
-		if ok[k] != 1 or rng.randf() > 0.45:
+	var patches := 2 + (1 if rng.randf() < 0.5 else 0)
+	for i in patches:
+		var cx := rng.randf() * chunk_size
+		var cz := rng.randf() * chunk_size
+		var kc := _nearest(cx, cz, spacing, vps)
+		var biome: BiomeData = biome_list.get(biomes[kc])
+		if biome == null or rng.randf() > biome.herb_density * 0.75:
 			continue
-		var biome: BiomeData = biome_list.get(biomes[k])
-		if biome == null:
+		var wet_spot := near[kc] > 0.35
+		var id := HarvestNode.pick_herb(biome, rng.randi(), wet_spot)
+		if id == "":
 			continue
-		herbs.append({"pos": Vector3(lx, _height(verts, lx, lz, spacing, vps), lz), "climate": _climate(climates, biome), "pick": rng.randi()})
+		var size := 1 + rng.randi() % 3
+		for q in size:
+			var lx := clampf(cx + rng.randf_range(-4.0, 4.0), 0.5, chunk_size - 0.5)
+			var lz := clampf(cz + rng.randf_range(-4.0, 4.0), 0.5, chunk_size - 0.5)
+			var k := _nearest(lx, lz, spacing, vps)
+			if ok[k] != 1 and not (HarvestNode.is_water_herb(id) and water[k] > verts[k].y and water[k] - verts[k].y < 0.5):
+				continue
+			herbs.append({"pos": Vector3(lx, _height(verts, lx, lz, spacing, vps), lz), "id": id, "pick": rng.randi()})
 	out["herbs"] = herbs
 	var ores: Array = []
 	if steep_count > 6 and rng.randf() < 0.4:
@@ -259,7 +280,7 @@ static func apply(chunk: TerrainChunk, d: Dictionary) -> void:
 		chunk.shape_owner_set_transform(owner_id, Transform3D(Basis.IDENTITY, Vector3(b4.x, b4.y, b4.z)))
 	var origin := chunk.position
 	for h in d.get("herbs", []):
-		HarvestNode.make_herb(chunk, h["pos"], origin + h["pos"], String(h["climate"]), int(h["pick"]))
+		HarvestNode.make_herb_id(chunk, h["pos"], origin + h["pos"], String(h["id"]), int(h["pick"]))
 	for o in d.get("ores", []):
 		HarvestNode.make_ore(chunk, o["pos"], origin + o["pos"], int(o["pick"]))
 
@@ -279,7 +300,7 @@ static func apply_cover(chunk: TerrainChunk, d: Dictionary) -> void:
 	if not rocks.is_empty():
 		for v in 3:
 			if int(rocks["n"][v]) > 0:
-				_mmi(chunk, "Rocks%d" % v, NatureMeshes.rock_mesh(v), NatureMeshes.rock_material(), rocks["bufs"][v], rocks["n"][v], ROCK_RANGE, true)
+				_mmi(chunk, "Rocks%d" % v, NatureMeshes.rock_mesh(v), null if ModelLibrary.has("nature/rock_%d" % v) else NatureMeshes.rock_material(), rocks["bufs"][v], rocks["n"][v], ROCK_RANGE, true)
 	var bushes: Dictionary = d.get("bushes", {})
 	if int(bushes.get("n", 0)) > 0:
 		_mmi(chunk, "Bushes", NatureMeshes.bush_mesh(), NatureMeshes.bush_material(), bushes["buf"], bushes["n"], BUSH_RANGE, false)

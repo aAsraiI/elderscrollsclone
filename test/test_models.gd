@@ -140,9 +140,10 @@ func t_nature() -> void:
 	print("-- trees and rocks")
 	var rock := NatureMeshes.rock_mesh(0)
 	check("rocks are models", rock is ArrayMesh and rock.get_surface_count() >= 1 and rock.get_aabb().size.y > 0.5)
-	var tree := TerrainChunk._tree_model(BiomeData.TreeStyle.BROADLEAF)
-	check("leafy trees are models (%.1f m)" % (tree.get_aabb().size.y if tree else 0.0), tree != null and absf(tree.get_aabb().size.y - 5.8) < 0.3)
-	check("styles without a model keep the old trees", TerrainChunk._tree_model(BiomeData.TreeStyle.CACTUS) == null)
+	var tree := Flora.shape_mesh(FloraLayer.make("t", FloraLayer.Shape.BROADLEAF, FloraLayer.Size.TREE, 1.0, [], {"height": 5.8}))
+	check("plain trees stand as tall as asked (%.1f m)" % (tree.get_aabb().size.y if tree else 0.0), tree != null and absf(tree.get_aabb().size.y - 5.8) < 0.6)
+	var planted := Flora.planted_mesh("tree/broadleaf", 5.8) if ModelLibrary.has("tree/broadleaf") else tree
+	check("tree models stand on their foot", planted != null and Vector2(Flora.foot_of(planted).x, Flora.foot_of(planted).z).length() < 0.1)
 
 
 func t_user_folder() -> void:

@@ -9,7 +9,16 @@ extends Resource
 ## Saves store the seed, so every save gets this world unless the player picks another seed.
 @export var world_seed: int = 1337
 
+## How the placements become land.
+##   Rectangles (the worlds before Alpha 1.21): each box is filled with its biome, borders bent by
+##   noise, and a cliff ring stands round the whole layout.
+##   Regions (1.21): each box only says roughly where a region is. The land is cut into rounded,
+##   flowing regions that meet each other exactly (no gaps), and the whole layout is an island with
+##   a coastline falling away into the open sea.
+enum LayoutStyle { RECTANGLES, REGIONS }
+
 @export_group("Layout")
+@export var layout_style: LayoutStyle = LayoutStyle.RECTANGLES
 ## Size of one layout cell in meters. Biome positions and sizes are measured in cells.
 @export_range(50.0, 5000.0, 10.0, "or_greater") var cell_size := 500.0
 ## The biome rectangles that make up the world. Order does not matter.
@@ -22,6 +31,48 @@ extends Resource
 @export_range(0.0, 2000.0, 1.0, "or_greater") var border_warp_strength := 140.0
 ## Size of the wiggles in meters. Small = jagged, large = long smooth curves.
 @export_range(20.0, 5000.0, 1.0, "or_greater") var border_warp_scale := 450.0
+
+@export_group("Regions and coast")
+## (Regions only.) How far broad noise bends the region borders (m), and how broad the bends are
+@export_range(0.0, 3000.0, 1.0, "or_greater") var region_warp_strength := 950.0
+@export_range(100.0, 10000.0, 1.0, "or_greater") var region_warp_scale := 2800.0
+## Small wiggles on top of the broad bends (m), and their size
+@export_range(0.0, 1000.0, 1.0, "or_greater") var region_detail_warp := 55.0
+@export_range(20.0, 3000.0, 1.0, "or_greater") var region_detail_scale := 240.0
+## Seed points per square kilometer of a placement's box. 1 seed = a round blob; more seeds = a
+## longer, lumpier region that fills its box more closely.
+@export_range(0.05, 4.0, 0.01) var region_seeds_per_km2 := 0.4
+## Open sea round the island (m), out to the edge of the world
+@export_range(200.0, 5000.0, 10.0, "or_greater") var sea_margin := 1500.0
+## How far noise pushes the coastline in and out (m): bays, headlands and peninsulas
+@export_range(0.0, 3000.0, 1.0, "or_greater") var coast_warp := 1100.0
+@export_range(100.0, 10000.0, 1.0, "or_greater") var coast_warp_scale := 3400.0
+## How wide the land takes to slope down to the beach (m). Narrow = sea cliffs, wide = long beaches.
+## Each stretch of coast picks between these by noise.
+@export_range(10.0, 2000.0, 1.0, "or_greater") var coast_width_min := 60.0
+@export_range(10.0, 2000.0, 1.0, "or_greater") var coast_width_max := 480.0
+## How deep the open sea gets (m below sea level)
+@export_range(2.0, 300.0, 1.0, "or_greater") var sea_depth := 40.0
+## More islands out in the sea, each made like the main island (its own biomes, any size)
+@export var islands: Array[IslandData] = []
+
+@export_group("Rivers and lakes")
+## (Regions only.) Streams and rivers run downhill to the sea or into lakes, carved into the land.
+@export var rivers_enabled := true
+## Meters per cell of the grid the rivers are worked out on
+@export_range(16.0, 128.0, 1.0) var river_grid := 40.0
+## Land (km²) that must drain into a spot before a stream starts there. Smaller = more streams.
+@export_range(0.05, 20.0, 0.01, "or_greater") var stream_catchment := 0.55
+## Land (km²) that makes a stream a river (wider, deeper)
+@export_range(0.1, 100.0, 0.1, "or_greater") var river_catchment := 4.0
+## Hollows deeper than this (m) fill up into lakes; shallower ones the stream just runs through
+@export_range(0.5, 50.0, 0.1) var lake_min_depth := 5.0
+## Smallest lake, in river grid cells
+@export_range(1, 500) var lake_min_cells := 30
+## At most this many lakes, the biggest (the other hollows are just low ground the streams run through)
+@export_range(0, 200) var max_lakes := 12
+## Largest lake, in river grid cells (a bigger hollow is low ground the river runs through)
+@export_range(10, 20000) var lake_max_cells := 450
 
 @export_group("World edge")
 ## Width of the cliff ring around the world, in meters
@@ -92,6 +143,12 @@ extends Resource
 
 
 const DEFAULT_PATH := "res://data/world/default_world.tres"
+## Changes when the region generator changes (part of layout_hash)
+const GENERATION := 2
+
+
+func is_regions() -> bool:
+	return layout_style == LayoutStyle.REGIONS
 const TOWNS_DIR := "res://data/world/Towns"
 
 static var _found_towns: Array[TownData] = []
@@ -143,7 +200,19 @@ func get_valid_placements() -> Array[BiomePlacement]:
 	for p in placements:
 		if p != null and p.is_valid():
 			out.append(p)
+	if layout_style == LayoutStyle.REGIONS:
+		for isle in islands:  # the islands' regions come after the main island's
+			if isle != null:
+				out.append_array(isle.get_valid_placements())
 	return out
+
+
+## Which island a placement belongs to: 0 = the main island, 1.. = Islands[0..]
+func island_of(p: BiomePlacement) -> int:
+	for i in islands.size():
+		if islands[i] != null and islands[i].placements.has(p):
+			return i + 1
+	return 0
 
 
 ## Human-readable problems with the layout. Empty = fine.
@@ -160,6 +229,8 @@ func validate() -> PackedStringArray:
 			valid.append(p)
 	if valid.is_empty():
 		out.append("No valid biome placements: the world will be empty.")
+	if layout_style == LayoutStyle.REGIONS:
+		return out  # region boxes may overlap: they only say roughly where each region is
 	for i in valid.size():
 		for j in range(i + 1, valid.size()):
 			if valid[i].get_rect(cell_size).intersects(valid[j].get_rect(cell_size)):
@@ -170,6 +241,8 @@ func validate() -> PackedStringArray:
 ## A number that changes when the layout changes (saves use it to notice an edited layout)
 func layout_hash() -> int:
 	var parts := PackedStringArray()
+	if layout_style == LayoutStyle.REGIONS:
+		parts.append("regions:%d:%.0f:%.0f:%.2f:%.0f:%s" % [GENERATION, region_warp_strength, coast_warp, region_seeds_per_km2, sea_margin, rivers_enabled])
 	for p in get_valid_placements():
 		parts.append("%s@%d,%d+%d,%d" % [p.biome.get_key(), p.cell.x, p.cell.y, p.size_cells.x, p.size_cells.y])
 		for rule in p.biome.poi_rules:

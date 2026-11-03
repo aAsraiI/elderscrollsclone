@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="6_bkmdb"]
 [ext_resource type="Resource" path="res://data/encounters/highland_harpies.tres" id="6_lfpdt"]
 [ext_resource type="Resource" path="res://data/world/POIs/ruined_shrine.tres" id="7_bswou"]
+[ext_resource type="Script" path="res://scripts/world/flora_layer.gd" id="7_kyrus"]
 [ext_resource type="Resource" path="res://data/world/POIs/standing_stones.tres" id="8_3xsts"]
 [ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="9_f8si1"]
 [ext_resource type="Resource" path="res://data/world/POIs/crypt_entrance.tres" id="10_pgco0"]
@@ -40,6 +41,74 @@
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="37_pl5c5"]
 [ext_resource type="Resource" path="res://data/world/Sites/ore_outcrop.tres" id="38_8e5r3"]
 [ext_resource type="Resource" path="res://data/world/Sites/nest.tres" id="39_4xa1r"]
+
+[sub_resource type="Resource" id="Resource_kyrus"]
+script = ExtResource("7_kyrus")
+name = "dead trees"
+models = PackedStringArray("kit/plants/trees/flora_treedead_mh_02", "kit/plants/trees/flora_ashtree_01", "kit/plants/trees/flora_ashtree_02", "kit/plants/trees/flora_ashtree_05")
+shape = 2
+density = 4.0
+clump_scale = 300.0
+clumping = 0.7
+height = 5.0
+scale_min = 0.6
+scale_max = 0.9
+trunk_radius = 0.2
+
+[sub_resource type="Resource" id="Resource_ypffb"]
+script = ExtResource("7_kyrus")
+name = "sagebrush"
+models = PackedStringArray("kit/plants/other/flora_roobrush_01")
+shape = 4
+size = 1
+color = Color(0.55, 0.57, 0.45, 1)
+density = 32.0
+clump_scale = 150.0
+height = 0.9
+scale_min = 0.45
+scale_max = 0.75
+solid = false
+
+[sub_resource type="Resource" id="Resource_qx410"]
+script = ExtResource("7_kyrus")
+name = "thornbushes"
+models = PackedStringArray("kit/plants/other/flora_rm_scathecraw_01", "kit/plants/other/flora_rm_scathecraw_02")
+shape = 2
+size = 1
+color = Color(0.35, 0.28, 0.2, 1)
+density = 7.0
+height = 1.2
+scale_min = 0.35
+scale_max = 0.55
+solid = false
+
+[sub_resource type="Resource" id="Resource_pl5c5"]
+script = ExtResource("7_kyrus")
+name = "small cacti"
+models = PackedStringArray()
+shape = 3
+size = 1
+color = Color(0.35, 0.45, 0.28, 1)
+density = 3.0
+height = 1.4
+solid = false
+
+[sub_resource type="Resource" id="Resource_8e5r3"]
+script = ExtResource("7_kyrus")
+name = "red boulders"
+models = PackedStringArray("kit/rocks/west_gash/terrain_rock_wg_01", "kit/rocks/west_gash/terrain_rock_wg_05", "kit/rocks/ascadian/terrain_rock_ai_04")
+shape = 10
+size = 3
+color = Color(0.55, 0.36, 0.26, 1)
+density = 2.5
+clump_scale = 200.0
+clumping = 0.6
+height = 1.6
+scale_min = 0.4
+scale_max = 0.8
+sink = 0.35
+lean = 10.0
+follow_ground = true
 
 [sub_resource type="Resource" id="Resource_3o4xy"]
 script = ExtResource("6_bkmdb")
@@ -287,8 +356,8 @@ border_margin = 40.0
 [sub_resource type="Resource" id="Resource_38lki"]
 script = ExtResource("6_bkmdb")
 poi = ExtResource("39_4xa1r")
-count_min = 0.055999999999999994
-count_max = 0.10400000000000001
+count_min = 0.05599999999999999
+count_max = 0.104
 extra_spacing = 40.0
 border_margin = 40.0
 
@@ -297,23 +366,36 @@ script = ExtResource("12_lwaoe")
 id = &"badlands"
 display_name = "Badlands"
 map_color = Color(0.72, 0.42, 0.26, 1)
-blend_distance = 260.0
-base_height = 22.0
-hills_amplitude = 16.0
+blend_distance = 300.0
+base_height = 24.0
+hills_amplitude = 14.0
 hills_scale = 320.0
 hills_octaves = 2
-mountain_amplitude = 60.0
+mountain_amplitude = 45.0
 mountain_scale = 500.0
-mountain_coverage = 0.45
+swirl = 180.0
+swirl_scale = 600.0
+valley_depth = 16.0
+valley_scale = 520.0
+valley_width = 0.09
+terrace_height = 7.0
+terrace_sharpness = 0.72
+crag_amplitude = 14.0
+crag_scale = 160.0
+crag_size = 0.16
 detail_amplitude = 0.25
 detail_scale = 7.0
 ground_color = Color(0.62, 0.36, 0.22, 1)
 ground_color_alt = Color(0.7, 0.46, 0.28, 1)
 patch_scale = 70.0
 steep_color = Color(0.5, 0.28, 0.2, 1)
+shore_color = Color(0.6, 0.42, 0.3, 1)
 tree_style = 3
 tree_density = 4.0
 tree_color = Color(0.32, 0.5, 0.26, 1)
+flora = Array[ExtResource("7_kyrus")]([SubResource("Resource_kyrus"), SubResource("Resource_ypffb"), SubResource("Resource_qx410"), SubResource("Resource_pl5c5"), SubResource("Resource_8e5r3")])
+herbs = PackedStringArray("sagebrush:4", "thornroot:3", "cactus_flower:1", "sandroot:1", "thistle:1")
+herb_density = 0.8
 poi_rules = Array[ExtResource("6_bkmdb")]([SubResource("Resource_3o4xy"), SubResource("Resource_3g6b6"), SubResource("Resource_r347b"), SubResource("Resource_kt13t"), SubResource("Resource_x4wka"), SubResource("Resource_chwfb"), SubResource("Resource_2u524"), SubResource("Resource_wispq"), SubResource("Resource_a4i37"), SubResource("Resource_0dpeh"), SubResource("Resource_binwg"), SubResource("Resource_yc6pu"), SubResource("Resource_bqwuv"), SubResource("Resource_q7y50"), SubResource("Resource_wm7i7"), SubResource("Resource_akwa5"), SubResource("Resource_aorji"), SubResource("Resource_v8344"), SubResource("Resource_ghi3v"), SubResource("Resource_l1qr0"), SubResource("Resource_um8nm"), SubResource("Resource_nbdqh"), SubResource("Resource_nvqto"), SubResource("Resource_ibnu3"), SubResource("Resource_bc1s6"), SubResource("Resource_0slng"), SubResource("Resource_s5efx"), SubResource("Resource_12lvt"), SubResource("Resource_b1to6"), SubResource("Resource_l2oy7"), SubResource("Resource_4umq3"), SubResource("Resource_38lki")])
 level_min = 33
 level_max = 57

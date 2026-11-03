@@ -17,6 +17,10 @@ const LEAD := 14.0
 const SPACING := 6.0
 ## Meters a road may sit above the land (it cuts into hills instead of standing on banks)
 const MAX_FILL := 0.3
+## Extra cost of a grid cell of running water (a bridge to build)
+const RIVER_COST := 45.0
+## Meters a bridge deck stands above the water
+const DECK_CLEAR := 1.4
 
 
 static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
@@ -56,7 +60,10 @@ static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
 		for i in w:
 			map.sample((float(region.position.x + i) + 0.5) * cell, (float(region.position.y + j) + 0.5) * cell, s)
 			row_h[i] = s.height
-			row_o[i] = 1 if s.edge > 0.02 or map.is_under_water(s.height - 0.5) else 0  # roads keep out of the water
+			# roads keep out of the sea and lakes; a river or stream is crossed (2), on a bridge
+			row_o[i] = 1 if s.edge > 0.02 or map.is_under_water(s.height - 0.5) else 0
+			if row_o[i] == 0 and s.water > s.height + 0.2:
+				row_o[i] = 2 if s.river > 0.3 else 1
 		rows[j] = [row_h, row_o], h, -1, true, "road heights")
 	WorkerThreadPool.wait_for_group_task_completion(task)
 	for j in h:
@@ -83,6 +90,8 @@ static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
 				if ni >= 0 and nj >= 0 and ni < w and nj < h:
 					grad = maxf(grad, absf(heights[nj * w + ni] - heights[k]) / cell)
 			base[k] = 1.0 + 8.0 * grad + 120.0 * grad * grad
+			if outside[k] == 2:
+				base[k] += RIVER_COST  # each crossing is a bridge: few of them, where the water is narrow
 			astar.set_point_weight_scale(c, base[k])
 
 	# The cells under each town
@@ -204,6 +213,9 @@ static func _route(map: WorldMap, net: RoadNetwork, astar: AStarGrid2D, region: 
 	var gb := _nearest_gate(b.town, a.position)
 	var gate_a := a.town.get_gates_world()[ga]
 	var gate_b := b.town.get_gates_world()[gb]
+	# the gate stands on the town's own (tilted) ground, not at the height of its middle
+	gate_a.y = map.get_height(gate_a.x, gate_a.z)
+	gate_b.y = map.get_height(gate_b.x, gate_b.z)
 	var lead_a := gate_a + a.town.get_gate_outward(ga) * LEAD
 	var lead_b := gate_b + b.town.get_gate_outward(gb) * LEAD
 
@@ -272,7 +284,7 @@ static func _route(map: WorldMap, net: RoadNetwork, astar: AStarGrid2D, region: 
 		hs[i] = map.get_height(p.x, p.y)
 		for t in [a, b]:
 			if p.distance_to(Vector2(t.position.x, t.position.z)) < t.poi.flatten_radius * 0.98:
-				hs[i] = t.position.y
+				hs[i] = map.get_height(p.x, p.y)  # the town's ground (it may be tilted), not its middle's height
 				pinned[i] = 1
 		if pinned[i] == 0:
 			var on_road := net.height_at(p.x, p.y)
@@ -351,10 +363,64 @@ static func _route(map: WorldMap, net: RoadNetwork, astar: AStarGrid2D, region: 
 		for i in range(hs.size() - 2, -1, -1):
 			if pinned[i] == 0:
 				hs[i] = maxf(hs[i], hs[i + 1] - grade * flat[i].distance_to(flat[i + 1]))
+	_bridge(map, net, flat, hs, pinned, grade)
 	var out := PackedVector3Array()
 	for i in flat.size():
 		out.append(Vector3(flat[i].x, hs[i], flat[i].y))
 	return {"points": out, "shared": shared}
+
+
+# Where the road crosses running water it is carried level over it on a deck, ramping up to the
+# deck on each bank, and the crossing is noted for WorldPlan.bridges() (net.crossings)
+static func _bridge(map: WorldMap, net: RoadNetwork, flat: Array[Vector2], hs: PackedFloat32Array, pinned: PackedByteArray, grade: float) -> void:
+	if map.rivers == null or map.rivers.river_count() == 0:
+		return
+	var near := PackedByteArray()
+	near.resize(flat.size())
+	for i in flat.size():
+		near[i] = 1 if map.rivers.distance_to(flat[i].x, flat[i].y, 8.0) < 2.5 else 0
+	var i := 0
+	while i < flat.size():
+		if near[i] == 0:
+			i += 1
+			continue
+		var j := i
+		while j + 1 < flat.size() and near[j + 1] == 1:
+			j += 1
+		var e0 := maxi(i - 1, 0)
+		var e1 := mini(j + 1, flat.size() - 1)
+		var water := -INF
+		for k in range(e0, e1 + 1):
+			water = maxf(water, map.rivers.water_level(flat[k].x, flat[k].y))
+		if water > -INF and e1 > e0:
+			var deck_a := maxf(hs[e0], water + DECK_CLEAR)
+			var deck_b := maxf(hs[e1], water + DECK_CLEAR)
+			var span := 0.0
+			for k in range(e0, e1):
+				span += flat[k].distance_to(flat[k + 1])
+			for k in range(e0, e1 + 1):
+				var t := 0.0 if span <= 0.0 else _walked(flat, e0, k) / span
+				hs[k] = lerpf(deck_a, deck_b, t)
+				pinned[k] = 1
+			# ramps up to a raised deck
+			for k in range(e0 - 1, -1, -1):
+				if pinned[k] == 1 and k != e0 - 1:
+					break
+				hs[k] = maxf(hs[k], hs[k + 1] - grade * flat[k].distance_to(flat[k + 1]))
+			for k in range(e1 + 1, flat.size()):
+				if pinned[k] == 1 and k != e1 + 1:
+					break
+				hs[k] = maxf(hs[k], hs[k - 1] - grade * flat[k].distance_to(flat[k - 1]))
+			net.crossings.append({"a": Vector3(flat[e0].x, deck_a, flat[e0].y), "b": Vector3(flat[e1].x, deck_b, flat[e1].y),
+				"water": water, "span": span + 3.0})
+		i = j + 1
+
+
+static func _walked(flat: Array[Vector2], from: int, to: int) -> float:
+	var d := 0.0
+	for k in range(from, to):
+		d += flat[k].distance_to(flat[k + 1])
+	return d
 
 
 static func _nearest_gate(layout: TownLayout, target: Vector3) -> int:

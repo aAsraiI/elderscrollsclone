@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ahq6e"]
+
+[resource]
+script = ExtResource("1_ahq6e")
+id = &"cloudberries"
+display_name = "Cloudberries"
+description = "An alchemical ingredient, found on cold heaths. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 6
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist", "food")
+ingredient_effects = PackedStringArray("restore_magicka", "resist_frost", "fortify_wisdom", "regenerate_stamina")

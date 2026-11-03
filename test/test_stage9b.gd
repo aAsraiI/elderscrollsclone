@@ -1,5 +1,5 @@
 extends SceneTree
-## Headless tests for stage 9b (the 16 x 16 km realm, level bands, discovery, fast travel).
+## Headless tests for stage 9b (the realm: since 1.21 a 12 km island, level bands, discovery, fast travel).
 ##   godot --headless --fixed-fps 60 --path . -s res://test/test_stage9b.gd
 
 const W := "res://data/world/"
@@ -37,10 +37,10 @@ func _run() -> void:
 func t_settings() -> void:
 	print("-- the realm")
 	var s := load(W + "realm_world.tres") as WorldSettings
-	check("realm_world loads with 13 biome regions", s != null and s.get_valid_placements().size() == 13)
+	check("realm_world is an island of rounded regions (%d)" % s.get_valid_placements().size(), s != null and s.is_regions() and s.get_valid_placements().size() >= 13)
 	var map := WorldMap.new(s, 1)
 	var b := map.get_bounds()
-	check("the realm is at least 16 x 16 km", b.size.x >= 16000.0 and b.size.y >= 16000.0, str(b.size))
+	check("the realm is a 12 km island in the sea", b.size.x >= 14000.0 and b.size.y >= 14000.0 and map.is_sea(b.position.x + 300.0, b.position.y + 300.0) and not map.is_sea(b.get_center().x, b.get_center().y), str(b.size))
 	var names := {}
 	for p in s.placements:
 		names[p.biome.display_name] = p.get_level_range()
@@ -48,14 +48,14 @@ func t_settings() -> void:
 		check("new biome: %s" % n, names.has(n))
 	check("the Frozen Crown goes up to level 100", names.get("Frozen Crown", Vector2i.ZERO) == Vector2i(80, 100))
 	check("placements can override a biome's levels", names.get("Plains", Vector2i.ZERO) == Vector2i(1, 13))
-	var start := map.get_placement_rect(s.spawn_placement).get_center()
-	var peak := map.get_placement_rect(1).get_center()
+	var start := map.get_region_center(s.spawn_placement)
+	var peak := map.get_region_center(1)  # the Frozen Crown
 	var low := map.get_level_band(start.x, start.y)
 	var high := map.get_level_band(peak.x, peak.y)
 	check("the south start is low level, the north is high", low.y <= 14.0 and high.x >= 75.0, "%s %s" % [low, high])
 	# crossing a border, the band changes gradually
-	var a := map.get_placement_rect(11).get_center()  # plains
-	var c := map.get_placement_rect(9).get_center()   # swamp
+	var a := map.get_region_center(13)  # plains
+	var c := map.get_region_center(11)  # swamp
 	var steps := 40
 	var biggest := 0.0
 	var prev := map.get_level_band(a.x, a.y)
@@ -74,7 +74,7 @@ func t_world() -> void:
 	var wm := get_first_node_in_group("world_manager") as WorldManager
 	var player := get_first_node_in_group("player") as CharacterBody3D
 	# The game works on a copy of realm_world.tres (Settings > Video changes its view distance), so check what makes it the realm
-	check("the game builds the realm", wm != null and wm.settings.named_settlements and is_equal_approx(wm.settings.cell_size, 1000.0) and player != null)
+	check("the game builds the realm", wm != null and wm.settings.named_settlements and wm.settings.is_regions() and player != null)
 	if wm == null or player == null:
 		return
 	check("the realm has dozens of towns", wm.towns.size() >= 25, str(wm.towns.size()))

@@ -37,6 +37,51 @@ enum TreeStyle { BROADLEAF, PINE, DEAD, CACTUS }
 @export_range(10.0, 10000.0, 1.0, "or_greater") var mountain_scale := 700.0
 ## Roughly how much of the biome is covered by mountains (0 to 1)
 @export_range(0.0, 1.0, 0.01) var mountain_coverage := 0.5
+## How pointed the mountain ridges are: 1 = rounded, 2 = the old look, 3+ = knife-edged
+@export_range(0.5, 6.0, 0.05) var ridge_sharpness := 2.0
+@export_subgroup("Swirl")
+## Meters the hills and mountains are pushed around by noise (domain warping): long winding ridges
+## and swirling valleys instead of round lumps. 0 = off.
+@export var swirl := 0.0
+@export_range(20.0, 5000.0, 1.0, "or_greater") var swirl_scale := 500.0
+@export_subgroup("Valleys")
+## Depth (m) of winding valleys cut into the land, branching like water-worn ground. 0 = none.
+@export var valley_depth := 0.0
+@export_range(50.0, 5000.0, 1.0, "or_greater") var valley_scale := 700.0
+## How wide the valleys are (0.05 = narrow gullies, 0.4 = broad vales)
+@export_range(0.02, 0.8, 0.01) var valley_width := 0.16
+@export_subgroup("Terraces")
+## Height (m) of each step of terraced land (mesas, strata, rice-terrace hills). 0 = none.
+@export var terrace_height := 0.0
+## 0 = soft steps, 1 = flat treads with sheer risers
+@export_range(0.0, 0.95, 0.01) var terrace_sharpness := 0.6
+@export_subgroup("Dunes")
+## Height (m) of wind-made dune ridges. 0 = none.
+@export var dune_amplitude := 0.0
+## Meters between dune crests
+@export_range(10.0, 1000.0, 1.0, "or_greater") var dune_scale := 80.0
+## Direction the crests run (degrees)
+@export_range(0.0, 180.0, 1.0) var dune_angle := 35.0
+@export_subgroup("Pools")
+## Depth (m) of hollows that fill with water where the land is low (marsh pools, meres). 0 = none.
+@export var pool_depth := 0.0
+@export_range(10.0, 2000.0, 1.0, "or_greater") var pool_scale := 90.0
+## How much of the land is pools (0..1)
+@export_range(0.0, 1.0, 0.01) var pool_coverage := 0.3
+@export_subgroup("Crags")
+## Height (m) of rock outcrops, tors and spires standing up out of the land. 0 = none.
+@export var crag_amplitude := 0.0
+## Meters between outcrops
+@export_range(20.0, 3000.0, 1.0, "or_greater") var crag_scale := 140.0
+## How fat each outcrop is (share of the space between them)
+@export_range(0.05, 0.9, 0.01) var crag_size := 0.3
+@export_subgroup("Cones")
+## Height (m) of volcanic cones (or any steep hills with a hollow top). 0 = none.
+@export var cone_amplitude := 0.0
+## Meters between cones
+@export_range(100.0, 10000.0, 1.0, "or_greater") var cone_scale := 1100.0
+## How deep the crater at the top is (share of the cone's height)
+@export_range(0.0, 1.0, 0.01) var crater_depth := 0.3
 @export_subgroup("Detail")
 ## Small bumps so the ground doesn't look polished (meters)
 @export var detail_amplitude := 0.4
@@ -58,6 +103,13 @@ enum TreeStyle { BROADLEAF, PINE, DEAD, CACTUS }
 @export var peak_height := 100000.0
 ## Meters over which the peak color fades in
 @export_range(1.0, 500.0, 1.0, "or_greater") var peak_blend := 25.0
+## Higher ground (heather on hilltops, bare stone on high plateaus) fades to this color, from
+## high_start to high_full meters above the biome's base height. high_full 0 = off.
+@export var high_color := Color(0.45, 0.42, 0.36)
+@export var high_start := 0.0
+@export var high_full := 0.0
+## The ground along the water: beaches, mud banks, shingle
+@export var shore_color := Color(0.6, 0.55, 0.42)
 
 @export_group("Trees")
 ## The kind of tree that grows here
@@ -65,6 +117,16 @@ enum TreeStyle { BROADLEAF, PINE, DEAD, CACTUS }
 ## Trees per hectare (100 x 100 m). 0 = none, 15 = scattered, 150 = forest.
 @export_range(0.0, 400.0, 1.0) var tree_density := 0.0
 @export var tree_color := Color(0.22, 0.42, 0.18)
+
+@export_group("Flora")
+## The trees, shrubs, plants, logs and rocks that grow here, each its own layer with its own
+## density, clumping and liking for slopes, heights and water (FloraLayer). When this list has
+## anything in it, it replaces Tree Style / Tree Density above.
+@export var flora: Array[FloraLayer] = []
+## Herbs you can pick here: "ingredient_id" or "ingredient_id:weight". Empty = by the climate.
+@export var herbs := PackedStringArray()
+## Pickable herbs compared to the usual amount (1 = about four on a 64 m square of open ground)
+@export_range(0.0, 5.0, 0.05) var herb_density := 1.0
 
 @export_group("Ground cover and weather")
 ## temperate, cold, arid or wet. Decides the weather, the season's look and which herbs grow.

@@ -28,8 +28,8 @@ static func plan(map: WorldMap, grid: POIPlanner.SpaceGrid = null) -> Array[Plac
 	var city_region := {}  # biome key -> region index
 	for region in map.placements.size():
 		var key := map.placements[region].biome.get_key()
-		var area := map.get_placement_rect(region).get_area()
-		if not city_region.has(key) or area > map.get_placement_rect(city_region[key]).get_area():
+		var area := map.get_region_area(region)
+		if not city_region.has(key) or area > map.get_region_area(city_region[key]):
 			city_region[key] = region
 
 	for region in map.placements.size():
@@ -49,6 +49,8 @@ static func plan(map: WorldMap, grid: POIPlanner.SpaceGrid = null) -> Array[Plac
 				if nt != null:
 					wanted.append(nt)
 					wanted_named.append(entry)
+		elif settings.named_settlements and not NamedSettlements.for_biome(biome.get_key()).is_empty():
+			pass  # a smaller pocket of a land whose named towns stand in its main region: no others
 		else:
 			if settings.city_per_biome and city_region.get(biome.get_key(), -1) == region:
 				var city := _pick(templates, biome, true, rng)

@@ -27,7 +27,9 @@ func _ready() -> void:
 	_mesh = MeshInstance3D.new()
 	_mesh.name = "FarTerrain"
 	_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_mesh.material_override = NatureMeshes.terrain_material()  # the same ground as up close
+	# the same ground as up close, cut away where the real chunks are drawn (else its coarse
+	# triangles show through over valleys and rivers as a floating layer)
+	_mesh.material_override = NatureMeshes.far_terrain_material()
 	add_child(_mesh)
 
 
@@ -43,6 +45,8 @@ func _process(delta: float) -> void:
 	var dm := world.dungeons
 	visible = dm == null or not dm.is_inside()
 	var p := world.player.global_position
+	# the detailed chunks reach (view distance - 1) chunks all round the player's chunk
+	NatureMeshes.far_terrain_material().set_shader_parameter("far_cut", maxf(float(world.settings.view_distance_chunks) - 1.5, 1.0) * world.settings.chunk_size)
 	# A finished build: show it
 	if _task >= 0 and WorkerThreadPool.is_task_completed(_task):
 		WorkerThreadPool.wait_for_task_completion(_task)
@@ -78,15 +82,17 @@ func _build(map: WorldMap, c: Vector3, sea: float) -> void:
 	normals.resize(n * n)
 	var x0 := c.x - REACH
 	var z0 := c.z - REACH
+	var s := WorldMap.Sample.new()
 	for iz in n:
 		for ix in n:
 			var x := x0 + ix * STEP
 			var z := z0 + iz * STEP
-			var h := map.get_height(x, z)
+			map.sample(x, z, s)
+			var h := s.height
 			var i := iz * n + ix
-			verts[i] = Vector3(x, maxf(h, sea - 0.5) - SINK, z)
-			var b := map.get_biome_at(x, z)
-			colors[i] = WATER if h < sea else (b.ground_color if b != null else Color(0.35, 0.45, 0.25))
+			var wet := s.water > h  # the sea, a lake or a river: the water's surface, blue
+			verts[i] = Vector3(x, (maxf(s.water, h) if wet else h) - SINK, z)
+			colors[i] = WATER if wet else s.color.lerp(s.steep_color, 0.25)
 	# normals from the neighbours, for a little shading on hills
 	for iz in n:
 		for ix in n:

@@ -235,6 +235,8 @@ func zoom_at(at: Vector2, factor: float) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	if _manager != null and _manager.map != null:
+		_ensure_land()  # made in the background as soon as the world is there
 	if not _open:
 		return
 	var pan := Vector2.ZERO
@@ -307,6 +309,12 @@ func draw_map(canvas: Control) -> void:
 	canvas.draw_rect(Rect2(tl, br - tl), PARCHMENT.darkened(0.45), false, 3.0)
 	var px_scale := _scale()
 	var font := ThemeDB.fallback_font
+	# the land: each biome's own tint on the parchment, its borders, the sea and lakes, the rivers
+	_ensure_land()
+	if _land_tex != null:
+		canvas.draw_texture_rect(_land_tex, Rect2(world_to_screen(_land_rect.position), _land_rect.size * px_scale), false)
+	_draw_rivers(canvas, px_scale)
+	_draw_biome_names(canvas, font)
 	if _night_layer and ClanTerritory.can_see_night(get_tree()):
 		_draw_night_layer(canvas, font)
 	# roads
@@ -385,6 +393,141 @@ func draw_map(canvas: Control) -> void:
 		var tail_b := at - f * 6.0 - side * 6.0
 		canvas.draw_colored_polygon(PackedVector2Array([tip, tail_a, tail_b]), Color(1.0, 0.85, 0.2))
 		canvas.draw_polyline(PackedVector2Array([tip, tail_a, tail_b, tip]), Color.BLACK, 1.5)
+
+
+# ---------------------------------------------------------------- the land picture (Alpha 1.21)
+
+## Pixels across the land picture (made once per world on a worker thread)
+const LAND_PX := 640
+const SEA_COLOR := Color(0.34, 0.46, 0.5)
+const LAKE_COLOR := Color(0.38, 0.52, 0.56)
+const BORDER_COLOR := Color(0.25, 0.18, 0.1, 0.85)
+
+var _land_tex: ImageTexture
+var _land_rect := Rect2()
+var _land_task := -1
+var _land_group := -1
+var _land_h := 1
+var _land_own := PackedInt32Array()
+var _land_sea := PackedByteArray()
+var _land_img: Image
+var _land_src: WorldMap
+
+
+func _ensure_land() -> void:
+	var map := _manager.map
+	if _land_src != map:
+		_finish_land_tasks()
+		_land_src = map
+		_land_tex = null
+		_land_img = null
+		_land_rect = map.get_bounds()
+		_land_h = maxi(1, roundi(LAND_PX * _land_rect.size.y / _land_rect.size.x))
+		_land_own.resize(LAND_PX * _land_h)
+		_land_sea.resize(LAND_PX * _land_h)
+		# every row on its own worker thread, then one more task paints the picture
+		_land_group = WorkerThreadPool.add_group_task(_land_row.bind(map), _land_h, -1, false, "map land")
+	elif _land_group >= 0 and WorkerThreadPool.is_group_task_completed(_land_group):
+		WorkerThreadPool.wait_for_group_task_completion(_land_group)
+		_land_group = -1
+		_land_task = WorkerThreadPool.add_task(func() -> void: _land_img = _paint_land(map), false, "map land paint")
+	elif _land_task >= 0 and WorkerThreadPool.is_task_completed(_land_task):
+		WorkerThreadPool.wait_for_task_completion(_land_task)
+		_land_task = -1
+		if _land_img != null:
+			_land_tex = ImageTexture.create_from_image(_land_img)
+
+
+func _finish_land_tasks() -> void:
+	if _land_group >= 0:
+		WorkerThreadPool.wait_for_group_task_completion(_land_group)
+		_land_group = -1
+	if _land_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_land_task)
+		_land_task = -1
+
+
+func _exit_tree() -> void:
+	_finish_land_tasks()
+
+
+# Worker thread: which land (or sea, or lake) each pixel of row j is
+func _land_row(j: int, map: WorldMap) -> void:
+	var step := _land_rect.size.x / float(LAND_PX)
+	var z := _land_rect.position.y + (float(j) + 0.5) * step
+	for i in LAND_PX:
+		var x := _land_rect.position.x + (float(i) + 0.5) * step
+		var k := j * LAND_PX + i
+		if map.is_sea(x, z):
+			_land_sea[k] = 1
+			_land_own[k] = -1
+			continue
+		_land_own[k] = map.get_placement_index_at(x, z)
+		_land_sea[k] = 2 if map.rivers != null and map.rivers.in_lake(x, z) else 0
+
+
+# Worker thread: parchment tinted by each biome, a dark line where two biomes meet, the sea and
+# lakes in blue-grey, the shore a little darker
+func _paint_land(map: WorldMap) -> Image:
+	var px := LAND_PX
+	var h := _land_h
+	var own := _land_own
+	var sea := _land_sea
+	var img := Image.create(px, h, false, Image.FORMAT_RGBA8)
+	for j in h:
+		for i in px:
+			var k := j * px + i
+			var c := Color(0, 0, 0, 0)
+			if sea[k] == 1:
+				c = SEA_COLOR
+			elif own[k] >= 0:
+				c = PARCHMENT.lerp(map.placements[own[k]].biome.map_color, 0.28)
+				if (i > 0 and own[k - 1] != own[k] and own[k - 1] >= 0) or (j > 0 and own[k - px] != own[k] and own[k - px] >= 0):
+					c = c.lerp(BORDER_COLOR, BORDER_COLOR.a)
+				if sea[k] == 2:
+					c = LAKE_COLOR
+				if (i > 0 and sea[k - 1] == 1) or (j > 0 and sea[k - px] == 1) or (i < px - 1 and sea[k + 1] == 1) or (j < h - 1 and sea[k + px] == 1):
+					c = c.darkened(0.35)
+				c.a = 1.0
+			img.set_pixel(i, j, c)
+	return img
+
+
+func _draw_rivers(canvas: Control, px_scale: float) -> void:
+	var map := _manager.map
+	if map.rivers == null:
+		return
+	var view_rect := Rect2(screen_to_world(Vector2.ZERO), canvas.size / px_scale).grow(50.0)
+	canvas.draw_set_transform(canvas.size / 2.0 - _center * px_scale, 0.0, Vector2(px_scale, px_scale))
+	for r: Dictionary in map.rivers.polylines:
+		var pts: PackedVector3Array = r["points"]
+		var widths: PackedFloat32Array = r["widths"]
+		var line := PackedVector2Array()
+		var stride := 1 if _zoom >= 3.0 else 3
+		for k in range(0, pts.size(), stride):
+			line.append(Vector2(pts[k].x, pts[k].z))
+		line.append(Vector2(pts[pts.size() - 1].x, pts[pts.size() - 1].z))
+		if line.size() < 2 or not view_rect.has_point(line[0]) and not view_rect.has_point(line[line.size() - 1]) and not view_rect.intersects(Rect2(line[0], Vector2.ZERO).expand(line[line.size() - 1])):
+			continue
+		var w := clampf(widths[widths.size() - 1] * 2.0 * px_scale, 1.2, 4.0) / px_scale
+		canvas.draw_polyline(line, LAKE_COLOR.darkened(0.15), w)
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+# Each region's land name in its middle, in faded capitals (the biggest regions only when zoomed out)
+func _draw_biome_names(canvas: Control, font: Font) -> void:
+	var map := _manager.map
+	for i in map.placements.size():
+		var area := map.get_region_area(i)
+		if area <= 0.0 or (_zoom < 1.6 and area < 4.0e6):
+			continue
+		var at := world_to_screen(map.get_region_center(i))
+		if not Rect2(Vector2.ZERO, canvas.size).grow(100).has_point(at):
+			continue
+		var text := map.placements[i].biome.display_name.to_upper()
+		var size := 13 if area < 6.0e6 else 16
+		var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+		canvas.draw_string(font, at - Vector2(w * 0.5, 0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(0.25, 0.17, 0.08, 0.55))
 
 
 func _cache_roads() -> void:

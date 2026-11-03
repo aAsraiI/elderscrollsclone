@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_2n4nu"]
+
+[resource]
+script = ExtResource("1_2n4nu")
+id = &"ash_root"
+display_name = "Ash Root"
+description = "An alchemical ingredient, found in the ashlands. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 10
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist")
+ingredient_effects = PackedStringArray("resist_fire", "fortify_strength", "damage_health", "regenerate_magicka")

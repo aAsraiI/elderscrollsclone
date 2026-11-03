@@ -33,3 +33,8 @@ func get_level_range() -> Vector2i:
 	var lo := level_min if level_min > 0 else biome.level_min
 	var hi := level_max if level_max > 0 else biome.level_max
 	return Vector2i(lo, maxi(hi, lo))
+
+
+## (Regions layouts only.) Meters this region pushes into its neighbours (negative = gives way to
+## them). Use it to make one region bigger than its seed points alone would.
+@export var reach := 0.0

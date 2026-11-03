@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_tiflc"]
+
+[resource]
+script = ExtResource("1_tiflc")
+id = &"cattail_root"
+display_name = "Cattail Root"
+description = "An alchemical ingredient, found at the edge of still water. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 5
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist")
+ingredient_effects = PackedStringArray("restore_stamina", "cure_disease", "feather", "resist_frost")

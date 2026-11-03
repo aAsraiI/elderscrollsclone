@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_guvh8"]
+
+[resource]
+script = ExtResource("1_guvh8")
+id = &"spore_pod"
+display_name = "Spore Pod"
+description = "An alchemical ingredient, found in swamps and dead lands. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 9
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist")
+ingredient_effects = PackedStringArray("paralyze", "night_eye", "poison_damage", "detect_life")

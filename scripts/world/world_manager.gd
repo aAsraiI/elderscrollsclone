@@ -349,15 +349,18 @@ func _plan_pois() -> void:
 		TownLayout.compact = true  # a new game (a loaded one was set by SaveSession.begin_load)
 	if TownLayout.compact:
 		WorldState.set_record("town_layout", {"v": 2})
+	WorldPlan.water(map)  # rivers and lakes first: towns, roads and places keep out of them
 	towns = SettlementPlanner.plan(map)
 	map.set_pads(towns)
 	SettlementPlanner.lay_out(map, towns)
+	map.set_foundations(WorldPlan.foundations(towns))  # the ground meets every building
 	var t1 := Time.get_ticks_msec()
 	map.set_roads(RoadPlanner.plan(map, towns))
 	var t2 := Time.get_ticks_msec()
 	pois = towns.duplicate()
 	pois.append_array(POIPlanner.plan(map, towns))
 	map.set_pads(pois)
+	WorldPlan.bridges(map, pois)  # one wherever a road crosses running water
 	if not towns.is_empty():
 		print("World: %d towns (%d ms), %d roads (%d ms)" % [towns.size(), t1 - t0, map.roads.get_roads().size(), t2 - t1])
 	_poi_by_id.clear()
@@ -577,12 +580,11 @@ func _make_water() -> void:
 	var reach := settings.view_distance_chunks * settings.chunk_size * 2.4
 	plane.size = Vector2(reach, reach)
 	_water.mesh = plane
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.16, 0.36, 0.52, 0.78)
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.roughness = 0.08
-	mat.metallic = 0.2
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	# the same water as rivers and lakes, deeper and bluer
+	var mat := TerrainChunk.water_material().duplicate() as ShaderMaterial
+	mat.set_shader_parameter("depth_range", 14.0)
+	mat.set_shader_parameter("shallow", Color(0.2, 0.4, 0.42))
+	mat.set_shader_parameter("deep", Color(0.04, 0.12, 0.22))
 	_water.material_override = mat
 	_water.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_water)
@@ -762,7 +764,7 @@ func _add_chunk(data: Dictionary) -> void:
 	chunk.collision_mask = 0
 	chunk.position = Vector3(c.x * settings.chunk_size, 0.0, c.y * settings.chunk_size)
 	add_child(chunk)
-	chunk.apply(data, _material)
+	chunk.apply(data, _material, map)
 	_chunks[c] = chunk
 	chunk.set_cover(_cover_wanted(c))
 	chunk_loaded.emit(c)

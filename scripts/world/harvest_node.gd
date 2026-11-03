@@ -33,11 +33,86 @@ var key := ""
 var _visual: Node3D
 
 
+## Herbs added in Alpha 1.21: colour of the plain look, the models that show them (the first that
+## exists; Morrowind's plants need Settings > Models > Import building pieces) and whether they
+## grow at the water's edge
+const HERB_INFO := {
+	"heather": [Color(0.62, 0.38, 0.6), ["kit/plants/other/flora_heather_01"], false],
+	"bog_bean": [Color(0.8, 0.75, 0.55), ["kit/plants/bitter_coast/flora_bc_podplant_01", "kit/plants/bitter_coast/flora_bc_podplant_02"], true],
+	"shelf_fungus": [Color(0.72, 0.55, 0.32), ["kit/plants/bitter_coast/flora_bc_shelffungus_01", "kit/plants/other/flora_t_shelffungus_01"], false],
+	"spore_pod": [Color(0.55, 0.6, 0.3), ["kit/plants/other/flora_muckpod_01", "kit/plants/other/flora_t_podbud_01"], false],
+	"cattail_root": [Color(0.42, 0.28, 0.16), [], true],
+	"cloudberries": [Color(0.95, 0.62, 0.25), ["kit/plants/solstheim/flora_bm_shrub_02"], false],
+	"wolfsbane": [Color(0.45, 0.35, 0.8), [], false],
+	"belladonna": [Color(0.25, 0.12, 0.3), [], false],
+	"aloe_leaf": [Color(0.45, 0.62, 0.42), [], false],
+	"sagebrush": [Color(0.62, 0.66, 0.55), ["kit/plants/other/flora_roobrush_01"], false],
+	"ash_root": [Color(0.5, 0.32, 0.25), ["kit/plants/other/flora_ash_grass_r_01"], false],
+	"ember_fern": [Color(0.85, 0.35, 0.15), ["kit/plants/other/flora_trama_shrub_02", "kit/plants/other/flora_trama_shrub_05"], false],
+	"thornroot": [Color(0.4, 0.3, 0.2), ["kit/plants/other/flora_rm_scathecraw_01", "kit/plants/other/flora_rm_scathecraw_02"], false],
+	"sea_kelp": [Color(0.3, 0.4, 0.2), ["kit/plants/grass/flora_kelp_01", "kit/plants/grass/flora_kelp_02"], true],
+	"saltgrass": [Color(0.7, 0.72, 0.5), ["kit/plants/bitter_coast/flora_bc_grass_01"], false],
+	"red_poppy": [Color(0.9, 0.15, 0.12), [], false],
+	"yarrow": [Color(0.95, 0.93, 0.85), [], false],
+	"cornflower": [Color(0.3, 0.45, 0.95), [], false],
+	"fly_agaric": [Color(0.85, 0.15, 0.1), ["kit/plants/mushrooms/flora_bc_mushroom_01", "kit/plants/mushrooms/flora_bc_mushroom_03"], false],
+	"fiddlehead": [Color(0.4, 0.6, 0.25), ["kit/plants/bitter_coast/flora_bc_fern_01", "kit/plants/bitter_coast/flora_bc_fern_03"], false],
+	"bramble_berries": [Color(0.3, 0.1, 0.3), ["kit/plants/other/flora_comberry_01"], false],
+	"water_mint": [Color(0.5, 0.75, 0.55), [], true],
+	"grave_moss": [Color(0.32, 0.36, 0.25), ["kit/plants/bitter_coast/flora_bc_moss_03", "kit/plants/bitter_coast/flora_bc_moss_07"], false],
+	"ice_lichen": [Color(0.7, 0.85, 0.9), [], false],
+	"strangleweed": [Color(0.35, 0.45, 0.2), ["kit/plants/other/flora_chokeweed_01"], false],
+	"bulbroot": [Color(0.75, 0.6, 0.4), ["kit/plants/other/flora_corkbulb_01"], false],
+	"mire_sponge": [Color(0.6, 0.5, 0.3), ["kit/plants/other/flora_muckspunge_01", "kit/plants/other/flora_muckspunge_03"], true],
+	"sand_lily": [Color(0.98, 0.85, 0.75), [], false],
+}
+## Older herbs that grow by the water too
+const WATER_HERBS := ["swamp_lily"]
+
+
+## A herb for this spot of a biome: by the biome's Herbs list (weights after ':'), only water herbs
+## at a wet spot and only dry-land herbs at a dry one; else one for the land's climate
+static func pick_herb(biome: BiomeData, pick: int, wet: bool) -> String:
+	var ids: Array[String] = []
+	var weights: Array[float] = []
+	var total := 0.0
+	for entry in biome.herbs:
+		var parts := entry.split(":")
+		var id := parts[0].strip_edges()
+		if id == "" or is_water_herb(id) != wet:
+			continue
+		var w := float(parts[1]) if parts.size() > 1 else 1.0
+		ids.append(id)
+		weights.append(w)
+		total += w
+	if ids.is_empty():
+		if wet or not biome.herbs.is_empty():
+			return ""  # no water herbs here (or the list has no dry-land ones)
+		var list: Array = HERBS.get(biome.get_climate(), HERBS["temperate"])
+		return list[pick % list.size()]
+	var roll := float(pick % 10000) / 10000.0 * total
+	for i in ids.size():
+		roll -= weights[i]
+		if roll <= 0.0:
+			return ids[i]
+	return ids[ids.size() - 1]
+
+
+static func is_water_herb(id: String) -> bool:
+	if HERB_INFO.has(id):
+		return bool(HERB_INFO[id][2])
+	return WATER_HERBS.has(id)
+
+
 static func make_herb(chunk: Node3D, local: Vector3, world_pos: Vector3, climate: String, pick: int) -> HarvestNode:
 	var list: Array = HERBS.get(climate, HERBS["temperate"])
+	return make_herb_id(chunk, local, world_pos, list[pick % list.size()], pick)
+
+
+static func make_herb_id(chunk: Node3D, local: Vector3, world_pos: Vector3, id: String, _pick: int) -> HarvestNode:
 	var n := HarvestNode.new()
 	n.kind = "herb"
-	n.item_id = list[pick % list.size()]
+	n.item_id = id
 	n.key = "harvest/%d_%d" % [roundi(world_pos.x), roundi(world_pos.z)]
 	n.position = local
 	chunk.add_child(n)
@@ -131,7 +206,7 @@ static func _herb_mesh(id: String) -> ArrayMesh:
 		blooms.append_from(bloom, 0, Transform3D(Basis.IDENTITY, Vector3(cos(a) * 0.16, 0.36, sin(a) * 0.16)))
 	var mesh := stems.commit()
 	blooms.commit(mesh)
-	var col: Color = HERB_COLORS.get(id, Color(0.8, 0.8, 0.3))
+	var col: Color = HERB_COLORS.get(id, HERB_INFO[id][0] if HERB_INFO.has(id) else Color(0.8, 0.8, 0.3))
 	mesh.surface_set_material(0, _material(Color(0.25, 0.45, 0.18)))
 	mesh.surface_set_material(1, _material(col, id == "glowcap"))
 	_herb_meshes[id] = mesh
@@ -142,7 +217,12 @@ func _build_visual() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
 	if kind == "herb":
-		_add_part(_herb_mesh(item_id), null, Transform3D.IDENTITY)
+		var model := ModelLibrary.first(HERB_INFO[item_id][1]) if HERB_INFO.has(item_id) else ""
+		var mesh: Mesh = ModelLibrary.merged_mesh(model, 0.0, 0.03) if model != "" else null
+		if mesh != null:
+			_add_part(mesh, null, Transform3D(Basis(Vector3.UP, float(key.hash() % 628) / 100.0), Vector3.ZERO))
+		else:
+			_add_part(_herb_mesh(item_id), null, Transform3D.IDENTITY)
 	else:
 		# Child 0 is the rock, child 1 the ore veins (hidden while the node is mined out)
 		_add_part(NatureMeshes.rock_mesh(1), _material(Color(0.35, 0.33, 0.32)),

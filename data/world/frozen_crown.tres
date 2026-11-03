@@ -5,6 +5,7 @@
 [ext_resource type="Resource" path="res://data/encounters/snow_beasts.tres" id="3_tvq7f"]
 [ext_resource type="Resource" path="res://data/encounters/snow_trapper.tres" id="4_rbkkf"]
 [ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="5_3q7vo"]
+[ext_resource type="Script" path="res://scripts/world/flora_layer.gd" id="5_u51gj"]
 [ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="6_xaft8"]
 [ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="7_dao40"]
 [ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="8_a6c0m"]
@@ -30,6 +31,53 @@
 [ext_resource type="Resource" path="res://data/world/Sites/lost_pack.tres" id="27_pstdl"]
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="28_w1wc2"]
 [ext_resource type="Resource" path="res://data/world/Sites/ore_outcrop.tres" id="29_25nt5"]
+
+[sub_resource type="Resource" id="Resource_u51gj"]
+script = ExtResource("5_u51gj")
+name = "lone pines"
+models = PackedStringArray("kit/plants/trees/flora_tree_bm_snow_04", "kit/plants/trees/flora_tree_bm_snow_07", "tree/pine")
+shape = 1
+color = Color(0.75, 0.8, 0.82, 1)
+density = 5.0
+clump_scale = 400.0
+clumping = 0.8
+max_height = 120.0
+scale_min = 0.7
+scale_max = 1.0
+sink = 0.2
+trunk_radius = 0.25
+
+[sub_resource type="Resource" id="Resource_nj4g7"]
+script = ExtResource("5_u51gj")
+name = "ice chunks"
+models = PackedStringArray("kit/rocks/solstheim/terrain_bm_icechunk_01", "kit/rocks/solstheim/terrain_bm_icechunk_02", "kit/rocks/solstheim/terrain_bm_icechunk_03")
+shape = 10
+size = 3
+color = Color(0.75, 0.85, 0.95, 1)
+density = 5.0
+clump_scale = 160.0
+clumping = 0.7
+height = 0.3
+scale_max = 1.4
+sink = 0.0
+lean = 0.0
+follow_ground = true
+solid = false
+
+[sub_resource type="Resource" id="Resource_pstdl"]
+script = ExtResource("5_u51gj")
+name = "frost boulders"
+models = PackedStringArray("kit/rocks/other/terrain_rock_bm_05", "kit/rocks/other/terrain_rock_bm_06")
+shape = 10
+size = 3
+color = Color(0.62, 0.64, 0.7, 1)
+density = 2.5
+height = 2.0
+scale_min = 0.4
+scale_max = 0.8
+sink = 0.4
+lean = 10.0
+follow_ground = true
 
 [sub_resource type="Resource" id="Resource_urbge"]
 script = ExtResource("5_3q7vo")
@@ -224,24 +272,34 @@ script = ExtResource("10_fyq6l")
 id = &"frozen_crown"
 display_name = "Frozen Crown"
 map_color = Color(0.94, 0.97, 1, 1)
-blend_distance = 450.0
-base_height = 80.0
-hills_amplitude = 18.0
-hills_scale = 280.0
-mountain_amplitude = 200.0
-mountain_scale = 800.0
-mountain_coverage = 0.75
+blend_distance = 460.0
+base_height = 85.0
+hills_amplitude = 20.0
+hills_scale = 300.0
+mountain_amplitude = 240.0
+mountain_scale = 1000.0
+mountain_coverage = 0.8
+ridge_sharpness = 3.0
+swirl = 420.0
+swirl_scale = 1300.0
+valley_depth = 40.0
+valley_scale = 1500.0
+valley_width = 0.11
 ground_color = Color(0.9, 0.93, 0.98, 1)
 ground_color_alt = Color(0.82, 0.88, 0.95, 1)
 steep_color = Color(0.36, 0.36, 0.4, 1)
 steep_slope_start = 32.0
 steep_slope_full = 52.0
 peak_color = Color(0.97, 0.98, 1, 1)
-peak_height = 130.0
+peak_height = 120.0
 peak_blend = 40.0
+shore_color = Color(0.7, 0.72, 0.76, 1)
 tree_style = 1
 tree_density = 6.0
 tree_color = Color(0.16, 0.3, 0.2, 1)
+flora = Array[ExtResource("5_u51gj")]([SubResource("Resource_u51gj"), SubResource("Resource_nj4g7"), SubResource("Resource_pstdl")])
+herbs = PackedStringArray("ice_lichen:4", "frost_mirriam:3", "snowberries:2", "wolfsbane:1")
+herb_density = 0.5
 poi_rules = Array[ExtResource("5_3q7vo")]([SubResource("Resource_urbge"), SubResource("Resource_1c3y7"), SubResource("Resource_u56h8"), SubResource("Resource_qukog"), SubResource("Resource_tvq7f"), SubResource("Resource_25nt5"), SubResource("Resource_voabf"), SubResource("Resource_ko3oy"), SubResource("Resource_nc78u"), SubResource("Resource_qe2m1"), SubResource("Resource_ltuas"), SubResource("Resource_hqthi"), SubResource("Resource_skaoa"), SubResource("Resource_iv5gj"), SubResource("Resource_bjc0x"), SubResource("Resource_l7ess"), SubResource("Resource_dxpc6"), SubResource("Resource_85e7y"), SubResource("Resource_a34vo"), SubResource("Resource_g0u0y"), SubResource("Resource_3kedd"), SubResource("Resource_tk5bu"), SubResource("Resource_nedjx"), SubResource("Resource_647n4")])
 level_min = 80
 level_max = 100

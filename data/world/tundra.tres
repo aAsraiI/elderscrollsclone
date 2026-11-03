@@ -8,6 +8,7 @@
 [ext_resource type="Resource" path="res://data/encounters/night_werewolf.tres" id="5_smixw"]
 [ext_resource type="Resource" path="res://data/encounters/night_vampire.tres" id="6_k6xp8"]
 [ext_resource type="Resource" path="res://data/world/POIs/cave_entrance.tres" id="6_sx8yx"]
+[ext_resource type="Script" path="res://scripts/world/flora_layer.gd" id="7_8nihv"]
 [ext_resource type="Resource" path="res://data/world/POIs/watchtower.tres" id="7_ah8mw"]
 [ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="8_7owl3"]
 [ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="9_1jv2r"]
@@ -39,6 +40,77 @@
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="36_wonvk"]
 [ext_resource type="Resource" path="res://data/world/Sites/ore_outcrop.tres" id="37_1uia6"]
 [ext_resource type="Resource" path="res://data/world/Sites/wayside_inn.tres" id="38_rohjr"]
+
+[sub_resource type="Resource" id="Resource_8nihv"]
+script = ExtResource("7_8nihv")
+name = "dwarf pines"
+models = PackedStringArray("kit/plants/trees/flora_tree_bm_snow_04", "kit/plants/trees/flora_tree_bm_snow_06", "kit/plants/trees/flora_tree_bm_07", "tree/pine")
+shape = 1
+color = Color(0.3, 0.38, 0.3, 1)
+density = 6.0
+clump_scale = 400.0
+clumping = 0.8
+height = 4.0
+scale_min = 0.45
+scale_max = 0.7
+trunk_radius = 0.2
+
+[sub_resource type="Resource" id="Resource_8rina"]
+script = ExtResource("7_8nihv")
+name = "tussock grass"
+models = PackedStringArray("kit/plants/solstheim/flora_bm_grass_02", "kit/plants/solstheim/flora_bm_grass_04", "kit/plants/solstheim/flora_bm_grass_06")
+shape = 6
+size = 2
+color = Color(0.55, 0.55, 0.42, 1)
+density = 320.0
+clump_scale = 90.0
+clumping = 0.4
+height = 0.5
+scale_min = 0.6
+scale_max = 1.0
+solid = false
+
+[sub_resource type="Resource" id="Resource_v5a3t"]
+script = ExtResource("7_8nihv")
+name = "heather"
+models = PackedStringArray("kit/plants/other/flora_heather_01")
+shape = 11
+size = 2
+color = Color(0.55, 0.4, 0.55, 1)
+density = 120.0
+clump_scale = 100.0
+clumping = 0.7
+height = 0.4
+scale_min = 0.9
+solid = false
+
+[sub_resource type="Resource" id="Resource_wonvk"]
+script = ExtResource("7_8nihv")
+name = "crowberry"
+models = PackedStringArray("kit/plants/solstheim/flora_bm_shrub_02")
+shape = 4
+size = 1
+color = Color(0.3, 0.32, 0.22, 1)
+density = 18.0
+height = 0.8
+scale_min = 0.4
+scale_max = 0.7
+solid = false
+
+[sub_resource type="Resource" id="Resource_1uia6"]
+script = ExtResource("7_8nihv")
+name = "erratics"
+models = PackedStringArray("kit/rocks/other/terrain_boulder_01", "kit/rocks/other/terrain_boulder_04", "kit/rocks/other/terrain_rock_bm_05")
+shape = 10
+size = 3
+color = Color(0.5, 0.52, 0.5, 1)
+density = 1.2
+height = 2.0
+scale_min = 0.5
+scale_max = 1.0
+sink = 0.4
+lean = 10.0
+follow_ground = true
 
 [sub_resource type="Resource" id="Resource_cqhew"]
 script = ExtResource("5_k6xp8")
@@ -290,12 +362,18 @@ id = &"tundra"
 display_name = "Tundra"
 map_color = Color(0.74, 0.78, 0.74, 1)
 blend_distance = 380.0
-base_height = 30.0
-hills_amplitude = 7.0
-hills_scale = 280.0
+base_height = 26.0
+hills_scale = 380.0
 mountain_amplitude = 15.0
 mountain_scale = 800.0
 mountain_coverage = 0.65
+swirl = 260.0
+swirl_scale = 900.0
+pool_depth = 4.0
+pool_scale = 150.0
+pool_coverage = 0.22
+crag_amplitude = 4.0
+crag_size = 0.15
 ground_color = Color(0.76, 0.79, 0.76, 1)
 ground_color_alt = Color(0.6, 0.65, 0.56, 1)
 steep_color = Color(0.36, 0.36, 0.4, 1)
@@ -303,9 +381,13 @@ steep_slope_start = 32.0
 steep_slope_full = 52.0
 peak_color = Color(0.97, 0.98, 1, 1)
 peak_blend = 40.0
+shore_color = Color(0.55, 0.56, 0.52, 1)
 tree_style = 1
 tree_density = 4.0
 tree_color = Color(0.16, 0.3, 0.2, 1)
+flora = Array[ExtResource("7_8nihv")]([SubResource("Resource_8nihv"), SubResource("Resource_8rina"), SubResource("Resource_v5a3t"), SubResource("Resource_wonvk"), SubResource("Resource_1uia6")])
+herbs = PackedStringArray("cloudberries:3", "heather:2", "ice_lichen:2", "snowberries:2", "juniper_berries:1")
+herb_density = 0.8
 poi_rules = Array[ExtResource("5_k6xp8")]([SubResource("Resource_cqhew"), SubResource("Resource_fubvx"), SubResource("Resource_36kvh"), SubResource("Resource_k346d"), SubResource("Resource_167v0"), SubResource("Resource_smixw"), SubResource("Resource_j3mf8"), SubResource("Resource_dsvr8"), SubResource("Resource_av0tq"), SubResource("Resource_ita36"), SubResource("Resource_5o3e4"), SubResource("Resource_kbavj"), SubResource("Resource_w6pbf"), SubResource("Resource_xh3va"), SubResource("Resource_gamyu"), SubResource("Resource_qk3sa"), SubResource("Resource_cb161"), SubResource("Resource_486r1"), SubResource("Resource_jj40q"), SubResource("Resource_qyatq"), SubResource("Resource_3262a"), SubResource("Resource_d2qmm"), SubResource("Resource_y066h"), SubResource("Resource_gj75x"), SubResource("Resource_1a0h7"), SubResource("Resource_nsmms"), SubResource("Resource_3dcqh"), SubResource("Resource_otho8"), SubResource("Resource_i6nsk"), SubResource("Resource_y2alh"), SubResource("Resource_mi5p0")])
 level_min = 57
 level_max = 80

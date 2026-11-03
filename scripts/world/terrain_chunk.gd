@@ -1,6 +1,7 @@
 class_name TerrainChunk
 extends StaticBody3D
-## One square piece of terrain: a smooth mesh plus a matching collision shape.
+## One square piece of terrain: a smooth mesh plus a matching collision shape, its plants (Flora),
+## its grass, rocks and herbs (GroundCover), and the surface of any river, stream or lake on it.
 ## Made by WorldManager. build_data() does the heavy math and is safe on a worker thread;
 ## apply() creates the actual mesh and collider and must run on the main thread.
 ##
@@ -9,27 +10,46 @@ extends StaticBody3D
 
 var coord := Vector2i.ZERO
 var _details := {}  # ground cover data, kept so the cover can be rebuilt when the player comes back
+var _flora: Array = []
+var _map: WorldMap
 var _cover_on := false
+## Shape owners added with the cover (logs and rocks you bump into), removed with it
+var cover_owners := PackedInt32Array()
+
+static var _water_mat: ShaderMaterial
 
 
-## Heavy part. Returns {"coord", "arrays", "faces"}. Thread-safe.
+## Heavy part. Returns {"coord", "arrays", "faces", "water", "flora", "details"}. Thread-safe.
 ## detail: ground cover amount (GameSettings "grass": 0 off .. 3 high)
 static func build_data(map: WorldMap, chunk_coord: Vector2i, chunk_size: float, quads: int, detail: int = 2) -> Dictionary:
 	var spacing := chunk_size / float(quads)
 	var vps := quads + 1          # vertices per side
 	var g := quads + 3            # sampled grid per side (one extra ring all around)
+	var count := vps * vps
 	var heights := PackedFloat32Array()
 	heights.resize(g * g)
 	var base_colors := PackedColorArray()
-	base_colors.resize(vps * vps)
+	base_colors.resize(count)
 	var steep_colors := PackedColorArray()
-	steep_colors.resize(vps * vps)
+	steep_colors.resize(count)
 	var steep_start := PackedFloat32Array()
-	steep_start.resize(vps * vps)
+	steep_start.resize(count)
 	var steep_full := PackedFloat32Array()
-	steep_full.resize(vps * vps)
+	steep_full.resize(count)
 	var biomes := PackedInt32Array()
-	biomes.resize(vps * vps)
+	biomes.resize(count)
+	var biomes2 := PackedInt32Array()
+	biomes2.resize(count)
+	var bweight := PackedFloat32Array()
+	bweight.resize(count)
+	var water := PackedFloat32Array()
+	water.resize(count)
+	var near := PackedFloat32Array()
+	near.resize(count)
+	var free := PackedByteArray()
+	free.resize(count)
+	var roadd := PackedFloat32Array()
+	roadd.resize(count)
 
 	var origin_x := chunk_coord.x * chunk_size
 	var origin_z := chunk_coord.y * chunk_size
@@ -46,14 +66,21 @@ static func build_data(map: WorldMap, chunk_coord: Vector2i, chunk_size: float, 
 				steep_colors[k] = s.steep_color
 				steep_start[k] = s.steep_start
 				steep_full[k] = s.steep_full
-				biomes[k] = s.biome_index if s.edge <= 0.05 else -1
+				var inside := s.edge <= 0.05
+				biomes[k] = s.biome_index if inside else -1
+				biomes2[k] = s.biome2 if inside else -1
+				bweight[k] = s.biome_w
+				water[k] = s.water
+				near[k] = maxf(s.near_water, 1.0 - smoothstep(0.3, 3.5, s.height - s.water)) if s.water > -INF else s.near_water
+				free[k] = 0 if map.is_on_pad(x, z) else 1
+				roadd[k] = map.roads.distance_to(x, z, 12.0) if map.roads != null else INF
 
 	var verts := PackedVector3Array()
-	verts.resize(vps * vps)
+	verts.resize(count)
 	var normals := PackedVector3Array()
-	normals.resize(vps * vps)
+	normals.resize(count)
 	var colors := PackedColorArray()
-	colors.resize(vps * vps)
+	colors.resize(count)
 	for j in vps:
 		for i in vps:
 			var gi := i + 1
@@ -102,54 +129,63 @@ static func build_data(map: WorldMap, chunk_coord: Vector2i, chunk_size: float, 
 	arrays[Mesh.ARRAY_NORMAL] = normals
 	arrays[Mesh.ARRAY_COLOR] = colors
 	arrays[Mesh.ARRAY_INDEX] = indices
-	return {"coord": chunk_coord, "arrays": arrays, "faces": faces, "trees": _scatter_trees(map, chunk_coord, chunk_size),
-		"details": GroundCover.scatter(map, chunk_coord, chunk_size, quads, verts, normals, colors, biomes, detail)}
+	var grid := {"verts": verts, "normals": normals, "colors": colors, "biomes": biomes, "biomes2": biomes2, "bweight": bweight,
+		"water": water, "near": near, "free": free, "roadd": roadd}
+	return {"coord": chunk_coord, "arrays": arrays, "faces": faces, "water": _water_arrays(map, verts, water, quads, spacing),
+		"flora": Flora.scatter(map, chunk_coord, chunk_size, quads, grid),
+		"details": GroundCover.scatter(map, chunk_coord, chunk_size, quads, grid, detail)}
 
 
-## Where trees grow in this chunk: style -> {"pos": PackedVector3Array, "scale": PackedFloat32Array,
-## "color": Color}. Never on roads, on leveled ground (towns, camps), in water or on steep slopes.
-## Thread-safe; the same chunk always gets the same trees.
-static func _scatter_trees(map: WorldMap, chunk_coord: Vector2i, chunk_size: float) -> Dictionary:
-	var out := {}
-	if map.placements.is_empty():
-		return out
-	var rng := RandomNumberGenerator.new()
-	rng.seed = ("%d|trees|%d,%d" % [map.world_seed, chunk_coord.x, chunk_coord.y]).hash()
-	var s := WorldMap.Sample.new()
-	var origin := Vector2(chunk_coord.x * chunk_size, chunk_coord.y * chunk_size)
-	# Try a fixed grid of jittered spots; each biome's density decides how many grow
-	var step := 5.0
-	var cells := int(chunk_size / step)
-	for j in cells:
-		for i in cells:
-			var x := origin.x + (float(i) + rng.randf()) * step
-			var z := origin.y + (float(j) + rng.randf()) * step
-			var roll := rng.randf()
-			map.sample(x, z, s)
-			if s.biome_index < 0 or s.edge > 0.05:
+# The surface of rivers, streams and lakes on this chunk (the sea is one big sheet of its own): a
+# square of water wherever the water stands above the ground at any of its corners, at the water's
+# own height at each corner, so a river's surface follows it downhill
+static func _water_arrays(map: WorldMap, verts: PackedVector3Array, water: PackedFloat32Array, quads: int, spacing: float) -> Array:
+	var vps := quads + 1
+	var sea := map.settings.sea_level if map.settings.water_enabled else -INF
+	var pts := PackedVector3Array()
+	var uvs := PackedVector2Array()
+	for j in quads:
+		for i in quads:
+			var ks := [j * vps + i, j * vps + i + 1, (j + 1) * vps + i, (j + 1) * vps + i + 1]
+			var any := false
+			var top := -INF
+			for k: int in ks:
+				top = maxf(top, water[k])
+				if water[k] > verts[k].y + 0.02 and water[k] > sea + 0.05:
+					any = true
+			if not any:
 				continue
-			var biome := map.placements[s.biome_index].biome
-			var chance := biome.tree_density * step * step / 10000.0
-			if roll >= chance:
-				continue
-			if map.is_under_water(s.height - 0.3) or map.is_on_pad(x, z):
-				continue
-			if map.roads != null and map.roads.distance_to(x, z, 4.0) < 4.0:
-				continue
-			var hx := map.get_height(x + 1.5, z)
-			var hz := map.get_height(x, z + 1.5)
-			if absf(hx - s.height) > 1.0 or absf(hz - s.height) > 1.0:
-				continue  # too steep (over ~34 degrees)
-			var key := int(biome.tree_style)
-			if not out.has(key):
-				out[key] = {"pos": PackedVector3Array(), "scale": PackedFloat32Array(), "color": biome.tree_color}
-			out[key]["pos"].append(Vector3(x - origin.x, s.height, z - origin.y))
-			out[key]["scale"].append(rng.randf_range(0.75, 1.35))
-	return out
+			var corner: Array[Vector3] = []
+			for k: int in ks:
+				var w := water[k] if water[k] > -INF else top
+				corner.append(Vector3(verts[k].x, w, verts[k].z))
+			for idx in [0, 1, 2, 1, 3, 2]:
+				pts.append(corner[idx])
+				uvs.append(Vector2(corner[idx].x, corner[idx].z))
+	if pts.is_empty():
+		return []
+	var normals := PackedVector3Array()
+	normals.resize(pts.size())
+	normals.fill(Vector3.UP)
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = pts
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	return arrays
+
+
+## The water of rivers and lakes (and the sea): see shaders/water.gdshader
+static func water_material() -> ShaderMaterial:
+	if _water_mat == null:
+		_water_mat = ShaderMaterial.new()
+		_water_mat.shader = load("res://shaders/water.gdshader") as Shader
+	return _water_mat
 
 
 ## Main-thread part: creates the mesh and the collision shape from build_data()'s result.
-func apply(data: Dictionary, material: Material) -> void:
+func apply(data: Dictionary, material: Material, map: WorldMap = null) -> void:
+	_map = map
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, data["arrays"])
 	mesh.surface_set_material(0, material)
@@ -165,137 +201,38 @@ func apply(data: Dictionary, material: Material) -> void:
 	collider.name = "Collision"
 	collider.shape = shape
 	add_child(collider)
-	_add_trees(data.get("trees", {}))
+	var water: Array = data.get("water", [])
+	if not water.is_empty():
+		var wm := ArrayMesh.new()
+		wm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, water)
+		var wmi := MeshInstance3D.new()
+		wmi.name = "Water"
+		wmi.mesh = wm
+		wmi.material_override = water_material()
+		wmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(wmi)
+	_flora = data.get("flora", [])
+	if map != null:
+		Flora.apply(self, map, _flora)
 	_details = data.get("details", {})
 	GroundCover.apply(self, _details)
 
 
-## Builds or frees this chunk's grass, flowers, rocks and bushes. WorldManager turns it on only
-## for chunks near the player (GroundCover.COVER_REACH), so far chunks carry no cover nodes.
+## Builds or frees this chunk's grass, flowers, rocks, shrubs and plants. WorldManager turns it on
+## only for chunks near the player (GroundCover.COVER_REACH), so far chunks carry no cover nodes.
 func set_cover(on: bool) -> void:
 	if on == _cover_on:
 		return
 	_cover_on = on
 	if on:
 		GroundCover.apply_cover(self, _details)
+		if _map != null:
+			Flora.apply_cover(self, _map, _flora)
 		return
 	for c in get_children():
 		if c.has_meta("cover"):
 			remove_child(c)
 			c.queue_free()
-
-
-# ---------------------------------------------------------------- trees
-
-static var _tree_meshes := {}  # style -> [trunk Mesh, crown Mesh, trunk height, trunk radius]
-static var _trunk_shapes := {}  # style -> CylinderShape3D
-
-
-static func _tree_parts(style: int) -> Array:
-	if _tree_meshes.has(style):
-		return _tree_meshes[style]
-	var trunk := CylinderMesh.new()
-	var crown: PrimitiveMesh
-	var trunk_h := 2.2
-	var radius := 0.22
-	match style:
-		BiomeData.TreeStyle.PINE:
-			trunk_h = 2.0
-			var cone := CylinderMesh.new()
-			cone.top_radius = 0.0
-			cone.bottom_radius = 1.8
-			cone.height = 6.5
-			crown = cone
-		BiomeData.TreeStyle.DEAD:
-			trunk_h = 4.5
-			radius = 0.18
-			var branches := BoxMesh.new()
-			branches.size = Vector3(2.4, 0.18, 0.18)
-			crown = branches
-		BiomeData.TreeStyle.CACTUS:
-			trunk_h = 2.6
-			radius = 0.3
-			var arms := BoxMesh.new()
-			arms.size = Vector3(1.6, 0.35, 0.35)
-			crown = arms
-		_:
-			var ball := SphereMesh.new()
-			ball.radius = 2.2
-			ball.height = 3.8
-			crown = ball
-	trunk.top_radius = radius * 0.8
-	trunk.bottom_radius = radius
-	trunk.height = trunk_h
-	_tree_meshes[style] = [trunk, crown, trunk_h, radius]
-	return _tree_meshes[style]
-
-
-## The ModelLibrary tree for a style ("tree/broadleaf", "tree/pine", "tree/dead", "tree/cactus"),
-## as one mesh as tall as the box tree it replaces; null when there is none
-static func _tree_model(style: int) -> ArrayMesh:
-	var key := "tree/" + String(BiomeData.TreeStyle.keys()[style]).to_lower()
-	if not ModelLibrary.has(key):
-		return null
-	var height: float = {BiomeData.TreeStyle.PINE: 7.8, BiomeData.TreeStyle.DEAD: 4.6, BiomeData.TreeStyle.CACTUS: 2.8}.get(style, 5.8)
-	return ModelLibrary.merged_mesh(key, height, 0.15)
-
-
-# Each kind of tree is drawn as two batches (trunks, crowns); trunks block you, crowns don't
-func _add_trees(trees: Dictionary) -> void:
-	for style: int in trees:
-		var group: Dictionary = trees[style]
-		var pos: PackedVector3Array = group["pos"]
-		var scales: PackedFloat32Array = group["scale"]
-		if pos.is_empty():
-			continue
-		var parts := _tree_parts(style)
-		var trunk_h: float = parts[2]
-		var model_mesh := _tree_model(style)
-		if model_mesh != null:
-			# A real tree model: one batch, its own materials, the same size the old tree was
-			var mm := MultiMesh.new()
-			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.mesh = model_mesh
-			mm.instance_count = pos.size()
-			for k in pos.size():
-				var rot := Basis(Vector3.UP, float(k) * 2.39996) * scales[k]
-				mm.set_instance_transform(k, Transform3D(rot, pos[k]))
-			var mmi := MultiMeshInstance3D.new()
-			mmi.name = "Trees%d" % style
-			mmi.multimesh = mm
-			mmi.visibility_range_end = 900.0
-			add_child(mmi)
-		var crown_color: Color = group["color"]
-		var trunk_color := Color(0.33, 0.24, 0.15) if style != BiomeData.TreeStyle.CACTUS else crown_color
-		var crown_y := trunk_h + (2.6 if style == BiomeData.TreeStyle.PINE else (1.6 if style == BiomeData.TreeStyle.BROADLEAF else 0.0))
-		if style == BiomeData.TreeStyle.DEAD:
-			crown_y = trunk_h * 0.75
-		elif style == BiomeData.TreeStyle.CACTUS:
-			crown_y = trunk_h * 0.55
-		for part in (0 if model_mesh != null else 2):
-			var mm := MultiMesh.new()
-			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.mesh = parts[part]
-			mm.instance_count = pos.size()
-			for k in pos.size():
-				var sc := scales[k]
-				var rot := Basis(Vector3.UP, float(k) * 2.39996) * sc
-				var y := pos[k].y + (trunk_h * 0.5 if part == 0 else crown_y) * sc
-				mm.set_instance_transform(k, Transform3D(rot, Vector3(pos[k].x, y, pos[k].z)))
-			var mmi := MultiMeshInstance3D.new()
-			mmi.name = "Trees%d_%d" % [style, part]
-			mmi.multimesh = mm
-			mmi.material_override = POIBuilder.get_material(trunk_color if part == 0 else crown_color)
-			mmi.visibility_range_end = 900.0
-			add_child(mmi)
-		# Trunks are solid: shapes added straight to this chunk's own body (no extra nodes)
-		if not _trunk_shapes.has(style):
-			var cyl := CylinderShape3D.new()
-			cyl.radius = float(parts[3]) * 1.2
-			cyl.height = trunk_h
-			_trunk_shapes[style] = cyl
-		var shape: Shape3D = _trunk_shapes[style]
-		for k in pos.size():
-			var owner_id := create_shape_owner(self)  # one owner per trunk: each has its own place
-			shape_owner_add_shape(owner_id, shape)
-			shape_owner_set_transform(owner_id, Transform3D(Basis.IDENTITY, Vector3(pos[k].x, pos[k].y + trunk_h * 0.5 * scales[k], pos[k].z)))
+	for owner_id in cover_owners:
+		remove_shape_owner(owner_id)
+	cover_owners.clear()

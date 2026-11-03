@@ -19,6 +19,8 @@ var region := -1
 var town: TownLayout
 ## Named towns only: the NamedSettlements entry (name, lord, seat...); empty for random towns
 var named: Dictionary = {}
+## Anything else a kind of place needs to remember about this one (a bridge: its span and width)
+var extra: Dictionary = {}
 
 
 func get_anchor_chunk(chunk_size: float) -> Vector2i:

@@ -21,11 +21,15 @@ void vertex() {
 	VERTEX.y *= 1.0 - snow * 0.75;
 }
 void fragment() {
-	vec3 c = COLOR.rgb * season_tint;
+	// the colours are picked in sRGB, like the ground's: convert them the same way and mute them as
+	// the ground is muted (terrain.gdshader), so the grass is the ground's own green, not a pale one
+	vec3 c = mix(COLOR.rgb / 12.92, pow((COLOR.rgb + 0.055) / 1.055, vec3(2.4)), step(0.04045, COLOR.rgb));
+	c = mix(c, vec3(dot(c, vec3(0.3, 0.55, 0.15))), 0.3) * vec3(1.0, 0.96, 0.84);
+	c *= season_tint;
 	c = mix(c, vec3(0.9, 0.92, 0.96), snow * 0.8);
 	ALBEDO = c;
 	ROUGHNESS = 0.9;
-	BACKLIGHT = vec3(0.25) * tip;
+	BACKLIGHT = c * 0.6 * tip;
 }
 """
 
@@ -36,6 +40,7 @@ static var _bush_mesh: Mesh
 static var _grass_mat: ShaderMaterial
 static var _flower_mat: ShaderMaterial
 static var _terrain_mat: ShaderMaterial
+static var _far_mat: ShaderMaterial
 static var _rock_mat: StandardMaterial3D
 static var _bush_mat: ShaderMaterial
 static var _season := {"tint": Vector3.ONE, "snow": 0.0, "wet": 0.0, "wind": 1.0}
@@ -47,6 +52,15 @@ static func terrain_material() -> ShaderMaterial:
 		_terrain_mat.shader = load("res://shaders/terrain.gdshader") as Shader  # rock on slopes, earth, detail
 		_push()
 	return _terrain_mat
+
+
+## The ground of the distant land (FarLand): the same look, with a hole round the camera
+## (far_cut meters) where the detailed chunks are drawn
+static func far_terrain_material() -> ShaderMaterial:
+	if _far_mat == null:
+		_far_mat = terrain_material().duplicate() as ShaderMaterial
+		_push()
+	return _far_mat
 
 
 static func grass_material() -> ShaderMaterial:
@@ -98,17 +112,18 @@ static func _push() -> void:
 			m.set_shader_parameter("wind", _season["wind"])
 	if _flower_mat != null:
 		_flower_mat.set_shader_parameter("season_tint", Vector3.ONE.lerp(_season["tint"], 0.5))
-	if _terrain_mat != null:
-		_terrain_mat.set_shader_parameter("season_tint", _season["tint"])
-		_terrain_mat.set_shader_parameter("snow", _season["snow"])
-		_terrain_mat.set_shader_parameter("wetness", _season["wet"])
+	for tm in [_terrain_mat, _far_mat]:
+		if tm != null:
+			(tm as ShaderMaterial).set_shader_parameter("season_tint", _season["tint"])
+			(tm as ShaderMaterial).set_shader_parameter("snow", _season["snow"])
+			(tm as ShaderMaterial).set_shader_parameter("wetness", _season["wet"])
 	if _rock_mat != null:
 		_rock_mat.roughness = lerpf(0.95, 0.45, float(_season["wet"]))
 
 
 # ---------------------------------------------------------------- meshes
 
-## A clump of 7 bent blades. UV.y = 0 at the root, 1 at the tip (the shader sways the tips).
+## A clump of 12 bent blades of mixed heights. UV.y = 0 at the root, 1 at the tip (the shader sways the tips).
 static func grass_mesh() -> ArrayMesh:
 	if _grass_mesh != null:
 		return _grass_mesh
@@ -116,12 +131,12 @@ static func grass_mesh() -> ArrayMesh:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 77
-	for b in 7:
+	for b in 12:
 		var a := rng.randf() * TAU
-		var r := rng.randf() * 0.18
+		var r := rng.randf() * 0.26
 		var base := Vector3(cos(a) * r, 0.0, sin(a) * r)
-		var h := rng.randf_range(0.32, 0.62)
-		var w := rng.randf_range(0.035, 0.055)
+		var h := rng.randf_range(0.22, 0.7)
+		var w := rng.randf_range(0.03, 0.05)
 		var face := rng.randf() * TAU
 		var side := Vector3(cos(face), 0.0, sin(face)) * w
 		var lean := Vector3(-sin(face), 0.0, cos(face)) * rng.randf_range(0.05, 0.16)
@@ -136,8 +151,8 @@ static func grass_mesh() -> ArrayMesh:
 		for i in segs:
 			var t0 := float(i) / float(segs)
 			var t1 := float(i + 1) / float(segs)
-			var c0 := Color(0.55 + 0.45 * t0, 0.55 + 0.45 * t0, 0.55 + 0.45 * t0)
-			var c1 := Color(0.55 + 0.45 * t1, 0.55 + 0.45 * t1, 0.55 + 0.45 * t1)
+			var c0 := Color(0.45 + 0.55 * t0, 0.45 + 0.55 * t0, 0.42 + 0.5 * t0)
+			var c1 := Color(0.45 + 0.55 * t1, 0.45 + 0.55 * t1, 0.42 + 0.5 * t1)
 			var a0 := pts[i * 2]
 			var b0 := pts[i * 2 + 1]
 			var a1 := pts[i * 2 + 2]

@@ -162,10 +162,10 @@ static func gate_position(w: WorldManager, id: String) -> Vector3:
 		var area := 0.0
 		for i in w.map.placements.size():
 			if w.map.placements[i].biome.get_key() == String(g["near"]):
-				var a := w.map.get_placement_rect(i).get_area()
+				var a := w.map.get_region_area(i)
 				if a > area:
 					area = a
-					var c := w.map.get_placement_rect(i).get_center()
+					var c := w.map.get_region_center(i)
 					center = Vector3(c.x, 0.0, c.y)
 	if not center.is_finite():
 		return Vector3.INF

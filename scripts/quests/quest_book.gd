@@ -786,12 +786,12 @@ func _near_pos(place: String) -> Vector3:
 		var area := 0.0
 		for i in world.map.placements.size():
 			if world.map.placements[i].biome.get_key() == place:
-				var a := world.map.get_placement_rect(i).get_area()
+				var a := world.map.get_region_area(i)
 				if a > area:
 					area = a
 					best = i
 		if best >= 0:
-			var c := world.map.get_placement_rect(best).get_center()
+			var c := world.map.get_region_center(best)
 			return Vector3(c.x, world.get_height_at(c.x, c.y), c.y)
 	return _player().global_position
 

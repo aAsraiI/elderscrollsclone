@@ -10,6 +10,8 @@ extends RefCounted
 const GRID_CELL := 200.0
 ## Meters a POI keeps between its footprint and the edge of a road
 const ROAD_GAP := 8.0
+## Meters a POI keeps between its footprint and the bank of a river or stream
+const RIVER_GAP := 6.0
 
 # Spatial hash of what has been placed, so spacing checks stay fast with thousands of POIs
 class SpaceGrid:
@@ -71,7 +73,7 @@ static func plan(map: WorldMap, already: Array[PlacedPOI] = []) -> Array[PlacedP
 		for region in map.placements.size():
 			var placement := map.placements[region]
 			var rect := map.get_placement_rect(region)
-			var area_km2 := rect.size.x * rect.size.y / 1.0e6
+			var area_km2 := map.get_region_area(region) / 1.0e6  # dry land only
 
 			# Rules that can actually be placed, biggest footprint first
 			var rules: Array[POIRule] = []
@@ -144,6 +146,8 @@ static func find_spot(map: WorldMap, rng: RandomNumberGenerator, area: Rect2, re
 			continue
 		if map.roads != null and map.roads.distance_to(x, z, r + ROAD_GAP) < r + ROAD_GAP:
 			continue
+		if map.rivers != null and map.rivers.distance_to(x, z, r + RIVER_GAP) < r + RIVER_GAP:
+			continue
 		if map.get_placement_index_at(x, z) != region:
 			continue
 		if map.get_inside_distance(x, z) < settings.edge_width + r + settings.poi_edge_margin:
@@ -160,14 +164,14 @@ static func find_spot(map: WorldMap, rng: RandomNumberGenerator, area: Rect2, re
 		# not too steep across the footprint
 		map.sample(x, z, s)
 		var h0 := s.height
-		if map.is_under_water(h0 - 1.5):
+		if h0 - 1.5 < s.water:
 			continue  # nothing is built at or under the water line
 		var worst := 0.0
 		for q in 8:
 			var a := float(q) * PI * 0.25
 			map.sample(x + cos(a) * ring, z + sin(a) * ring, s)
 			worst = maxf(worst, absf(s.height - h0))
-			if map.is_under_water(s.height - 0.5):
+			if s.height - 0.5 < s.water:
 				worst = INF  # part of it would be in the water
 		if rad_to_deg(atan2(worst, ring)) > poi.max_slope_deg:
 			continue
@@ -205,7 +209,7 @@ static func _score(map: WorldMap, x: float, z: float, h0: float, prefer: String)
 				for q in 8:
 					var a := float(q) * PI * 0.25
 					map.sample(x + cos(a) * d, z + sin(a) * d, s)
-					if map.is_under_water(s.height):
+					if s.height < s.water:
 						wet += 100.0 / d
 			return wet
 		"road":
@@ -247,7 +251,7 @@ static func _lay_paths(map: WorldMap, placed: Array[PlacedPOI]) -> void:
 
 # Signposts where roads meet outside the towns (an arm for each way, naming the town it leads to and
 # how far), and a milestone every MILESTONE_EVERY meters along the longer roads
-const MILESTONE_EVERY := 2000.0
+const MILESTONE_EVERY := 1000.0  # (the 1.21 island is compact: towns are closer)
 
 static func _signposts(map: WorldMap, out: Array[PlacedPOI], towns: Array[PlacedPOI]) -> void:
 	if map.roads == null:

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_tiwjg"]
+
+[resource]
+script = ExtResource("1_tiwjg")
+id = &"red_poppy"
+display_name = "Red Poppy"
+description = "An alchemical ingredient, found in meadows. Alchemists buy it."
+item_type = 4
+weight = 0.1
+value = 5
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("alchemist")
+ingredient_effects = PackedStringArray("restore_health", "slow", "invisibility", "fear")

@@ -60,8 +60,14 @@ func _start(clan: String) -> void:
 	for c in ClanTerritory.CLANS:
 		if c != clan and (attacker == "" or int(scores[c]) > int(scores[attacker])):
 			attacker = c
-	var rect := world.map.get_placement_rect(i)
-	var spot := rect.position + rect.size * Vector2(rng.randf_range(0.3, 0.7), rng.randf_range(0.3, 0.7))
+	# somewhere in the land round its middle (lands are rounded, so a spot in its box may be another's)
+	var spot := world.map.get_region_center(i)
+	for tries in 12:
+		var r := world.map.get_placement_rect(i)
+		var at := world.map.get_region_center(i) + Vector2(rng.randf_range(-0.2, 0.2) * r.size.x, rng.randf_range(-0.2, 0.2) * r.size.y)
+		if world.map.get_placement_index_at(at.x, at.y) == i:
+			spot = at
+			break
 	WorldState.set_record(RECORD, {"month": month, "state": "active", "land": land.get_key(), "land_name": land.display_name,
 		"attacker": attacker, "clan": clan, "pos": [spot.x, spot.y], "until": world.clock.day + DAYS})
 	var text := "The %s are moving on the %s. Their raiders gather there: kill them within %d days or our hold on the land slips." % [

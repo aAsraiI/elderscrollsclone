@@ -16,7 +16,8 @@ var _under := false
 var _hurt := 0.0
 var _player: CharacterBody3D
 var _tint: CanvasLayer
-var _sea := 0.0
+var _sea := 0.0  # the water surface where you are (the sea, a lake or a river)
+var _world: WorldManager
 var _water := false
 
 
@@ -26,6 +27,7 @@ func _ready() -> void:
 	if world != null and world.settings != null:
 		_water = world.settings.water_enabled
 		_sea = world.settings.sea_level
+		_world = world
 
 
 func is_swimming() -> bool:
@@ -42,6 +44,8 @@ func _physics_process(delta: float) -> void:
 	var dm := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
 	var inside := dm != null and dm.is_inside()
 	var y := _player.global_position.y
+	if _world != null and _world.map != null:
+		_sea = _world.map.get_water_level(_player.global_position.x, _player.global_position.z)
 	var was := _swimming
 	_swimming = not inside and y < _sea - 1.1 and not _player.has_meta("riding") and not _player.has_meta("boat")
 	if _swimming and not was:

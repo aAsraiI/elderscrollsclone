@@ -19,6 +19,9 @@ const EDGE_SOFT := 1.4
 ## Whole roads, for the map: {"points": PackedVector3Array, "half_width": float, "color": Color,
 ## "street": bool, "from": String, "to": String}
 var polylines: Array[Dictionary] = []
+## Where roads cross running water (RoadPlanner): {"a", "b": the deck's ends (x, height, z),
+## "water": the water level, "span": meters}. WorldPlan.bridges() builds a bridge on each.
+var crossings: Array[Dictionary] = []
 
 var _ax := PackedFloat64Array()
 var _az := PackedFloat64Array()

@@ -5,6 +5,7 @@
 [ext_resource type="Resource" path="res://data/encounters/night_vampire.tres" id="6_lyudj"]
 [ext_resource type="Resource" path="res://data/encounters/swamp_lurkers.tres" id="7_7i13v"]
 [ext_resource type="Resource" path="res://data/encounters/swamp_hag.tres" id="8_uk8r3"]
+[ext_resource type="Script" path="res://scripts/world/flora_layer.gd" id="9_kbthc"]
 [ext_resource type="Resource" path="res://data/world/POIs/sewers_entrance.tres" id="10_4qnd8"]
 [ext_resource type="Resource" path="res://data/world/Sites/bandit_camp.tres" id="15_cudlu"]
 [ext_resource type="Resource" path="res://data/world/Sites/bandit_hold.tres" id="16_rp87e"]
@@ -41,6 +42,139 @@
 [ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="poi_2"]
 [ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="poi_3"]
 [ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
+
+[sub_resource type="Resource" id="Resource_kbthc"]
+script = ExtResource("9_kbthc")
+name = "swamp trees"
+models = PackedStringArray("kit/plants/bitter_coast/flora_bc_tree_01", "kit/plants/bitter_coast/flora_bc_tree_03", "kit/plants/bitter_coast/flora_bc_tree_05", "kit/plants/bitter_coast/flora_bc_tree_07", "kit/plants/bitter_coast/flora_bc_tree_09", "kit/plants/bitter_coast/flora_bc_tree_10")
+shape = 2
+color = Color(0.27, 0.3, 0.18, 1)
+density = 36.0
+clump_scale = 220.0
+water_ok = true
+height = 9.0
+scale_min = 0.42
+scale_max = 0.65
+sink = 0.4
+trunk_radius = 0.45
+
+[sub_resource type="Resource" id="Resource_i1p2s"]
+script = ExtResource("9_kbthc")
+name = "cypress knees"
+models = PackedStringArray("kit/plants/bitter_coast/flora_bc_knee_01", "kit/plants/bitter_coast/flora_bc_knee_02", "kit/plants/bitter_coast/flora_bc_knee_03", "kit/plants/bitter_coast/flora_bc_knee_04")
+shape = 9
+size = 3
+density = 50.0
+clump_scale = 60.0
+clumping = 0.7
+water_ok = true
+height = 0.8
+scale_min = 0.3
+scale_max = 0.5
+solid = false
+
+[sub_resource type="Resource" id="Resource_lxj37"]
+script = ExtResource("9_kbthc")
+name = "cap trees"
+models = PackedStringArray("kit/plants/trees/flora_tree_ac_03", "kit/plants/trees/flora_tree_ac_04")
+shape = 7
+color = Color(0.55, 0.45, 0.32, 1)
+density = 3.0
+clump_scale = 300.0
+clumping = 0.8
+scale_min = 0.6
+scale_max = 0.9
+sink = 0.2
+
+[sub_resource type="Resource" id="Resource_1nqn0"]
+script = ExtResource("9_kbthc")
+name = "giant mushrooms"
+models = PackedStringArray("kit/plants/other/flora_emp_parasol_01", "kit/plants/other/flora_emp_parasol_03", "kit/plants/mushrooms/flora_t_mushroom_02")
+shape = 7
+color = Color(0.6, 0.5, 0.35, 1)
+density = 1.2
+clump_scale = 500.0
+clumping = 0.9
+scale_min = 0.45
+scale_max = 0.7
+trunk_radius = 0.6
+
+[sub_resource type="Resource" id="Resource_rf1d7"]
+script = ExtResource("9_kbthc")
+name = "marsh grass"
+models = PackedStringArray("kit/plants/bitter_coast/flora_bc_grass_01", "kit/plants/bitter_coast/flora_bc_grass_02")
+shape = 6
+size = 2
+color = Color(0.36, 0.4, 0.2, 1)
+density = 320.0
+clump_scale = 50.0
+water_ok = true
+height = 1.2
+scale_min = 0.6
+scale_max = 1.0
+solid = false
+
+[sub_resource type="Resource" id="Resource_dbe1k"]
+script = ExtResource("9_kbthc")
+name = "lily pads"
+models = PackedStringArray("kit/plants/bitter_coast/flora_bc_lilypad_01", "kit/plants/bitter_coast/flora_bc_lilypad_02", "kit/plants/bitter_coast/flora_bc_lilypad_03")
+shape = 11
+size = 2
+color = Color(0.3, 0.45, 0.22, 1)
+density = 450.0
+clump_scale = 40.0
+in_water = true
+floats = true
+height = 0.1
+sink = 0.0
+lean = 0.0
+solid = false
+
+[sub_resource type="Resource" id="Resource_tshwx"]
+script = ExtResource("9_kbthc")
+name = "moss mounds"
+models = PackedStringArray("kit/plants/bitter_coast/flora_bc_moss_01", "kit/plants/bitter_coast/flora_bc_moss_02", "kit/plants/bitter_coast/flora_bc_moss_05")
+shape = 4
+size = 3
+color = Color(0.25, 0.3, 0.15, 1)
+density = 60.0
+clump_scale = 70.0
+clumping = 0.6
+height = 0.4
+scale_min = 0.6
+scale_max = 1.1
+follow_ground = true
+solid = false
+
+[sub_resource type="Resource" id="Resource_0k7pp"]
+script = ExtResource("9_kbthc")
+name = "pods"
+models = PackedStringArray("kit/plants/other/flora_muckpod_01", "kit/plants/other/flora_muckpod_02", "kit/plants/other/flora_muckpod_03")
+shape = 7
+size = 2
+color = Color(0.55, 0.55, 0.3, 1)
+density = 30.0
+clump_scale = 50.0
+clumping = 0.8
+height = 0.8
+scale_min = 0.6
+scale_max = 1.0
+solid = false
+
+[sub_resource type="Resource" id="Resource_ivfp0"]
+script = ExtResource("9_kbthc")
+name = "rotten logs"
+models = PackedStringArray("kit/plants/logs_roots/flora_bc_log_01", "kit/plants/logs_roots/flora_bc_log_02")
+shape = 8
+size = 3
+density = 3.0
+water_ok = true
+height = 4.0
+scale_min = 0.35
+scale_max = 0.5
+sink = 0.3
+lean = 0.0
+follow_ground = true
 
 [sub_resource type="Resource" id="rule_0"]
 script = ExtResource("rule_script")
@@ -261,8 +395,8 @@ border_margin = 40.0
 [sub_resource type="Resource" id="Resource_31fea"]
 script = ExtResource("rule_script")
 poi = ExtResource("38_1nqn0")
-count_min = 0.055999999999999994
-count_max = 0.10400000000000001
+count_min = 0.05599999999999999
+count_max = 0.104
 extra_spacing = 40.0
 border_margin = 40.0
 
@@ -277,8 +411,8 @@ border_margin = 40.0
 [sub_resource type="Resource" id="Resource_e8ruo"]
 script = ExtResource("rule_script")
 poi = ExtResource("40_dbe1k")
-count_min = 0.055999999999999994
-count_max = 0.10400000000000001
+count_min = 0.05599999999999999
+count_max = 0.104
 extra_spacing = 40.0
 border_margin = 40.0
 
@@ -287,17 +421,26 @@ script = ExtResource("1_biome")
 id = &"swamp"
 display_name = "Swamp"
 map_color = Color(0.33, 0.38, 0.25, 1)
-blend_distance = 200.0
-base_height = 2.0
-hills_amplitude = 4.0
+blend_distance = 220.0
+base_height = 2.4
+hills_amplitude = 3.0
 hills_scale = 160.0
-detail_amplitude = 0.6
+swirl = 60.0
+swirl_scale = 250.0
+pool_depth = 4.5
+pool_scale = 75.0
+pool_coverage = 0.4
+detail_amplitude = 0.3
 ground_color = Color(0.24, 0.28, 0.16, 1)
 ground_color_alt = Color(0.2, 0.24, 0.14, 1)
 steep_color = Color(0.25, 0.23, 0.18, 1)
+shore_color = Color(0.24, 0.23, 0.16, 1)
 tree_style = 2
 tree_density = 35.0
 tree_color = Color(0.25, 0.22, 0.17, 1)
+flora = Array[ExtResource("9_kbthc")]([SubResource("Resource_kbthc"), SubResource("Resource_i1p2s"), SubResource("Resource_lxj37"), SubResource("Resource_1nqn0"), SubResource("Resource_rf1d7"), SubResource("Resource_dbe1k"), SubResource("Resource_tshwx"), SubResource("Resource_0k7pp"), SubResource("Resource_ivfp0")])
+herbs = PackedStringArray("spore_pod:2", "strangleweed:2", "bloodmoss:2", "shelf_fungus:1", "nightshade:1", "glowcap:1", "bog_bean:3", "mire_sponge:2", "swamp_lily:2")
+herb_density = 1.3
 poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_ci6ew"), SubResource("Resource_wpofc"), SubResource("Resource_tdosd"), SubResource("Resource_k6xps"), SubResource("Resource_e4rjg"), SubResource("Resource_8cu3o"), SubResource("Resource_j2frk"), SubResource("Resource_nhqvb"), SubResource("Resource_nghpk"), SubResource("Resource_sq867"), SubResource("Resource_riukm"), SubResource("Resource_yyrcj"), SubResource("Resource_ck8pq"), SubResource("Resource_ihaeq"), SubResource("Resource_r8x3s"), SubResource("Resource_0c1it"), SubResource("Resource_tph17"), SubResource("Resource_udfwy"), SubResource("Resource_7wbu5"), SubResource("Resource_3sxmb"), SubResource("Resource_ji1ts"), SubResource("Resource_isogf"), SubResource("Resource_6e5lq"), SubResource("Resource_lfwrh"), SubResource("Resource_31fea"), SubResource("Resource_dfp4j"), SubResource("Resource_e8ruo")])
 level_min = 8
 level_max = 20

@@ -48,3 +48,37 @@ func _redraw() -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.albedo_color = COLORS[int(kind)]
 	_gizmo.material_override = mat
+	_preview()
+
+
+# The editor: what the game would put here (RoomFiller's choice for this room), never saved
+func _preview() -> void:
+	EditorPreview.clear(self)
+	var room: RoomModule = null
+	var p := get_parent()
+	while p != null and room == null:
+		room = p as RoomModule
+		p = p.get_parent()
+	if kind in [Kind.CHEST, Kind.LOOT]:
+		var chest := ModelLibrary.instance(POIBuilder.container_key("Satchel" if kind == Kind.LOOT else "Chest"))
+		if chest != null:
+			chest.name = EditorPreview.PREVIEW
+			add_child(chest, false, Node.INTERNAL_MODE_BACK)
+		return
+	if not kind in [Kind.FURNITURE, Kind.DECORATION, Kind.WALL_DECORATION, Kind.LIGHT, Kind.CEILING]:
+		return
+	var path := ""
+	if not pool.is_empty() and String(pool[0]).ends_with(".tscn"):
+		path = pool[absi(String(name).hash()) % pool.size()]
+	else:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = String(name).hash()
+		var theme := String(room.themes[0]) if room != null and not room.themes.is_empty() else "fort"
+		var wealth := room.wealth if room != null else 1
+		var kind_name := String(Kind.keys()[kind])
+		var e := PropLibrary.pick(kind_name, tags, theme, wealth, rng)
+		if e == null and not tags.is_empty():
+			e = PropLibrary.pick(kind_name, PackedStringArray(), theme, wealth, rng)
+		path = e.path if e != null else ""
+	if path != "":
+		EditorPreview.show_scene(self, path)

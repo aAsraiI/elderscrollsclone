@@ -23,6 +23,7 @@ enum Snap { FLOOR, WALL, CEILING }
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
+		_preview()
 		return
 	dress()
 
@@ -36,20 +37,45 @@ func dress() -> void:
 	if _dressed:
 		return
 	_dressed = true
-	# A real model for this prop (ModelLibrary "prop/<scene name>", then its first tag) replaces the
-	# boxes, with collision from the model's own shape
+	var key := _model_key()
+	if key != "":
+		ModelLibrary.replace_meshes(self, key, "", null, _turn(key))
+	else:
+		_fit_collision()
+
+
+# A real model for this prop (ModelLibrary "prop/<scene name>", then its tags) replaces the boxes,
+# with collision from the model's own shape
+func _model_key() -> String:
 	var keys: Array = []
 	if scene_file_path != "":
 		keys.append("prop/" + scene_file_path.get_file().get_basename())
 	for t in tags:
 		keys.append("prop/" + t)
-	var key := ModelLibrary.first(keys)
-	if key != "":
-		# prop scenes face -Z (their sockets' way); Morrowind's furniture is made facing +Z
-		var turn := PI if String(ModelLibrary.entry(key).get("source", "")) == "morrowind" else 0.0
-		ModelLibrary.replace_meshes(self, key, "", null, turn)
-	else:
-		_fit_collision()
+	return ModelLibrary.first(keys)
+
+
+# prop scenes face -Z (their sockets' way); Morrowind's furniture is made facing +Z
+func _turn(key: String) -> float:
+	return PI if String(ModelLibrary.entry(key).get("source", "")) == "morrowind" else 0.0
+
+
+# The editor: the model drawn where dress() would put it, the boxes hidden (nothing saved)
+func _preview() -> void:
+	var key := _model_key()
+	if key == "":
+		return
+	var old := AABB()
+	var first := true
+	for mi in find_children("*", "MeshInstance3D", true, true):
+		var m := mi as MeshInstance3D
+		if m.mesh == null or not m.visible or ModelLibrary._glows(m):
+			continue
+		var b := ModelLibrary.relative_transform(self, m) * m.get_aabb()
+		old = b if first else old.merge(b)
+		first = false
+	if not first and old.size.length() > 0.001:
+		EditorPreview.show_model(self, ModelLibrary.fitted(key, old, "", _turn(key)))
 
 
 # Without a model the boxes stay, but the collision is made to fit what you see (the old prop scenes'

@@ -43,6 +43,7 @@ var _gizmo: MeshInstance3D
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		_redraw()
+		EditorPreview.dress_room(self)  # Morrowind's walls and floors, as in game (never saved)
 
 
 ## The room's box in its own space

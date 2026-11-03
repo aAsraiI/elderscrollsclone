@@ -5,7 +5,7 @@
 [ext_resource type="Material" path="res://data/interiors/materials/flagstone.tres" id="3_22v8u"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="4_6sivb"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="5_a5het"]
-[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="6_gw6s4"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/sconce.tscn" id="6_8nv8f"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_w232j"]
 size = Vector3(4, 0.3, 16)
@@ -631,74 +631,17 @@ mesh = SubResource("BoxMesh_j8hae")
 [node name="Shape" type="CollisionShape3D" parent="Stairs/Landing" unique_id=362759650]
 shape = SubResource("BoxShape3D_k1db6")
 
-[node name="Light4" type="Marker3D" parent="." unique_id=2038950299]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, -6)
-script = ExtResource("6_gw6s4")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light5" type="Marker3D" parent="." unique_id=1845968678]
+[node name="Sconce" parent="." unique_id=496657960 instance=ExtResource("6_8nv8f")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, -2)
-script = ExtResource("6_gw6s4")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
 
-[node name="Light6" type="Marker3D" parent="." unique_id=679726967]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, 2)
-script = ExtResource("6_gw6s4")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light7" type="Marker3D" parent="." unique_id=140021254]
+[node name="Sconce2" parent="." unique_id=686034010 instance=ExtResource("6_8nv8f")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, 6)
-script = ExtResource("6_gw6s4")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
 
-[node name="Light8" type="Marker3D" parent="." unique_id=984953172]
+[node name="Sconce3" parent="." unique_id=546430328 instance=ExtResource("6_8nv8f")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.55)
-script = ExtResource("6_gw6s4")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
 
-[node name="Light9" type="Marker3D" parent="." unique_id=960749865]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, -6)
-script = ExtResource("6_gw6s4")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light10" type="Marker3D" parent="." unique_id=49757880]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, -2)
-script = ExtResource("6_gw6s4")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light11" type="Marker3D" parent="." unique_id=2064118950]
+[node name="Sconce4" parent="." unique_id=1459654202 instance=ExtResource("6_8nv8f")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, 2)
-script = ExtResource("6_gw6s4")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
 
-[node name="Light12" type="Marker3D" parent="." unique_id=979894466]
+[node name="Sconce5" parent="." unique_id=1168835702 instance=ExtResource("6_8nv8f")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, 6)
-script = ExtResource("6_gw6s4")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()

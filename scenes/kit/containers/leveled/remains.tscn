@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_fajwy"]
+
+[node name="Remains" type="Node3D" unique_id=1856298983]
+script = ExtResource("1_fajwy")
+display_name = "Remains"
+model_key = "kit/containers/all/contain_corpse00"
+loot_tags = PackedStringArray("camp", "crypt")

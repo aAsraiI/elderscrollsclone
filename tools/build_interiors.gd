@@ -4,6 +4,8 @@ extends SceneTree
 ## and a template per role (scenes/interiors/modules/templates/). A scene that already exists is
 ## never overwritten (your hand edits are safe); pass --force to rebuild everything.
 ##   godot --headless --path . -s res://tools/build_interiors.gd [-- --force]
+## Since Alpha 1.20 the game no longer fills furniture spawn points: after a --force rebuild run
+## tools/bake_room_props.gd to turn them into placed props.
 
 const MOD_DIR := "res://scenes/interiors/modules/"
 const PROP_DIR := "res://scenes/interiors/props/"

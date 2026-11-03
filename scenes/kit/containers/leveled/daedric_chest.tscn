@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_mf3q7"]
+
+[node name="DaedricChest" type="Node3D" unique_id=845692362]
+script = ExtResource("1_mf3q7")
+display_name = "Daedric Chest"
+model_key = "kit/containers/all/contain_daedric_chest_01"
+loot_tags = PackedStringArray("ashen", "vault")

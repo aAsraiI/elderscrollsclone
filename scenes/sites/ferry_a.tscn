@@ -3,7 +3,10 @@
 [ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_eou1x"]
 [ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_bxid4"]
 [ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_a4r1x"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/rowboat.tscn" id="4_71qwb"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="4_jlh6s"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/barrels.tscn" id="5_6w6mb"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/broken_cart.tscn" id="6_6lv6k"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_71qwb"]
 size = Vector3(3, 0.3, 16)
@@ -232,27 +235,14 @@ mesh = SubResource("BoxMesh_43w1l")
 [node name="Shape" type="CollisionShape3D" parent="Part11" unique_id=1934795939]
 shape = SubResource("BoxShape3D_giox5")
 
-[node name="Furniture11" type="Marker3D" parent="." unique_id=189041798]
-transform = Transform3D(0.9950042, 0, 0.09983342, 0, 1, 0, -0.09983342, 0, 0.9950042, 3.2, 0, -10)
-script = ExtResource("4_jlh6s")
-kind = 0
-tags = PackedStringArray("boat")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Rowboat" parent="." unique_id=1373317713 instance=ExtResource("4_71qwb")]
+transform = Transform3D(0.99212563, 0, 0.1252464, 0, 1, 0, -0.1252464, 0, 0.99212563, 3.2, 0, -10)
 
-[node name="Decoration12" type="Marker3D" parent="." unique_id=1715017962]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -2)
-script = ExtResource("4_jlh6s")
-tags = PackedStringArray("crate", "barrel")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Barrels" parent="." unique_id=2119694589 instance=ExtResource("5_6w6mb")]
+transform = Transform3D(0.9996969, 0, 0.024618568, 0, 1, 0, -0.024618568, 0, 0.9996969, 0, 0.75, -2)
 
-[node name="Decoration13" type="Marker3D" parent="." unique_id=1846663626]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.75, -11)
-script = ExtResource("4_jlh6s")
-tags = PackedStringArray("rope")
-chance = 1.0
-pool = PackedStringArray()
+[node name="BrokenCart" parent="." unique_id=2084705094 instance=ExtResource("6_6lv6k")]
+transform = Transform3D(0.9997936, 0, 0.020315696, 0, 1, 0, -0.020315696, 0, 0.9997936, 0.6, 0.75, -11)
 
 [node name="Part12" type="StaticBody3D" parent="." unique_id=137563896 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.6, 1.6, 6)

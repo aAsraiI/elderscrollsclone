@@ -3,7 +3,10 @@
 [ext_resource type="Script" path="res://scripts/interiors/room_module.gd" id="1_bmafn"]
 [ext_resource type="Script" path="res://scripts/interiors/doorway_marker.gd" id="2_u4d0r"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="3_g5bbv"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/bones.tscn" id="4_2uqiv"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="4_4fs00"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/skull_pile.tscn" id="5_c4jwl"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/cobweb.tscn" id="6_nxy1j"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_2uqiv"]
 size = Vector3(8, 0.3, 8)
@@ -248,95 +251,23 @@ mesh = SubResource("BoxMesh_4sfnr")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_1" unique_id=221498764]
 shape = SubResource("BoxShape3D_re8j2")
 
-[node name="Decoration3" type="Marker3D" parent="." unique_id=358385549]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2, 0, -3.2)
-script = ExtResource("4_4fs00")
-tags = PackedStringArray("bones", "skull_pile")
-chance = 0.8
-pool = PackedStringArray()
+[node name="Bones" parent="." unique_id=190940147 instance=ExtResource("4_2uqiv")]
+transform = Transform3D(-0.99939406, 0, -0.03480738, 0, 1, 0, 0.03480738, 0, -0.99939406, 2, 0, -3.2)
 
-[node name="Decoration4" type="Marker3D" parent="." unique_id=1107474156]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -3.2, 0, -2)
-script = ExtResource("4_4fs00")
-tags = PackedStringArray("bones", "skull_pile")
-chance = 0.8
-pool = PackedStringArray()
+[node name="SkullPile" parent="." unique_id=1494056844 instance=ExtResource("5_c4jwl")]
+transform = Transform3D(0.07462349, 0, -0.99721175, 0, 1, 0, 0.99721175, 0, 0.07462349, -3.2, 0, 2)
 
-[node name="Decoration5" type="Marker3D" parent="." unique_id=320749037]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -3.2, 0, 2)
-script = ExtResource("4_4fs00")
-tags = PackedStringArray("bones", "skull_pile")
-chance = 0.8
-pool = PackedStringArray()
+[node name="Bones2" parent="." unique_id=789643365 instance=ExtResource("4_2uqiv")]
+transform = Transform3D(0.9968376, 0, 0.079465665, 0, 1, 0, -0.079465665, 0, 0.9968376, -2, 0, 3.2)
 
-[node name="Decoration6" type="Marker3D" parent="." unique_id=1003573612]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 3.2)
-script = ExtResource("4_4fs00")
-tags = PackedStringArray("bones", "skull_pile")
-chance = 0.8
-pool = PackedStringArray()
+[node name="SkullPile2" parent="." unique_id=2040002756 instance=ExtResource("5_c4jwl")]
+transform = Transform3D(0.1465197, 0, 0.98920774, 0, 1, 0, -0.98920774, 0, 0.1465197, 3.2, 0, -2)
 
-[node name="Decoration7" type="Marker3D" parent="." unique_id=861557366]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.2, 0, -2)
-script = ExtResource("4_4fs00")
-tags = PackedStringArray("bones", "skull_pile")
-chance = 0.8
-pool = PackedStringArray()
-
-[node name="Decoration8" type="Marker3D" parent="." unique_id=605938977]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.2, 0, 2)
-script = ExtResource("4_4fs00")
-tags = PackedStringArray("bones", "skull_pile")
-chance = 0.8
-pool = PackedStringArray()
-
-[node name="Furniture9" type="Marker3D" parent="." unique_id=1012325949]
-transform = Transform3D(-0.42270675, 0, -0.9062665, 0, 1, 0, 0.9062665, 0, -0.42270675, -2, 0, 2)
-script = ExtResource("4_4fs00")
-kind = 0
-tags = PackedStringArray("pillar")
-chance = 0.25
-pool = PackedStringArray()
-
-[node name="Furniture10" type="Marker3D" parent="." unique_id=151501912]
-transform = Transform3D(0.9321862, 0, -0.36197925, 0, 1, 0, 0.36197925, 0, 0.9321862, 2, 0, -2)
-script = ExtResource("4_4fs00")
-kind = 0
-tags = PackedStringArray("pillar")
-chance = 0.25
-pool = PackedStringArray()
-
-[node name="Ceiling11" type="Marker3D" parent="." unique_id=1304341978]
+[node name="Cobweb" parent="." unique_id=267071329 instance=ExtResource("6_nxy1j")]
 transform = Transform3D(0.049304113, 0, 0.9987838, 0, 1, 0, -0.9987838, 0, 0.049304113, -2, 4.95, -2)
-script = ExtResource("4_4fs00")
-kind = 12
-tags = PackedStringArray("cobweb")
-chance = 0.5
-pool = PackedStringArray()
 
-[node name="Ceiling12" type="Marker3D" parent="." unique_id=532325555]
+[node name="Cobweb2" parent="." unique_id=894170510 instance=ExtResource("6_nxy1j")]
 transform = Transform3D(0.5597308, 0, -0.8286745, 0, 1, 0, 0.8286745, 0, 0.5597308, -2, 4.95, 2)
-script = ExtResource("4_4fs00")
-kind = 12
-tags = PackedStringArray("cobweb")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Ceiling13" type="Marker3D" parent="." unique_id=1112152445]
-transform = Transform3D(-0.6162182, 0, -0.7875755, 0, 1, 0, 0.7875755, 0, -0.6162182, 2, 4.95, -2)
-script = ExtResource("4_4fs00")
-kind = 12
-tags = PackedStringArray("cobweb")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Ceiling14" type="Marker3D" parent="." unique_id=996085643]
-transform = Transform3D(0.9996133, 0, 0.027807003, 0, 1, 0, -0.027807003, 0, 0.9996133, 2, 4.95, 2)
-script = ExtResource("4_4fs00")
-kind = 12
-tags = PackedStringArray("cobweb")
-chance = 0.5
-pool = PackedStringArray()
 
 [node name="Enemy15" type="Marker3D" parent="." unique_id=746649526]
 transform = Transform3D(0.8709436, 0, -0.491383, 0, 1, 0, 0.491383, 0, 0.8709436, -0.8582766, 0, 0.04411888)

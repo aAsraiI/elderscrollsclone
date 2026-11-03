@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_xleb8"]
+
+[node name="MapTable" type="StaticBody3D" unique_id=1407431431]
+script = ExtResource("1_xleb8")
+furniture = "prop/map_table"
+fallback = "prop/table"
+loot_tags = PackedStringArray("library", "weapon")

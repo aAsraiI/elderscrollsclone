@@ -371,8 +371,32 @@ static func add_collision(body: CollisionObject3D, model: Node3D, cache_key: Str
 	var rel := relative_transform(null, body).affine_inverse() * relative_transform(null, model)
 	var shapes: Array = []
 	var ck := cache_key + "|" + str(rel.basis.get_scale().snappedf(0.001)) if cache_key != "" else ""
+	var key := String(model.get_meta("model_key", cache_key.get_slice("|", 0)))
 	if ck != "" and _shapes.has(ck):
 		shapes = _shapes[ck]
+	elif is_open(key):
+		# Shelving: its own faces, so the planks hold things and the gaps between them stay open (a hull
+		# would fill the shelves: put-back items hit an invisible wall and set ones get pushed out of it)
+		var scale_only := Transform3D(Basis.from_scale(rel.basis.get_scale()), Vector3.ZERO)
+		var faces := PackedVector3Array()
+		for mi in model.find_children("*", "MeshInstance3D", true, false):
+			var m := mi as MeshInstance3D
+			if m.mesh == null or _glows(m) or _skeleton_of(m) != null:
+				continue
+			var xf := scale_only * relative_transform(model, m)
+			for s in m.mesh.get_surface_count():
+				var a := m.mesh.surface_get_arrays(s)
+				var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+				var idx: PackedInt32Array = a[Mesh.ARRAY_INDEX] if a[Mesh.ARRAY_INDEX] != null else PackedInt32Array(range(v.size()))
+				for k in idx:
+					faces.append(xf * v[k])
+		if faces.size() >= 3:
+			var exact := ConcavePolygonShape3D.new()
+			exact.set_faces(faces)
+			exact.backface_collision = true
+			shapes.append(exact)
+		if ck != "":
+			_shapes[ck] = shapes
 	else:
 		# Points in the model's own space times the model's scale, so the shape can be reused anywhere
 		var scale_only := Transform3D(Basis.from_scale(rel.basis.get_scale()), Vector3.ZERO)
@@ -406,6 +430,16 @@ static func add_collision(body: CollisionObject3D, model: Node3D, cache_key: Str
 		cs.shape = hull
 		cs.transform = Transform3D(rel.basis.orthonormalized(), rel.origin)
 		body.add_child(cs)
+
+
+## Furniture you set things in rather than on (shelves, bookcases, racks, burial niches): its collision is
+## its own faces (add_collision), never a hull over the gaps
+const OPEN := ["shelf", "bookcase", "rack", "niche", "hutch", "lecturn", "kegstand", "winerack"]
+
+
+static func is_open(key: String) -> bool:
+	var name := key.get_file()
+	return OPEN.any(func(w: String) -> bool: return name.contains(w))
 
 
 # Few points for a hull (physics engines want few): the furthest point in each of 98 directions

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_0mqp1"]
+
+[node name="Basket" type="Node3D" unique_id=1193247953]
+script = ExtResource("1_0mqp1")
+display_name = "Basket"
+model_key = "kit/containers/all/contain_com_basket_01"
+loot_tags = PackedStringArray("kitchen", "home")

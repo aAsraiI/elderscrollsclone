@@ -2,14 +2,15 @@
 class_name RoomFiller
 extends RefCounted
 ## Fills a built room from its spawn points (SpawnSocket), the same way every visit:
-##   furniture, decorations, wall decorations, ceiling things and lights: a prop from PropLibrary
-##     that fits the socket's tags, the room's theme and wealth (two props never overlap, unless a socket is tagged "set": placed by design right beside another)
 ##   chests: a chest with loot for the level (the boss room's is "dungeon/<id>/chest_boss", where
 ##     quests put their items); loot: a satchel with a little in it
 ##   enemies: a group from the dungeon's spawn table; boss: the dungeon's boss
-## Furniture comes from the room's template, so a kind of room looks alike wherever it is (one of a few
-## variants); what else a socket gets comes from a seed made of the room's id and the socket's name, so taking
-## things or killing things never changes what the other sockets hold. Killed enemies stay dead
+##   captives, quest items
+## Furniture is never picked here (Alpha 1.20): it is part of the room's scene, placed by hand (props and
+## builder-kit pieces), so a room looks the same wherever it is used; only what is in it changes. The
+## old furniture spawn points were baked into the scenes once (tools/bake_room_props.gd) and do nothing.
+## What a socket gets comes from a seed made of the room's id and the socket's name, so taking things or
+## killing things never changes what the other sockets hold. Killed enemies stay dead
 ## (WorldState "kill/<key>"); chests remember their contents by their save id.
 
 ## What a dungeon passes along: {"data": DungeonData, "dungeon_id", "level_min", "level_max",
@@ -17,29 +18,20 @@ extends RefCounted
 static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 	var out := {"props": 0, "chests": 0, "enemies": 0, "boss": false}
 	var room_id := String(room.get_meta("room_id", room.name))
-	var theme := String(room.themes[0]) if not room.themes.is_empty() else "fort"
 	var data: DungeonData = ctx.get("data")
 	var lmin := int(ctx.get("level_min", 1))
 	var lmax := int(ctx.get("level_max", lmin + 3))
 	var density := float(ctx.get("density", 1.0))
-	var taken: Array = []  # [position, radius] of props already placed
-	# Furniture and decoration come from the room's template (its scene) and one of LAYOUTS variants, so a
-	# kind of room looks the same wherever it is used; loot, chests and enemies stay this room's own
-	var template := room.scene_file_path if room.scene_file_path != "" else String(room.name)
-	var variant := absi(("%d|%s" % [int(ctx.get("seed", 0)), room_id]).hash()) % RoomDecorator.LAYOUTS
 	for s in room.sockets():
+		if not s.kind in [SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT, SpawnSocket.Kind.ENEMY, SpawnSocket.Kind.BOSS, SpawnSocket.Kind.NPC, SpawnSocket.Kind.QUEST_ITEM]:
+			continue  # furniture, lights, traps and patrols: the room's own (or InteriorFeatures / InteriorNav)
 		var key := "%s/%s" % [room_id, s.name]
 		var rng := RandomNumberGenerator.new()
-		if s.kind in [SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT, SpawnSocket.Kind.ENEMY, SpawnSocket.Kind.BOSS]:
-			rng.seed = ("%d|%s" % [int(ctx.get("seed", 0)), key]).hash()
-		else:
-			rng.seed = ("%s|%d|%s" % [template, variant, s.name]).hash()
+		rng.seed = ("%d|%s" % [int(ctx.get("seed", 0)), key]).hash()
 		var always := s.kind in [SpawnSocket.Kind.BOSS] or (s.kind == SpawnSocket.Kind.CHEST and s.tags.has("boss"))
 		var boost := 1.6 if s.kind in [SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT] else 1.0  # dungeons hold plenty to find (1.16)
 		if not always and rng.randf() > clampf(s.chance * density * boost, 0.0, 1.0):
 			continue
-		if bool(ctx.get("props_only", false)) and s.kind in [SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT, SpawnSocket.Kind.ENEMY, SpawnSocket.Kind.BOSS]:
-			continue  # the editor preview: furniture only
 		match s.kind:
 			SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT:
 				var boss_chest := s.tags.has("boss")
@@ -106,40 +98,4 @@ static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 					if item != null:
 						WorldItem.place(item, 1, room, s.position + Vector3(0, 0.4, 0), key, "")
 						out["quest_items"] = int(out.get("quest_items", 0)) + 1
-			SpawnSocket.Kind.TRAP, SpawnSocket.Kind.PATROL:
-				pass  # traps come from InteriorFeatures, patrols from InteriorNav
-			_:
-				if _place_prop(room, s, theme, rng, taken):
-					out["props"] += 1
-	# A room or site whose template came up bare still gets its first piece of furniture
-	if out["props"] == 0 and not bool(ctx.get("props_only", false)):
-		for s in room.sockets():
-			if s.kind in [SpawnSocket.Kind.FURNITURE, SpawnSocket.Kind.DECORATION]:
-				var rng := RandomNumberGenerator.new()
-				rng.seed = ("%s|%s" % [template, s.name]).hash()
-				if _place_prop(room, s, theme, rng, taken):
-					out["props"] += 1
-					break
 	return out
-
-
-# A prop from PropLibrary that fits the socket (none when it would stand in another one)
-static func _place_prop(room: RoomModule, s: SpawnSocket, theme: String, rng: RandomNumberGenerator, taken: Array) -> bool:
-	var kind_name := String(SpawnSocket.Kind.keys()[s.kind])
-	var e := PropLibrary.pick(kind_name, s.tags, theme, room.wealth, rng)
-	if e == null and not s.tags.is_empty():
-		e = PropLibrary.pick(kind_name, PackedStringArray(), theme, room.wealth, rng)
-	if e == null:
-		return false
-	var at := s.position
-	if not s.tags.has("set") and taken.any(func(t: Array) -> bool: return Vector2(at.x - t[0].x, at.z - t[0].z).length() < e.radius + float(t[1]) and absf(at.y - t[0].y) < 1.5):
-		return false
-	var prop := (load(e.path) as PackedScene).instantiate() as Node3D
-	room.add_child(prop)
-	prop.transform = s.transform
-	if prop is InteriorProp:
-		(prop as InteriorProp).dress()  # its model in now, so what is set on it sits on the model
-	if s.kind != SpawnSocket.Kind.WALL_DECORATION and e.snap == InteriorProp.Snap.FLOOR and not s.tags.has("tabletop"):
-		prop.rotate_y(rng.randf_range(-0.15, 0.15))  # never quite straight
-	taken.append([at, e.radius])
-	return true

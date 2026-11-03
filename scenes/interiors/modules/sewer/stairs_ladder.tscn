@@ -6,7 +6,7 @@
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="4_6li7w"]
 [ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="5_b0ha4"]
 [ext_resource type="Script" path="res://scripts/interiors/ladder.gd" id="6_h8ht7"]
-[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="7_eae8i"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/sconce.tscn" id="7_fu0nr"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_mis32"]
 size = Vector3(4, 0.3, 8)
@@ -476,42 +476,8 @@ mesh = SubResource("BoxMesh_rkwg0")
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, -0.5)
 script = ExtResource("6_h8ht7")
 
-[node name="Light4" type="Marker3D" parent="." unique_id=2023698133]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, -2)
-script = ExtResource("7_eae8i")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light5" type="Marker3D" parent="." unique_id=536499457]
+[node name="Sconce" parent="." unique_id=496657960 instance=ExtResource("7_fu0nr")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, 2)
-script = ExtResource("7_eae8i")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
 
-[node name="Light6" type="Marker3D" parent="." unique_id=158878264]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.55)
-script = ExtResource("7_eae8i")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light7" type="Marker3D" parent="." unique_id=828162576]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, -2)
-script = ExtResource("7_eae8i")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light8" type="Marker3D" parent="." unique_id=757484876]
+[node name="Sconce2" parent="." unique_id=583106284 instance=ExtResource("7_fu0nr")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, 2)
-script = ExtResource("7_eae8i")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()

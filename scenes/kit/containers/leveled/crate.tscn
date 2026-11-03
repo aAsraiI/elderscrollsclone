@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_nk0h2"]
+
+[node name="Crate" type="Node3D" unique_id=565393142]
+script = ExtResource("1_nk0h2")
+display_name = "Crate"
+model_key = "kit/containers/all/contain_crate_01"
+loot_tags = PackedStringArray("tools", "camp")

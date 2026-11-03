@@ -425,12 +425,12 @@ static func route(spots: Dictionary, from: Vector3, to: Vector3) -> PackedVector
 	return out
 
 
-# A building from its scene: the spawn points furnish it (RoomFiller), the markers say where the
-# door, the beds, the chests, the stations and the people's places are
+# A building from its scene: its furniture is the scene's own (placed by hand), the markers say where the
+# door, the beds, the chests, the stations and the people's places are, and RoomDecorator sets loot on
+# its surfaces. Builder-kit pieces in it read whose they are and the loot level from the root's meta (KitPlace)
 static func _from_module(b: BuildingPlot, path: String, interior_seed: int, level: int, today: int, rng: RandomNumberGenerator) -> Dictionary:
 	var room := (load(path) as PackedScene).instantiate() as RoomModule
 	room.set_meta("room_id", "building/%s" % b.id)
-	RoomFiller.fill(room, {"props_only": true, "seed": interior_seed})
 	var root := Node3D.new()
 	root.name = "Interior"
 	root.set_meta("building_id", b.id)
@@ -619,6 +619,10 @@ static func _from_module(b: BuildingPlot, path: String, interior_seed: int, leve
 	var theme := "rich_home" if path.get_file().begins_with("manor") else theme_for(b, rng)
 	if b.kind == BuildingPlot.Kind.HOUSE and theme == "rich_home" and not path.get_file().begins_with("manor"):
 		theme = "home"
+	root.set_meta("interior_owner", owner)
+	root.set_meta("building_kind", b.kind)
+	root.set_meta("loot_level", level)
+	root.set_meta("loot_theme", theme)
 	var decor := RoomDecorator.decorate(root, Rect2(-hx + InteriorKit.WALL, -hz + InteriorKit.WALL, hx * 2.0 - InteriorKit.WALL * 2.0, hz * 2.0 - InteriorKit.WALL * 2.0),
 		theme, level, interior_seed ^ 0x5eed, owner, "building/%s" % b.id, clear, 3, today, h)
 	var start: Vector3 = at.call("Start", door + Vector3(0, 0, 1.9))

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_r0pwd"]
+
+[node name="Cauldron" type="Node3D" unique_id=1967906339]
+script = ExtResource("1_r0pwd")
+display_name = "Cauldron"
+model_key = "kit/containers/all/contain_couldron10"
+loot_tags = PackedStringArray("alchemist", "kitchen")

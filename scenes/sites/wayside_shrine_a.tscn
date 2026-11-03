@@ -3,7 +3,8 @@
 [ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_ugr0p"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_frtu2"]
 [ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_du0wb"]
-[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="4_w72t7"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/altar.tscn" id="4_frtu2"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/candles.tscn" id="5_du0wb"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_yalwg"]
 size = Vector3(4, 0.3, 4)
@@ -79,29 +80,14 @@ mesh = SubResource("BoxMesh_vnjih")
 [node name="Shape" type="CollisionShape3D" parent="Part4" unique_id=664071665]
 shape = SubResource("BoxShape3D_k38m8")
 
-[node name="Furniture4" type="Marker3D" parent="." unique_id=1080989928]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 1)
-script = ExtResource("4_w72t7")
-kind = 0
-tags = PackedStringArray("altar")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Altar" parent="." unique_id=1067768566 instance=ExtResource("4_frtu2")]
+transform = Transform3D(0.99889666, 0, -0.046962712, 0, 1, 0, 0.046962712, 0, 0.99889666, 0, 0.3, 1)
 
-[node name="Light5" type="Marker3D" parent="." unique_id=644499371]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.3, -0.4)
-script = ExtResource("4_w72t7")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Candles" parent="." unique_id=1836540246 instance=ExtResource("5_du0wb")]
+transform = Transform3D(0.99159795, 0, -0.12935798, 0, 1, 0, 0.12935798, 0, 0.99159795, -1.2, 0.3, -0.4)
 
-[node name="Light6" type="Marker3D" parent="." unique_id=1008189997]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.3, -0.4)
-script = ExtResource("4_w72t7")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Candles2" parent="." unique_id=971438547 instance=ExtResource("5_du0wb")]
+transform = Transform3D(0.99628204, 0, 0.08615145, 0, 1, 0, -0.08615145, 0, 0.99628204, 1.2, 0.3, -0.4)
 
 [node name="Blessing" type="Marker3D" parent="." unique_id=511007681]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -0.6)

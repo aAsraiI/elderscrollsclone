@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_6k7q2"]
+
+[node name="Footlocker" type="Node3D" unique_id=1612955541]
+script = ExtResource("1_6k7q2")
+display_name = "Footlocker"
+model_key = "kit/containers/all/contain_chest10"
+loot_tags = PackedStringArray("camp", "weapon", "armor")

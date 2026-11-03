@@ -4,7 +4,9 @@
 [ext_resource type="Script" path="res://scripts/interiors/doorway_marker.gd" id="2_l4g0k"]
 [ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="3_c6ibk"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="4_5v113"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/puddle.tscn" id="5_c6ibk"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="5_mkmtl"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/boulder.tscn" id="6_5v113"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_4k3uq"]
 size = Vector3(8, 0.3, 12)
@@ -282,33 +284,17 @@ mesh = SubResource("BoxMesh_qfyre")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_2" unique_id=1746346269]
 shape = SubResource("BoxShape3D_q3t7v")
 
-[node name="Decoration3" type="Marker3D" parent="." unique_id=154455337]
-transform = Transform3D(0.87832755, 0, -0.47805935, 0, 1, 0, 0.47805935, 0, 0.87832755, 1.8719857, 0, -2.1945724)
-script = ExtResource("5_mkmtl")
-tags = PackedStringArray("puddle", "rubble")
-chance = 0.9
-pool = PackedStringArray()
+[node name="Puddle" parent="." unique_id=799017813 instance=ExtResource("5_c6ibk")]
+transform = Transform3D(0.80544573, 0, -0.5926694, 0, 1, 0, 0.5926694, 0, 0.80544573, 1.8719857, 0, -2.1945724)
 
-[node name="Decoration4" type="Marker3D" parent="." unique_id=1762268625]
-transform = Transform3D(0.6948201, 0, 0.71918356, 0, 1, 0, -0.71918356, 0, 0.6948201, -0.7421336, 0, -2.1577003)
-script = ExtResource("5_mkmtl")
-tags = PackedStringArray("puddle", "rubble")
-chance = 0.9
-pool = PackedStringArray()
+[node name="Puddle2" parent="." unique_id=1525237605 instance=ExtResource("5_c6ibk")]
+transform = Transform3D(0.766222, 0, 0.642576, 0, 1, 0, -0.642576, 0, 0.766222, -0.7421336, 0, -2.1577003)
 
-[node name="Decoration5" type="Marker3D" parent="." unique_id=1335335830]
-transform = Transform3D(-0.4222112, 0, 0.9064975, 0, 1, 0, -0.9064975, 0, -0.4222112, 0.6578455, 0, -3.3648014)
-script = ExtResource("5_mkmtl")
-tags = PackedStringArray("puddle", "rubble")
-chance = 0.9
-pool = PackedStringArray()
+[node name="Boulder" parent="." unique_id=1562813496 instance=ExtResource("6_5v113")]
+transform = Transform3D(-0.29647282, 0, 0.9550413, 0, 1, 0, -0.9550413, 0, -0.29647282, 0.6578455, 0, -3.3648014)
 
-[node name="Decoration6" type="Marker3D" parent="." unique_id=456674767]
-transform = Transform3D(-0.8441374, 0, -0.536127, 0, 1, 0, 0.536127, 0, -0.8441374, 2.7269146, 0, -3.8883736)
-script = ExtResource("5_mkmtl")
-tags = PackedStringArray("puddle", "rubble")
-chance = 0.9
-pool = PackedStringArray()
+[node name="Puddle3" parent="." unique_id=1708859699 instance=ExtResource("5_c6ibk")]
+transform = Transform3D(-0.8285181, 0, -0.5599624, 0, 1, 0, 0.5599624, 0, -0.8285181, 2.7269146, 0, -3.8883736)
 
 [node name="Enemy7" type="Marker3D" parent="." unique_id=1592343124]
 transform = Transform3D(0.6647571, 0, -0.7470596, 0, 1, 0, 0.7470596, 0, 0.6647571, 2.7132432, 0, -1.0207598)

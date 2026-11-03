@@ -2,7 +2,8 @@
 
 [ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_krr0v"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_x85jo"]
-[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="3_o1o72"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/altar.tscn" id="3_x85jo"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/candles.tscn" id="4_o1o72"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_iibwl"]
 size = Vector3(4, 0.3, 4)
@@ -30,29 +31,14 @@ mesh = SubResource("BoxMesh_iibwl")
 [node name="Shape" type="CollisionShape3D" parent="Part1" unique_id=1502963579]
 shape = SubResource("BoxShape3D_pnv7d")
 
-[node name="Furniture1" type="Marker3D" parent="." unique_id=1769092857]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 1)
-script = ExtResource("3_o1o72")
-kind = 0
-tags = PackedStringArray("altar")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Altar" parent="." unique_id=1067768566 instance=ExtResource("3_x85jo")]
+transform = Transform3D(0.99629253, 0, -0.086030364, 0, 1, 0, 0.086030364, 0, 0.99629253, 0, 0.3, 1)
 
-[node name="Light2" type="Marker3D" parent="." unique_id=250527084]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.3, -0.4)
-script = ExtResource("3_o1o72")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Candles" parent="." unique_id=1836540246 instance=ExtResource("4_o1o72")]
+transform = Transform3D(0.9940695, 0, -0.108746454, 0, 1, 0, 0.108746454, 0, 0.9940695, -1.2, 0.3, -0.4)
 
-[node name="Light3" type="Marker3D" parent="." unique_id=830968106]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.3, -0.4)
-script = ExtResource("3_o1o72")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Candles2" parent="." unique_id=186827496 instance=ExtResource("4_o1o72")]
+transform = Transform3D(0.99101, 0, 0.1337879, 0, 1, 0, -0.1337879, 0, 0.99101, 1.2, 0.3, -0.4)
 
 [node name="Blessing" type="Marker3D" parent="." unique_id=1733524186]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -0.6)

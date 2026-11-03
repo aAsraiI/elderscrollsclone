@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_k2588"]
+
+[node name="TableDunmer" type="StaticBody3D" unique_id=2082694553]
+script = ExtResource("1_k2588")
+furniture = "kit/furniture/dunmer/furn_de_table_01"
+fallback = "prop/table"
+loot_tags = PackedStringArray()

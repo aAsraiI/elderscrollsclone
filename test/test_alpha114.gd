@@ -54,8 +54,8 @@ func t_sites() -> void:
 		count += 1
 		kinds[s.site_kind] = true
 		probs.append_array(s.problems())
-		if s.sockets().is_empty():
-			probs.append("%s has no spawn points" % f)
+		if s.sockets().is_empty() and s.find_children("*", "InteriorProp", true, false).is_empty() and s.find_children("*", "Marker3D", false, false).is_empty():
+			probs.append("%s has nothing in it" % f)  # furniture is the scene's own since 1.20 (no spawn points needed)
 		if not s.links().is_empty():
 			linked += 1
 		s.free()

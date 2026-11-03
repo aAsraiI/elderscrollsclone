@@ -5,6 +5,8 @@
 [ext_resource type="Material" path="res://data/interiors/materials/rock.tres" id="3_jktvx"]
 [ext_resource type="Material" path="res://data/interiors/materials/rock_dark.tres" id="4_13e2k"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="5_150rj"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/rope_coil.tscn" id="5_jktvx"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/boulder.tscn" id="6_13e2k"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_8xvx2"]
 size = Vector3(12, 0.3, 12)
@@ -352,76 +354,17 @@ mesh = SubResource("BoxMesh_kd02m")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_2_Top" unique_id=390575739]
 shape = SubResource("BoxShape3D_h2887")
 
-[node name="Decoration4" type="Marker3D" parent="." unique_id=1600218110]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, -5.2)
-script = ExtResource("5_150rj")
-tags = PackedStringArray("boulder", "rope")
-chance = 0.5
-pool = PackedStringArray()
+[node name="RopeCoil" parent="." unique_id=126900831 instance=ExtResource("5_jktvx")]
+transform = Transform3D(-0.9960148, 0, -0.08918858, 0, 1, 0, 0.08918858, 0, -0.9960148, 4, 0, -5.2)
 
-[node name="Decoration5" type="Marker3D" parent="." unique_id=641163438]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4, 0, -5.2)
-script = ExtResource("5_150rj")
-tags = PackedStringArray("boulder", "rope")
-chance = 0.5
-pool = PackedStringArray()
+[node name="Boulder" parent="." unique_id=1562813496 instance=ExtResource("6_13e2k")]
+transform = Transform3D(-0.090066954, 0, -0.99593574, 0, 1, 0, 0.99593574, 0, -0.090066954, -5.2, 0, 0)
 
-[node name="Decoration6" type="Marker3D" parent="." unique_id=903064333]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.2, 0, -4)
-script = ExtResource("5_150rj")
-tags = PackedStringArray("boulder", "rope")
-chance = 0.5
-pool = PackedStringArray()
+[node name="Boulder2" parent="." unique_id=1709804090 instance=ExtResource("6_13e2k")]
+transform = Transform3D(0.9956757, 0, 0.09289737, 0, 1, 0, -0.09289737, 0, 0.9956757, -4, 0, 5.2)
 
-[node name="Decoration7" type="Marker3D" parent="." unique_id=48409535]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.2, 0, 0)
-script = ExtResource("5_150rj")
-tags = PackedStringArray("boulder", "rope")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Decoration8" type="Marker3D" parent="." unique_id=510417659]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.2, 0, 4)
-script = ExtResource("5_150rj")
-tags = PackedStringArray("boulder", "rope")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Decoration9" type="Marker3D" parent="." unique_id=1859502395]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 5.2)
-script = ExtResource("5_150rj")
-tags = PackedStringArray("boulder", "rope")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Decoration10" type="Marker3D" parent="." unique_id=350468130]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.2)
-script = ExtResource("5_150rj")
-tags = PackedStringArray("boulder", "rope")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Decoration11" type="Marker3D" parent="." unique_id=1611135089]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 5.2, 0, -4)
-script = ExtResource("5_150rj")
-tags = PackedStringArray("boulder", "rope")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Decoration12" type="Marker3D" parent="." unique_id=780261706]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 5.2, 0, 0)
-script = ExtResource("5_150rj")
-tags = PackedStringArray("boulder", "rope")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Light13" type="Marker3D" parent="." unique_id=1253639279]
-transform = Transform3D(0.6438834, 0, -0.7651236, 0, 1, 0, 0.7651236, 0, 0.6438834, 3.552124, 0, 3.8054218)
-script = ExtResource("5_150rj")
-kind = 7
-tags = PackedStringArray("fungus")
-chance = 0.6
-pool = PackedStringArray()
+[node name="Boulder3" parent="." unique_id=909822975 instance=ExtResource("6_13e2k")]
+transform = Transform3D(0.041993313, 0, 0.9991179, 0, 1, 0, -0.9991179, 0, 0.041993313, 5.2, 0, -4)
 
 [node name="Enemy14" type="Marker3D" parent="." unique_id=1821437810]
 transform = Transform3D(-0.49195877, 0, 0.8706185, 0, 1, 0, -0.8706185, 0, -0.49195877, -4.1444073, 0, 1.221942)

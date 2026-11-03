@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_8svv7"]
+
+[node name="CrateTrade" type="Node3D" unique_id=1296091693]
+script = ExtResource("1_8svv7")
+display_name = "Trade Crate"
+model_key = "kit/containers/all/contain_de_crate_logo"
+loot_tags = PackedStringArray("shop", "kitchen")

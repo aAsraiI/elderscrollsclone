@@ -223,61 +223,6 @@ mesh = SubResource("BoxMesh_pawhk")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_1" unique_id=2116549324]
 shape = SubResource("BoxShape3D_0jcst")
 
-[node name="Light3" type="Marker3D" parent="." unique_id=193625759]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, -2)
-script = ExtResource("6_svpv3")
-kind = 7
-tags = PackedStringArray("torch", "fungus")
-chance = 0.35
-pool = PackedStringArray()
-
-[node name="Light4" type="Marker3D" parent="." unique_id=1666420085]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, 2)
-script = ExtResource("6_svpv3")
-kind = 7
-tags = PackedStringArray("torch", "fungus")
-chance = 0.35
-pool = PackedStringArray()
-
-[node name="Light5" type="Marker3D" parent="." unique_id=919829139]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, -2)
-script = ExtResource("6_svpv3")
-kind = 7
-tags = PackedStringArray("torch", "fungus")
-chance = 0.35
-pool = PackedStringArray()
-
-[node name="Light6" type="Marker3D" parent="." unique_id=497393356]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, 2)
-script = ExtResource("6_svpv3")
-kind = 7
-tags = PackedStringArray("torch", "fungus")
-chance = 0.35
-pool = PackedStringArray()
-
-[node name="Decoration7" type="Marker3D" parent="." unique_id=963962723]
-transform = Transform3D(0.9996777, 0, 0.025387082, 0, 1, 0, -0.025387082, 0, 0.9996777, -0.39208683, 0, 0.5771508)
-script = ExtResource("6_svpv3")
-tags = PackedStringArray("rubble", "bones", "barrel", "crate", "rails", "puddle")
-chance = 0.4
-pool = PackedStringArray()
-
-[node name="Ceiling8" type="Marker3D" parent="." unique_id=779821403]
-transform = Transform3D(-0.74843365, 0, -0.6632097, 0, 1, 0, 0.6632097, 0, -0.74843365, 0, 4.95, -2)
-script = ExtResource("6_svpv3")
-kind = 12
-tags = PackedStringArray("cobweb", "chain")
-chance = 0.2
-pool = PackedStringArray()
-
-[node name="Ceiling9" type="Marker3D" parent="." unique_id=1418025572]
-transform = Transform3D(-0.7504314, 0, -0.66094834, 0, 1, 0, 0.66094834, 0, -0.7504314, 0, 4.95, 2)
-script = ExtResource("6_svpv3")
-kind = 12
-tags = PackedStringArray("cobweb", "chain")
-chance = 0.2
-pool = PackedStringArray()
-
 [node name="Enemy10" type="Marker3D" parent="." unique_id=2047497476]
 transform = Transform3D(-0.15413813, 0, -0.9880493, 0, 1, 0, 0.9880493, 0, -0.15413813, -0.24230492, 0, -0.5751498)
 script = ExtResource("6_svpv3")

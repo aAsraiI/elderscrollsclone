@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_hnp4l"]
+
+[node name="WallShelf" type="StaticBody3D" unique_id=318945784]
+script = ExtResource("1_hnp4l")
+furniture = "kit/furniture/common/furn_com_shelf_01"
+fallback = "prop/shelf"
+loot_tags = PackedStringArray()

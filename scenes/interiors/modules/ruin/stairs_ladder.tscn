@@ -6,7 +6,7 @@
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="4_iq38t"]
 [ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="5_tjy2w"]
 [ext_resource type="Script" path="res://scripts/interiors/ladder.gd" id="6_ctdg2"]
-[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="7_0grn5"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/sconce.tscn" id="7_d3so1"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_2nj4u"]
 size = Vector3(4, 0.3, 8)
@@ -476,42 +476,5 @@ mesh = SubResource("BoxMesh_utptu")
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, -0.5)
 script = ExtResource("6_ctdg2")
 
-[node name="Light4" type="Marker3D" parent="." unique_id=156389332]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, -2)
-script = ExtResource("7_0grn5")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light5" type="Marker3D" parent="." unique_id=1553892991]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, 2)
-script = ExtResource("7_0grn5")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light6" type="Marker3D" parent="." unique_id=270005066]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.55)
-script = ExtResource("7_0grn5")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light7" type="Marker3D" parent="." unique_id=325058371]
+[node name="Sconce" parent="." unique_id=496657960 instance=ExtResource("7_d3so1")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, -2)
-script = ExtResource("7_0grn5")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light8" type="Marker3D" parent="." unique_id=739306983]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.55, 0, 2)
-script = ExtResource("7_0grn5")
-kind = 7
-tags = PackedStringArray("torch")
-chance = 0.6
-pool = PackedStringArray()

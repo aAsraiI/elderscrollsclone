@@ -3,7 +3,11 @@
 [ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_fblxi"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_r677l"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="3_gp5uo"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/ritual_circle.tscn" id="4_iasvs"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="4_o2wk2"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/candles.tscn" id="5_dqb8g"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/candle_stand.tscn" id="6_rdpd7"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/weapon_heap.tscn" id="7_7ybbf"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_iasvs"]
 size = Vector3(1.2, 3, 0.7)
@@ -143,50 +147,23 @@ mesh = SubResource("BoxMesh_micui")
 [node name="Shape" type="CollisionShape3D" parent="Part8" unique_id=1925121982]
 shape = SubResource("BoxShape3D_vlfhk")
 
-[node name="Decoration8" type="Marker3D" parent="." unique_id=1066853933]
-script = ExtResource("4_o2wk2")
-tags = PackedStringArray("ritual")
-chance = 1.0
-pool = PackedStringArray()
+[node name="RitualCircle" parent="." unique_id=334244995 instance=ExtResource("4_iasvs")]
+transform = Transform3D(0.99745506, 0, -0.07129786, 0, 1, 0, 0.07129786, 0, 0.99745506, 0, 0, 0)
 
-[node name="Light9" type="Marker3D" parent="." unique_id=2083847923]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0, 0)
-script = ExtResource("4_o2wk2")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Candles" parent="." unique_id=1836540246 instance=ExtResource("5_dqb8g")]
+transform = Transform3D(0.9991313, 0, 0.04167296, 0, 1, 0, -0.04167296, 0, 0.9991313, 2.2, 0, 0)
 
-[node name="Light10" type="Marker3D" parent="." unique_id=1120816074]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.347067e-16, 0, 2.2)
-script = ExtResource("4_o2wk2")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Candles2" parent="." unique_id=292611893 instance=ExtResource("5_dqb8g")]
+transform = Transform3D(0.999962, 0, 0.008721464, 0, 1, 0, -0.008721464, 0, 0.999962, 1.347067e-16, 0, 2.2)
 
-[node name="Light11" type="Marker3D" parent="." unique_id=1714662614]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0, 2.694134e-16)
-script = ExtResource("4_o2wk2")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Candles3" parent="." unique_id=1484736935 instance=ExtResource("5_dqb8g")]
+transform = Transform3D(0.9944574, 0, 0.105140254, 0, 1, 0, -0.105140254, 0, 0.9944574, -2.2, 0, 2.694134e-16)
 
-[node name="Light12" type="Marker3D" parent="." unique_id=941504302]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.041201e-16, 0, -2.2)
-script = ExtResource("4_o2wk2")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
+[node name="CandleStand" parent="." unique_id=1168646860 instance=ExtResource("6_rdpd7")]
+transform = Transform3D(0.99361324, 0, 0.11283948, 0, 1, 0, -0.11283948, 0, 0.99361324, -4.041201e-16, 0, -2.2)
 
-[node name="Decoration13" type="Marker3D" parent="." unique_id=490755801]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -4)
-script = ExtResource("4_o2wk2")
-tags = PackedStringArray("bones", "remains")
-chance = 0.9
-pool = PackedStringArray()
+[node name="WeaponHeap" parent="." unique_id=212059753 instance=ExtResource("7_7ybbf")]
+transform = Transform3D(0.9981724, 0, -0.060431026, 0, 1, 0, 0.060431026, 0, 0.9981724, -5, 0, -4)
 
 [node name="Enemy14" type="Marker3D" parent="." unique_id=1275471608]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 3)

@@ -13,6 +13,8 @@ extends "res://tools/build_interiors.gd"
 ##   Via_<spot>_<n>               the way to a spot behind a wall or upstairs, in order
 ## A scene that exists is never overwritten (hand edits are safe); pass --force to rebuild.
 ##   godot --headless --path . -s res://tools/build_houses.gd [-- --force]
+## Since Alpha 1.20 the game no longer fills furniture spawn points: after a --force rebuild run
+## tools/bake_room_props.gd to turn them into placed props.
 
 const HOUSE_DIR := "res://scenes/interiors/houses/"
 

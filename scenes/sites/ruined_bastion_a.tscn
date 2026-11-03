@@ -4,8 +4,11 @@
 [ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="2_p3gce"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="3_jf4xl"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="4_bfwfx"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/boulder.tscn" id="4_gilx6"]
 [ext_resource type="Script" path="res://scripts/sites/site_link.gd" id="5_gilx6"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/rubble.tscn" id="6_doylo"]
 [ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="6_rlsqp"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/broken_pillar.tscn" id="7_hh8y3"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_doylo"]
 size = Vector3(14, 3, 10)
@@ -86,12 +89,8 @@ tags = PackedStringArray("guard")
 chance = 0.85
 pool = PackedStringArray()
 
-[node name="Decoration2" type="Marker3D" parent="." unique_id=1388161329]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.2, 3, 10.5)
-script = ExtResource("3_jf4xl")
-tags = PackedStringArray("rubble", "broken_pillar")
-chance = 0.8
-pool = PackedStringArray()
+[node name="Boulder" parent="." unique_id=1562813496 instance=ExtResource("4_gilx6")]
+transform = Transform3D(0.99999726, 0, -0.002343876, 0, 1, 0, 0.002343876, 0, 0.99999726, -12.2, 3, 10.5)
 
 [node name="Part2" type="StaticBody3D" parent="." unique_id=87632777 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 3, 6)
@@ -111,12 +110,8 @@ tags = PackedStringArray()
 chance = 0.85
 pool = PackedStringArray()
 
-[node name="Decoration5" type="Marker3D" parent="." unique_id=2027941744]
-transform = Transform3D(0.5403023, 0, 0.84147096, 0, 1, 0, -0.84147096, 0, 0.5403023, 4.4, 6, 8.5)
-script = ExtResource("3_jf4xl")
-tags = PackedStringArray("rubble", "broken_pillar")
-chance = 0.8
-pool = PackedStringArray()
+[node name="Rubble" parent="." unique_id=618522156 instance=ExtResource("6_doylo")]
+transform = Transform3D(0.5893931, 0, 0.8078463, 0, 1, 0, -0.8078463, 0, 0.5893931, 4.4, 6, 8.5)
 
 [node name="Part3" type="StaticBody3D" parent="." unique_id=247073859 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 4.75, -9)
@@ -136,12 +131,8 @@ tags = PackedStringArray()
 chance = 0.85
 pool = PackedStringArray()
 
-[node name="Decoration8" type="Marker3D" parent="." unique_id=1506211557]
-transform = Transform3D(-0.41614684, 0, 0.9092974, 0, 1, 0, -0.9092974, 0, -0.41614684, -0.19999981, 9.5, -7)
-script = ExtResource("3_jf4xl")
-tags = PackedStringArray("rubble", "broken_pillar")
-chance = 0.8
-pool = PackedStringArray()
+[node name="BrokenPillar" parent="." unique_id=1924844099 instance=ExtResource("7_hh8y3")]
+transform = Transform3D(-0.4741011, 0, 0.8804704, 0, 1, 0, -0.8804704, 0, -0.4741011, -0.19999981, 9.5, -7)
 
 [node name="Part4" type="StaticBody3D" parent="." unique_id=575532821 groups=["interior_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 6.5, -8)
@@ -161,12 +152,8 @@ tags = PackedStringArray("archer")
 chance = 0.85
 pool = PackedStringArray()
 
-[node name="Decoration11" type="Marker3D" parent="." unique_id=1140748275]
-transform = Transform3D(-0.9899925, 0, 0.14112, 0, 1, 0, -0.14112, 0, -0.9899925, -12.4, 13, -6)
-script = ExtResource("3_jf4xl")
-tags = PackedStringArray("rubble", "broken_pillar")
-chance = 0.8
-pool = PackedStringArray()
+[node name="Boulder2" parent="." unique_id=803963120 instance=ExtResource("4_gilx6")]
+transform = Transform3D(-0.9983565, 0, 0.05730938, 0, 1, 0, -0.05730938, 0, -0.9983565, -12.4, 13, -6)
 
 [node name="Climb0" type="Node3D" parent="." unique_id=57345242]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -2.5)

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_dvbw8"]
+
+[node name="SackPile" type="Node3D" unique_id=681173544]
+script = ExtResource("1_dvbw8")
+display_name = "Sacks"
+model_key = "kit/containers/all/contain_com_sack_01"
+loot_tags = PackedStringArray("kitchen", "home")

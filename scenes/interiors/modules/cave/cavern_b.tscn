@@ -5,6 +5,9 @@
 [ext_resource type="Material" path="res://data/interiors/materials/rock.tres" id="3_3y061"]
 [ext_resource type="Material" path="res://data/interiors/materials/rock_dark.tres" id="4_sso3d"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="5_3308h"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/stalagmite.tscn" id="5_sso3d"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/stalactite.tscn" id="6_3308h"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/crystal.tscn" id="7_go2lx"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_go2lx"]
 size = Vector3(12, 0.3, 8)
@@ -320,97 +323,32 @@ mesh = SubResource("BoxMesh_sxb86")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_1_Top" unique_id=1633163055]
 shape = SubResource("BoxShape3D_hbrqp")
 
-[node name="Decoration4" type="Marker3D" parent="." unique_id=410975677]
-transform = Transform3D(0.048102956, 0, 0.99884236, 0, 1, 0, -0.99884236, 0, 0.048102956, 4.2710752, 0, 0.5968425)
-script = ExtResource("5_3308h")
-tags = PackedStringArray("stalagmite", "boulder", "rock")
-chance = 0.85
-pool = PackedStringArray()
+[node name="Stalagmite" parent="." unique_id=756749984 instance=ExtResource("5_sso3d")]
+transform = Transform3D(0.13569489, 0, 0.9907506, 0, 1, 0, -0.9907506, 0, 0.13569489, 4.2710752, 0, 0.5968425)
 
-[node name="Decoration5" type="Marker3D" parent="." unique_id=9446834]
-transform = Transform3D(0.6717633, 0, -0.74076587, 0, 1, 0, 0.74076587, 0, 0.6717633, 1.8697062, 0, 2.365133)
-script = ExtResource("5_3308h")
-tags = PackedStringArray("stalagmite", "boulder", "rock")
-chance = 0.85
-pool = PackedStringArray()
+[node name="Stalagmite2" parent="." unique_id=1373521065 instance=ExtResource("5_sso3d")]
+transform = Transform3D(0.5997619, 0, -0.8001785, 0, 1, 0, 0.8001785, 0, 0.5997619, 1.8697062, 0, 2.365133)
 
-[node name="Decoration6" type="Marker3D" parent="." unique_id=1196766860]
+[node name="Stalactite" parent="." unique_id=1169114470 instance=ExtResource("6_3308h")]
 transform = Transform3D(0.2743378, 0, 0.9616334, 0, 1, 0, -0.9616334, 0, 0.2743378, -3.5408385, 0, -1.5133485)
-script = ExtResource("5_3308h")
-tags = PackedStringArray("stalagmite", "boulder", "rock")
-chance = 0.85
-pool = PackedStringArray()
 
-[node name="Decoration7" type="Marker3D" parent="." unique_id=1282680324]
-transform = Transform3D(0.9998238, 0, 0.0187708, 0, 1, 0, -0.0187708, 0, 0.9998238, 0.3629918, 0, 2.2924721)
-script = ExtResource("5_3308h")
-tags = PackedStringArray("stalagmite", "boulder", "rock")
-chance = 0.85
-pool = PackedStringArray()
+[node name="Stalagmite3" parent="." unique_id=828273758 instance=ExtResource("5_sso3d")]
+transform = Transform3D(0.9943624, 0, 0.10603426, 0, 1, 0, -0.10603426, 0, 0.9943624, 0.3629918, 0, 2.2924721)
 
-[node name="Ceiling8" type="Marker3D" parent="." unique_id=1615533864]
-transform = Transform3D(-0.49450132, 0, -0.86917686, 0, 1, 0, 0.86917686, 0, -0.49450132, -4, 4.95, -2)
-script = ExtResource("5_3308h")
-kind = 12
-tags = PackedStringArray("rock")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Ceiling9" type="Marker3D" parent="." unique_id=1927185302]
+[node name="Stalactite2" parent="." unique_id=2104336975 instance=ExtResource("6_3308h")]
 transform = Transform3D(-0.23579836, 0, 0.971802, 0, 1, 0, -0.971802, 0, -0.23579836, -4, 4.95, 2)
-script = ExtResource("5_3308h")
-kind = 12
-tags = PackedStringArray("rock")
-chance = 0.5
-pool = PackedStringArray()
 
-[node name="Ceiling10" type="Marker3D" parent="." unique_id=1456130395]
+[node name="Stalactite3" parent="." unique_id=596471087 instance=ExtResource("6_3308h")]
 transform = Transform3D(0.36147636, 0, 0.9323813, 0, 1, 0, -0.9323813, 0, 0.36147636, 0, 4.95, -2)
-script = ExtResource("5_3308h")
-kind = 12
-tags = PackedStringArray("rock")
-chance = 0.5
-pool = PackedStringArray()
 
-[node name="Ceiling11" type="Marker3D" parent="." unique_id=377629068]
+[node name="Stalactite4" parent="." unique_id=1703621545 instance=ExtResource("6_3308h")]
 transform = Transform3D(-0.81833124, 0, 0.5747469, 0, 1, 0, -0.5747469, 0, -0.81833124, 0, 4.95, 2)
-script = ExtResource("5_3308h")
-kind = 12
-tags = PackedStringArray("rock")
-chance = 0.5
-pool = PackedStringArray()
 
-[node name="Ceiling12" type="Marker3D" parent="." unique_id=1225441679]
-transform = Transform3D(-0.93063134, 0, -0.365958, 0, 1, 0, 0.365958, 0, -0.93063134, 4, 4.95, -2)
-script = ExtResource("5_3308h")
-kind = 12
-tags = PackedStringArray("rock")
-chance = 0.5
-pool = PackedStringArray()
+[node name="Crystal" parent="." unique_id=527512038 instance=ExtResource("7_go2lx")]
+transform = Transform3D(-0.9967347, 0, -0.080746315, 0, 1, 0, 0.080746315, 0, -0.9967347, 4.544132, 0, -1.9709499)
 
-[node name="Ceiling13" type="Marker3D" parent="." unique_id=1368426273]
-transform = Transform3D(0.5526991, 0, 0.8333809, 0, 1, 0, -0.8333809, 0, 0.5526991, 4, 4.95, 2)
-script = ExtResource("5_3308h")
-kind = 12
-tags = PackedStringArray("rock")
-chance = 0.5
-pool = PackedStringArray()
-
-[node name="Light14" type="Marker3D" parent="." unique_id=268493987]
-transform = Transform3D(-0.9896801, 0, -0.14329441, 0, 1, 0, 0.14329441, 0, -0.9896801, 4.544132, 0, -1.9709499)
-script = ExtResource("5_3308h")
-kind = 7
-tags = PackedStringArray("fungus", "crystal")
-chance = 0.6
-pool = PackedStringArray()
-
-[node name="Light15" type="Marker3D" parent="." unique_id=974910076]
-transform = Transform3D(-0.39342064, 0, -0.9193586, 0, 1, 0, 0.9193586, 0, -0.39342064, 2.4880419, 0, 0.4501512)
-script = ExtResource("5_3308h")
-kind = 7
-tags = PackedStringArray("fungus", "crystal")
-chance = 0.6
-pool = PackedStringArray()
+[node name="Crystal2" parent="." unique_id=277743960 instance=ExtResource("7_go2lx")]
+transform = Transform3D(-0.45795682, 0, -0.8889745, 0, 1, 0, 0.8889745, 0, -0.45795682, 2.4880419, 0, 0.4501512)
 
 [node name="Enemy16" type="Marker3D" parent="." unique_id=1424351145]
 transform = Transform3D(0.89108074, 0, -0.4538448, 0, 1, 0, 0.4538448, 0, 0.89108074, -2.895512, 0, -0.26403022)

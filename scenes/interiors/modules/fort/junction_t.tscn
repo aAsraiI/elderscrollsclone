@@ -226,29 +226,6 @@ mesh = SubResource("BoxMesh_5ofm7")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_0_Top" unique_id=294408187]
 shape = SubResource("BoxShape3D_5wsqm")
 
-[node name="Light4" type="Marker3D" parent="." unique_id=30186760]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.55)
-script = ExtResource("6_m7ngr")
-kind = 7
-tags = PackedStringArray("torch", "fungus")
-chance = 0.35
-pool = PackedStringArray()
-
-[node name="Decoration5" type="Marker3D" parent="." unique_id=856499002]
-transform = Transform3D(0.97864807, 0, 0.20554309, 0, 1, 0, -0.20554309, 0, 0.97864807, -0.2100117, 0, 0.032619327)
-script = ExtResource("6_m7ngr")
-tags = PackedStringArray("rubble", "bones", "barrel", "crate", "rails", "puddle")
-chance = 0.4
-pool = PackedStringArray()
-
-[node name="Ceiling6" type="Marker3D" parent="." unique_id=1935322227]
-transform = Transform3D(0.40677908, 0, 0.91352654, 0, 1, 0, -0.91352654, 0, 0.40677908, 0, 4.95, 0)
-script = ExtResource("6_m7ngr")
-kind = 12
-tags = PackedStringArray("cobweb", "chain")
-chance = 0.2
-pool = PackedStringArray()
-
 [node name="Enemy7" type="Marker3D" parent="." unique_id=341963167]
 transform = Transform3D(0.8509993, 0, -0.5251668, 0, 1, 0, 0.5251668, 0, 0.8509993, 0.15612105, 0, 0.33134285)
 script = ExtResource("6_m7ngr")

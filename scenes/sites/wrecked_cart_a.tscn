@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_cwi7b"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_mlqym"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/broken_cart.tscn" id="2_x517n"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/sacks.tscn" id="3_x2ehk"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/barrel.tscn" id="4_5fr75"]
 
 [node name="WreckedCartA" type="Node3D" unique_id=235978089]
 script = ExtResource("1_cwi7b")
@@ -10,33 +13,14 @@ biomes = PackedStringArray()
 size_class = 0
 themes = PackedStringArray("camp")
 
-[node name="Decoration0" type="Marker3D" parent="." unique_id=1727524562]
-transform = Transform3D(0.921061, 0, 0.38941833, 0, 1, 0, -0.38941833, 0, 0.921061, 0, 0, 0)
-script = ExtResource("2_mlqym")
-tags = PackedStringArray("cart", "wreck")
-chance = 1.0
-pool = PackedStringArray()
+[node name="BrokenCart" parent="." unique_id=2084705094 instance=ExtResource("2_x517n")]
+transform = Transform3D(0.92706996, 0, 0.37488842, 0, 1, 0, -0.37488842, 0, 0.92706996, 0, 0, 0)
 
-[node name="Decoration1" type="Marker3D" parent="." unique_id=1710212428]
-transform = Transform3D(0.9553365, 0, 0.29552022, 0, 1, 0, -0.29552022, 0, 0.9553365, 2, 0, 1)
-script = ExtResource("2_mlqym")
-tags = PackedStringArray("crate", "barrel", "sack")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Sacks" parent="." unique_id=211499194 instance=ExtResource("3_x2ehk")]
+transform = Transform3D(0.9844784, 0, 0.17550597, 0, 1, 0, -0.17550597, 0, 0.9844784, 2, 0, 1)
 
-[node name="Decoration2" type="Marker3D" parent="." unique_id=1084009777]
-transform = Transform3D(0.4535961, 0, 0.8912074, 0, 1, 0, -0.8912074, 0, 0.4535961, -1.8, 0, -1.2)
-script = ExtResource("2_mlqym")
-tags = PackedStringArray("crate", "barrel", "sack")
-chance = 0.8
-pool = PackedStringArray()
-
-[node name="Decoration3" type="Marker3D" parent="." unique_id=322321326]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0, -2)
-script = ExtResource("2_mlqym")
-tags = PackedStringArray("bones", "remains")
-chance = 0.6
-pool = PackedStringArray()
+[node name="Barrel" parent="." unique_id=651565992 instance=ExtResource("4_5fr75")]
+transform = Transform3D(0.5810313, 0, 0.8138813, 0, 1, 0, -0.8138813, 0, 0.5810313, -1.8, 0, -1.2)
 
 [node name="Loot4" type="Marker3D" parent="." unique_id=1545427974]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0, 1.8)

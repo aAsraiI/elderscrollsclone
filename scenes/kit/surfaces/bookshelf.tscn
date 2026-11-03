@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_miix4"]
+
+[node name="Bookshelf" type="StaticBody3D" unique_id=879011421]
+script = ExtResource("1_miix4")
+furniture = "prop/bookshelf"
+fallback = "prop/bookcase"
+loot_tags = PackedStringArray("library")

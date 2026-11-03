@@ -4,7 +4,10 @@
 [ext_resource type="Script" path="res://scripts/interiors/doorway_marker.gd" id="2_6kp3w"]
 [ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="3_ws2lr"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="4_a860p"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/pillar.tscn" id="5_a860p"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="5_t2tra"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/rubble.tscn" id="6_t2tra"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/boulder.tscn" id="7_6anuh"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_6anuh"]
 size = Vector3(12, 0.3, 8)
@@ -282,65 +285,14 @@ mesh = SubResource("BoxMesh_1bd55")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_1" unique_id=1119564547]
 shape = SubResource("BoxShape3D_dloxt")
 
-[node name="Furniture3" type="Marker3D" parent="." unique_id=708306963]
-transform = Transform3D(-0.9518028, 0, -0.3067107, 0, 1, 0, 0.3067107, 0, -0.9518028, -4, 0, 2)
-script = ExtResource("5_t2tra")
-kind = 0
-tags = PackedStringArray("pillar", "broken_pillar")
-chance = 0.4
-pool = PackedStringArray()
+[node name="Pillar" parent="." unique_id=155347044 instance=ExtResource("5_a860p")]
+transform = Transform3D(0.29817346, 0, 0.9545117, 0, 1, 0, -0.9545117, 0, 0.29817346, 0, 0, 2)
 
-[node name="Furniture4" type="Marker3D" parent="." unique_id=94629180]
-transform = Transform3D(-0.9999667, 0, -0.008163449, 0, 1, 0, 0.008163449, 0, -0.9999667, 0, 0, -2)
-script = ExtResource("5_t2tra")
-kind = 0
-tags = PackedStringArray("pillar", "broken_pillar")
-chance = 0.4
-pool = PackedStringArray()
+[node name="Rubble" parent="." unique_id=618522156 instance=ExtResource("6_t2tra")]
+transform = Transform3D(0.7577439, 0, -0.652552, 0, 1, 0, 0.652552, 0, 0.7577439, 4.26577, 0, 0.1849482)
 
-[node name="Furniture5" type="Marker3D" parent="." unique_id=1347267799]
-transform = Transform3D(0.30329597, 0, 0.9528964, 0, 1, 0, -0.9528964, 0, 0.30329597, 0, 0, 2)
-script = ExtResource("5_t2tra")
-kind = 0
-tags = PackedStringArray("pillar", "broken_pillar")
-chance = 0.4
-pool = PackedStringArray()
-
-[node name="Furniture6" type="Marker3D" parent="." unique_id=1706162735]
-transform = Transform3D(-0.25828955, 0, 0.96606755, 0, 1, 0, -0.96606755, 0, -0.25828955, 4, 0, -2)
-script = ExtResource("5_t2tra")
-kind = 0
-tags = PackedStringArray("pillar", "broken_pillar")
-chance = 0.4
-pool = PackedStringArray()
-
-[node name="Decoration7" type="Marker3D" parent="." unique_id=93580178]
-transform = Transform3D(0.8243944, 0, -0.5660157, 0, 1, 0, 0.5660157, 0, 0.8243944, 4.26577, 0, 0.1849482)
-script = ExtResource("5_t2tra")
-tags = PackedStringArray("rubble")
-chance = 0.9
-pool = PackedStringArray()
-
-[node name="Decoration8" type="Marker3D" parent="." unique_id=1098486922]
-transform = Transform3D(-0.89538944, 0, 0.44528386, 0, 1, 0, -0.44528386, 0, -0.89538944, 0.20777225, 0, -1.9769709)
-script = ExtResource("5_t2tra")
-tags = PackedStringArray("rubble")
-chance = 0.9
-pool = PackedStringArray()
-
-[node name="Decoration9" type="Marker3D" parent="." unique_id=302057505]
-transform = Transform3D(-0.3785683, 0, 0.92557335, 0, 1, 0, -0.92557335, 0, -0.3785683, 4.7093525, 0, -0.63826466)
-script = ExtResource("5_t2tra")
-tags = PackedStringArray("rubble")
-chance = 0.9
-pool = PackedStringArray()
-
-[node name="Decoration10" type="Marker3D" parent="." unique_id=1992027958]
-transform = Transform3D(-0.7872149, 0, -0.6166788, 0, 1, 0, 0.6166788, 0, -0.7872149, -4.1123204, 0, 0.99045825)
-script = ExtResource("5_t2tra")
-tags = PackedStringArray("rubble")
-chance = 0.9
-pool = PackedStringArray()
+[node name="Boulder" parent="." unique_id=1562813496 instance=ExtResource("7_6anuh")]
+transform = Transform3D(-0.82886475, 0, -0.559449, 0, 1, 0, 0.559449, 0, -0.82886475, -4.1123204, 0, 0.99045825)
 
 [node name="Enemy11" type="Marker3D" parent="." unique_id=1375415883]
 transform = Transform3D(0.9896212, 0, -0.14370045, 0, 1, 0, 0.14370045, 0, 0.9896212, 4.040715, 0, 0.90372825)

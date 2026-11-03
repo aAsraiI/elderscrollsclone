@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_l4acn"]
+
+[node name="ChestOrnate" type="Node3D" unique_id=499835804]
+script = ExtResource("1_l4acn")
+display_name = "Ornate Chest"
+model_key = "kit/containers/all/contain_de_chest_01"
+loot_tags = PackedStringArray("rich_home", "jewelry")

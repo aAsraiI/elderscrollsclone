@@ -6,6 +6,8 @@ extends "res://tools/build_interiors.gd"
 ##   biome rules        each biome's Poi Rules get the kinds that suit it
 ## Scenes and kinds that exist are kept (hand edits are safe); pass --force to make them again.
 ##   godot --headless --path . -s res://tools/build_sites.gd [-- --force]
+## Since Alpha 1.20 the game no longer fills furniture spawn points: after a --force rebuild run
+## tools/bake_room_props.gd to turn them into placed props.
 
 const SITE_DIR := "res://scenes/sites/"
 const KIND_DIR := "res://data/world/Sites/"

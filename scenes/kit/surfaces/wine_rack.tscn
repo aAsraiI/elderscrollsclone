@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_gxag5"]
+
+[node name="WineRack" type="StaticBody3D" unique_id=56187047]
+script = ExtResource("1_gxag5")
+furniture = "kit/furniture/common/furn_com_winerack"
+fallback = "prop/drying_rack"
+loot_tags = PackedStringArray("tavern")

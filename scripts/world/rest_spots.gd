@@ -48,7 +48,7 @@ func _player() -> Node:
 
 
 func is_own_home() -> bool:
-	return Homes.owns(building_id)
+	return building_id == "" or Homes.owns(building_id)  # a bed outside any building (a camp's bedroll) is anyone's
 
 
 func get_prompt() -> String:

@@ -41,42 +41,36 @@ func t_decorator() -> void:
 	WorldState.clear()
 	var counts := {}
 	for theme in ["home", "tavern", "smithy", "library", "crypt", "mine", "vault"]:
-		var trial := Node3D.new()
+		var trial := _furnished()
 		var r := RoomDecorator.decorate(trial, Rect2(-5, -4, 10, 8), theme, 30, 77, "", "t/" + theme, [Vector3(0, 0, -4)])
 		counts[theme] = r
-		check("%s: furniture and things on it" % theme, r["pieces"] >= 3 and r["items"] >= 2, str(r))
+		check("%s: things on the room's own furniture, none added" % theme, r["pieces"] == 0 and r["containers"] == 0 and r["items"] >= 2, str(r))
 		trial.free()
-	var room := Node3D.new()
+	var room := _furnished()
 	RoomDecorator.decorate(room, Rect2(-5, -4, 10, 8), "home", 10, 5, "house_1", "t/same", [Vector3(0, 0, -4)])
 	var first := _items(room).map(func(w: WorldItem) -> String: return "%s@%s" % [w.item.display_name, w.position.snapped(Vector3.ONE * 0.01)])
 	room.free()
-	room = Node3D.new()
+	room = _furnished()
 	RoomDecorator.decorate(room, Rect2(-5, -4, 10, 8), "home", 10, 5, "house_1", "t/same", [Vector3(0, 0, -4)])
 	var again := _items(room).map(func(w: WorldItem) -> String: return "%s@%s" % [w.item.display_name, w.position.snapped(Vector3.ONE * 0.01)])
 	check("the same room is furnished the same way every time", first == again and first.size() > 0)
 	var items := _items(room)
 	check("things are owned, frozen and remembered by slot", items.all(func(w: WorldItem) -> bool: return w.owner_id == "house_1" and w.start_frozen and (w.slot_id.begins_with("t/same/slot_") or w.slot_id.begins_with("t/same/clutter_"))))  # clutter is real items too (1.15.6)
 	check("owned things say Steal", (items[0] as WorldItem).get_prompt().begins_with("Steal"))
-	var path_clear := true
-	for c in room.get_children():
-		if c is Node3D and String(c.name).begins_with("Decor_"):
-			var p := (c as Node3D).position
-			if absf(p.x) < 0.9 and p.z < 0.0:
-				path_clear = false
-	check("a walkway from the door stays clear", path_clear)
+	check("no furniture is added (the room's scene has it all)", room.get_children().filter(func(c: Node) -> bool: return c is InteriorProp).size() == 4)
 	# taking a slot empties it; shops and homes refill after a few days
 	var slot := (items[0] as WorldItem).slot_id
 	WorldState.set_record(WorldItem.taken_key(slot), {"day": 1})
 	room.free()
-	room = Node3D.new()
+	room = _furnished()
 	RoomDecorator.decorate(room, Rect2(-5, -4, 10, 8), "home", 10, 5, "house_1", "t/same", [Vector3(0, 0, -4)], 3, 2)
 	check("a taken thing stays gone", not _items(room).any(func(w: WorldItem) -> bool: return w.slot_id == slot))
 	room.free()
-	room = Node3D.new()
+	room = _furnished()
 	RoomDecorator.decorate(room, Rect2(-5, -4, 10, 8), "home", 10, 5, "house_1", "t/same", [Vector3(0, 0, -4)], 3, 5)
 	check("...until the room restocks", _items(room).any(func(w: WorldItem) -> bool: return w.slot_id == slot))
 	room.free()
-	room = Node3D.new()
+	room = _furnished()
 	RoomDecorator.decorate(room, Rect2(-6, -6, 12, 12), "vault", 60, 9, "", "t/vault", [Vector3(0, 0, -6)])
 	check("dungeon things belong to nobody", _items(room).all(func(w: WorldItem) -> bool: return w.owner_id == "" and w.get_prompt().begins_with("Take")))
 	room.free()
@@ -125,3 +119,13 @@ func t_in_game() -> void:
 		if c is Node3D and String(c.name).begins_with("Decor_") and Vector2((c as Node3D).position.x - work.x, (c as Node3D).position.z - work.z).length() < 0.6:
 			blocked = true
 	check("nothing is built on the resident's work spot", not blocked)
+
+
+# A room with its own furniture (since 1.20 the decorator only sets loot on what a room already has)
+func _furnished() -> Node3D:
+	var r := Node3D.new()
+	for p: Array in [["table", Vector3(0, 0, 1)], ["table_meal", Vector3(2.5, 0, -1)], ["shelf", Vector3(-3, 0, 3.4)], ["bookshelf", Vector3(3, 0, 3.4)]]:
+		var prop := (load("res://scenes/interiors/props/%s.tscn" % p[0]) as PackedScene).instantiate() as Node3D
+		prop.position = p[1]
+		r.add_child(prop, true)
+	return r

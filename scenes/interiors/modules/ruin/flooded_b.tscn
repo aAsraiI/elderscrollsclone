@@ -4,7 +4,9 @@
 [ext_resource type="Script" path="res://scripts/interiors/doorway_marker.gd" id="2_32svf"]
 [ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="3_crni3"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="4_tw0fd"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/rubble.tscn" id="5_crni3"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="5_tcjh5"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/broken_pillar.tscn" id="6_tw0fd"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_avl8t"]
 size = Vector3(12, 0.3, 12)
@@ -352,33 +354,14 @@ mesh = SubResource("BoxMesh_voko7")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_2_Top" unique_id=1768037520]
 shape = SubResource("BoxShape3D_qo8fo")
 
-[node name="Decoration4" type="Marker3D" parent="." unique_id=1032307572]
-transform = Transform3D(0.99889976, 0, 0.046896722, 0, 1, 0, -0.046896722, 0, 0.99889976, 1.2092366, 0, 1.8142066)
-script = ExtResource("5_tcjh5")
-tags = PackedStringArray("puddle", "rubble")
-chance = 0.9
-pool = PackedStringArray()
+[node name="Rubble" parent="." unique_id=618522156 instance=ExtResource("5_crni3")]
+transform = Transform3D(0.99907255, 0, 0.043058556, 0, 1, 0, -0.043058556, 0, 0.99907255, 1.2092366, 0, 1.8142066)
 
-[node name="Decoration5" type="Marker3D" parent="." unique_id=1315031560]
-transform = Transform3D(-0.96437204, 0, -0.26454973, 0, 1, 0, 0.26454973, 0, -0.96437204, -2.6599352, 0, 1.3550744)
-script = ExtResource("5_tcjh5")
-tags = PackedStringArray("puddle", "rubble")
-chance = 0.9
-pool = PackedStringArray()
+[node name="Rubble2" parent="." unique_id=1932110915 instance=ExtResource("5_crni3")]
+transform = Transform3D(-0.98772097, 0, -0.15622875, 0, 1, 0, 0.15622875, 0, -0.98772097, -2.6599352, 0, 1.3550744)
 
-[node name="Decoration6" type="Marker3D" parent="." unique_id=16726318]
-transform = Transform3D(-0.99938124, 0, -0.035172924, 0, 1, 0, 0.035172924, 0, -0.99938124, 4.6983156, 0, -4.1701393)
-script = ExtResource("5_tcjh5")
-tags = PackedStringArray("puddle", "rubble")
-chance = 0.9
-pool = PackedStringArray()
-
-[node name="Decoration7" type="Marker3D" parent="." unique_id=931640332]
-transform = Transform3D(-0.9890593, 0, 0.14751846, 0, 1, 0, -0.14751846, 0, -0.9890593, -2.1266382, 0, 2.291747)
-script = ExtResource("5_tcjh5")
-tags = PackedStringArray("puddle", "rubble")
-chance = 0.9
-pool = PackedStringArray()
+[node name="BrokenPillar" parent="." unique_id=1924844099 instance=ExtResource("6_tw0fd")]
+transform = Transform3D(-0.997848, 0, -0.06557054, 0, 1, 0, 0.06557054, 0, -0.997848, 4.6983156, 0, -4.1701393)
 
 [node name="Enemy8" type="Marker3D" parent="." unique_id=1581652558]
 transform = Transform3D(-0.91601336, 0, 0.40114772, 0, 1, 0, -0.40114772, 0, -0.91601336, 0.9272814, 0, 0.39064693)

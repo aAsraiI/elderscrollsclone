@@ -93,7 +93,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(ACTION) and not event.is_echo() and not get_tree().paused:
+	if event.is_action_pressed(ACTION) and not event.is_echo() and not get_tree().paused and not get_parent().get_meta("flying", false):
 		set_sneaking(not sneaking)
 		get_viewport().set_input_as_handled()
 

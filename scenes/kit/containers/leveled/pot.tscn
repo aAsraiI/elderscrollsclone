@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_4qkt8"]
+
+[node name="Pot" type="Node3D" unique_id=292594890]
+script = ExtResource("1_4qkt8")
+display_name = "Clay Pot"
+model_key = "kit/containers/all/contain_pot_redware_01"
+loot_tags = PackedStringArray("kitchen", "alchemist")

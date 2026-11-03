@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_uw0rm"]
+
+[node name="Desk" type="Node3D" unique_id=1477041752]
+script = ExtResource("1_uw0rm")
+display_name = "Desk Drawer"
+model_key = "kit/containers/all/contain_de_desk_01"
+loot_tags = PackedStringArray("library", "jewelry")

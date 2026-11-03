@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_bbwvc"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_5md0p"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="3_bofck"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/candles.tscn" id="4_5md0p"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="4_8pdn3"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_0r087"]
@@ -98,28 +99,11 @@ shape = SubResource("BoxShape3D_yb6hn")
 [node name="Inscription" type="Marker3D" parent="." unique_id=83898538]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 1.2, -2.5)
 
-[node name="Light6" type="Marker3D" parent="." unique_id=306692013]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 1.2, -1.9)
-script = ExtResource("4_8pdn3")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Candles" parent="." unique_id=1836540246 instance=ExtResource("4_5md0p")]
+transform = Transform3D(0.9970389, 0, -0.07689862, 0, 1, 0, 0.07689862, 0, 0.9970389, -1.6, 1.2, -1.9)
 
-[node name="Light7" type="Marker3D" parent="." unique_id=1477592165]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 1.2, -1.9)
-script = ExtResource("4_8pdn3")
-kind = 7
-tags = PackedStringArray("candle")
-chance = 1.0
-pool = PackedStringArray()
-
-[node name="Decoration8" type="Marker3D" parent="." unique_id=1314606017]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -3.2)
-script = ExtResource("4_8pdn3")
-tags = PackedStringArray("bucket", "crate")
-chance = 0.7
-pool = PackedStringArray()
+[node name="Candles2" parent="." unique_id=1707178644 instance=ExtResource("4_5md0p")]
+transform = Transform3D(0.99996656, 0, -0.008174626, 0, 1, 0, 0.008174626, 0, 0.99996656, 1.6, 1.2, -1.9)
 
 [node name="Loot9" type="Marker3D" parent="." unique_id=889598095]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -1.9)

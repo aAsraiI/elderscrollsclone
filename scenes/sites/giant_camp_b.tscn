@@ -5,6 +5,8 @@
 [ext_resource type="Material" path="res://data/interiors/materials/glow.tres" id="3_8kkxr"]
 [ext_resource type="Material" path="res://data/interiors/materials/bone.tres" id="4_omaw8"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="5_5slfj"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/campfire.tscn" id="5_8kkxr"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/weapon_heap.tscn" id="6_omaw8"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_j652e"]
 size = Vector3(2.4, 0.4, 2.4)
@@ -169,27 +171,14 @@ mesh = SubResource("BoxMesh_jy1fg")
 [node name="Shape" type="CollisionShape3D" parent="Part10" unique_id=367499282]
 shape = SubResource("BoxShape3D_gk6ed")
 
-[node name="Light10" type="Marker3D" parent="." unique_id=1177836750]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.5)
-script = ExtResource("5_5slfj")
-kind = 7
-tags = PackedStringArray("campfire")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Campfire" parent="." unique_id=2088736315 instance=ExtResource("5_8kkxr")]
+transform = Transform3D(0.99838495, 0, 0.056810457, 0, 1, 0, -0.056810457, 0, 0.99838495, 0, 0, -3.5)
 
-[node name="Decoration11" type="Marker3D" parent="." unique_id=1168164880]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 5)
-script = ExtResource("5_5slfj")
-tags = PackedStringArray("bones", "remains")
-chance = 1.0
-pool = PackedStringArray()
+[node name="WeaponHeap" parent="." unique_id=212059753 instance=ExtResource("6_omaw8")]
+transform = Transform3D(0.9983037, 0, -0.05822074, 0, 1, 0, 0.05822074, 0, 0.9983037, -8, 0, 5)
 
-[node name="Decoration12" type="Marker3D" parent="." unique_id=1908347471]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -9)
-script = ExtResource("5_5slfj")
-tags = PackedStringArray("bones", "remains")
-chance = 1.0
-pool = PackedStringArray()
+[node name="WeaponHeap2" parent="." unique_id=1975294564 instance=ExtResource("6_omaw8")]
+transform = Transform3D(0.99730635, 0, -0.07334905, 0, 1, 0, 0.07334905, 0, 0.99730635, 6, 0, -9)
 
 [node name="Boss13" type="Marker3D" parent="." unique_id=959007259]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 4)

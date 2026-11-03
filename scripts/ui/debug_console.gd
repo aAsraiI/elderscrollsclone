@@ -6,7 +6,21 @@ extends CanvasLayer
 
 const ACTION := "debug_console"
 const HELP := """help                      this list
-tp <town>  |  tp <x> <z>  go to a town by name, or a spot on the map (meters)
+tp <town>  |  tp <x> <z>  go to a town by name, or a spot on the map (meters)  (also: teleport)
+tp nearest [kind] [out]   go into the nearest dungeon or building; kinds: dungeon, cave, crypt, fort,
+                          mine, barrow, sewer, ruin, vault, house, farm, shop, inn, smithy, temple,
+                          guild [fighters|mages|thieves...], seat (lord's hall), building, site, town,
+                          city, village. "out" stops at the door. (tpn = tp nearest)
+near [kind]               list the 8 nearest places of a kind, with distance and direction
+exit                      leave the building or dungeon you are in
+speed [times]             move faster (speed 3); speed alone puts it back to 1
+fly                       allow flight: double-tap Space to take off or land; Space up, Ctrl down,
+                          Shift faster (again: off)
+noclip                    fly through walls and the ground (again: off)
+pos                       where you are: position, land, town or dungeon
+reveal                    every place on the map found
+bounty [clear]            your bounties (clear: wiped in every town)
+timescale <x>             game speed (0.25 slow motion, 1 normal, 4 fast)
 give <item> [count]       an item by its id or file name (iron_sword, health_potion...)
 gold <amount>             add gold (negative takes it)
 skill <skill> [levels]    raise a skill (one_handed, destruction, sneak...)
@@ -182,8 +196,63 @@ func run(text: String) -> String:
 		"clear":
 			_log.clear()
 			return ""
-		"tp":
+		"tp", "teleport":
+			if not args.is_empty() and String(args[0]).to_lower() == "nearest":
+				return _tp_nearest(args.slice(1), p, world)
 			return _tp(args, p, world)
+		"tpn":
+			return _tp_nearest(args, p, world)
+		"near":
+			return _near(args, p, world)
+		"exit", "leave":
+			if world == null or world.dungeons == null or not world.dungeons.is_inside():
+				return "You are not inside anything."
+			_set_open(false)
+			world.dungeons.exit()
+			return "Leaving."
+		"speed":
+			var pl: Variant = p  # the player script (player.gd has no class name)
+			pl.debug_speed = clampf(float(args[0]), 0.1, 20.0) if not args.is_empty() and String(args[0]).is_valid_float() else 1.0
+			return "Speed x%s." % str(snappedf(pl.debug_speed, 0.01))
+		"fly":
+			var pl: Variant = p  # the player script (player.gd has no class name)
+			pl.can_fly = not pl.can_fly
+			if not pl.can_fly:
+				pl.noclip = false
+			pl.set_flying(pl.flying)
+			return "Flight %s." % ("on: double-tap Space to take off or land (Space up, Ctrl down, Shift faster)" if pl.can_fly else "off")
+		"noclip":
+			var pl: Variant = p  # the player script (player.gd has no class name)
+			pl.noclip = not pl.noclip
+			if pl.noclip:
+				pl.can_fly = true
+			pl.set_flying(pl.noclip)
+			return "Noclip %s." % ("on: you fly through everything (Space up, Ctrl down)" if pl.noclip else "off (flight stays allowed: type fly to stop it)")
+		"pos", "where":
+			return _where(p, world)
+		"reveal":
+			if world == null or world.discovery == null:
+				return "No world."
+			var n := 0
+			for poi in world.pois:
+				if world.discovery.mark_found(poi):
+					n += 1
+			return "%d places found." % n
+		"bounty":
+			var all := CrimeManager.bounties()
+			if not args.is_empty() and String(args[0]) == "clear":
+				var crime := get_tree().get_first_node_in_group("crime") as CrimeManager
+				for town: String in all:
+					if crime != null:
+						crime.set_bounty(town, 0)
+					else:
+						CrimeManager.set_bounty_raw(town, 0)
+				return "Bounties cleared in %d towns." % all.size()
+			return "No bounty anywhere." if all.is_empty() else "
+".join(all.keys().map(func(t: String) -> String: return "%s: %d gold" % [t, all[t]]))
+		"timescale":
+			Engine.time_scale = clampf(float(args[0]), 0.05, 10.0) if not args.is_empty() and String(args[0]).is_valid_float() else 1.0
+			return "Game speed x%s." % str(snappedf(Engine.time_scale, 0.01))
 		"give":
 			if args.is_empty():
 				return "give <item> [count]"
@@ -362,3 +431,148 @@ func _talk(name: String, p: Node3D, world: WorldManager) -> String:
 		ui.closed.connect(e.queue_free, CONNECT_ONE_SHOT)
 		ui.open_with.call_deferred(e)
 	return "Talking to %s." % e.display_name
+
+
+# ---------------------------------------------------------------- places near you
+
+## Words for the kinds of building (BuildingPlot.Kind)
+const BUILDING_KINDS := {"house": BuildingPlot.Kind.HOUSE, "farm": BuildingPlot.Kind.FARM, "shop": BuildingPlot.Kind.SHOP,
+	"inn": BuildingPlot.Kind.INN, "smithy": BuildingPlot.Kind.SMITHY, "temple": BuildingPlot.Kind.TEMPLE,
+	"guild": BuildingPlot.Kind.GUILD_HALL, "seat": BuildingPlot.Kind.SEAT, "castle": BuildingPlot.Kind.SEAT, "hall": BuildingPlot.Kind.SEAT}
+const TOWN_KINDS := {"village": TownData.Kind.VILLAGE, "town": TownData.Kind.TOWN, "city": TownData.Kind.CITY}
+
+
+# Where you are on the map (inside a building or dungeon: the door you came in by)
+func _map_spot(p: Node3D, world: WorldManager) -> Vector3:
+	if world.dungeons != null and world.dungeons.is_inside():
+		return world.dungeons._return_position
+	return p.global_position
+
+
+## Every place of a kind: [name, entrance id ("" = go to its spot only), spot outside, world position].
+## kind "" = any dungeon or building; extra narrows it (a guild's name, a dungeon's name or theme).
+func _places(kind: String, extra: String, world: WorldManager) -> Array:
+	var out: Array = []
+	var any := kind == "" or kind == "interior"
+	var dungeon_word := kind in ["dungeon", "cave", "crypt", "fort", "mine", "barrow", "sewer", "sewers", "ruin", "vault", "ice", "ashen", "temple_ruin"]
+	if any or dungeon_word or kind == "site" or (not BUILDING_KINDS.has(kind) and not TOWN_KINDS.has(kind) and kind != "building"):
+		for poi in world.pois:
+			var ent := poi.poi as DungeonEntrancePOIData
+			if ent == null:
+				continue
+			var site := ent is SitePOIData
+			if kind == "site" and not site:
+				continue
+			if kind != "site" and (site or ent.dungeon == null):
+				continue
+			if dungeon_word and kind != "dungeon":
+				var words := ("%s %s %s" % [ent.dungeon.id, ent.dungeon.theme, ent.dungeon.display_name]).to_lower()
+				if not words.contains(kind.trim_suffix("s")):
+					continue
+			elif not any and not dungeon_word and kind != "site":
+				var words := ("%s %s" % [poi.id, Discovery.place_name(world, poi)]).to_lower()
+				if not words.contains(kind):
+					continue  # a dungeon or place by its name
+			var outside := poi.position + Vector3(0, 0, 4).rotated(Vector3.UP, poi.yaw)
+			out.append([Discovery.place_name(world, poi), "" if site else poi.id, outside, poi.position])
+	if TOWN_KINDS.has(kind):
+		for t in world.towns:
+			if t.town != null and (t.poi as TownData).kind == TOWN_KINDS[kind]:
+				out.append([t.town.display_name, "", t.position, t.position])
+	if any or kind == "building" or BUILDING_KINDS.has(kind):
+		for t in world.towns:
+			if t.town == null:
+				continue
+			for b in t.town.buildings:
+				if BUILDING_KINDS.has(kind) and b.kind != BUILDING_KINDS[kind]:
+					continue
+				if extra != "" and kind == "guild" and not b.guild.begins_with(extra):
+					continue
+				# the door is on the building's -Z side
+				var outside := b.world_pos + Basis(Vector3.UP, b.world_yaw) * Vector3(0, 0, -(b.size.z * 0.5 + 1.8))
+				out.append(["%s (%s)" % [b.display_name, b.town_name], b.id, outside, b.world_pos])
+	return out
+
+
+func _sorted_places(args: Array, p: Node3D, world: WorldManager) -> Array:
+	var words := PackedStringArray()
+	for a in args:
+		if String(a).to_lower() != "out":
+			words.append(String(a).to_lower())
+	var kind := words[0] if not words.is_empty() else ""
+	var extra := " ".join(words.slice(1))
+	if kind == "guild" and extra == "" and words.size() > 1:
+		extra = words[1]
+	var from := _map_spot(p, world)
+	var list := _places(kind, extra, world)
+	list.sort_custom(func(a: Array, b: Array) -> bool: return Vector2(a[3].x - from.x, a[3].z - from.z).length() < Vector2(b[3].x - from.x, b[3].z - from.z).length())
+	return list
+
+
+func _tp_nearest(args: Array, p: Node3D, world: WorldManager) -> String:
+	if world == null:
+		return "No world."
+	var list := _sorted_places(args, p, world)
+	if list.is_empty():
+		return "Nothing of that kind found. Kinds: dungeon, cave, crypt, fort, mine, house, shop, inn, smithy, temple, guild, seat, building, site, town, city, village."
+	var go_in := not args.any(func(a) -> bool: return String(a).to_lower() == "out")
+	var target: Array = list[0]
+	var from := _map_spot(p, world)
+	var metres := roundi(Vector2(target[3].x - from.x, target[3].z - from.z).length())  # before the jump
+	_go_to(target, go_in, p, world)
+	return "%s %s, %d m away." % ["Going into" if go_in and String(target[1]) != "" else "Going to", target[0], metres]
+
+
+# Out of where you are (if inside), to the place's door, and in
+func _go_to(target: Array, go_in: bool, p: Node3D, world: WorldManager) -> void:
+	_set_open(false)
+	if world.dungeons.is_inside():
+		await world.dungeons.exit()
+	var spot: Vector3 = target[2]
+	world.ensure_area_loaded(spot, 1)
+	spot.y = world.get_height_at(spot.x, spot.z) + 1.0
+	p.global_position = spot
+	if p is CharacterBody3D:
+		(p as CharacterBody3D).velocity = Vector3.ZERO
+	var door: Vector3 = target[3]
+	p.rotation.y = atan2(spot.x - door.x, spot.z - door.z)  # facing the door
+	if go_in and String(target[1]) != "":
+		await world.dungeons.enter(String(target[1]), spot, p.rotation.y)
+
+
+func _near(args: Array, p: Node3D, world: WorldManager) -> String:
+	if world == null:
+		return "No world."
+	var list := _sorted_places(args, p, world)
+	if list.is_empty():
+		return "Nothing of that kind found."
+	var from := _map_spot(p, world)
+	var lines := PackedStringArray()
+	for e: Array in list.slice(0, 8):
+		var d := Vector2(e[3].x - from.x, e[3].z - from.z)
+		var compass: String = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][int(round(fposmod(atan2(d.x, -d.y), TAU) / (TAU / 8.0))) % 8]
+		lines.append("%5d m %-2s  %s" % [roundi(d.length()), compass, e[0]])
+	return "\n".join(lines)
+
+
+func _where(p: Node3D, world: WorldManager) -> String:
+	var at := p.global_position
+	var out := "Position %d, %d, %d" % [roundi(at.x), roundi(at.y), roundi(at.z)]
+	if world == null:
+		return out
+	if world.dungeons != null and world.dungeons.is_inside():
+		var spot := world.dungeons._return_position
+		return out + "\nInside %s (entered from %d, %d)" % [world.dungeons.current_entrance_id, roundi(spot.x), roundi(spot.z)]
+	var biome := world.get_biome_at(at.x, at.z)
+	if biome != null:
+		out += "\nLand: %s, level %d" % [biome.display_name, LevelCurve.place_level(world.map, at)]
+	var town := ""
+	var best := INF
+	for t in world.towns:
+		var d := Vector2(t.position.x - at.x, t.position.z - at.z).length()
+		if t.town != null and d < best:
+			best = d
+			town = t.town.display_name
+	if town != "":
+		out += "\nNearest town: %s, %d m" % [town, roundi(best)]
+	return out

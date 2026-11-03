@@ -1,7 +1,9 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_pmwgy"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/cart.tscn" id="2_2oxqh"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_e02t3"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/crates.tscn" id="3_h1uyx"]
 
 [node name="WreckedCartB" type="Node3D" unique_id=958691007]
 script = ExtResource("1_pmwgy")
@@ -10,33 +12,11 @@ biomes = PackedStringArray()
 size_class = 0
 themes = PackedStringArray("camp")
 
-[node name="Decoration0" type="Marker3D" parent="." unique_id=435611643]
-transform = Transform3D(0.16996716, 0, 0.98544973, 0, 1, 0, -0.98544973, 0, 0.16996716, 0, 0, 0)
-script = ExtResource("2_e02t3")
-tags = PackedStringArray("cart", "wreck")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Cart" parent="." unique_id=1912786743 instance=ExtResource("2_2oxqh")]
+transform = Transform3D(0.13747808, 0, 0.9905048, 0, 1, 0, -0.9905048, 0, 0.13747808, 0, 0, 0)
 
-[node name="Decoration1" type="Marker3D" parent="." unique_id=760625557]
-transform = Transform3D(0.9553365, 0, 0.29552022, 0, 1, 0, -0.29552022, 0, 0.9553365, 2, 0, 1)
-script = ExtResource("2_e02t3")
-tags = PackedStringArray("crate", "barrel", "sack")
-chance = 1.0
-pool = PackedStringArray()
-
-[node name="Decoration2" type="Marker3D" parent="." unique_id=611445990]
-transform = Transform3D(0.4535961, 0, 0.8912074, 0, 1, 0, -0.8912074, 0, 0.4535961, -1.8, 0, -1.2)
-script = ExtResource("2_e02t3")
-tags = PackedStringArray("crate", "barrel", "sack")
-chance = 0.8
-pool = PackedStringArray()
-
-[node name="Decoration3" type="Marker3D" parent="." unique_id=1234653367]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0, -2)
-script = ExtResource("2_e02t3")
-tags = PackedStringArray("bones", "remains")
-chance = 0.6
-pool = PackedStringArray()
+[node name="Crates" parent="." unique_id=707562429 instance=ExtResource("3_h1uyx")]
+transform = Transform3D(0.9813954, 0, 0.19199747, 0, 1, 0, -0.19199747, 0, 0.9813954, 2, 0, 1)
 
 [node name="Loot4" type="Marker3D" parent="." unique_id=1673313652]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0, 1.8)

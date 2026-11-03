@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_0dogg"]
+
+[node name="Plinth" type="StaticBody3D" unique_id=1520765854]
+script = ExtResource("1_0dogg")
+furniture = "prop/plinth"
+loot_tags = PackedStringArray("vault", "jewelry")

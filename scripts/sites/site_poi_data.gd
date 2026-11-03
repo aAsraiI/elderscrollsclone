@@ -33,6 +33,10 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 	for s in site.sockets():
 		if s.position.y < 0.05 and map != null:
 			s.position.y = POIBuilder.ground_y(placed, map, s.position.x, s.position.z)
+	# and so do props and builder-kit pieces standing on the ground (furniture is the scene's own since 1.20)
+	for c in site.get_children():
+		if (c is InteriorProp or c is KitContainer or c is KitLootShelf or c is KitStation or c is KitModel) and (c as Node3D).position.y < 0.05 and map != null:
+			(c as Node3D).position.y = POIBuilder.ground_y(placed, map, (c as Node3D).position.x, (c as Node3D).position.z)
 	var zone := LevelCurve.zone_range(map, placed.position) if map != null else Vector2i(1, 5)
 	var data := DungeonData.new()
 	var who := SiteChanges.occupants(self, placed, site.boss)  # places change hands over time
@@ -43,6 +47,7 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 	var own_id := placed.id if dungeon == null else placed.id + "/site"
 	var ctx := {"data": data, "dungeon_id": own_id, "level_min": zone.x + garrison_level_offset, "level_max": zone.y + garrison_level_offset,
 		"density": 1.0, "seed": placed.seed_value}
+	site.set_meta("loot_level", int(ctx["level_max"]))
 	RoomFiller.fill(site, ctx)
 	if dungeon != null:
 		for link in site.links():

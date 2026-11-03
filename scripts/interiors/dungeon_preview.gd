@@ -11,8 +11,6 @@ extends Node3D
 @export var level := 10
 ## Leave the ceilings out, to look down into the rooms from above
 @export var hide_ceilings := true
-## Put furniture and decorations in the rooms (no enemies in the editor)
-@export var fill_rooms := true
 @export var generate := false:
 	set(v):
 		if v and Engine.is_editor_hint() and is_inside_tree():
@@ -49,10 +47,6 @@ func _generate() -> Node3D:
 	var built := plan.build("preview")
 	built.name = "Preview"
 	add_child(built, false, Node.INTERNAL_MODE_BACK)
-	if fill_rooms:
-		for room in built.get_children():
-			if room is RoomModule:
-				RoomFiller.fill(room, {"props_only": true, "dungeon_id": "preview", "level_min": level, "level_max": level + 2, "density": r.density, "seed": seed_value})
 	if hide_ceilings:
 		for c in built.find_children("Ceiling", "", true, false):
 			(c as Node3D).visible = false

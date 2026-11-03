@@ -1,10 +1,11 @@
 @tool
 class_name SpawnSocket
 extends Marker3D
-## A spot in a room (or outdoor site) where something may appear: a piece of furniture, a
-## decoration, a chest, an enemy, a light... RoomFiller picks what goes here from the prop and
-## spawn libraries by Kind, Tags, the room's theme and wealth, and the level. Drawn in the editor
-## as a small coloured box (its colour is its kind); its -Z is the way the thing faces.
+## A spot in a room (or outdoor site) where something may appear: a chest, a satchel of loot, an enemy
+## group, the boss, a captive, a quest item. RoomFiller picks what goes here by Kind, Tags and the level.
+## Drawn in the editor as a small coloured box (its colour is its kind); its -Z is the way the thing faces.
+## FURNITURE, DECORATION, WALL_DECORATION, LIGHT and CEILING spots are no longer filled (Alpha 1.20):
+## furniture is placed by hand (scenes/interiors/props, scenes/kit), so a room looks the same every time.
 
 enum Kind { FURNITURE, DECORATION, WALL_DECORATION, CHEST, LOOT, ENEMY, BOSS, LIGHT, TRAP, NPC, QUEST_ITEM, PATROL, CEILING }
 
@@ -51,34 +52,11 @@ func _redraw() -> void:
 	_preview()
 
 
-# The editor: what the game would put here (RoomFiller's choice for this room), never saved
+# The editor: a chest where one may appear, never saved
 func _preview() -> void:
 	EditorPreview.clear(self)
-	var room: RoomModule = null
-	var p := get_parent()
-	while p != null and room == null:
-		room = p as RoomModule
-		p = p.get_parent()
 	if kind in [Kind.CHEST, Kind.LOOT]:
 		var chest := ModelLibrary.instance(POIBuilder.container_key("Satchel" if kind == Kind.LOOT else "Chest"))
 		if chest != null:
 			chest.name = EditorPreview.PREVIEW
 			add_child(chest, false, Node.INTERNAL_MODE_BACK)
-		return
-	if not kind in [Kind.FURNITURE, Kind.DECORATION, Kind.WALL_DECORATION, Kind.LIGHT, Kind.CEILING]:
-		return
-	var path := ""
-	if not pool.is_empty() and String(pool[0]).ends_with(".tscn"):
-		path = pool[absi(String(name).hash()) % pool.size()]
-	else:
-		var rng := RandomNumberGenerator.new()
-		rng.seed = String(name).hash()
-		var theme := String(room.themes[0]) if room != null and not room.themes.is_empty() else "fort"
-		var wealth := room.wealth if room != null else 1
-		var kind_name := String(Kind.keys()[kind])
-		var e := PropLibrary.pick(kind_name, tags, theme, wealth, rng)
-		if e == null and not tags.is_empty():
-			e = PropLibrary.pick(kind_name, PackedStringArray(), theme, wealth, rng)
-		path = e.path if e != null else ""
-	if path != "":
-		EditorPreview.show_scene(self, path)

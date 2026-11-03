@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_vhyhs"]
+
+[node name="Wardrobe" type="Node3D" unique_id=445849258]
+script = ExtResource("1_vhyhs")
+display_name = "Wardrobe"
+model_key = "kit/containers/all/contain_com_closet_01"
+loot_tags = PackedStringArray("clothes", "home")

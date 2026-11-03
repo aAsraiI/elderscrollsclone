@@ -163,15 +163,13 @@ and fire and ice spirits. Give any of them a key in models.json (or your models 
 
 ## Rooms, clutter and loot
 
-Rooms are laid out from a few templates per kind of room (`RoomDecorator.LAYOUTS`, and per module
-scene in dungeons, `RoomFiller`): a tavern of a given size looks the same wherever it is, in one of three
-variants. Only the loot changes from room to room. Every surface keeps what kind of surface it is and
+Since 1.20 every room's furniture is part of its scene, placed by hand (see INTERIORS.md, "Hand-made
+rooms"): a room looks the same every time. Only the loot changes from room to room. Every surface keeps what kind of surface it is and
 takes loot from its own leveled table (`RoomDecorator.SURFACE_TAGS`): books on bookcases, weapons and
 armour on racks, food and drink on tables, jewellery and relics on altars, plinths and in niches, tools
-and supplies on barrels and crates. Each kind of room also sets out fixed clutter (`RoomDecorator.CLUTTER`) in the same places every
-time. Plates, cups, tankards, candles, books, scrolls, bottles, skulls, bones, urns, bread and the like
+and supplies on barrels and crates. Some surfaces also get small things of the room's kind (`RoomDecorator.CLUTTER`), rolled like the loot. Plates, cups, tankards, candles, books, scrolls, bottles, skulls, bones, urns, bread and the like
 are real items you can pick up (`RoomDecorator.CLUTTER_ITEMS`, owned like the room's loot; once taken
-they stay gone). Baskets, cloth and spoons stay part of the room.
+they stay gone). Baskets, cloth and spoons are not items: place them by hand as kit models (`clutter/basket`...).
 
 ## Every item has a model
 
@@ -207,8 +205,9 @@ is made nearly grey with its contrast softened at import (`MwSurfaces._soften`) 
 Workstations are built from models (`CraftingStation.LOOKS`): an alchemy lab is a table with an alembic,
 retort, calcinator and mortar on it; an enchanter a table with soul gems and an open book; a forge with
 bellows, an oven with coal, a hide rack, a cauldron on a firepit, an altar with candles. The pieces are
-fixed in place, not items. Every lootable container takes its model by its name
-(`POIBuilder.container_key`: chest, strongbox, sack, urn, barrel, crate, cupboard, wardrobe, bookcase).
+fixed in place, not items, and their collision is a hull round each piece. Every lootable container takes its model by its name
+(`POIBuilder.container_key`: chest, strongbox, sack, urn, barrel, crate, cupboard, wardrobe, bookcase);
+kit containers name their own Morrowind model and stand at its real size (`POIBuilder.make_container`).
 City walls are Morrowind's Imperial walls, guard towers, corners and an arched gateway, stretched over
 the wall pieces (`ModelLibrary.dress_box`, the box keeps the collision). Sites and generic POIs get the
 same for every plain box that is clearly a wall or a tower (`ModelLibrary.dress_structures`). Cave
@@ -232,12 +231,13 @@ own glow, sparks and cloud for the hand glow, projectiles, bursts and sprays, an
 `scenes/kit/` holds pieces to drop into scenes you build by hand (dungeons, towers, POIs). They show
 their model in the editor and are Morrowind's when imported (`tools/build_kit.gd` writes them):
 
-- `container_*`: chests, strongboxes, sacks, barrels, crates, urns, cupboards, wardrobes you can loot;
-  set the loot tags and a level bonus (`KitContainer`). They remember what was taken.
-- `loot_*`: a shelf, bookcase, table, altar, counter or weapon rack that fills its own planks with loot
-  from its tags, read from the model's surfaces, wherever it stands (`KitLootShelf`).
-- `exit_door`: the way out; it always leaves to where the player came in (`KitExitDoor`).
-- `block_*`: a wall, tower, corner, arch, palisade or stone block of any size you set (`KitBlock`).
+- `containers/leveled/*`, `containers/empty/*`: 33 kinds of container you can open, filled with loot for
+  the place or empty (`KitContainer`). They remember what was taken or stored.
+- `surfaces/*`: 27 pieces of furniture (shelves, bookcases, tables, counters, altars, racks...) that set
+  loot on their own planks and tops, read from the model's surfaces, wherever they stand (`KitLootShelf`).
+- `stations/*`: crafting stations, beds, a shrine and a planter (`KitStation`).
+- `doors/exit_door`: the way out; it always leaves to where the player came in (`KitExitDoor`).
+- `blocks/*`: a wall, tower, corner, arch, palisade or stone block of any size you set (`KitBlock`).
 - `model`: any model by its key, with collision from its shape (`KitModel`).
 - `morrowind/<type>/<set>/<piece>`: every building piece in your copy of Morrowind (below).
 

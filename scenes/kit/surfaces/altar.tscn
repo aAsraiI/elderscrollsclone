@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_afo8j"]
+
+[node name="Altar" type="StaticBody3D" unique_id=699300057]
+script = ExtResource("1_afo8j")
+furniture = "prop/altar"
+loot_tags = PackedStringArray("temple", "jewelry")

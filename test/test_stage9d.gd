@@ -117,7 +117,7 @@ func t_features() -> void:
 			trap_free = false
 	check("easy dungeons have no traps", trap_free)
 	var decor := (easy["root"] as Node3D).find_children("Decor_*", "", false, false)
-	check("dungeon rooms are furnished", decor.size() >= 4, str(decor.size()))
+	check("no furniture is picked at run time (1.20: rooms are templates)", decor.is_empty(), str(decor.size()))
 	(easy["root"] as Node3D).free()
 	r1.free()
 
@@ -132,8 +132,8 @@ func t_types() -> void:
 		world.add_child(rt)
 		await frames(2)
 		var enemies := rt.find_children("*", "Enemy", true, false)
-		var items := rt.find_children("*", "WorldItem", true, false)
-		check("%s has enemies and things to find" % key, enemies.size() > 0 and items.size() > 0, "%d enemies, %d items" % [enemies.size(), items.size()])
+		var items := rt.find_children("*", "ContainerComponent", true, false)  # chests (furniture and its loot come from room templates since 1.20)
+		check("%s has enemies and things to find" % key, enemies.size() > 0 and items.size() > 0, "%d enemies, %d chests" % [enemies.size(), items.size()])
 		rt.queue_free()
 		await frames(1)
 	var found := {}
@@ -162,24 +162,12 @@ func t_in_game() -> void:
 	if target == null:
 		return
 	wm.dungeons.fade_time = 0.0
-	# a dungeon from an old save keeps the old many-floored layout (new ones are stitched, Alpha 1.13)
+	# a dungeon from an old save is built from room templates too since 1.20 (it used to keep its old
+	# many-floored generated layout)
 	WorldState.set_record("dungeon/%s/opened" % target.id, {"old": true})
 	await wm.dungeons.enter(target.id, target.position, 0.0)
 	await frames(5)
-	check("you are on floor 1 of several", wm.dungeons.current_floor == 0 and wm.dungeons.floor_count >= 2, str(wm.dungeons.floor_count))
-	var stairs := wm.dungeons.get_interior_root().get_node_or_null("StairsDown") as DungeonDoor
-	check("there are stairs down", stairs != null)
-	if stairs == null:
-		return
-	stairs.interact(null)
-	await frames(10)
-	check("the stairs take you down a floor", wm.dungeons.current_floor == 1 and wm.dungeons.is_inside())
-	var saved := wm.dungeons.to_dict()
-	check("the save remembers the floor", int(saved.get("floor", -1)) == 1)
-	var up := wm.dungeons.get_interior_root().get_node_or_null("StairsUp") as DungeonDoor
-	up.interact(null)
-	await frames(10)
-	var down_again := wm.dungeons.get_interior_root().get_node_or_null("StairsDown") as Node3D
-	check("going up puts you by the stairs down", wm.dungeons.current_floor == 0 and down_again != null and p.global_position.distance_to(down_again.global_position) < 5.0, str(p.global_position.distance_to(down_again.global_position) if down_again != null else -1.0))
+	var rooms := wm.dungeons.get_interior_root().find_children("*", "RoomModule", true, false) if wm.dungeons.is_inside() else []
+	check("an old save's dungeon is built from room templates (%d rooms)" % rooms.size(), rooms.size() >= 3)
 	DungeonBuilder._on_boss_died(target.id, 30)
 	check("killing the boss marks the place cleared", Discovery.is_cleared(target.id))

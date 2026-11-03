@@ -4,6 +4,9 @@
 [ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="2_ao1fm"]
 [ext_resource type="Material" path="res://data/interiors/materials/moss_stone.tres" id="3_p0fdu"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="4_1v76n"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/candle_stand.tscn" id="5_1v76n"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/broken_pillar.tscn" id="6_roiis"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/sconce.tscn" id="7_wpkti"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_roiis"]
 size = Vector3(4, 0.6, 30)
@@ -155,32 +158,14 @@ tags = PackedStringArray()
 chance = 0.5
 pool = PackedStringArray()
 
-[node name="Light9" type="Marker3D" parent="." unique_id=602834336]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 3.3, -13.5)
-script = ExtResource("4_1v76n")
-kind = 7
-tags = PackedStringArray("candle", "torch", "brazier")
-chance = 1.0
-pool = PackedStringArray()
+[node name="CandleStand" parent="." unique_id=1168646860 instance=ExtResource("5_1v76n")]
+transform = Transform3D(0.9945731, 0, -0.10403975, 0, 1, 0, 0.10403975, 0, 0.9945731, 1.4, 3.3, -13.5)
 
-[node name="Decoration10" type="Marker3D" parent="." unique_id=159425201]
-transform = Transform3D(0.5403023, 0, -0.84147096, 0, 1, 0, 0.84147096, 0, 0.5403023, -3.5, 0, -6)
-script = ExtResource("4_1v76n")
-tags = PackedStringArray("rubble", "broken_pillar")
-chance = 0.9
-pool = PackedStringArray()
+[node name="BrokenPillar" parent="." unique_id=1924844099 instance=ExtResource("6_roiis")]
+transform = Transform3D(0.48108503, 0, -0.8766738, 0, 1, 0, 0.8766738, 0, 0.48108503, -3.5, 0, -6)
 
-[node name="Light11" type="Marker3D" parent="." unique_id=1627614000]
+[node name="Sconce" parent="." unique_id=496657960 instance=ExtResource("7_wpkti")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 3.3, 13.5)
-script = ExtResource("4_1v76n")
-kind = 7
-tags = PackedStringArray("candle", "torch", "brazier")
-chance = 1.0
-pool = PackedStringArray()
 
-[node name="Decoration12" type="Marker3D" parent="." unique_id=1236805188]
-transform = Transform3D(0.5403023, 0, 0.84147096, 0, 1, 0, -0.84147096, 0, 0.5403023, -3.5, 0, 6)
-script = ExtResource("4_1v76n")
-tags = PackedStringArray("rubble", "broken_pillar")
-chance = 0.9
-pool = PackedStringArray()
+[node name="BrokenPillar2" parent="." unique_id=763462899 instance=ExtResource("6_roiis")]
+transform = Transform3D(0.42873675, 0, 0.9034294, 0, 1, 0, -0.9034294, 0, 0.42873675, -3.5, 0, 6)

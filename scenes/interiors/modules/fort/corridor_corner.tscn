@@ -6,6 +6,7 @@
 [ext_resource type="Material" path="res://data/interiors/materials/stone_dark.tres" id="4_x62ph"]
 [ext_resource type="Material" path="res://data/interiors/materials/stone.tres" id="5_ie0ww"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="6_q1xxl"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/rubble.tscn" id="6_vcxpu"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_v57xm"]
 size = Vector3(4, 0.3, 4)
@@ -191,36 +192,8 @@ mesh = SubResource("BoxMesh_ttjt8")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_0_Top" unique_id=1459540666]
 shape = SubResource("BoxShape3D_41yjr")
 
-[node name="Light3" type="Marker3D" parent="." unique_id=292492029]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, 0)
-script = ExtResource("6_q1xxl")
-kind = 7
-tags = PackedStringArray("torch", "fungus")
-chance = 0.35
-pool = PackedStringArray()
-
-[node name="Light4" type="Marker3D" parent="." unique_id=53949727]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.55)
-script = ExtResource("6_q1xxl")
-kind = 7
-tags = PackedStringArray("torch", "fungus")
-chance = 0.35
-pool = PackedStringArray()
-
-[node name="Decoration5" type="Marker3D" parent="." unique_id=135006893]
-transform = Transform3D(-0.9736956, 0, -0.22785297, 0, 1, 0, 0.22785297, 0, -0.9736956, 0.11885515, 0, 0.12564978)
-script = ExtResource("6_q1xxl")
-tags = PackedStringArray("rubble", "bones", "barrel", "crate", "rails", "puddle")
-chance = 0.4
-pool = PackedStringArray()
-
-[node name="Ceiling6" type="Marker3D" parent="." unique_id=731307911]
-transform = Transform3D(-0.3868982, 0, -0.9221224, 0, 1, 0, 0.9221224, 0, -0.3868982, 0, 4.95, 0)
-script = ExtResource("6_q1xxl")
-kind = 12
-tags = PackedStringArray("cobweb", "chain")
-chance = 0.2
-pool = PackedStringArray()
+[node name="Rubble" parent="." unique_id=618522156 instance=ExtResource("6_vcxpu")]
+transform = Transform3D(-0.94000345, 0, -0.3411651, 0, 1, 0, 0.3411651, 0, -0.94000345, 0.11885515, 0, 0.12564978)
 
 [node name="Enemy7" type="Marker3D" parent="." unique_id=1862904806]
 transform = Transform3D(-0.36247185, 0, -0.93199474, 0, 1, 0, 0.93199474, 0, -0.36247185, 0.33266023, 0, 0.02884382)

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_lu6b5"]
+
+[node name="Hutch" type="Node3D" unique_id=1049558231]
+script = ExtResource("1_lu6b5")
+display_name = "Hutch Cupboard"
+model_key = "kit/containers/all/contain_com_hutch_01"
+loot_tags = PackedStringArray("kitchen", "rich_home")

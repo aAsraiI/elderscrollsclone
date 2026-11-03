@@ -42,6 +42,17 @@ const TEST_ITEMS := [
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
+## Debug console cheats (DebugConsole: speed, fly, noclip). Never saved.
+var debug_speed := 1.0
+## Flight is allowed: double-tap jump to take off or land (Space up, Ctrl down, Shift faster)
+var can_fly := false
+var flying := false
+## Fly through walls and the ground (implies flight)
+var noclip := false
+const FLY_SPEED := 9.0
+const FLY_SPRINT := 3.0
+var _last_jump_ms := -1000
+
 @onready var head: Node3D = $Head
 @onready var _stats: Stats = get_node_or_null("Stats") as Stats
 @onready var _skills: Skills = get_node_or_null("Skills") as Skills
@@ -165,6 +176,16 @@ func _physics_process(delta: float) -> void:
 		rotate_y(-look.x * sp)
 		head.rotate_x(-look.y * sp * (-1.0 if invert_y else 1.0))
 		head.rotation.x = clampf(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
+	if can_fly and Input.is_action_just_pressed("jump") and not _is_paralyzed():
+		var now := Time.get_ticks_msec()
+		if now - _last_jump_ms < 300:
+			set_flying(not flying)
+			_last_jump_ms = -1000
+		else:
+			_last_jump_ms = now
+	if flying:
+		_fly(delta)
+		return
 	# Gravity and jumping
 	if not is_on_floor():
 		var fall := clampf(_stats.get_stat("fall_mult"), 0.1, 1.0) if _stats != null and velocity.y < 0.0 else 1.0
@@ -212,6 +233,30 @@ func _physics_process(delta: float) -> void:
 			_skills.add_xp(&"athletics", sprint_xp_per_second)
 
 
+## Starts or stops flying (only while can_fly; noclip keeps you flying)
+func set_flying(on: bool) -> void:
+	flying = (on and can_fly) or noclip
+	set_meta("flying", flying)  # Stealth leaves Ctrl alone while you fly (it is the way down)
+	if not flying:
+		velocity.y = minf(velocity.y, 0.0)
+
+
+# Flight like Minecraft: no gravity, where you face is forward, Space rises, Ctrl sinks, Shift is faster.
+# Touching the ground lands you (not with noclip, which goes through everything).
+func _fly(delta: float) -> void:
+	var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var dir: Vector3 = (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
+	var up := (1.0 if Input.is_action_pressed("jump") else 0.0) - (1.0 if InputMap.has_action("sneak") and Input.is_action_pressed("sneak") else 0.0)
+	var speed := FLY_SPEED * debug_speed * (FLY_SPRINT if Input.is_action_pressed("sprint") else 1.0)
+	velocity = velocity.lerp(Vector3(dir.x * speed, up * speed, dir.z * speed), clampf(10.0 * delta, 0.0, 1.0))
+	if noclip:
+		global_position += velocity * delta
+		return
+	move_and_slide()
+	if is_on_floor() and up < 0.0:
+		set_flying(false)
+
+
 ## Paralyze (a spell, a poison): you can't move for a moment
 func _is_paralyzed() -> bool:
 	return has_meta("paralyzed_until") and Time.get_ticks_msec() < int(get_meta("paralyzed_until"))
@@ -223,6 +268,7 @@ func _get_speed_multiplier() -> float:
 	if _stats != null:
 		m = _stats.get_stat("move_speed_mult")
 		m = m if m > 0.0 else 1.0
+	m *= debug_speed
 	if _combat != null:
 		m *= _combat.get_move_speed_multiplier()
 	# Holding something with the Grabber (items barely, corpses a lot)

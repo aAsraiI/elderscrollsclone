@@ -4,6 +4,9 @@
 [ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="2_y68we"]
 [ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="3_losoj"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="4_hewud"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/crate.tscn" id="4_l8k8o"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/barrels.tscn" id="5_utf02"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/stool.tscn" id="6_hhb0j"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_l8k8o"]
 size = Vector3(6, 4, 22)
@@ -47,26 +50,14 @@ mesh = SubResource("BoxMesh_hhb0j")
 [node name="Shape" type="CollisionShape3D" parent="Part2" unique_id=1126092821]
 shape = SubResource("BoxShape3D_jlqio")
 
-[node name="Decoration2" type="Marker3D" parent="." unique_id=1858958894]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 4)
-script = ExtResource("4_hewud")
-tags = PackedStringArray("crate", "barrel")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Crate" parent="." unique_id=952313155 instance=ExtResource("4_l8k8o")]
+transform = Transform3D(0.9936776, 0, 0.11227103, 0, 1, 0, -0.11227103, 0, 0.9936776, 5, 0, 4)
 
-[node name="Decoration3" type="Marker3D" parent="." unique_id=725432747]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -6)
-script = ExtResource("4_hewud")
-tags = PackedStringArray("crate", "barrel")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Barrels" parent="." unique_id=2119694589 instance=ExtResource("5_utf02")]
+transform = Transform3D(0.99417436, 0, -0.107784, 0, 1, 0, 0.107784, 0, 0.99417436, 6, 0, -6)
 
-[node name="Decoration4" type="Marker3D" parent="." unique_id=1881969916]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 8)
-script = ExtResource("4_hewud")
-tags = PackedStringArray("rope")
-chance = 1.0
-pool = PackedStringArray()
+[node name="Stool" parent="." unique_id=449039702 instance=ExtResource("6_hhb0j")]
+transform = Transform3D(0.9896884, 0, -0.14323719, 0, 1, 0, 0.14323719, 0, 0.9896884, -6, 0, 8)
 
 [node name="Chest5" type="Marker3D" parent="." unique_id=862135914]
 transform = Transform3D(0.8253356, 0, 0.5646425, 0, 1, 0, -0.5646425, 0, 0.8253356, 4.5, 0, -1)

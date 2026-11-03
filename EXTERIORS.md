@@ -17,7 +17,7 @@ Outdoor places and town buildings are put together from scenes and resources you
 
 1. Copy a scene in `scenes/sites/` (or make a new scene with an **ExteriorSite** root).
 2. On the root set **Site Kind**, **Biomes** (empty = any land), **Size Class**, **Min Distance**, **Map Icon** and, if it has a ruler, **Boss**. **Cells** is its footprint in 4 m squares.
-3. Build it from boxes, props or anything else. Spawn points (**SpawnSocket**) fill it: furniture, decoration, lights, chests, loot, enemies (tags: `sleeper`, `guard`, `archer`, `ambush`) and the boss. Spawn points at ground level are set onto the land where it is built; ones up on a floor or a wall stay where you put them.
+3. Build it from boxes, props, kit pieces (`scenes/kit/`) or anything else; the furniture stays where you put it (Alpha 1.20). Spawn points (**SpawnSocket**) add chests, loot, enemies (tags: `sleeper`, `guard`, `archer`, `ambush`) and the boss. Props, kit pieces and spawn points at ground level are set onto the land where it is built; ones up on a floor or a wall stay where you put them.
 4. A **SiteLink** (door, cave mouth, hatch or trapdoor) is the way down into a dungeon. Its blue-purple arrow points the way in.
 5. Markers that turn into things: `Note` (a note to read), `Inscription` (a monument's words), `Blessing` (a shrine), `Herb<n>` and `Ore<n>` (things to gather), `Keeper` (a wayside rest's keeper).
 6. Add the scene to its kind's **Sites** list in `data/world/Sites/<kind>.tres`. Each place picks one version by its seed.

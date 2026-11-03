@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_8fffs"]
+
+[node name="ShelfRedoran" type="StaticBody3D" unique_id=107974741]
+script = ExtResource("1_8fffs")
+furniture = "kit/furniture/dunmer/furn_redoran_shelf1_01"
+fallback = "prop/shelf"
+loot_tags = PackedStringArray()

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_xymsf"]
+
+[node name="Drawers" type="Node3D" unique_id=995447077]
+script = ExtResource("1_xymsf")
+display_name = "Chest of Drawers"
+model_key = "kit/containers/all/contain_com_drawers_01"
+loot_tags = PackedStringArray("clothes", "home")

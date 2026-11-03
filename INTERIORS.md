@@ -9,6 +9,7 @@ Every interior is a scene you can open and edit in the Godot editor. Dungeons ar
 | Dungeon room modules, by theme | `scenes/interiors/modules/<theme>/` |
 | A template per room role | `scenes/interiors/modules/templates/` |
 | Props (furniture and decoration) | `scenes/interiors/props/` |
+| Builder kit: containers, loot furniture, stations | `scenes/kit/` |
 | Town building interiors | `scenes/interiors/houses/` |
 | Set-pieces pinned into dungeons | `scenes/interiors/setpieces/` |
 | Hand-made dungeons and halls | `scenes/interiors/handmade/` |
@@ -22,15 +23,44 @@ The tools that made them (`tools/build_interiors.gd`, `tools/build_houses.gd`, `
 1. Copy a template from `modules/templates/` into a theme folder (for example `modules/crypt/`).
 2. On the root (RoomModule) set **Themes**, **Role** (room, corridor, stairs, boss...), **Kind** (what recipes ask for: `barracks`, `ossuary`...), **Cells** (4 m squares, 5 m storeys), **Weight** and the level range.
 3. Doorways are **DoorwayMarker** nodes on the room's edge, facing out (blue arrow). Width and tags decide what they join.
-4. Spawn points are **SpawnSocket** nodes: pick a **Kind** (furniture, decoration, wall decoration, light, ceiling, chest, loot, enemy, boss, NPC, quest item), **Tags** that say what fits (`table`, `bed`, `sleeper`, `ambush`, `captive`...), a **Chance** and a **Count**. Tag a socket `set` when it sits right beside another prop on purpose.
-5. The room's shell comes from `InteriorKit` (floor, walls with gaps at the doorways, ceiling). Add your own boxes with any name; anything in the group `interior_dynamic` is never merged (things that open or move).
-6. Run the tests: the module checker (`RoomModule.problems()`) reports doorways off the edge, sockets outside the room and similar mistakes.
+4. Furniture is placed by hand: props from `props/` and kit pieces from `scenes/kit/`, saved in the scene, so the room looks the same every time (see "Hand-made rooms" below).
+5. Spawn points are **SpawnSocket** nodes for what changes: pick a **Kind** (chest, loot, enemy, boss, NPC, quest item), **Tags** (`sleeper`, `ambush`, `captive`, `boss`...), a **Chance** and a **Count**. The furniture kinds (furniture, decoration, wall decoration, light, ceiling) are no longer filled.
+6. The room's shell comes from `InteriorKit` (floor, walls with gaps at the doorways, ceiling). Add your own boxes with any name; anything in the group `interior_dynamic` is never merged (things that open or move).
+7. Run the tests: the module checker (`RoomModule.problems()`) reports doorways off the edge, sockets outside the room and similar mistakes.
 
 Enemy socket tags the AI uses: `sleeper` (lies in a bunk), `eating`/`cook` (sits), `guard`/`officer` (stands at a post facing the way in), `ambush` (waits until you come by). Corridors get patrols on their own.
 
 ## A prop
 
 Copy a scene in `props/`, change its meshes, and set on the root (InteriorProp): **Tags**, **Socket Kinds**, **Themes** (empty = all), **Snap** (floor, wall, ceiling), **Radius**, wealth range and **Weight**. A child OmniLight3D makes it a light (candle, torch, brazier and hearth lights flicker).
+
+## Hand-made rooms (Alpha 1.20)
+
+No furniture is picked when the game runs. Every room, house, hall, set-piece and outdoor site holds its
+furniture as nodes in its scene (the old furniture spawn points were turned into the props the game used
+to pick by `tools/bake_room_props.gd`). Move, delete or add props and kit pieces and save; every place
+using the scene changes. Only the loot is rolled: on the room's tables, shelves, counters and altars
+(`RoomDecorator.decorate`, per building or dungeon room, restocked in towns after 3 days) and in containers.
+
+The builder kit (`scenes/kit/`, written by `tools/build_kit.gd`):
+
+| Folder | What | Script |
+|---|---|---|
+| `containers/leveled/` | 33 containers filled with loot for the place (chests, sacks, barrels, crates, urns, pots, wardrobes, drawers, desks, Dwemer and Daedric chests, remains...) | `KitContainer` |
+| `containers/empty/` | the same, empty (storage) | `KitContainer` (Leveled off) |
+| `surfaces/` | 27 pieces of furniture with loot on them (shelves, bookcases, tables, counters, bar, altar, plinth, racks, niche, sarcophagus, cart) | `KitLootShelf` |
+| `stations/` | forge, smelter, tanning rack, workbench, grindstone, cooking pot, alchemy lab, enchanter, spell altar, beds, bunk, bedroll, shrine, planter | `KitStation` |
+| `blocks/`, `doors/`, `model` | wall blocks, the exit door, any model | `KitBlock`, `KitExitDoor`, `KitModel` |
+
+Kit pieces read where they stand from the interior they are built into (`KitPlace`): the dungeon's level
+and room theme, or the building's owner, level and kind. Leave **Loot Tags** empty to take what the place
+holds; set **Owner Id** or **Free To Take** to change whose things they are. A container's save id is its
+room and its node name, so give containers in one scene different names.
+
+Shelving (bookcases, shelves, racks, niches, wine racks, keg stands: `ModelLibrary.OPEN`) has exact
+collision, so things can be put back on its planks, and loot is laid along a plank only where it fits
+(`RoomDecorator.set_on`). Containers stand at their model's size with a hull that fits it
+(`POIBuilder.make_container`).
 
 ## A recipe
 

@@ -124,13 +124,13 @@ func t_props() -> void:
 	check("a campfire keeps its flames (%d of %d)" % [glow_after, glow_before], glow_after == glow_before)
 	check("and its stones are a model", fire.get_node_or_null("Model") != null)
 	fire.free()
-	# Decorations built in code
+	# A room's table (its scene's own furniture since 1.20): a model, its top a place for loot
 	var room := Node3D.new()
 	root.add_child(room)
-	var slots: Array = []
-	RoomDecorator._build_piece(room, "table", Vector3.ZERO, 0.0, slots, 3.0)
-	var piece := room.get_child(0) as Node3D
-	check("a decorated room's table is a model", piece.get_node_or_null("Model") != null)
+	var piece := (load("res://scenes/interiors/props/table.tscn") as PackedScene).instantiate() as InteriorProp
+	room.add_child(piece)
+	var slots: Array = RoomDecorator._existing_surfaces(room, Rect2(-3, -3, 6, 6))
+	check("a room's table is a model", piece.find_child("Model", true, false) != null and not slots.is_empty())
 	var tb := ModelLibrary.bounds(piece)
 	check("things set on it still sit on top (%.2f tall, slot at %.2f)" % [tb.end.y, (slots[0][0] as Vector3).y], absf(tb.end.y - (slots[0][0] as Vector3).y) < 0.15)
 	room.free()
@@ -263,16 +263,20 @@ func t_rooms() -> void:
 	var room := Rect2(-3.0, -2.5, 6.0, 5.0)
 	var layouts: Array = []
 	var loot: Array = []
-	for seed_value in [3, 6]:  # both variant 0 of LAYOUTS = 3
+	for seed_value in [3, 6]:
 		var root := Node3D.new()
+		for p: Array in [["table", Vector3(0, 0, 0)], ["shelf", Vector3(-2, 0, 2)], ["table_meal", Vector3(1.6, 0, -1.4)]]:
+			var prop := (load("res://scenes/interiors/props/%s.tscn" % p[0]) as PackedScene).instantiate() as Node3D
+			prop.position = p[1]
+			root.add_child(prop, true)
 		RoomDecorator.decorate(root, room, "tavern", 4, seed_value, "", "test/room_%d" % seed_value)
-		var pieces := root.get_children().filter(func(c): return String(c.name).begins_with("Decor_")).map(func(c): return "%s@%s" % [String(c.name).trim_suffix("2").trim_suffix("3"), (c as Node3D).position.snappedf(0.01)])
+		var pieces := root.get_children().filter(func(c): return c is InteriorProp).map(func(c): return "%s@%s" % [c.name, (c as Node3D).position.snappedf(0.01)])
 		pieces.sort()
 		layouts.append(pieces)
 		loot.append(root.find_children("*", "WorldItem", true, false).map(func(w): return String((w as WorldItem).item.id)))
 		root.free()
-	check("two taverns of a size share a layout (%d pieces)" % layouts[0].size(), layouts[0] == layouts[1] and layouts[0].size() >= 3)
-	check("but their loot is their own", loot[0] != loot[1] or loot[0].is_empty())
+	check("the decorator adds no furniture (%d pieces, the room's own)" % layouts[0].size(), layouts[0] == layouts[1] and layouts[0].size() == 3)
+	check("but the loot on it is each room's own", loot[0] != loot[1] and not loot[0].is_empty())
 	var tags := RoomDecorator.surface_tags("rack", PackedStringArray(["weapon", "armor", "camp", "tavern"]))
 	check("racks hold weapons and armour (%s)" % ", ".join(tags), not tags.has("tavern") and tags.has("weapon"))
 	var shelf := RoomDecorator.surface_tags("bookcase", PackedStringArray(["camp"]))

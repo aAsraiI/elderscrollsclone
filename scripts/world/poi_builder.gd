@@ -338,6 +338,35 @@ static func make_chest(chest_name: String, loot: Array[LootEntry], save_id: Stri
 	return body
 
 
+## A container at its model's own size (a wardrobe stands as tall as a wardrobe, not squeezed into a
+## chest's box), its bottom on y = 0, with collision from the model's shape. Without the model it is
+## make_chest's box (lifted to stand on the floor).
+static func make_container(chest_name: String, model_key: String, loot: Array[LootEntry], save_id: String, loot_seed: int) -> StaticBody3D:
+	var key := ModelLibrary.first([model_key, container_key(chest_name)])
+	var m := ModelLibrary.instance(key) if key != "" else null
+	if m == null:
+		var chest := make_chest(chest_name, loot, save_id, loot_seed)
+		for c in chest.get_children():
+			if c is Node3D:
+				(c as Node3D).position.y += 0.35
+		return chest
+	var body := StaticBody3D.new()
+	body.name = "Chest"
+	body.add_child(m)
+	var b := ModelLibrary.bounds(m)
+	m.position.y -= b.position.y
+	ModelLibrary.add_collision(body, m, key + "|container")
+	var cc := ContainerComponent.new()
+	cc.name = "ContainerComponent"
+	cc.display_name = chest_name
+	cc.save_id = save_id
+	cc.loot_seed = loot_seed
+	for e in loot:
+		cc.contents.append(e)
+	body.add_child(cc)
+	return body
+
+
 ## Which model a container takes, by what it is called (a sack, an urn, a strongbox...)
 static func container_key(chest_name: String) -> String:
 	var n := chest_name.to_lower()

@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_egmxa"]
+
+[node name="SackPile" type="Node3D" unique_id=660679688]
+script = ExtResource("1_egmxa")
+display_name = "Sacks"
+model_key = "kit/containers/all/contain_com_sack_01"
+leveled = false
+loot_tags = PackedStringArray()

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_3e8l1"]
+
+[node name="DwemerDesk" type="Node3D" unique_id=847370370]
+script = ExtResource("1_3e8l1")
+display_name = "Dwemer Desk Drawer"
+model_key = "kit/containers/all/contain_dwrv_desk00"
+loot_tags = PackedStringArray("ruin", "library")

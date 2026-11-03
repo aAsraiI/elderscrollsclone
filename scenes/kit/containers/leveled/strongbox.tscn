@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_jvk14"]
+
+[node name="Strongbox" type="Node3D" unique_id=1373787804]
+script = ExtResource("1_jvk14")
+display_name = "Strongbox"
+model_key = "kit/containers/all/contain_de_chest_02"
+loot_tags = PackedStringArray("jewelry", "vault")

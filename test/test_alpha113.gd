@@ -57,11 +57,11 @@ func t_modules() -> void:
 	for e in all:
 		var room := (load(e.path) as PackedScene).instantiate() as RoomModule
 		probs.append_array(room.problems())
-		if room.sockets().is_empty() and room.role != RoomModule.Role.STAIRS:
+		if room.sockets().is_empty() and room.find_children("*", "InteriorProp", true, false).is_empty() and room.role != RoomModule.Role.STAIRS:
 			no_sockets += 1
 		room.free()
 	check("the module checker finds nothing wrong", probs.is_empty(), "\n".join(probs.slice(0, 8)))
-	check("rooms have spawn points", no_sockets <= 2, str(no_sockets))
+	check("rooms have spawn points or furniture of their own", no_sockets <= 2, str(no_sockets))  # furniture is placed in the scene since 1.20
 	for theme in ["fort", "crypt", "cave"]:
 		check("%s has an entrance, corridors, rooms, stairs and a boss room" % theme, [RoomModule.Role.ENTRANCE, RoomModule.Role.CORRIDOR, RoomModule.Role.ROOM, RoomModule.Role.STAIRS, RoomModule.Role.BOSS].all(func(r: int) -> bool: return not ModuleLibrary.of(theme, r).is_empty()))
 	var fort_kinds := {}
@@ -770,7 +770,14 @@ func t_qa() -> void:
 	var root := r["root"] as Node3D
 	StaticBatch.merge_interior(root)
 	var ms := Time.get_ticks_msec() - t1
-	var meshes := root.find_children("*", "MeshInstance3D", true, false).size()
+	# loot set on furniture (since 1.20 in dungeon rooms too) moves when taken, so it is never merged: not counted
+	var meshes := 0
+	for m in root.find_children("*", "MeshInstance3D", true, false):
+		var up := m.get_parent()
+		while up != null and up != root and not up is WorldItem:
+			up = up.get_parent()
+		if not up is WorldItem:
+			meshes += 1
 	check("the biggest dungeon (%d rooms) builds in %d ms" % [int(r["rooms"]), ms], ms < 4000)
 	check("...and draws in few pieces (%d meshes for %d rooms)" % [meshes, int(r["rooms"])], meshes < int(r["rooms"]) * 30)  # props are real models (several meshes each) since 1.15.6
 	root.free()

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_t74hu"]
+
+[node name="TableSmall" type="StaticBody3D" unique_id=1996087200]
+script = ExtResource("1_t74hu")
+furniture = "kit/furniture/common/furn_com_table_02"
+fallback = "prop/table"
+loot_tags = PackedStringArray()

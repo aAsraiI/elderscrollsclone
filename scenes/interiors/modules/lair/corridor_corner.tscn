@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/interiors/doorway_marker.gd" id="2_3bbss"]
 [ext_resource type="Material" path="res://data/interiors/materials/ash.tres" id="3_kb1s6"]
 [ext_resource type="Material" path="res://data/interiors/materials/rock_dark.tres" id="4_hcahp"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/sconce.tscn" id="5_3bbss"]
 [ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="5_krmc7"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_pbgmi"]
@@ -190,36 +191,8 @@ mesh = SubResource("BoxMesh_yec4v")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_0_Top" unique_id=1334049825]
 shape = SubResource("BoxShape3D_lh6oi")
 
-[node name="Light3" type="Marker3D" parent="." unique_id=1112141167]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.55, 0, 0)
-script = ExtResource("5_krmc7")
-kind = 7
-tags = PackedStringArray("torch", "fungus")
-chance = 0.35
-pool = PackedStringArray()
-
-[node name="Light4" type="Marker3D" parent="." unique_id=1936949177]
+[node name="Sconce" parent="." unique_id=496657960 instance=ExtResource("5_3bbss")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.55)
-script = ExtResource("5_krmc7")
-kind = 7
-tags = PackedStringArray("torch", "fungus")
-chance = 0.35
-pool = PackedStringArray()
-
-[node name="Decoration5" type="Marker3D" parent="." unique_id=1558281138]
-transform = Transform3D(-0.9736956, 0, -0.22785297, 0, 1, 0, 0.22785297, 0, -0.9736956, 0.11885515, 0, 0.12564978)
-script = ExtResource("5_krmc7")
-tags = PackedStringArray("rubble", "bones", "barrel", "crate", "rails", "puddle")
-chance = 0.4
-pool = PackedStringArray()
-
-[node name="Ceiling6" type="Marker3D" parent="." unique_id=1291351251]
-transform = Transform3D(-0.3868982, 0, -0.9221224, 0, 1, 0, 0.9221224, 0, -0.3868982, 0, 4.95, 0)
-script = ExtResource("5_krmc7")
-kind = 12
-tags = PackedStringArray("cobweb", "chain")
-chance = 0.2
-pool = PackedStringArray()
 
 [node name="Enemy7" type="Marker3D" parent="." unique_id=1588989604]
 transform = Transform3D(-0.36247185, 0, -0.93199474, 0, 1, 0, 0.93199474, 0, -0.36247185, 0.33266023, 0, 0.02884382)

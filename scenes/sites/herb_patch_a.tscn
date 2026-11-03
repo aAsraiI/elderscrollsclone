@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_axbye"]
-[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_46cvr"]
 
 [node name="HerbPatchA" type="Node3D" unique_id=17952640]
 script = ExtResource("1_axbye")
@@ -25,10 +24,3 @@ transform = Transform3D(-0.80901694, 0, -0.58778536, 0, 1, 0, 0.58778536, 0, -0.
 
 [node name="Herb4" type="Marker3D" parent="." unique_id=442457506]
 transform = Transform3D(0.30901712, 0, -0.9510565, 0, 1, 0, 0.9510565, 0, 0.30901712, 0.4326238, 0, -1.3314791)
-
-[node name="Decoration5" type="Marker3D" parent="." unique_id=110842506]
-transform = Transform3D(0.87758255, 0, 0.47942555, 0, 1, 0, -0.47942555, 0, 0.87758255, 0.3, 0, 0.2)
-script = ExtResource("2_46cvr")
-tags = PackedStringArray("rock", "boulder")
-chance = 0.5
-pool = PackedStringArray()

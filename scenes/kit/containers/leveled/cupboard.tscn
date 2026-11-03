@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_container.gd" id="1_jwjff"]
+
+[node name="Cupboard" type="Node3D" unique_id=1890942302]
+script = ExtResource("1_jwjff")
+display_name = "Cupboard"
+model_key = "kit/containers/all/contain_com_cupboard_01"
+loot_tags = PackedStringArray("kitchen", "home")

@@ -11,32 +11,13 @@ extends RefCounted
 ## Handmade. Its rooms are filled the same way; doors, levers and secrets come from the joins a
 ## baked scene remembers.
 ##
-## Old saves: a dungeon visited before Alpha 1.13 keeps its old layout (legacy), so its chests and
-## bodies are still where they were; one already visited as a generated dungeon stays generated.
+## Old saves: a dungeon visited before Alpha 1.13 used to keep its old generated layout; since Alpha 1.20
+## (rooms are hand-made templates, no furniture picked at run time) it is built from its recipe like any
+## other. DungeonBuilder is left for a DungeonData without a recipe.
 
 
 static func uses_modules(data: DungeonData, dungeon_id: String) -> bool:
-	if is_legacy(dungeon_id):
-		return false
 	return (data != null and data.recipe != null) or handmade_for(data, dungeon_id) != ""
-
-
-## Was this dungeon visited before Alpha 1.13 (it has saved chests or kills of the old layout)?
-static func is_legacy(dungeon_id: String) -> bool:
-	if WorldState.has_record("stitched/" + dungeon_id):
-		return false
-	var prefix := "dungeon/%s/" % dungeon_id
-	for key: String in WorldState.records:
-		var rest := ""
-		if key.begins_with(prefix):
-			rest = key.trim_prefix(prefix)
-		elif key.begins_with("kill/" + prefix):
-			rest = key.trim_prefix("kill/" + prefix)
-		else:
-			continue
-		if not (rest.begins_with("r") and rest.substr(1, 1).is_valid_int()) and rest != "boss" and rest != "chest_boss":
-			return true  # an old layout's chest or body (a stitched room's are "r<n>/...")
-	return false
 
 
 ## The hand-made scene this dungeon uses ("" = generate it)
@@ -77,10 +58,16 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 	var occ := DungeonRefill.occupants(data, dungeon_id, Rumors._day())  # new folk in a long-cleared place
 	var ctx := {"data": occ["data"], "dungeon_id": dungeon_id, "level_min": level_min + data.level_offset, "level_max": level_max + data.level_offset,
 		"density": density, "seed": dungeon_seed, "occupants": int(occ["gen"])}
+	root.set_meta("loot_level", int(ctx["level_max"]))  # builder-kit containers and shelves in its rooms (KitPlace)
 	var totals := {"props": 0, "chests": 0, "enemies": 0, "boss": false}
 	for room in root.get_children():
 		if room is RoomModule:
 			var got := RoomFiller.fill(room, ctx)
+			# loot on the room's own furniture (its tables, shelves, altars), thinner than in a house, never restocked
+			var rb := (room as RoomModule).bounds()
+			var rid := String(room.get_meta("room_id", room.name))
+			RoomDecorator.decorate(room, Rect2(rb.position.x, rb.position.z, rb.size.x, rb.size.z), KitPlace.room_theme(room), int(ctx["level_max"]),
+				("%d|%s" % [dungeon_seed, rid]).hash(), "", rid, [], 0, 1, 3.0, 0.5)
 			for k in ["props", "chests", "enemies"]:
 				totals[k] += int(got[k])
 			totals["boss"] = bool(totals["boss"]) or bool(got["boss"])

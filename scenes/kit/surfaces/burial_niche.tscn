@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_r0qf4"]
+
+[node name="BurialNiche" type="StaticBody3D" unique_id=1803706011]
+script = ExtResource("1_r0qf4")
+furniture = "prop/niche"
+loot_tags = PackedStringArray("crypt")

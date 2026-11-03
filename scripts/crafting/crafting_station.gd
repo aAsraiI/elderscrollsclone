@@ -26,6 +26,13 @@ static func place(parent: Node3D, p_kind: String, at: Vector3, yaw: float = 0.0)
 func _ready() -> void:
 	collision_layer = WORLD_LAYER | INTERACTABLE_LAYER
 	collision_mask = 0
+	_build_model()
+	var looks := get_children().filter(func(c: Node) -> bool: return String(c.name).begins_with("Look_"))
+	if not looks.is_empty():
+		# collision that fits what you see: a hull round each piece (the table, the forge, the bellows)
+		for m: Node3D in looks:
+			ModelLibrary.add_collision(self, m, String(m.get_meta("model_key", m.name)) + "|station|" + str((m.get_child(0) as Node3D).transform))  # one model fitted two ways is two shapes
+		return
 	var size := _size()
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
@@ -33,7 +40,6 @@ func _ready() -> void:
 	shape.shape = box
 	shape.position = Vector3(0, size.y * 0.5, 0)
 	add_child(shape)
-	_build_model()
 
 
 func get_prompt() -> String:
@@ -198,9 +204,22 @@ const GLOWS := {"forge": [Vector3(0, 1.3, 0), Color(1.0, 0.5, 0.2), 1.4], "smelt
 
 
 func _build_from_models() -> bool:
-	var look: Array = LOOKS.get(kind, [])
-	if look.is_empty() or not ModelLibrary.has(String(look[0][0])):
+	var parts := add_look(self, kind)
+	if parts.is_empty():
 		return false
+	if GLOWS.has(kind):
+		var g: Array = GLOWS[kind]
+		_light(g[0], g[1], g[2])
+	return true
+
+
+## The station's models (LOOKS) under `holder`, the base first; empty when the base has no model. Static,
+## so the builder kit (KitStation) draws the same look in the editor.
+static func add_look(holder: Node3D, station: String) -> Array[Node3D]:
+	var out: Array[Node3D] = []
+	var look: Array = LOOKS.get(station, [])
+	if look.is_empty() or not ModelLibrary.has(String(look[0][0])):
+		return out
 	var top := 0.0
 	for i in look.size():
 		var part: Array = look[i]
@@ -214,12 +233,11 @@ func _build_from_models() -> bool:
 		if m == null:
 			continue
 		for l in m.find_children("*", "Light3D", true, false):
-			l.queue_free()  # one light for the station (GLOWS), not one per candle
+			l.get_parent().remove_child(l)
+			l.free()  # one light for the station (GLOWS), not one per candle
 		m.name = "Look_" + key.get_file()
-		add_child(m)
+		holder.add_child(m, false, Node.INTERNAL_MODE_BACK if Engine.is_editor_hint() else Node.INTERNAL_MODE_DISABLED)
+		out.append(m)
 		if i == 0:
-			top = ModelLibrary.bounds(self).end.y
-	if GLOWS.has(kind):
-		var g: Array = GLOWS[kind]
-		_light(g[0], g[1], g[2])
-	return true
+			top = (ModelLibrary.relative_transform(holder, m) * ModelLibrary.bounds(m)).end.y
+	return out

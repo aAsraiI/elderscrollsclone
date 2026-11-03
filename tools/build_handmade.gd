@@ -8,6 +8,8 @@ extends "res://tools/build_interiors.gd"
 ##                   (scenes/interiors/handmade/seat_<town>.tscn), listed in InteriorOverrides
 ## Scenes that exist are kept (hand edits are safe); pass --force to make them again.
 ##   godot --headless --path . -s res://tools/build_handmade.gd [-- --force]
+## Since Alpha 1.20 the game no longer fills furniture spawn points: after a --force rebuild run
+## tools/bake_room_props.gd to turn them into placed props.
 
 const SET_DIR := "res://scenes/interiors/setpieces/"
 const HAND_DIR := "res://scenes/interiors/handmade/"

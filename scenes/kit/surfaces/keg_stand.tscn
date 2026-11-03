@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/kit_loot_shelf.gd" id="1_6iw6p"]
+
+[node name="KegStand" type="StaticBody3D" unique_id=1296947594]
+script = ExtResource("1_6iw6p")
+furniture = "kit/furniture/common/furn_com_kegstand"
+fallback = "prop/keg_rack"
+loot_tags = PackedStringArray("tavern")

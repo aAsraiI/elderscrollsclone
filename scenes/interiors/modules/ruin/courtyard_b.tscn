@@ -270,20 +270,6 @@ mesh = SubResource("BoxMesh_lmhum")
 [node name="Shape" type="CollisionShape3D" parent="Shell/Wall_3_0_1_Top" unique_id=888233392]
 shape = SubResource("BoxShape3D_kktfr")
 
-[node name="Decoration4" type="Marker3D" parent="." unique_id=897118609]
-transform = Transform3D(0.72426146, 0, 0.6895254, 0, 1, 0, -0.6895254, 0, 0.72426146, -2, 0, 2)
-script = ExtResource("4_veq30")
-tags = PackedStringArray("broken_pillar", "rubble", "statue")
-chance = 0.4
-pool = PackedStringArray()
-
-[node name="Decoration5" type="Marker3D" parent="." unique_id=1789942563]
-transform = Transform3D(-0.9845013, 0, 0.1753773, 0, 1, 0, -0.1753773, 0, -0.9845013, 2, 0, -2)
-script = ExtResource("4_veq30")
-tags = PackedStringArray("broken_pillar", "rubble", "statue")
-chance = 0.4
-pool = PackedStringArray()
-
 [node name="Enemy6" type="Marker3D" parent="." unique_id=1060070423]
 transform = Transform3D(0.9962067, 0, 0.08701832, 0, 1, 0, -0.08701832, 0, 0.9962067, 1.8373473, 0, 1.2003372)
 script = ExtResource("4_veq30")

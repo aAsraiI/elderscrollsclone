@@ -134,7 +134,7 @@ const FLORA := {
 			"models": ["trees/flora_tree_bm_01", "trees/flora_tree_bm_02", "trees/flora_tree_bm_04", "trees/flora_tree_bm_06", "tree/pine"], "scale_min": 0.7, "scale_max": 1.0,
 			"height": 8.0, "color": Color(0.22, 0.34, 0.2), "sink": 0.2, "water": -0.2, "lean": 7.0, "trunk_radius": 0.25},
 		{"name": "dune grass", "shape": S.REEDS, "size": Z.PLANT, "density": 220.0, "clump_scale": 50.0, "clumping": 0.6,
-			"models": ["grass/flora_grass_05", "grass/flora_grass_06"], "scale_min": 0.6, "scale_max": 1.0, "height": 0.7,
+			"models": ["grass/flora_grass_01", "grass/flora_grass_03"], "scale_min": 0.6, "scale_max": 1.0, "height": 0.7,
 			"color": Color(0.62, 0.62, 0.4), "solid": false},
 		{"name": "kelp", "shape": S.REEDS, "size": Z.PLANT, "density": 260.0, "clump_scale": 50.0, "clumping": 0.6, "in_water": true,
 			"models": ["grass/flora_kelp_01", "grass/flora_kelp_02", "grass/flora_kelp_03", "grass/flora_kelp_04"], "scale_min": 0.4, "scale_max": 0.7,

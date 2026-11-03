@@ -36,13 +36,13 @@
 [ext_resource type="Resource" path="res://data/world/Sites/lost_pack.tres" id="32_s3dh0"]
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="33_p7l8a"]
 [ext_resource type="Resource" path="res://data/world/Sites/ore_outcrop.tres" id="34_2hepf"]
-[ext_resource type="Resource" path="res://data/world/POIs/citadel_entrance.tres" id="36_bg0ma"]
-[ext_resource type="Resource" path="res://data/world/POIs/echoing_halls_entrance.tres" id="37_s3dh0"]
 [ext_resource type="Resource" path="res://data/world/POIs/dragon_roost_entrance.tres" id="38_p7l8a"]
 [ext_resource type="Resource" path="res://data/world/Sites/nomad_camp.tres" id="39_01nkw"]
 [ext_resource type="Resource" path="res://data/world/Sites/fire_altar.tres" id="40_0iehg"]
+[ext_resource type="Resource" path="res://data/world/Sites/citadel_site.tres" id="40_01nkw"]
+[ext_resource type="Resource" path="res://data/world/Sites/echoing_halls_site.tres" id="40_78fmw"]
 
-[sub_resource type="Resource" id="Resource_3rx7d"]
+[sub_resource type="Resource" id="Resource_jsnfe"]
 script = ExtResource("7_3rx7d")
 name = "ash trees"
 models = PackedStringArray("kit/plants/trees/flora_ashtree_01", "kit/plants/trees/flora_ashtree_03", "kit/plants/trees/flora_ashtree_04", "kit/plants/trees/flora_ashtree_05", "kit/plants/trees/flora_ashtree_07")
@@ -55,7 +55,7 @@ scale_min = 0.7
 scale_max = 1.0
 trunk_radius = 0.25
 
-[sub_resource type="Resource" id="Resource_bg0ma"]
+[sub_resource type="Resource" id="Resource_sttk3"]
 script = ExtResource("7_3rx7d")
 name = "trama shrubs"
 models = PackedStringArray("kit/plants/other/flora_trama_shrub_01", "kit/plants/other/flora_trama_shrub_03", "kit/plants/other/flora_trama_shrub_04", "kit/plants/other/flora_trama_shrub_06")
@@ -70,7 +70,7 @@ scale_min = 0.18
 scale_max = 0.3
 solid = false
 
-[sub_resource type="Resource" id="Resource_s3dh0"]
+[sub_resource type="Resource" id="Resource_1bcbf"]
 script = ExtResource("7_3rx7d")
 name = "ash grass"
 models = PackedStringArray("kit/plants/other/flora_ash_grass_b_01", "kit/plants/other/flora_ash_grass_r_01", "kit/plants/other/flora_ash_grass_w_01")
@@ -85,7 +85,7 @@ scale_min = 0.4
 scale_max = 0.7
 solid = false
 
-[sub_resource type="Resource" id="Resource_p7l8a"]
+[sub_resource type="Resource" id="Resource_wspr1"]
 script = ExtResource("7_3rx7d")
 name = "thorns"
 models = PackedStringArray("kit/plants/other/flora_rm_scathecraw_01", "kit/plants/other/flora_rm_scathecraw_02")
@@ -98,7 +98,7 @@ scale_min = 0.35
 scale_max = 0.55
 solid = false
 
-[sub_resource type="Resource" id="Resource_2hepf"]
+[sub_resource type="Resource" id="Resource_r21hg"]
 script = ExtResource("7_3rx7d")
 name = "ash logs"
 models = PackedStringArray("kit/plants/logs_roots/flora_ash_log_01", "kit/plants/logs_roots/flora_ash_log_03")
@@ -112,7 +112,7 @@ sink = 0.2
 lean = 0.0
 follow_ground = true
 
-[sub_resource type="Resource" id="Resource_jsnfe"]
+[sub_resource type="Resource" id="Resource_wu5uw"]
 script = ExtResource("7_3rx7d")
 name = "lava rocks"
 models = PackedStringArray("kit/rocks/ashlands/terrain_ashland_rock_01", "kit/rocks/ashlands/terrain_ashland_rock_03", "kit/rocks/ashlands/terrain_rock_rm_03", "kit/rocks/ashlands/terrain_rock_rm_04")
@@ -342,22 +342,6 @@ count_max = 0.156
 extra_spacing = 40.0
 border_margin = 40.0
 
-[sub_resource type="Resource" id="Resource_es7mf"]
-script = ExtResource("6_5sjo6")
-poi = ExtResource("36_bg0ma")
-count_mode = 0
-count_max = 1.0
-extra_spacing = 80.0
-border_margin = 80.0
-
-[sub_resource type="Resource" id="Resource_x7x2l"]
-script = ExtResource("6_5sjo6")
-poi = ExtResource("37_s3dh0")
-count_min = 0.02
-count_max = 0.03
-extra_spacing = 80.0
-border_margin = 80.0
-
 [sub_resource type="Resource" id="Resource_e57qp"]
 script = ExtResource("6_5sjo6")
 poi = ExtResource("38_p7l8a")
@@ -381,6 +365,22 @@ count_min = 0.063
 count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_es7mf"]
+script = ExtResource("6_5sjo6")
+poi = ExtResource("40_01nkw")
+count_mode = 0
+count_max = 1.0
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_x7x2l"]
+script = ExtResource("6_5sjo6")
+poi = ExtResource("40_78fmw")
+count_min = 0.02
+count_max = 0.03
+extra_spacing = 80.0
+border_margin = 80.0
 
 [resource]
 script = ExtResource("11_fbwxn")
@@ -411,10 +411,10 @@ steep_color = Color(0.12, 0.11, 0.11, 1)
 shore_color = Color(0.17, 0.16, 0.16, 1)
 tree_style = 1
 tree_color = Color(0.16, 0.32, 0.18, 1)
-flora = Array[ExtResource("7_3rx7d")]([SubResource("Resource_3rx7d"), SubResource("Resource_bg0ma"), SubResource("Resource_s3dh0"), SubResource("Resource_p7l8a"), SubResource("Resource_2hepf"), SubResource("Resource_jsnfe")])
+flora = Array[ExtResource("7_3rx7d")]([SubResource("Resource_jsnfe"), SubResource("Resource_sttk3"), SubResource("Resource_1bcbf"), SubResource("Resource_wspr1"), SubResource("Resource_r21hg"), SubResource("Resource_wu5uw")])
 herbs = PackedStringArray("ash_root:4", "ember_fern:3", "thornroot:2")
 herb_density = 0.7
-poi_rules = Array[ExtResource("6_5sjo6")]([SubResource("Resource_wgm6g"), SubResource("Resource_tw5pc"), SubResource("Resource_dya0r"), SubResource("Resource_lgn5m"), SubResource("Resource_2neev"), SubResource("Resource_tjnqq"), SubResource("Resource_0iehg"), SubResource("Resource_78fmw"), SubResource("Resource_5ijn4"), SubResource("Resource_eu47b"), SubResource("Resource_d35dm"), SubResource("Resource_loooc"), SubResource("Resource_aji0d"), SubResource("Resource_sm6q4"), SubResource("Resource_a3nre"), SubResource("Resource_874ub"), SubResource("Resource_hqav6"), SubResource("Resource_7bumw"), SubResource("Resource_6q30o"), SubResource("Resource_m18ah"), SubResource("Resource_e34ry"), SubResource("Resource_01nkw"), SubResource("Resource_ckkap"), SubResource("Resource_604ul"), SubResource("Resource_rpbr4"), SubResource("Resource_onqsf"), SubResource("Resource_o0eu4"), SubResource("Resource_es7mf"), SubResource("Resource_x7x2l"), SubResource("Resource_e57qp"), SubResource("Resource_5rulb"), SubResource("Resource_ywrr3")])
+poi_rules = Array[ExtResource("6_5sjo6")]([SubResource("Resource_wgm6g"), SubResource("Resource_tw5pc"), SubResource("Resource_dya0r"), SubResource("Resource_lgn5m"), SubResource("Resource_2neev"), SubResource("Resource_tjnqq"), SubResource("Resource_0iehg"), SubResource("Resource_78fmw"), SubResource("Resource_5ijn4"), SubResource("Resource_eu47b"), SubResource("Resource_d35dm"), SubResource("Resource_loooc"), SubResource("Resource_aji0d"), SubResource("Resource_sm6q4"), SubResource("Resource_a3nre"), SubResource("Resource_874ub"), SubResource("Resource_hqav6"), SubResource("Resource_7bumw"), SubResource("Resource_6q30o"), SubResource("Resource_m18ah"), SubResource("Resource_e34ry"), SubResource("Resource_01nkw"), SubResource("Resource_ckkap"), SubResource("Resource_604ul"), SubResource("Resource_rpbr4"), SubResource("Resource_onqsf"), SubResource("Resource_o0eu4"), SubResource("Resource_e57qp"), SubResource("Resource_5rulb"), SubResource("Resource_ywrr3"), SubResource("Resource_es7mf"), SubResource("Resource_x7x2l")])
 level_min = 70
 level_max = 93
 encounters = Array[ExtResource("1_uapfi")]([ExtResource("2_fqerg"), ExtResource("3_2neev"), ExtResource("4_tplft"), ExtResource("5_8dw1d"), ExtResource("6_wnvx0")])

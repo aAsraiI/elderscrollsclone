@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/echoing_halls.tres" id="1_7lfqh"]
+[ext_resource type="Resource" path="res://data/spawns/dungeon_halls.tres" id="2_6qrhc"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_7i436"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ruined_keep_a.tscn" id="4_usi2b"]
+[ext_resource type="PackedScene" path="res://scenes/sites/ruined_keep_b.tscn" id="5_2wprm"]
+
+[resource]
+script = ExtResource("3_7i436")
+sites = Array[PackedScene]([ExtResource("4_usi2b"), ExtResource("5_2wprm")])
+occupants = ExtResource("2_6qrhc")
+map_icon = "ruin"
+dungeon = ExtResource("1_7lfqh")
+enter_name = "Echoing Halls"
+id = &"site_echoing_halls"
+display_name = "Hall of Echoes"
+map_color = Color(0.6, 0.65, 0.5, 1)
+footprint_radius = 26.0
+flatten_radius = 20.0
+max_slope_deg = 12.0
+prefer = "high"
+min_same_distance = 900.0
+path_to_road = 200.0
+garrison_level_offset = 5

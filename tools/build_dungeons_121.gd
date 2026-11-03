@@ -96,6 +96,15 @@ const DUNGEONS := {
 		"entrance": ["Hollow", Color(0.5, 0.8, 0.4), true, Color(0.3, 0.32, 0.26), 12.0, "low"], "biomes": {"swamp": [0.12, 0.2], "deadlands": [0.06, 0.1], "forest": [0.03, 0.05]}},
 }
 
+## The very large dungeons stand under a whole site, not a bare door: [site kind copied (its scenes
+## have a way down), the site's name, who holds it above]. Their plain entrance rules are taken out.
+const FRONTS := {
+	"citadel": ["fort", "Black Citadel", "dungeon_citadel"],
+	"necropolis": ["graveyard", "Necropolis Gate", "dungeon_necropolis"],
+	"deep_delve": ["mine_entrance", "Delve Head", "dungeon_delve"],
+	"echoing_halls": ["ruined_keep", "Hall of Echoes", "dungeon_halls"],
+}
+
 ## The older POIs that filled the land, cut back (multiplied) so the new kinds have room to show
 const THIN := {"cave_entrance": 0.4, "bandit_camp": 0.5, "ruined_shrine": 0.5, "crypt_entrance": 0.6, "standing_stones": 0.6, "watchtower": 0.6, "glowing_shrine": 0.6}
 const BIOMES := ["plains", "lakeland", "forest", "coast", "swamp", "highlands", "snow_mountains", "frozen_crown", "tundra", "desert", "badlands", "deadlands", "ashlands"]
@@ -140,6 +149,23 @@ func _initialize() -> void:
 		d.chests_min = 2
 		d.chests_max = 5
 		_save(d, path)
+		if FRONTS.has(key):
+			# a site above it: a copy of a site kind whose scenes lead down, leading here instead
+			var front: Array = FRONTS[key]
+			var site := (load(R + "world/Sites/%s.tres" % front[0]) as SitePOIData).duplicate() as SitePOIData
+			site.id = StringName("site_%s" % key)
+			site.display_name = front[1]
+			site.enter_name = spec["display_name"]
+			site.dungeon = load(path) as DungeonData
+			site.occupants = load(R + "spawns/%s.tres" % front[2]) as SpawnTable
+			site.min_same_distance = 900.0
+			site.garrison_level_offset = int(spec.get("level_offset", 0))
+			var site_path := R + "world/Sites/%s_site.tres" % key
+			_save(site, site_path)
+			for biome_key: String in spec["biomes"]:
+				_unhook(biome_key, "%s_entrance" % key)
+				_hook(biome_key, load(site_path) as POIData, spec["biomes"][biome_key])
+			continue
 		var ent: Array = spec["entrance"]
 		var poi_path := R + "world/POIs/%s_entrance.tres" % key
 		var p: DungeonEntrancePOIData = load(poi_path) if ResourceLoader.exists(poi_path) else DungeonEntrancePOIData.new()
@@ -190,6 +216,20 @@ func _hook(biome_key: String, poi: POIData, counts: Array) -> void:
 	rules.append(r)
 	b.poi_rules = rules
 	_save(b, path)
+
+
+# Takes a land's rule for this POI out (a dungeon that now stands under a site)
+func _unhook(biome_key: String, poi_key: String) -> void:
+	var path := R + "world/%s.tres" % biome_key
+	var b := load(path) as BiomeData
+	if b == null:
+		return
+	var rules := b.poi_rules.filter(func(r: POIRule) -> bool: return r == null or r.poi == null or r.poi.get_key() != poi_key)
+	if rules.size() != b.poi_rules.size():
+		var typed: Array[POIRule] = []
+		typed.assign(rules)
+		b.poi_rules = typed
+		_save(b, path)
 
 
 # Cuts the old filler POIs back once (a land remembers it was thinned: its meta "thinned_121")

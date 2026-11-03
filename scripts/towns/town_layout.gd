@@ -77,6 +77,8 @@ var dress: Array[Dictionary] = []
 ## water nearby). Tradesmen are picked from these: fishermen only where there is water.
 var biome_key := ""
 var shore := Vector3.INF
+## A walled town's gap in the wall toward its shore (local), or INF
+var sea_gate := Vector3.INF
 ## Named towns: the NamedSettlements entry (its lord and seat); empty for random towns
 var named: Dictionary = {}
 
@@ -834,6 +836,14 @@ func _wall_outline(rng: RandomNumberGenerator) -> void:
 				s.a = gates[0]
 				s.b = gates[1]
 		_build_street_graph()
+	# a walled town by the water has a sea gate toward its shore, out to the pier (Alpha 1.21)
+	if shore != Vector3.INF:
+		var to_shore := Vector2(shore.x, shore.z)
+		for i in hull.size():
+			var hit = Geometry2D.segment_intersects_segment(Vector2.ZERO, to_shore.normalized() * 2000.0, hull[i], hull[(i + 1) % hull.size()])
+			if hit != null:
+				sea_gate = Vector3((hit as Vector2).x, 0, (hit as Vector2).y)
+				break
 
 
 ## The wall's pieces between the gates: [from, to] local points, each no longer than `step`
@@ -847,7 +857,7 @@ func wall_pieces(step: float, gate_gap: float) -> Array:
 			var p := a.lerp(b, float(k) / n)
 			var q := a.lerp(b, float(k + 1) / n)
 			var mid := (p + q) * 0.5
-			if gates.any(func(g: Vector3) -> bool: return Vector2(g.x, g.z).distance_to(mid) < gate_gap):
+			if gates.any(func(g: Vector3) -> bool: return Vector2(g.x, g.z).distance_to(mid) < gate_gap) or (sea_gate != Vector3.INF and Vector2(sea_gate.x, sea_gate.z).distance_to(mid) < gate_gap):
 				continue
 			out.append([p, q])
 	return out

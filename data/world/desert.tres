@@ -26,8 +26,8 @@
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="33_ktabj"]
 [ext_resource type="Resource" path="res://data/world/Sites/ore_outcrop.tres" id="34_oed7g"]
 [ext_resource type="Resource" path="res://data/world/Sites/wayside_inn.tres" id="35_qed0b"]
-[ext_resource type="Resource" path="res://data/world/POIs/echoing_halls_entrance.tres" id="37_kdlmp"]
 [ext_resource type="Resource" path="res://data/world/Sites/oasis.tres" id="38_ktabj"]
+[ext_resource type="Resource" path="res://data/world/Sites/echoing_halls_site.tres" id="39_ktabj"]
 [ext_resource type="Resource" path="res://data/world/Sites/nomad_camp.tres" id="39_oed7g"]
 [ext_resource type="Resource" path="res://data/encounters/desert_raiders.tres" id="enc_0"]
 [ext_resource type="Resource" path="res://data/encounters/desert_beasts.tres" id="enc_1"]
@@ -41,7 +41,7 @@
 [ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="poi_4"]
 [ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
 
-[sub_resource type="Resource" id="Resource_i00ec"]
+[sub_resource type="Resource" id="Resource_ktabj"]
 script = ExtResource("7_i00ec")
 name = "cacti"
 models = PackedStringArray()
@@ -56,7 +56,7 @@ scale_max = 1.2
 lean = 4.0
 trunk_radius = 0.25
 
-[sub_resource type="Resource" id="Resource_kdlmp"]
+[sub_resource type="Resource" id="Resource_jrwoy"]
 script = ExtResource("7_i00ec")
 name = "oasis palms"
 models = PackedStringArray()
@@ -70,7 +70,7 @@ scale_max = 1.2
 lean = 8.0
 trunk_radius = 0.25
 
-[sub_resource type="Resource" id="Resource_lq5wi"]
+[sub_resource type="Resource" id="Resource_m6eva"]
 script = ExtResource("7_i00ec")
 name = "dry shrubs"
 models = PackedStringArray("kit/plants/other/flora_roobrush_01")
@@ -83,7 +83,7 @@ scale_min = 0.45
 scale_max = 0.75
 solid = false
 
-[sub_resource type="Resource" id="Resource_ktabj"]
+[sub_resource type="Resource" id="Resource_qhakt"]
 script = ExtResource("7_i00ec")
 name = "dead trees"
 models = PackedStringArray("kit/plants/trees/flora_treedead_mh_02", "kit/plants/trees/flora_ashtree_02")
@@ -94,7 +94,7 @@ scale_min = 0.7
 scale_max = 1.0
 trunk_radius = 0.2
 
-[sub_resource type="Resource" id="Resource_jrwoy"]
+[sub_resource type="Resource" id="Resource_8pm5r"]
 script = ExtResource("7_i00ec")
 name = "sandstone"
 models = PackedStringArray("kit/rocks/coast/terrain_rock_ac_03", "kit/rocks/coast/terrain_rock_ac_05")
@@ -327,14 +327,6 @@ count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
-[sub_resource type="Resource" id="Resource_iqqxc"]
-script = ExtResource("rule_script")
-poi = ExtResource("37_kdlmp")
-count_mode = 0
-count_max = 1.0
-extra_spacing = 80.0
-border_margin = 80.0
-
 [sub_resource type="Resource" id="Resource_7kx8b"]
 script = ExtResource("rule_script")
 poi = ExtResource("38_ktabj")
@@ -350,6 +342,14 @@ count_min = 0.0525
 count_max = 0.09750000000000002
 extra_spacing = 40.0
 border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_iqqxc"]
+script = ExtResource("rule_script")
+poi = ExtResource("39_ktabj")
+count_mode = 0
+count_max = 1.0
+extra_spacing = 80.0
+border_margin = 80.0
 
 [resource]
 script = ExtResource("1_biome")
@@ -378,10 +378,10 @@ shore_color = Color(0.78, 0.7, 0.5, 1)
 tree_style = 3
 tree_density = 4.0
 tree_color = Color(0.32, 0.5, 0.26, 1)
-flora = Array[ExtResource("7_i00ec")]([SubResource("Resource_i00ec"), SubResource("Resource_kdlmp"), SubResource("Resource_lq5wi"), SubResource("Resource_ktabj"), SubResource("Resource_jrwoy")])
+flora = Array[ExtResource("7_i00ec")]([SubResource("Resource_ktabj"), SubResource("Resource_jrwoy"), SubResource("Resource_m6eva"), SubResource("Resource_qhakt"), SubResource("Resource_8pm5r")])
 herbs = PackedStringArray("aloe_leaf:3", "sand_lily:2", "cactus_flower:3", "sandroot:3", "sagebrush:1")
 herb_density = 0.7
-poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("Resource_otag7"), SubResource("Resource_7is4q"), SubResource("Resource_oed7g"), SubResource("Resource_qed0b"), SubResource("Resource_vt1cm"), SubResource("Resource_rs2l3"), SubResource("Resource_6brtd"), SubResource("Resource_neqnc"), SubResource("Resource_fodos"), SubResource("Resource_a3vkq"), SubResource("Resource_0bu14"), SubResource("Resource_tvkti"), SubResource("Resource_xq0f6"), SubResource("Resource_g6oia"), SubResource("Resource_k85my"), SubResource("Resource_orqal"), SubResource("Resource_pulsy"), SubResource("Resource_gq3we"), SubResource("Resource_aaq8d"), SubResource("Resource_50uw2"), SubResource("Resource_c1kyo"), SubResource("Resource_eatdx"), SubResource("Resource_lc103"), SubResource("Resource_iqqxc"), SubResource("Resource_7kx8b"), SubResource("Resource_ay2jx")])
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("Resource_otag7"), SubResource("Resource_7is4q"), SubResource("Resource_oed7g"), SubResource("Resource_qed0b"), SubResource("Resource_vt1cm"), SubResource("Resource_rs2l3"), SubResource("Resource_6brtd"), SubResource("Resource_neqnc"), SubResource("Resource_fodos"), SubResource("Resource_a3vkq"), SubResource("Resource_0bu14"), SubResource("Resource_tvkti"), SubResource("Resource_xq0f6"), SubResource("Resource_g6oia"), SubResource("Resource_k85my"), SubResource("Resource_orqal"), SubResource("Resource_pulsy"), SubResource("Resource_gq3we"), SubResource("Resource_aaq8d"), SubResource("Resource_50uw2"), SubResource("Resource_c1kyo"), SubResource("Resource_eatdx"), SubResource("Resource_lc103"), SubResource("Resource_7kx8b"), SubResource("Resource_ay2jx"), SubResource("Resource_iqqxc")])
 level_min = 6
 level_max = 18
 encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("6_sp1mm")])

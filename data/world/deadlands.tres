@@ -36,13 +36,13 @@
 [ext_resource type="Resource" path="res://data/world/Sites/lost_pack.tres" id="32_yqn18"]
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="33_2llix"]
 [ext_resource type="Resource" path="res://data/world/Sites/nest.tres" id="34_u30it"]
-[ext_resource type="Resource" path="res://data/world/POIs/necropolis_entrance.tres" id="36_hwl1y"]
 [ext_resource type="Resource" path="res://data/world/POIs/witch_hollow_entrance.tres" id="37_yqn18"]
 [ext_resource type="Resource" path="res://data/world/Sites/witch_hut.tres" id="38_rl0tb"]
 [ext_resource type="Resource" path="res://data/world/Sites/gallows.tres" id="39_5vqf7"]
 [ext_resource type="Resource" path="res://data/world/Sites/plague_pit.tres" id="40_3jjlk"]
+[ext_resource type="Resource" path="res://data/world/Sites/necropolis_site.tres" id="40_rl0tb"]
 
-[sub_resource type="Resource" id="Resource_dw3du"]
+[sub_resource type="Resource" id="Resource_hd0sp"]
 script = ExtResource("8_dw3du")
 name = "dead trees"
 models = PackedStringArray("kit/plants/trees/flora_treedead_mh_01", "kit/plants/trees/flora_ashtree_04", "kit/plants/trees/flora_ashtree_06", "kit/plants/trees/flora_ashtree_07", "kit/plants/trees/flora_tree_gl_10", "kit/plants/trees/flora_tree_gl_07")
@@ -56,7 +56,7 @@ scale_max = 0.75
 sink = 0.3
 trunk_radius = 0.25
 
-[sub_resource type="Resource" id="Resource_hwl1y"]
+[sub_resource type="Resource" id="Resource_sbk71"]
 script = ExtResource("8_dw3du")
 name = "gnarled roots"
 models = PackedStringArray("kit/plants/logs_roots/flora_root_wg_02", "kit/plants/logs_roots/flora_root_wg_04", "kit/plants/logs_roots/flora_root_wg_06", "kit/plants/logs_roots/flora_root_wg_08")
@@ -68,7 +68,7 @@ scale_min = 0.45
 scale_max = 0.75
 sink = 0.3
 
-[sub_resource type="Resource" id="Resource_yqn18"]
+[sub_resource type="Resource" id="Resource_w7qyq"]
 script = ExtResource("8_dw3du")
 name = "grave moss"
 models = PackedStringArray("kit/plants/bitter_coast/flora_bc_moss_03", "kit/plants/bitter_coast/flora_bc_moss_07", "kit/plants/bitter_coast/flora_bc_moss_11")
@@ -84,7 +84,7 @@ scale_max = 1.0
 follow_ground = true
 solid = false
 
-[sub_resource type="Resource" id="Resource_2llix"]
+[sub_resource type="Resource" id="Resource_1g2hl"]
 script = ExtResource("8_dw3du")
 name = "rotting logs"
 models = PackedStringArray("kit/plants/logs_roots/flora_ash_log_01", "kit/plants/logs_roots/flora_ash_log_02")
@@ -98,7 +98,7 @@ sink = 0.2
 lean = 0.0
 follow_ground = true
 
-[sub_resource type="Resource" id="Resource_u30it"]
+[sub_resource type="Resource" id="Resource_rlxvn"]
 script = ExtResource("8_dw3du")
 name = "pods"
 models = PackedStringArray("kit/plants/other/flora_muckpod_04", "kit/plants/other/flora_muckpod_05")
@@ -111,7 +111,7 @@ scale_min = 0.6
 scale_max = 1.0
 solid = false
 
-[sub_resource type="Resource" id="Resource_hd0sp"]
+[sub_resource type="Resource" id="Resource_s2h0d"]
 script = ExtResource("8_dw3du")
 name = "bare giants"
 models = PackedStringArray("kit/plants/trees/flora_tree_gl_03", "kit/plants/trees/flora_tree_gl_05")
@@ -325,14 +325,6 @@ count_max = 0.104
 extra_spacing = 40.0
 border_margin = 40.0
 
-[sub_resource type="Resource" id="Resource_u7hvv"]
-script = ExtResource("5_0r0nr")
-poi = ExtResource("36_hwl1y")
-count_mode = 0
-count_max = 1.0
-extra_spacing = 80.0
-border_margin = 80.0
-
 [sub_resource type="Resource" id="Resource_gwxi4"]
 script = ExtResource("5_0r0nr")
 poi = ExtResource("37_yqn18")
@@ -365,6 +357,14 @@ count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
+[sub_resource type="Resource" id="Resource_u7hvv"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("40_rl0tb")
+count_mode = 0
+count_max = 1.0
+extra_spacing = 80.0
+border_margin = 80.0
+
 [resource]
 script = ExtResource("10_puq31")
 id = &"deadlands"
@@ -393,10 +393,10 @@ shore_color = Color(0.25, 0.24, 0.21, 1)
 tree_style = 2
 tree_density = 10.0
 tree_color = Color(0.3, 0.28, 0.25, 1)
-flora = Array[ExtResource("8_dw3du")]([SubResource("Resource_dw3du"), SubResource("Resource_hwl1y"), SubResource("Resource_yqn18"), SubResource("Resource_2llix"), SubResource("Resource_u30it"), SubResource("Resource_hd0sp")])
+flora = Array[ExtResource("8_dw3du")]([SubResource("Resource_hd0sp"), SubResource("Resource_sbk71"), SubResource("Resource_w7qyq"), SubResource("Resource_1g2hl"), SubResource("Resource_rlxvn"), SubResource("Resource_s2h0d")])
 herbs = PackedStringArray("grave_moss:4", "belladonna:3", "wolfsbane:2", "spore_pod:1", "nightshade:2")
 herb_density = 0.9
-poi_rules = Array[ExtResource("5_0r0nr")]([SubResource("Resource_pg31t"), SubResource("Resource_u7b4k"), SubResource("Resource_xg30r"), SubResource("Resource_hv32u"), SubResource("Resource_4v8qn"), SubResource("Resource_dh2ua"), SubResource("Resource_rl0tb"), SubResource("Resource_5vqf7"), SubResource("Resource_3jjlk"), SubResource("Resource_s2oqk"), SubResource("Resource_4qx1b"), SubResource("Resource_vc6xi"), SubResource("Resource_8kjoq"), SubResource("Resource_h1yk6"), SubResource("Resource_n0dfg"), SubResource("Resource_fubn8"), SubResource("Resource_1jmkj"), SubResource("Resource_ndyor"), SubResource("Resource_1tsk0"), SubResource("Resource_i0e7v"), SubResource("Resource_ujhy3"), SubResource("Resource_fkypy"), SubResource("Resource_jyubn"), SubResource("Resource_jnvga"), SubResource("Resource_e3xh7"), SubResource("Resource_64eqq"), SubResource("Resource_u7hvv"), SubResource("Resource_gwxi4"), SubResource("Resource_fawtu"), SubResource("Resource_2dpki"), SubResource("Resource_5jmog")])
+poi_rules = Array[ExtResource("5_0r0nr")]([SubResource("Resource_pg31t"), SubResource("Resource_u7b4k"), SubResource("Resource_xg30r"), SubResource("Resource_hv32u"), SubResource("Resource_4v8qn"), SubResource("Resource_dh2ua"), SubResource("Resource_rl0tb"), SubResource("Resource_5vqf7"), SubResource("Resource_3jjlk"), SubResource("Resource_s2oqk"), SubResource("Resource_4qx1b"), SubResource("Resource_vc6xi"), SubResource("Resource_8kjoq"), SubResource("Resource_h1yk6"), SubResource("Resource_n0dfg"), SubResource("Resource_fubn8"), SubResource("Resource_1jmkj"), SubResource("Resource_ndyor"), SubResource("Resource_1tsk0"), SubResource("Resource_i0e7v"), SubResource("Resource_ujhy3"), SubResource("Resource_fkypy"), SubResource("Resource_jyubn"), SubResource("Resource_jnvga"), SubResource("Resource_e3xh7"), SubResource("Resource_64eqq"), SubResource("Resource_gwxi4"), SubResource("Resource_fawtu"), SubResource("Resource_2dpki"), SubResource("Resource_5jmog"), SubResource("Resource_u7hvv")])
 level_min = 50
 level_max = 73
 encounters = Array[ExtResource("1_tdexh")]([ExtResource("2_ocdib"), ExtResource("3_4v8qn"), ExtResource("4_dh2ua"), ExtResource("5_dh2ua"), ExtResource("6_0r0nr"), ExtResource("7_koxu8")])

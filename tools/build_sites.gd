@@ -1147,13 +1147,13 @@ func _cairn(v: int) -> void:
 		var r := 2.4 - k * 0.45
 		for i in 6 - k:
 			var a := TAU * i / (6.0 - k) + k * 0.5
-			_b(Vector3(1.1, 0.7, 0.9), Vector3(cos(a) * r, 0.35 + k * 0.6, sin(a) * r), "rock", true, a)
+			_b(Vector3(1.1, 0.7, 0.9), Vector3(cos(a) * r, 0.35 + k * 0.6, sin(a) * r), "stone_dark", true, a)
 	_b(Vector3(0.7, 1.2, 0.4), Vector3(0, layers * 0.6 + 0.6, 0), "stone")
 	_marker(_site, "Inscription", Vector3(0, 0.8, -2.8), PI)
 	_s(S.LOOT, [], Vector3(1.6, 0, -2.2), 0.0, 0.5)
 	_s(S.DECORATION, ["bones", "remains"], Vector3(-2.2, 0, 1.4), 0.6)
+	_s(S.DECORATION, ["bones", "remains"], Vector3(2.4, 0, 1.8), 2.1, 0.7)
 	_s(S.LIGHT, ["candle"], Vector3(0.6, 0, -2.6), 0.0)
-	_s(S.DECORATION, ["rock", "boulder"], Vector3(3.0, 0, 1.0), 1.2)
 	_done(file)
 
 

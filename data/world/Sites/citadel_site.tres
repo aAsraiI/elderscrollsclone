@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/citadel.tres" id="1_jpym7"]
+[ext_resource type="Resource" path="res://data/spawns/dungeon_citadel.tres" id="2_hlk23"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_su07s"]
+[ext_resource type="PackedScene" path="res://scenes/sites/fort_a.tscn" id="4_wuqpb"]
+[ext_resource type="PackedScene" path="res://scenes/sites/fort_b.tscn" id="5_2ay00"]
+
+[resource]
+script = ExtResource("3_su07s")
+sites = Array[PackedScene]([ExtResource("4_wuqpb"), ExtResource("5_2ay00")])
+occupants = ExtResource("2_hlk23")
+map_icon = "fort"
+dungeon = ExtResource("1_jpym7")
+enter_name = "Black Citadel"
+id = &"site_citadel"
+display_name = "Black Citadel"
+map_color = Color(0.75, 0.6, 0.5, 1)
+footprint_radius = 36.0
+flatten_radius = 32.0
+max_slope_deg = 12.0
+prefer = "high"
+min_same_distance = 900.0
+path_to_road = 300.0
+garrison_level_offset = 6

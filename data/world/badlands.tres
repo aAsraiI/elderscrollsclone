@@ -41,12 +41,12 @@
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="37_pl5c5"]
 [ext_resource type="Resource" path="res://data/world/Sites/ore_outcrop.tres" id="38_8e5r3"]
 [ext_resource type="Resource" path="res://data/world/Sites/nest.tres" id="39_4xa1r"]
-[ext_resource type="Resource" path="res://data/world/POIs/deep_delve_entrance.tres" id="41_ypffb"]
-[ext_resource type="Resource" path="res://data/world/POIs/echoing_halls_entrance.tres" id="42_qx410"]
 [ext_resource type="Resource" path="res://data/world/Sites/nomad_camp.tres" id="43_8e5r3"]
 [ext_resource type="Resource" path="res://data/world/Sites/cairn.tres" id="44_4xa1r"]
+[ext_resource type="Resource" path="res://data/world/Sites/deep_delve_site.tres" id="44_8e5r3"]
+[ext_resource type="Resource" path="res://data/world/Sites/echoing_halls_site.tres" id="44_wispq"]
 
-[sub_resource type="Resource" id="Resource_kyrus"]
+[sub_resource type="Resource" id="Resource_8e5r3"]
 script = ExtResource("7_kyrus")
 name = "dead trees"
 models = PackedStringArray("kit/plants/trees/flora_treedead_mh_02", "kit/plants/trees/flora_ashtree_01", "kit/plants/trees/flora_ashtree_02", "kit/plants/trees/flora_ashtree_05")
@@ -59,7 +59,7 @@ scale_min = 0.6
 scale_max = 0.9
 trunk_radius = 0.2
 
-[sub_resource type="Resource" id="Resource_ypffb"]
+[sub_resource type="Resource" id="Resource_vehns"]
 script = ExtResource("7_kyrus")
 name = "sagebrush"
 models = PackedStringArray("kit/plants/other/flora_roobrush_01")
@@ -73,7 +73,7 @@ scale_min = 0.45
 scale_max = 0.75
 solid = false
 
-[sub_resource type="Resource" id="Resource_qx410"]
+[sub_resource type="Resource" id="Resource_1jc73"]
 script = ExtResource("7_kyrus")
 name = "thornbushes"
 models = PackedStringArray("kit/plants/other/flora_rm_scathecraw_01", "kit/plants/other/flora_rm_scathecraw_02")
@@ -86,7 +86,7 @@ scale_min = 0.35
 scale_max = 0.55
 solid = false
 
-[sub_resource type="Resource" id="Resource_pl5c5"]
+[sub_resource type="Resource" id="Resource_age52"]
 script = ExtResource("7_kyrus")
 name = "small cacti"
 models = PackedStringArray()
@@ -97,7 +97,7 @@ density = 3.0
 height = 1.4
 solid = false
 
-[sub_resource type="Resource" id="Resource_8e5r3"]
+[sub_resource type="Resource" id="Resource_tavqn"]
 script = ExtResource("7_kyrus")
 name = "red boulders"
 models = PackedStringArray("kit/rocks/west_gash/terrain_rock_wg_01", "kit/rocks/west_gash/terrain_rock_wg_05", "kit/rocks/ascadian/terrain_rock_ai_04")
@@ -364,24 +364,6 @@ count_max = 0.104
 extra_spacing = 40.0
 border_margin = 40.0
 
-[sub_resource type="Resource" id="Resource_4xa1r"]
-script = ExtResource("6_bkmdb")
-poi = ExtResource("41_ypffb")
-count_mode = 0
-count_min = 0.5
-count_max = 1.0
-extra_spacing = 80.0
-border_margin = 80.0
-
-[sub_resource type="Resource" id="Resource_ywd13"]
-script = ExtResource("6_bkmdb")
-poi = ExtResource("42_qx410")
-count_mode = 0
-count_min = 0.4
-count_max = 0.8
-extra_spacing = 80.0
-border_margin = 80.0
-
 [sub_resource type="Resource" id="Resource_f1yi3"]
 script = ExtResource("6_bkmdb")
 poi = ExtResource("43_8e5r3")
@@ -397,6 +379,24 @@ count_min = 0.08399999999999999
 count_max = 0.156
 extra_spacing = 40.0
 border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_4xa1r"]
+script = ExtResource("6_bkmdb")
+poi = ExtResource("44_8e5r3")
+count_mode = 0
+count_min = 0.5
+count_max = 1.0
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_ywd13"]
+script = ExtResource("6_bkmdb")
+poi = ExtResource("44_wispq")
+count_mode = 0
+count_min = 0.4
+count_max = 0.8
+extra_spacing = 80.0
+border_margin = 80.0
 
 [resource]
 script = ExtResource("12_lwaoe")
@@ -430,10 +430,10 @@ shore_color = Color(0.6, 0.42, 0.3, 1)
 tree_style = 3
 tree_density = 4.0
 tree_color = Color(0.32, 0.5, 0.26, 1)
-flora = Array[ExtResource("7_kyrus")]([SubResource("Resource_kyrus"), SubResource("Resource_ypffb"), SubResource("Resource_qx410"), SubResource("Resource_pl5c5"), SubResource("Resource_8e5r3")])
+flora = Array[ExtResource("7_kyrus")]([SubResource("Resource_8e5r3"), SubResource("Resource_vehns"), SubResource("Resource_1jc73"), SubResource("Resource_age52"), SubResource("Resource_tavqn")])
 herbs = PackedStringArray("sagebrush:4", "thornroot:3", "cactus_flower:1", "sandroot:1", "thistle:1")
 herb_density = 0.8
-poi_rules = Array[ExtResource("6_bkmdb")]([SubResource("Resource_3o4xy"), SubResource("Resource_3g6b6"), SubResource("Resource_r347b"), SubResource("Resource_kt13t"), SubResource("Resource_x4wka"), SubResource("Resource_chwfb"), SubResource("Resource_2u524"), SubResource("Resource_wispq"), SubResource("Resource_a4i37"), SubResource("Resource_0dpeh"), SubResource("Resource_binwg"), SubResource("Resource_yc6pu"), SubResource("Resource_bqwuv"), SubResource("Resource_q7y50"), SubResource("Resource_wm7i7"), SubResource("Resource_akwa5"), SubResource("Resource_aorji"), SubResource("Resource_v8344"), SubResource("Resource_ghi3v"), SubResource("Resource_l1qr0"), SubResource("Resource_um8nm"), SubResource("Resource_nbdqh"), SubResource("Resource_nvqto"), SubResource("Resource_ibnu3"), SubResource("Resource_bc1s6"), SubResource("Resource_0slng"), SubResource("Resource_s5efx"), SubResource("Resource_12lvt"), SubResource("Resource_b1to6"), SubResource("Resource_l2oy7"), SubResource("Resource_4umq3"), SubResource("Resource_38lki"), SubResource("Resource_4xa1r"), SubResource("Resource_ywd13"), SubResource("Resource_f1yi3"), SubResource("Resource_fhpww")])
+poi_rules = Array[ExtResource("6_bkmdb")]([SubResource("Resource_3o4xy"), SubResource("Resource_3g6b6"), SubResource("Resource_r347b"), SubResource("Resource_kt13t"), SubResource("Resource_x4wka"), SubResource("Resource_chwfb"), SubResource("Resource_2u524"), SubResource("Resource_wispq"), SubResource("Resource_a4i37"), SubResource("Resource_0dpeh"), SubResource("Resource_binwg"), SubResource("Resource_yc6pu"), SubResource("Resource_bqwuv"), SubResource("Resource_q7y50"), SubResource("Resource_wm7i7"), SubResource("Resource_akwa5"), SubResource("Resource_aorji"), SubResource("Resource_v8344"), SubResource("Resource_ghi3v"), SubResource("Resource_l1qr0"), SubResource("Resource_um8nm"), SubResource("Resource_nbdqh"), SubResource("Resource_nvqto"), SubResource("Resource_ibnu3"), SubResource("Resource_bc1s6"), SubResource("Resource_0slng"), SubResource("Resource_s5efx"), SubResource("Resource_12lvt"), SubResource("Resource_b1to6"), SubResource("Resource_l2oy7"), SubResource("Resource_4umq3"), SubResource("Resource_38lki"), SubResource("Resource_f1yi3"), SubResource("Resource_fhpww"), SubResource("Resource_4xa1r"), SubResource("Resource_ywd13")])
 level_min = 33
 level_max = 57
 encounters = Array[ExtResource("1_hgn5o")]([ExtResource("2_ofbxx"), ExtResource("3_chwfb"), ExtResource("4_2u524"), ExtResource("5_3evps"), ExtResource("6_lfpdt")])

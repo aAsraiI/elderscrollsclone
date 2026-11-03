@@ -51,7 +51,7 @@
 [ext_resource type="Resource" path="res://data/world/POIs/bandit_camp.tres" id="poi_4"]
 [ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
 
-[sub_resource type="Resource" id="Resource_ikkrr"]
+[sub_resource type="Resource" id="Resource_n8dof"]
 script = ExtResource("9_ikkrr")
 name = "willows"
 models = PackedStringArray("kit/plants/trees/flora_tree_01", "kit/plants/trees/flora_tree_02", "tree/broadleaf")
@@ -66,7 +66,7 @@ scale_max = 0.6
 sink = 0.3
 trunk_radius = 0.35
 
-[sub_resource type="Resource" id="Resource_522t3"]
+[sub_resource type="Resource" id="Resource_u8ybc"]
 script = ExtResource("9_ikkrr")
 name = "birches"
 models = PackedStringArray("kit/plants/trees/flora_tree_03", "kit/plants/trees/flora_tree_04", "kit/plants/trees/flora_tree_ai_06")
@@ -81,7 +81,7 @@ scale_max = 0.65
 sink = 0.2
 trunk_radius = 0.2
 
-[sub_resource type="Resource" id="Resource_3ya0j"]
+[sub_resource type="Resource" id="Resource_4xr0m"]
 script = ExtResource("9_ikkrr")
 name = "reeds"
 models = PackedStringArray("kit/plants/bitter_coast/flora_bc_grass_01", "kit/plants/bitter_coast/flora_bc_grass_02")
@@ -98,7 +98,7 @@ scale_min = 0.7
 scale_max = 1.1
 solid = false
 
-[sub_resource type="Resource" id="Resource_dn32i"]
+[sub_resource type="Resource" id="Resource_kp2if"]
 script = ExtResource("9_ikkrr")
 name = "lily pads"
 models = PackedStringArray("kit/plants/bitter_coast/flora_bc_lilypad_01", "kit/plants/bitter_coast/flora_bc_lilypad_02", "kit/plants/bitter_coast/flora_bc_lilypad_03")
@@ -115,7 +115,7 @@ sink = 0.0
 lean = 0.0
 solid = false
 
-[sub_resource type="Resource" id="Resource_cm7t1"]
+[sub_resource type="Resource" id="Resource_1eng2"]
 script = ExtResource("9_ikkrr")
 name = "meadow flowers"
 models = PackedStringArray()
@@ -128,7 +128,7 @@ clumping = 0.7
 height = 0.45
 solid = false
 
-[sub_resource type="Resource" id="Resource_n8dof"]
+[sub_resource type="Resource" id="Resource_g6mlx"]
 script = ExtResource("9_ikkrr")
 name = "shrubs"
 models = PackedStringArray("kit/plants/solstheim/flora_bm_shrub_02", "kit/plants/other/flora_bush_01")
@@ -141,7 +141,7 @@ scale_min = 0.6
 scale_max = 0.9
 solid = false
 
-[sub_resource type="Resource" id="Resource_u8ybc"]
+[sub_resource type="Resource" id="Resource_1a2r1"]
 script = ExtResource("9_ikkrr")
 name = "shore stones"
 models = PackedStringArray("kit/rocks/bitter_coast/terrain_rock_bc_01", "kit/rocks/bitter_coast/terrain_rock_bc_02", "kit/rocks/bitter_coast/terrain_rock_bc_03")
@@ -483,7 +483,7 @@ steep_color = Color(0.4, 0.38, 0.33, 1)
 shore_color = Color(0.45, 0.43, 0.33, 1)
 tree_density = 25.0
 tree_color = Color(0.24, 0.44, 0.2, 1)
-flora = Array[ExtResource("9_ikkrr")]([SubResource("Resource_ikkrr"), SubResource("Resource_522t3"), SubResource("Resource_3ya0j"), SubResource("Resource_dn32i"), SubResource("Resource_cm7t1"), SubResource("Resource_n8dof"), SubResource("Resource_u8ybc")])
+flora = Array[ExtResource("9_ikkrr")]([SubResource("Resource_n8dof"), SubResource("Resource_u8ybc"), SubResource("Resource_4xr0m"), SubResource("Resource_kp2if"), SubResource("Resource_1eng2"), SubResource("Resource_g6mlx"), SubResource("Resource_1a2r1")])
 herbs = PackedStringArray("water_mint:3", "cattail_root:3", "swamp_lily:2", "bulbroot:2", "yarrow:1", "saltgrass:1", "lavender:1", "cornflower:1")
 herb_density = 1.3
 poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("Resource_gcxwx"), SubResource("Resource_ey0a8"), SubResource("Resource_ppbr2"), SubResource("Resource_b0wsu"), SubResource("Resource_6qkxj"), SubResource("Resource_c5swg"), SubResource("Resource_n0ny7"), SubResource("Resource_bvi3m"), SubResource("Resource_gxgj0"), SubResource("Resource_32jxf"), SubResource("Resource_72srd"), SubResource("Resource_xn3h3"), SubResource("Resource_5hbin"), SubResource("Resource_es176"), SubResource("Resource_50040"), SubResource("Resource_6gimb"), SubResource("Resource_u7emh"), SubResource("Resource_ggotc"), SubResource("Resource_vlksw"), SubResource("Resource_ahlt6"), SubResource("Resource_st3oq"), SubResource("Resource_1jlj8"), SubResource("Resource_i47bs"), SubResource("Resource_swje4"), SubResource("Resource_c2kg5"), SubResource("Resource_r4uva"), SubResource("Resource_gduai"), SubResource("Resource_70cd6"), SubResource("Resource_fsfps"), SubResource("Resource_gr2ja"), SubResource("Resource_615cn"), SubResource("Resource_gdhgs"), SubResource("Resource_bxp1t"), SubResource("Resource_8qmbi")])

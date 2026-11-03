@@ -48,7 +48,7 @@
 [ext_resource type="Resource" path="res://data/world/POIs/pirate_hold_entrance.tres" id="45_l580p"]
 [ext_resource type="Resource" path="res://data/world/Sites/smugglers_landing.tres" id="46_kptkv"]
 
-[sub_resource type="Resource" id="Resource_0oev3"]
+[sub_resource type="Resource" id="Resource_kptkv"]
 script = ExtResource("10_0oev3")
 name = "sea pines"
 models = PackedStringArray("kit/plants/trees/flora_tree_bm_01", "kit/plants/trees/flora_tree_bm_02", "kit/plants/trees/flora_tree_bm_04", "kit/plants/trees/flora_tree_bm_06", "tree/pine")
@@ -65,10 +65,10 @@ sink = 0.2
 lean = 7.0
 trunk_radius = 0.25
 
-[sub_resource type="Resource" id="Resource_j8y7k"]
+[sub_resource type="Resource" id="Resource_dg1ua"]
 script = ExtResource("10_0oev3")
 name = "dune grass"
-models = PackedStringArray("kit/plants/grass/flora_grass_05", "kit/plants/grass/flora_grass_06")
+models = PackedStringArray("kit/plants/grass/flora_grass_01", "kit/plants/grass/flora_grass_03")
 shape = 6
 size = 2
 color = Color(0.62, 0.62, 0.4, 1)
@@ -80,7 +80,7 @@ scale_min = 0.6
 scale_max = 1.0
 solid = false
 
-[sub_resource type="Resource" id="Resource_l580p"]
+[sub_resource type="Resource" id="Resource_4w7wl"]
 script = ExtResource("10_0oev3")
 name = "kelp"
 models = PackedStringArray("kit/plants/grass/flora_kelp_01", "kit/plants/grass/flora_kelp_02", "kit/plants/grass/flora_kelp_03", "kit/plants/grass/flora_kelp_04")
@@ -97,7 +97,7 @@ scale_max = 0.7
 lean = 10.0
 solid = false
 
-[sub_resource type="Resource" id="Resource_kptkv"]
+[sub_resource type="Resource" id="Resource_kqeon"]
 script = ExtResource("10_0oev3")
 name = "driftwood"
 models = PackedStringArray("kit/plants/logs_roots/flora_bc_log_01", "kit/plants/logs_roots/flora_bc_log_02", "kit/plants/logs_roots/flora_bm_log_03")
@@ -113,7 +113,7 @@ sink = 0.2
 lean = 0.0
 follow_ground = true
 
-[sub_resource type="Resource" id="Resource_dg1ua"]
+[sub_resource type="Resource" id="Resource_calor"]
 script = ExtResource("10_0oev3")
 name = "blossom trees"
 models = PackedStringArray("kit/plants/trees/flora_tree_ac_01", "kit/plants/trees/flora_tree_ac_02")
@@ -126,7 +126,7 @@ scale_min = 0.55
 scale_max = 0.8
 trunk_radius = 0.18
 
-[sub_resource type="Resource" id="Resource_4w7wl"]
+[sub_resource type="Resource" id="Resource_axifw"]
 script = ExtResource("10_0oev3")
 name = "salt shrubs"
 models = PackedStringArray("kit/plants/solstheim/flora_bm_shrub_01")
@@ -139,7 +139,7 @@ scale_min = 0.5
 scale_max = 0.8
 solid = false
 
-[sub_resource type="Resource" id="Resource_kqeon"]
+[sub_resource type="Resource" id="Resource_75kui"]
 script = ExtResource("10_0oev3")
 name = "sea rocks"
 models = PackedStringArray("kit/rocks/coast/terrain_rock_ac_02", "kit/rocks/coast/terrain_rock_ac_04", "kit/rocks/coast/terrain_rock_ac_06")
@@ -457,7 +457,7 @@ high_full = 16.0
 shore_color = Color(0.74, 0.68, 0.5, 1)
 tree_density = 8.0
 tree_color = Color(0.24, 0.44, 0.2, 1)
-flora = Array[ExtResource("10_0oev3")]([SubResource("Resource_0oev3"), SubResource("Resource_j8y7k"), SubResource("Resource_l580p"), SubResource("Resource_kptkv"), SubResource("Resource_dg1ua"), SubResource("Resource_4w7wl"), SubResource("Resource_kqeon")])
+flora = Array[ExtResource("10_0oev3")]([SubResource("Resource_kptkv"), SubResource("Resource_dg1ua"), SubResource("Resource_4w7wl"), SubResource("Resource_kqeon"), SubResource("Resource_calor"), SubResource("Resource_axifw"), SubResource("Resource_75kui")])
 herbs = PackedStringArray("sea_kelp:3", "saltgrass:3", "thistle:2", "blue_mountain_flower:1", "yarrow:1", "cattail_root:1")
 poi_rules = Array[ExtResource("6_ss271")]([SubResource("Resource_7ta4w"), SubResource("Resource_8m2gg"), SubResource("Resource_ar1jx"), SubResource("Resource_51a4c"), SubResource("Resource_nnn3e"), SubResource("Resource_jxyjy"), SubResource("Resource_03kbe"), SubResource("Resource_hohnj"), SubResource("Resource_e6l7g"), SubResource("Resource_ganxl"), SubResource("Resource_h7mrj"), SubResource("Resource_qtw07"), SubResource("Resource_l5va8"), SubResource("Resource_vdg3e"), SubResource("Resource_oug4r"), SubResource("Resource_kwhdp"), SubResource("Resource_57tib"), SubResource("Resource_2ypjr"), SubResource("Resource_rgyfr"), SubResource("Resource_nh5qi"), SubResource("Resource_ab366"), SubResource("Resource_owiom"), SubResource("Resource_gq0nc"), SubResource("Resource_ymnsv"), SubResource("Resource_c5k6d"), SubResource("Resource_kt7hx"), SubResource("Resource_j2t8c"), SubResource("Resource_mvd4n"), SubResource("Resource_s8y5h"), SubResource("Resource_0bwvi"), SubResource("Resource_ot7fj"), SubResource("Resource_54r7c"), SubResource("Resource_pi5fd"), SubResource("Resource_hb64h"), SubResource("Resource_hs8iy")])
 level_min = 10

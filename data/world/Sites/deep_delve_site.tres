@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/deep_delve.tres" id="1_c847y"]
+[ext_resource type="Resource" path="res://data/spawns/dungeon_delve.tres" id="2_aq32t"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_gey4m"]
+[ext_resource type="PackedScene" path="res://scenes/sites/mine_entrance_a.tscn" id="4_eajik"]
+
+[resource]
+script = ExtResource("3_gey4m")
+sites = Array[PackedScene]([ExtResource("4_eajik")])
+occupants = ExtResource("2_aq32t")
+map_icon = "mine"
+dungeon = ExtResource("1_c847y")
+enter_name = "The Deep Delve"
+id = &"site_deep_delve"
+display_name = "Delve Head"
+map_color = Color(0.55, 0.45, 0.35, 1)
+footprint_radius = 18.0
+flatten_radius = 12.0
+max_slope_deg = 12.0
+prefer = "high"
+min_same_distance = 900.0
+path_to_road = 250.0
+garrison_level_offset = 5

@@ -46,7 +46,7 @@
 [ext_resource type="Resource" path="res://data/world/Sites/frozen_camp.tres" id="43_j3mf8"]
 [ext_resource type="Resource" path="res://data/world/Sites/cairn.tres" id="44_dsvr8"]
 
-[sub_resource type="Resource" id="Resource_8nihv"]
+[sub_resource type="Resource" id="Resource_8eu7n"]
 script = ExtResource("7_8nihv")
 name = "dwarf pines"
 models = PackedStringArray("kit/plants/trees/flora_tree_bm_snow_04", "kit/plants/trees/flora_tree_bm_snow_06", "kit/plants/trees/flora_tree_bm_07", "tree/pine")
@@ -60,7 +60,7 @@ scale_min = 0.45
 scale_max = 0.7
 trunk_radius = 0.2
 
-[sub_resource type="Resource" id="Resource_8rina"]
+[sub_resource type="Resource" id="Resource_370gb"]
 script = ExtResource("7_8nihv")
 name = "tussock grass"
 models = PackedStringArray("kit/plants/solstheim/flora_bm_grass_02", "kit/plants/solstheim/flora_bm_grass_04", "kit/plants/solstheim/flora_bm_grass_06")
@@ -75,7 +75,7 @@ scale_min = 0.6
 scale_max = 1.0
 solid = false
 
-[sub_resource type="Resource" id="Resource_v5a3t"]
+[sub_resource type="Resource" id="Resource_86ijh"]
 script = ExtResource("7_8nihv")
 name = "heather"
 models = PackedStringArray("kit/plants/other/flora_heather_01")
@@ -89,7 +89,7 @@ height = 0.4
 scale_min = 0.9
 solid = false
 
-[sub_resource type="Resource" id="Resource_wonvk"]
+[sub_resource type="Resource" id="Resource_wpot0"]
 script = ExtResource("7_8nihv")
 name = "crowberry"
 models = PackedStringArray("kit/plants/solstheim/flora_bm_shrub_02")
@@ -102,7 +102,7 @@ scale_min = 0.4
 scale_max = 0.7
 solid = false
 
-[sub_resource type="Resource" id="Resource_1uia6"]
+[sub_resource type="Resource" id="Resource_1411c"]
 script = ExtResource("7_8nihv")
 name = "erratics"
 models = PackedStringArray("kit/rocks/other/terrain_boulder_01", "kit/rocks/other/terrain_boulder_04", "kit/rocks/other/terrain_rock_bm_05")
@@ -430,7 +430,7 @@ shore_color = Color(0.55, 0.56, 0.52, 1)
 tree_style = 1
 tree_density = 4.0
 tree_color = Color(0.16, 0.3, 0.2, 1)
-flora = Array[ExtResource("7_8nihv")]([SubResource("Resource_8nihv"), SubResource("Resource_8rina"), SubResource("Resource_v5a3t"), SubResource("Resource_wonvk"), SubResource("Resource_1uia6")])
+flora = Array[ExtResource("7_8nihv")]([SubResource("Resource_8eu7n"), SubResource("Resource_370gb"), SubResource("Resource_86ijh"), SubResource("Resource_wpot0"), SubResource("Resource_1411c")])
 herbs = PackedStringArray("cloudberries:3", "heather:2", "ice_lichen:2", "snowberries:2", "juniper_berries:1")
 herb_density = 0.8
 poi_rules = Array[ExtResource("5_k6xp8")]([SubResource("Resource_cqhew"), SubResource("Resource_fubvx"), SubResource("Resource_36kvh"), SubResource("Resource_k346d"), SubResource("Resource_167v0"), SubResource("Resource_smixw"), SubResource("Resource_j3mf8"), SubResource("Resource_dsvr8"), SubResource("Resource_av0tq"), SubResource("Resource_ita36"), SubResource("Resource_5o3e4"), SubResource("Resource_kbavj"), SubResource("Resource_w6pbf"), SubResource("Resource_xh3va"), SubResource("Resource_gamyu"), SubResource("Resource_qk3sa"), SubResource("Resource_cb161"), SubResource("Resource_486r1"), SubResource("Resource_jj40q"), SubResource("Resource_qyatq"), SubResource("Resource_3262a"), SubResource("Resource_d2qmm"), SubResource("Resource_y066h"), SubResource("Resource_gj75x"), SubResource("Resource_1a0h7"), SubResource("Resource_nsmms"), SubResource("Resource_3dcqh"), SubResource("Resource_otho8"), SubResource("Resource_i6nsk"), SubResource("Resource_y2alh"), SubResource("Resource_mi5p0"), SubResource("Resource_rohjr"), SubResource("Resource_dvcx7"), SubResource("Resource_ny7x6"), SubResource("Resource_s2nqb"), SubResource("Resource_p8r50")])

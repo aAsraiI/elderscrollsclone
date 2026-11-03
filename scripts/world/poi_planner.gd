@@ -121,6 +121,8 @@ static func plan(map: WorldMap, already: Array[PlacedPOI] = []) -> Array[PlacedP
 					placed.region = region
 					placed.id = "r%d_%d/%s/%d" % [placement.cell.x, placement.cell.y, poi.get_key(), k]
 					placed.yaw = rng.randf_range(0.0, TAU) if poi.random_rotation else 0.0
+					if poi.prefer == "water":
+						placed.yaw = _face_water(map, spot, placed.yaw)  # a dock or a jetty runs out over the water
 					placed.seed_value = ("%d|%s" % [map.world_seed, placed.id]).hash()
 					out.append(placed)
 					grid.add(placed)
@@ -356,3 +358,22 @@ static func _arms_at(roads: Array[Dictionary], at: Vector3, names: Dictionary) -
 	for name: String in best:
 		out.append([best[name][0], "%s  %.1f km" % [name, float(best[name][1]) / 1000.0]])
 	return out
+
+
+## The turn that points a place's front (-Z) at the nearest water (a jetty, a dock, a mill race);
+## `fallback` when there is none within reach
+static func _face_water(map: WorldMap, at: Vector3, fallback: float) -> float:
+	var s := WorldMap.Sample.new()
+	for d in [20.0, 35.0, 55.0, 80.0]:
+		var best := -1
+		var best_depth := 0.0
+		for q in 16:
+			var a := float(q) / 16.0 * TAU
+			map.sample(at.x + cos(a) * d, at.z + sin(a) * d, s)
+			if s.water - s.height > best_depth:
+				best_depth = s.water - s.height
+				best = q
+		if best >= 0:
+			var a := float(best) / 16.0 * TAU
+			return atan2(-cos(a), -sin(a))
+	return fallback

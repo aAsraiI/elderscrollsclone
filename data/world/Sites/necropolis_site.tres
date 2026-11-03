@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/necropolis.tres" id="1_705ed"]
+[ext_resource type="Resource" path="res://data/spawns/dungeon_necropolis.tres" id="2_blnfc"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="3_543lg"]
+[ext_resource type="PackedScene" path="res://scenes/sites/graveyard_a.tscn" id="4_l6xpu"]
+[ext_resource type="PackedScene" path="res://scenes/sites/graveyard_b.tscn" id="5_8no7y"]
+
+[resource]
+script = ExtResource("3_543lg")
+sites = Array[PackedScene]([ExtResource("4_l6xpu"), ExtResource("5_8no7y")])
+occupants = ExtResource("2_blnfc")
+map_icon = "grave"
+dungeon = ExtResource("1_705ed")
+enter_name = "Sunken Necropolis"
+id = &"site_necropolis"
+display_name = "Necropolis Gate"
+map_color = Color(0.5, 0.55, 0.6, 1)
+footprint_radius = 22.0
+flatten_radius = 18.0
+max_slope_deg = 12.0
+prefer = "low"
+min_same_distance = 900.0
+path_to_road = 200.0
+garrison_level_offset = 6

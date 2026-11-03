@@ -3,7 +3,7 @@ extends SceneTree
 ## without playing). Each view: x,z,height above ground,yaw degrees,pitch degrees[,name].
 ## The player is moved there first so the terrain and plants load around it.
 ##   godot --path . -s res://tools/capture_world.gd -- out_dir "x,z,h,yaw,pitch[,name]" ["..."]
-## A view of "town" or "start" is taken where the game starts.
+## A view "poi:<kind>,distance,height,pitch[,name]" looks at the first place of that kind from the south.
 
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
@@ -27,6 +27,14 @@ func _init() -> void:
 	root.add_child(cam)
 	for vi in range(1, args.size()):
 		var v := args[vi].split(",")
+		if v[0].begins_with("poi:"):
+			# "poi:<kind>,<distance>,<height>,<pitch>,name": the first place of that kind, seen from the south
+			var kind := v[0].substr(4)
+			for place in wm.pois:
+				if place.poi.get_key() == kind or place.poi.get_key() == "site_" + kind:
+					var d := float(v[1])
+					v = PackedStringArray([str(place.position.x), str(place.position.z + d), v[2], "0", v[3], v[4] if v.size() > 4 else kind])
+					break
 		var x := float(v[0])
 		var z := float(v[1])
 		var name := v[5] if v.size() > 5 else "view%d" % vi

@@ -49,10 +49,10 @@
 [ext_resource type="Resource" path="res://data/world/POIs/glowing_shrine.tres" id="poi_3"]
 [ext_resource type="Script" path="res://scripts/world/poi_rule.gd" id="rule_script"]
 
-[sub_resource type="Resource" id="Resource_kbthc"]
+[sub_resource type="Resource" id="Resource_tshwx"]
 script = ExtResource("9_kbthc")
 name = "swamp trees"
-models = PackedStringArray("kit/plants/bitter_coast/flora_bc_tree_01", "kit/plants/bitter_coast/flora_bc_tree_03", "kit/plants/bitter_coast/flora_bc_tree_05", "kit/plants/bitter_coast/flora_bc_tree_07", "kit/plants/bitter_coast/flora_bc_tree_09", "kit/plants/bitter_coast/flora_bc_tree_10")
+models = PackedStringArray("kit/plants/bitter_coast/flora_bc_tree_01", "kit/plants/bitter_coast/flora_bc_tree_03", "kit/plants/bitter_coast/flora_bc_tree_05", "kit/plants/bitter_coast/flora_bc_tree_07", "kit/plants/bitter_coast/flora_bc_tree_08", "kit/plants/bitter_coast/flora_bc_tree_10")
 shape = 2
 color = Color(0.27, 0.3, 0.18, 1)
 density = 36.0
@@ -64,7 +64,7 @@ scale_max = 0.65
 sink = 0.4
 trunk_radius = 0.45
 
-[sub_resource type="Resource" id="Resource_i1p2s"]
+[sub_resource type="Resource" id="Resource_0k7pp"]
 script = ExtResource("9_kbthc")
 name = "cypress knees"
 models = PackedStringArray("kit/plants/bitter_coast/flora_bc_knee_01", "kit/plants/bitter_coast/flora_bc_knee_02", "kit/plants/bitter_coast/flora_bc_knee_03", "kit/plants/bitter_coast/flora_bc_knee_04")
@@ -79,7 +79,7 @@ scale_min = 0.3
 scale_max = 0.5
 solid = false
 
-[sub_resource type="Resource" id="Resource_lxj37"]
+[sub_resource type="Resource" id="Resource_ivfp0"]
 script = ExtResource("9_kbthc")
 name = "cap trees"
 models = PackedStringArray("kit/plants/trees/flora_tree_ac_03", "kit/plants/trees/flora_tree_ac_04")
@@ -92,10 +92,10 @@ scale_min = 0.6
 scale_max = 0.9
 sink = 0.2
 
-[sub_resource type="Resource" id="Resource_1nqn0"]
+[sub_resource type="Resource" id="Resource_ql4dy"]
 script = ExtResource("9_kbthc")
 name = "giant mushrooms"
-models = PackedStringArray("kit/plants/other/flora_emp_parasol_01", "kit/plants/other/flora_emp_parasol_03", "kit/plants/mushrooms/flora_t_mushroom_02")
+models = PackedStringArray("kit/plants/other/flora_emp_parasol_01", "kit/plants/other/flora_emp_parasol_02", "kit/plants/mushrooms/flora_t_mushroom_02")
 shape = 7
 color = Color(0.6, 0.5, 0.35, 1)
 density = 1.2
@@ -105,7 +105,7 @@ scale_min = 0.45
 scale_max = 0.7
 trunk_radius = 0.6
 
-[sub_resource type="Resource" id="Resource_rf1d7"]
+[sub_resource type="Resource" id="Resource_jni32"]
 script = ExtResource("9_kbthc")
 name = "marsh grass"
 models = PackedStringArray("kit/plants/bitter_coast/flora_bc_grass_01", "kit/plants/bitter_coast/flora_bc_grass_02")
@@ -120,7 +120,7 @@ scale_min = 0.6
 scale_max = 1.0
 solid = false
 
-[sub_resource type="Resource" id="Resource_dbe1k"]
+[sub_resource type="Resource" id="Resource_77fvd"]
 script = ExtResource("9_kbthc")
 name = "lily pads"
 models = PackedStringArray("kit/plants/bitter_coast/flora_bc_lilypad_01", "kit/plants/bitter_coast/flora_bc_lilypad_02", "kit/plants/bitter_coast/flora_bc_lilypad_03")
@@ -136,7 +136,7 @@ sink = 0.0
 lean = 0.0
 solid = false
 
-[sub_resource type="Resource" id="Resource_tshwx"]
+[sub_resource type="Resource" id="Resource_uiijf"]
 script = ExtResource("9_kbthc")
 name = "moss mounds"
 models = PackedStringArray("kit/plants/bitter_coast/flora_bc_moss_01", "kit/plants/bitter_coast/flora_bc_moss_02", "kit/plants/bitter_coast/flora_bc_moss_05")
@@ -152,7 +152,7 @@ scale_max = 1.1
 follow_ground = true
 solid = false
 
-[sub_resource type="Resource" id="Resource_0k7pp"]
+[sub_resource type="Resource" id="Resource_0s2qd"]
 script = ExtResource("9_kbthc")
 name = "pods"
 models = PackedStringArray("kit/plants/other/flora_muckpod_01", "kit/plants/other/flora_muckpod_02", "kit/plants/other/flora_muckpod_03")
@@ -167,7 +167,7 @@ scale_min = 0.6
 scale_max = 1.0
 solid = false
 
-[sub_resource type="Resource" id="Resource_ivfp0"]
+[sub_resource type="Resource" id="Resource_hea1n"]
 script = ExtResource("9_kbthc")
 name = "rotten logs"
 models = PackedStringArray("kit/plants/logs_roots/flora_bc_log_01", "kit/plants/logs_roots/flora_bc_log_02")
@@ -496,7 +496,7 @@ shore_color = Color(0.24, 0.23, 0.16, 1)
 tree_style = 2
 tree_density = 35.0
 tree_color = Color(0.25, 0.22, 0.17, 1)
-flora = Array[ExtResource("9_kbthc")]([SubResource("Resource_kbthc"), SubResource("Resource_i1p2s"), SubResource("Resource_lxj37"), SubResource("Resource_1nqn0"), SubResource("Resource_rf1d7"), SubResource("Resource_dbe1k"), SubResource("Resource_tshwx"), SubResource("Resource_0k7pp"), SubResource("Resource_ivfp0")])
+flora = Array[ExtResource("9_kbthc")]([SubResource("Resource_tshwx"), SubResource("Resource_0k7pp"), SubResource("Resource_ivfp0"), SubResource("Resource_ql4dy"), SubResource("Resource_jni32"), SubResource("Resource_77fvd"), SubResource("Resource_uiijf"), SubResource("Resource_0s2qd"), SubResource("Resource_hea1n")])
 herbs = PackedStringArray("spore_pod:2", "strangleweed:2", "bloodmoss:2", "shelf_fungus:1", "nightshade:1", "glowcap:1", "bog_bean:3", "mire_sponge:2", "swamp_lily:2")
 herb_density = 1.3
 poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_ci6ew"), SubResource("Resource_wpofc"), SubResource("Resource_tdosd"), SubResource("Resource_k6xps"), SubResource("Resource_e4rjg"), SubResource("Resource_8cu3o"), SubResource("Resource_j2frk"), SubResource("Resource_nhqvb"), SubResource("Resource_nghpk"), SubResource("Resource_sq867"), SubResource("Resource_riukm"), SubResource("Resource_yyrcj"), SubResource("Resource_ck8pq"), SubResource("Resource_ihaeq"), SubResource("Resource_r8x3s"), SubResource("Resource_0c1it"), SubResource("Resource_tph17"), SubResource("Resource_udfwy"), SubResource("Resource_7wbu5"), SubResource("Resource_3sxmb"), SubResource("Resource_ji1ts"), SubResource("Resource_isogf"), SubResource("Resource_6e5lq"), SubResource("Resource_lfwrh"), SubResource("Resource_31fea"), SubResource("Resource_dfp4j"), SubResource("Resource_e8ruo"), SubResource("Resource_scg6w"), SubResource("Resource_fdfe2"), SubResource("Resource_1swwi"), SubResource("Resource_c1mx6"), SubResource("Resource_1j0u7"), SubResource("Resource_nqx2v")])

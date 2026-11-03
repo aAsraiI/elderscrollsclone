@@ -270,6 +270,7 @@ static func planted_mesh(key: String, height: float) -> ArrayMesh:
 		return null
 	var foot := foot_of(src)
 	var out := src
+	_keep_leaves(src)
 	if Vector2(foot.x, foot.z).length() > 0.05:
 		out = ArrayMesh.new()
 		for si in src.get_surface_count():
@@ -282,6 +283,27 @@ static func planted_mesh(key: String, height: float) -> ArrayMesh:
 			out.surface_set_material(si, src.surface_get_material(si))
 	_planted[ck] = out
 	return out
+
+
+static var _leaf_mats := {}  # material -> its copy that keeps its leaves far off
+
+
+# Leaves are cut out of their texture by an alpha threshold; far off, the texture's smaller mipmaps
+# average the leaves away and a tree turns into bare sticks. A lower threshold and alpha to coverage
+# keep the crown. (Each material is copied once and shared.)
+static func _keep_leaves(mesh: ArrayMesh) -> void:
+	for si in mesh.get_surface_count():
+		var m := mesh.surface_get_material(si) as BaseMaterial3D
+		if m == null or m.transparency not in [BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR, BaseMaterial3D.TRANSPARENCY_ALPHA, BaseMaterial3D.TRANSPARENCY_ALPHA_HASH]:
+			continue
+		if not _leaf_mats.has(m):
+			var c := m.duplicate() as BaseMaterial3D
+			c.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+			c.alpha_scissor_threshold = minf(m.alpha_scissor_threshold, 0.3)
+			c.alpha_antialiasing_mode = BaseMaterial3D.ALPHA_ANTIALIASING_ALPHA_TO_COVERAGE
+			c.cull_mode = BaseMaterial3D.CULL_DISABLED
+			_leaf_mats[m] = c
+		mesh.surface_set_material(si, _leaf_mats[m])
 
 
 ## Where a mesh meets the ground: the middle of its vertices in the lowest few percent of its height

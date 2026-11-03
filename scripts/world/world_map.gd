@@ -1125,7 +1125,9 @@ func _sample_regions(x: float, z: float, out: Sample) -> void:
 	# narrow: sea cliffs), then the sea floor shelves away into deep water
 	var e := _coast_sdf(x, z)
 	var sea := settings.sea_level
-	var width := lerpf(settings.coast_width_min, settings.coast_width_max, smoothstep(0.3, 0.7, (_coast_kind.get_noise_2d(x, z) + 1.0) * 0.5))
+	var width := settings.coast_width_max  # (only worked out near the coast)
+	if e > -width:
+		width = lerpf(settings.coast_width_min, settings.coast_width_max, smoothstep(0.3, 0.7, (_coast_kind.get_noise_2d(x, z) + 1.0) * 0.5))
 	if e > -width:
 		if e >= 0.0:
 			h = sea + 0.7 - settings.sea_depth * (1.0 - exp(-e / 380.0)) + _sea_floor.get_noise_2d(x, z) * 3.0 * smoothstep(0.0, 300.0, e)

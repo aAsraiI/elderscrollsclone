@@ -174,6 +174,10 @@ func _try_join(spot: Array, e) -> Placed:
 		var tmp = order[i]
 		order[i] = order[j]
 		order[j] = tmp
+	if e.role == RoomModule.Role.STAIRS and recipe.extra_floors >= 2:
+		# a deep dungeon keeps going down: a stair room joins by its upper doorway first, so it
+		# leads below (with up and down at random the floors cancel out)
+		order.sort_custom(func(x: int, y: int) -> bool: return float(e.doors[x]["pos"].y) > float(e.doors[y]["pos"].y))
 	for bi: int in order:
 		var bd: Dictionary = e.doors[bi]
 		if not _fits(fd, bd):

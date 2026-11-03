@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_v6kqy"]
+
+[resource]
+script = ExtResource("1_v6kqy")
+themes = PackedStringArray("crypt", "ruin")
+mix = 0.3
+rooms_base = 16
+rooms_per_10_levels = 4
+rooms_max = 56
+required = PackedStringArray("burial_hall", "ossuary", "catacomb", "sarcophagi", "chapel")
+branching = 0.45
+corridors = 0.5
+extra_floors = 3
+density = 1.2
+light = 0

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/witch_hollow.tres" id="1_v5lvg"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="2_4vgga"]
+
+[resource]
+script = ExtResource("2_4vgga")
+dungeon = ExtResource("1_v5lvg")
+color = Color(0.3, 0.32, 0.26, 1)
+enter_name = "Witch's Hollow"
+id = &"witch_hollow_entrance"
+display_name = "Hollow"
+map_color = Color(0.5, 0.8, 0.4, 1)
+footprint_radius = 12.0
+flatten_radius = 6.0
+max_slope_deg = 20.0
+prefer = "low"
+min_same_distance = 900.0
+path_to_road = 300.0

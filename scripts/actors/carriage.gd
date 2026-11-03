@@ -22,6 +22,11 @@ func _ready() -> void:
 	shape.shape = box
 	shape.position.y = 1.0
 	add_child(shape)
+	_build_look()
+
+
+## The carriage itself (a ship overrides this)
+func _build_look() -> void:
 	var wood := StandardMaterial3D.new()
 	wood.albedo_color = Color(0.4, 0.27, 0.15)
 	var cloth := StandardMaterial3D.new()
@@ -73,7 +78,7 @@ func _cities() -> Array[PlacedPOI]:
 
 func price_to(t: PlacedPOI) -> int:
 	var km := Vector2(t.position.x - global_position.x, t.position.z - global_position.z).length() / 1000.0
-	return maxi(MIN_PRICE, roundi(km * GOLD_PER_KM))
+	return maxi(MIN_PRICE, roundi(km * _gold_per_km()))
 
 
 func interact(actor: Inventory) -> void:
@@ -95,7 +100,7 @@ func _open_menu(actor: Inventory) -> void:
 	center.add_child(panel)
 	var v := VBoxContainer.new()
 	panel.add_child(v)
-	v.add_child(UITheme.heading("Carriage"))
+	v.add_child(UITheme.heading(_title()))
 	v.add_child(UITheme.hint("Where to? You have %d gold." % Currency.get_gold(actor)))
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(0, 320)
@@ -104,11 +109,11 @@ func _open_menu(actor: Inventory) -> void:
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(list)
 	var w := _world()
-	for t in _cities():
+	for t in _destinations():
 		var b := Button.new()
 		var cost := price_to(t)
 		var km := Vector2(t.position.x - global_position.x, t.position.z - global_position.z).length() / 1000.0
-		b.text = "%s   %.1f km, %d h   %d gold" % [t.town.display_name if t.town != null else t.id, km, ceili(km / SPEED_KMH), cost]
+		b.text = "%s   %.1f km, %d h   %d gold" % [t.town.display_name if t.town != null else t.id, km, ceili(km / _speed()), cost]
 		b.disabled = Currency.get_gold(actor) < cost
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.pressed.connect(func() -> void: _travel(t, actor))
@@ -139,16 +144,16 @@ func _travel(t: PlacedPOI, actor: Inventory) -> void:
 		return
 	var w := _world()
 	var km := Vector2(t.position.x - global_position.x, t.position.z - global_position.z).length() / 1000.0
-	var spot := Carriage.stop_for(t)
+	var spot := _arrival(t)
 	w.ensure_area_loaded(spot, 1)
 	var p := get_tree().get_first_node_in_group("player") as CharacterBody3D
 	p.global_position = Vector3(spot.x, w.get_height_at(spot.x, spot.z) + 1.2, spot.z)
 	p.velocity = Vector3.ZERO
 	if w.clock != null:
-		w.clock.advance_hours(km / SPEED_KMH)
+		w.clock.advance_hours(km / _speed())
 	var weather := Weather.get_instance(get_tree())
 	if weather != null:
-		weather.hours_left -= km / SPEED_KMH
+		weather.hours_left -= km / _speed()
 	if w.discovery != null:
 		w.discovery.mark_found(t)
 	Locks.toast(get_tree(), "You arrive at %s" % (t.town.display_name if t.town != null else ""))
@@ -162,3 +167,25 @@ static func stop_for(t: PlacedPOI) -> Vector3:
 	var gate := layout.gates[0]
 	var out := gate.normalized()
 	return layout.to_world(gate + out * 10.0 + Vector3(-out.z, 0, out.x) * 4.0)
+
+
+# ---------------------------------------------------------------- what a ship changes (SeaPassage)
+
+func _title() -> String:
+	return "Carriage"
+
+
+func _destinations() -> Array[PlacedPOI]:
+	return _cities()
+
+
+func _arrival(t: PlacedPOI) -> Vector3:
+	return Carriage.stop_for(t)
+
+
+func _speed() -> float:
+	return SPEED_KMH
+
+
+func _gold_per_km() -> float:
+	return GOLD_PER_KM

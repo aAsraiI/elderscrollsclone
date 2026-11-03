@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_jcwdb"]
+
+[resource]
+script = ExtResource("1_jcwdb")
+themes = PackedStringArray("ruin", "crypt")
+mix = 0.3
+rooms_base = 10
+rooms_max = 32
+required = PackedStringArray("library")
+corridors = 0.5
+extra_floors = 1

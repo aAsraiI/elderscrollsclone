@@ -21,6 +21,9 @@ const MAX_FILL := 0.3
 const RIVER_COST := 45.0
 ## Meters a bridge deck stands above the water
 const DECK_CLEAR := 1.4
+## Meters a causeway stands above shallow water (a swamp pool, a mere's edge)
+const CAUSEWAY := 0.4
+## Meters a causeway stands above shallow water
 
 
 static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
@@ -31,8 +34,21 @@ static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
 	if not settings.roads_enabled or towns.size() < 2:
 		return net
 
+	# each island on its own grid: no roads cross the sea (ships do, SeaPassage), and the open sea
+	# between the islands is never sampled
+	for area in map.get_island_rects():
+		var here: Array[PlacedPOI] = []
+		for t in towns:
+			if area.grow(300.0).has_point(Vector2(t.position.x, t.position.z)):
+				here.append(t)
+		if here.size() >= 2:
+			_plan_roads(map, net, here, area.grow(400.0))
+	return net
+
+
+static func _plan_roads(map: WorldMap, net: RoadNetwork, towns: Array[PlacedPOI], b: Rect2) -> void:
+	var settings := map.settings
 	var cell := settings.road_grid
-	var b := map.get_bounds()
 	var astar := AStarGrid2D.new()
 	astar.region = Rect2i(floori(b.position.x / cell), floori(b.position.y / cell), ceili(b.size.x / cell) + 1, ceili(b.size.y / cell) + 1)
 	astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
@@ -136,7 +152,6 @@ static func plan(map: WorldMap, towns: Array[PlacedPOI]) -> RoadNetwork:
 		alone[_root(group, i)] = true
 	if alone.size() > 1:
 		push_warning("Roads: %d groups of towns could not be joined (water between them)" % alone.size())
-	return net
 
 
 ## The streets of a town, leveled at the town's height
@@ -213,9 +228,6 @@ static func _route(map: WorldMap, net: RoadNetwork, astar: AStarGrid2D, region: 
 	var gb := _nearest_gate(b.town, a.position)
 	var gate_a := a.town.get_gates_world()[ga]
 	var gate_b := b.town.get_gates_world()[gb]
-	# the gate stands on the town's own (tilted) ground, not at the height of its middle
-	gate_a.y = map.get_height(gate_a.x, gate_a.z)
-	gate_b.y = map.get_height(gate_b.x, gate_b.z)
 	var lead_a := gate_a + a.town.get_gate_outward(ga) * LEAD
 	var lead_b := gate_b + b.town.get_gate_outward(gb) * LEAD
 
@@ -364,6 +376,7 @@ static func _route(map: WorldMap, net: RoadNetwork, astar: AStarGrid2D, region: 
 			if pinned[i] == 0:
 				hs[i] = maxf(hs[i], hs[i + 1] - grade * flat[i].distance_to(flat[i + 1]))
 	_bridge(map, net, flat, hs, pinned, grade)
+	_causeway(map, flat, hs, pinned, grade)
 	var out := PackedVector3Array()
 	for i in flat.size():
 		out.append(Vector3(flat[i].x, hs[i], flat[i].y))
@@ -510,3 +523,25 @@ static func _detours(towns: Array[PlacedPOI], e: Vector2i, group: Array[int], tr
 			if added >= 2:
 				break
 	return out
+
+
+# A road never runs below the water line: where it crosses shallow standing water too small for the
+# planning grid to see (a swamp pool, a mere's edge) or cuts down through a bank by the shore, it
+# runs on a raised causeway just above the water, ramping up and down at the grade
+static func _causeway(map: WorldMap, flat: Array[Vector2], hs: PackedFloat32Array, pinned: PackedByteArray, grade: float) -> void:
+	if not map.settings.water_enabled:
+		return
+	var top := map.settings.sea_level + CAUSEWAY
+	var raised := false
+	for i in flat.size():
+		if i > 0 and i < flat.size() - 1 and hs[i] < top:  # (a cutting never goes below the water line either)
+			hs[i] = top
+			raised = true
+	if not raised:
+		return
+	for i in range(1, hs.size()):
+		if pinned[i] == 0:
+			hs[i] = maxf(hs[i], hs[i - 1] - grade * flat[i].distance_to(flat[i - 1]))
+	for i in range(hs.size() - 2, -1, -1):
+		if pinned[i] == 0:
+			hs[i] = maxf(hs[i], hs[i + 1] - grade * flat[i].distance_to(flat[i + 1]))

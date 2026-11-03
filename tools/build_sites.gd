@@ -51,6 +51,18 @@ const KINDS := {
 	"bridge": ["Old Bridge", "ruin", "bridge", "", "", "", 20.0, 0.0, ["lakeland", "forest", "highlands", "swamp", "plains"], 0.02, 1200.0, "water", 200.0],
 	"ruined_bastion": ["Ruined Bastion", "ruin", "ruin", "garrison_ruins", "skeleton_knight", "crypt", 26.0, 20.0, [], 0.03, 900.0, "high", 0.0],
 	"beast_den": ["Beast's Den", "camp", "camp", "enc_wolves", "cave_troll", "", 22.0, 18.0, ["forest", "highlands", "tundra", "snow_mountains", "swamp", "badlands"], 0.03, 1100.0, "low", 0.0],
+	# Alpha 1.21: places of one land
+	"oasis": ["Oasis", "camp", "camp", "", "", "", 22.0, 0.0, ["desert"], 0.025, 1400.0, "low", 200.0],
+	"nomad_camp": ["Nomad Camp", "camp", "camp", "", "", "", 20.0, 16.0, ["tundra", "ashlands", "desert", "badlands"], 0.025, 1200.0, "any", 0.0],
+	"hermit_hut": ["Hermit's Hut", "house", "farm", "", "", "", 12.0, 9.0, ["forest", "swamp", "highlands", "snow_mountains"], 0.03, 1200.0, "any", 0.0],
+	"witch_hut": ["Witch's Hut", "crypt", "shrine", "enc_swamp_hag", "marsh_hag", "", 14.0, 10.0, ["swamp", "deadlands"], 0.025, 1400.0, "low", 0.0],
+	"gallows": ["Gallows", "ruin", "grave", "", "", "", 8.0, 6.0, ["plains", "deadlands", "highlands", "lakeland"], 0.02, 1500.0, "road", 0.0],
+	"plague_pit": ["Plague Pit", "crypt", "grave", "enc_dead_ghouls", "grave_ghoul", "", 16.0, 12.0, ["deadlands", "swamp"], 0.03, 1000.0, "low", 0.0],
+	"fire_altar": ["Fire Altar", "ruin", "stones", "dungeon_ashen", "ashen_priest", "", 16.0, 12.0, ["ashlands"], 0.03, 1200.0, "high", 0.0],
+	"frozen_camp": ["Frozen Camp", "camp", "camp", "dungeon_ice", "", "", 14.0, 10.0, ["frozen_crown", "snow_mountains", "tundra"], 0.03, 1000.0, "any", 0.0],
+	"smugglers_landing": ["Smugglers' Landing", "camp", "dock", "dungeon_smugglers", "smuggler_chief", "", 18.0, 12.0, ["coast", "lakeland", "swamp"], 0.025, 1200.0, "water", 0.0],
+	"cairn": ["Cairn", "ruin", "stones", "", "", "", 8.0, 0.0, ["highlands", "tundra", "snow_mountains", "frozen_crown", "badlands"], 0.04, 800.0, "high", 0.0],
+	"druid_grove": ["Druid Grove", "ruin", "stones", "", "", "", 18.0, 0.0, ["forest", "lakeland", "highlands"], 0.02, 1500.0, "any", 0.0],
 	# small places between the big ones (not discovered, not on the map: SMALL)
 	"roadside_camp": ["Campfire", "camp", "camp", "enc_wanderer", "", "", 6.0, 4.0, [], 0.15, 300.0, "road", 0.0],
 	"wrecked_cart": ["Wrecked Cart", "camp", "camp", "enc_plains_ambush", "", "", 6.0, 4.0, [], 0.12, 400.0, "road", 0.0],
@@ -291,6 +303,7 @@ func _sites() -> void:
 	_bridge()
 	_ruined_bastion()
 	_beast_den()
+	_sites_121()
 	_small_places()
 
 
@@ -930,6 +943,237 @@ func _small_places() -> void:
 	_s(S.DECORATION, ["cart"], Vector3(8.5, 0, -6.0), 0.4)
 	_marker(_site, "Keeper", Vector3(1.0, 0, 3.5), PI)
 	_done(file)
+
+# ---------------------------------------------------------------- Alpha 1.21: places of one land
+
+func _sites_121() -> void:
+	_oasis()
+	_nomad_camp()
+	_hermit_hut()
+	_witch_hut()
+	_gallows()
+	_plague_pit()
+	_fire_altar()
+	_frozen_camp()
+	_smugglers_landing()
+	_cairn(0)
+	_cairn(1)
+	_druid_grove()
+
+
+# A desert spring: a stone-rimmed pool, palm shade, traders' tents and the keeper of the well
+func _oasis() -> void:
+	var file := "oasis_a"
+	_new(file, "oasis", Vector3i(10, 1, 10))
+	_b(Vector3(9.0, 0.3, 7.0), Vector3(0, -0.05, 0), "water", false)
+	for i in 12:
+		var a := TAU * i / 12.0
+		_b(Vector3(1.6, 0.5, 0.8), Vector3(cos(a) * 5.4, 0.2, sin(a) * 4.4), "stone", true, -a)
+	for i in 3:
+		var a := TAU * i / 3.0 + 0.5
+		_s(S.FURNITURE, ["tent"], Vector3(cos(a) * 11.0, 0, sin(a) * 11.0), -a + PI * 0.5)
+	_s(S.LIGHT, ["campfire"], Vector3(8.0, 0, 6.0))
+	_s(S.FURNITURE, ["stall", "market"], Vector3(-9.0, 0, 3.0), 1.2)
+	_s(S.DECORATION, ["crate", "barrel", "sack"], Vector3(-10.0, 0, -4.0), 0.3)
+	_s(S.DECORATION, ["cart"], Vector3(12.0, 0, -6.0), 0.8)
+	for i in 4:
+		_marker(_site, "Herb%d" % i, Vector3(cos(i * 1.6) * 6.6, 0, sin(i * 1.6) * 5.6), 0.0)
+	_marker(_site, "Keeper", Vector3(-8.0, 0, 1.5), PI * 0.5)
+	_done(file)
+
+
+# Wanderers' round tents of hide on a frame, a fire, drying racks, their pack beasts' fodder
+func _nomad_camp() -> void:
+	var file := "nomad_camp_a"
+	_new(file, "nomad_camp", Vector3i(9, 1, 9))
+	for i in 4:
+		var a := TAU * i / 4.0 + 0.3
+		var at := Vector3(cos(a) * 9.0, 0, sin(a) * 9.0)
+		_b(Vector3(4.6, 2.2, 4.6), at + Vector3(0, 1.1, 0), "cloth", true, a)
+		_b(Vector3(3.4, 1.0, 3.4), at + Vector3(0, 2.7, 0), "cloth_red", false, a + 0.78)
+		_s(S.FURNITURE, ["bedroll", "set"], at + Vector3(cos(a) * -3.4, 0, sin(a) * -3.4), -a)
+	_s(S.LIGHT, ["campfire"], Vector3.ZERO)
+	_s(S.FURNITURE, ["rack", "pelts"], Vector3(4.0, 0, -2.0), 0.5)
+	_s(S.FURNITURE, ["rack", "pelts"], Vector3(-3.0, 0, 4.0), -0.4)
+	_s(S.DECORATION, ["hay", "storage"], Vector3(13.0, 0, 2.0))
+	_s(S.CHEST, [], Vector3(-12.0, 0, -2.0), 1.2, 0.8)
+	_marker(_site, "Keeper", Vector3(2.0, 0, 2.5), PI)
+	_done(file)
+
+
+# A lone house in the wilds with a garden of herbs and a note on the table
+func _hermit_hut() -> void:
+	var file := "hermit_hut_a"
+	_new(file, "hermit_hut", Vector3i(5, 1, 5))
+	_house(Vector3(0, 0, 0), 7.0, 6.0, "wood_dark")
+	_s(S.FURNITURE, ["bed"], Vector3(-2.0, 0, 1.6), 0.0)
+	_s(S.FURNITURE, ["table"], Vector3(1.6, 0, 1.0), 0.0)
+	_s(S.LIGHT, ["candle"], Vector3(1.6, 0.8, 1.0))
+	_s(S.CHEST, [], Vector3(2.4, 0, -1.6), PI, 1.0)
+	_marker(_site, "Note", Vector3(1.4, 0.82, 1.2), 0.3)
+	_s(S.FURNITURE, ["fence"], Vector3(0, 0, -6.5), 0.0)
+	for i in 6:
+		_marker(_site, "Herb%d" % i, Vector3(-3.0 + i * 1.2, 0, -5.0 - (i % 2) * 0.8), 0.0)
+	_s(S.DECORATION, ["logs", "storage"], Vector3(5.0, 0, 2.0), 1.5)
+	_done(file)
+
+
+# A hut on stilts over the mire: a witch's cauldron, skulls on posts, her chest
+func _witch_hut() -> void:
+	var file := "witch_hut_a"
+	_new(file, "witch_hut", Vector3i(6, 2, 6))
+	var y := 1.8
+	for x in [-3.0, 3.0]:
+		for z in [-2.5, 2.5]:
+			_b(Vector3(0.35, y + 0.4, 0.35), Vector3(x, (y + 0.4) * 0.5 - 0.2, z), "wood_dark")
+	_b(Vector3(7.0, 0.25, 6.0), Vector3(0, y, 0), "wood")
+	_wall(Vector2(-3.4, 2.9), Vector2(3.4, 2.9), 2.6, "wood_dark", 0.3, y)
+	_wall(Vector2(-3.4, -2.9), Vector2(-3.4, 2.9), 2.6, "wood_dark", 0.3, y)
+	_wall(Vector2(3.4, -2.9), Vector2(3.4, 2.9), 2.6, "wood_dark", 0.3, y)
+	_wall(Vector2(-3.4, -2.9), Vector2(-0.8, -2.9), 2.6, "wood_dark", 0.3, y)
+	_wall(Vector2(0.8, -2.9), Vector2(3.4, -2.9), 2.6, "wood_dark", 0.3, y)
+	_b(Vector3(7.6, 0.2, 6.6), Vector3(0, y + 2.8, 0), "straw", false)
+	# a ladder of planks up to the door
+	for k in 5:
+		_b(Vector3(1.4, 0.12, 0.5), Vector3(0, 0.2 + k * 0.38, -3.4 - (4 - k) * 0.5), "wood")
+	_s(S.FURNITURE, ["cauldron"], Vector3(-1.5, y + 0.12, 0.8), 0.0)
+	_s(S.FURNITURE, ["bedroll", "set"], Vector3(2.0, y + 0.12, 1.5), 0.0)
+	_s(S.CHEST, [], Vector3(2.4, y + 0.12, -1.6), PI, 1.0)
+	for i in 4:
+		var a := TAU * i / 4.0 + 0.4
+		_b(Vector3(0.12, 2.0, 0.12), Vector3(cos(a) * 7.5, 1.0, sin(a) * 7.5), "wood_dark", false)
+		_b(Vector3(0.35, 0.35, 0.35), Vector3(cos(a) * 7.5, 2.15, sin(a) * 7.5), "bone", false)
+	_s(S.BOSS, [], Vector3(-4.5, 0, -5.0))
+	for i in 3:
+		_marker(_site, "Herb%d" % i, Vector3(5.5, 0, -4.0 + i * 2.0), 0.0)
+	_done(file)
+
+
+# A gibbet at a crossroads: the frame, a cage, what is left of the last one
+func _gallows() -> void:
+	var file := "gallows_a"
+	_new(file, "gallows", Vector3i(3, 1, 3))
+	_b(Vector3(4.0, 0.5, 3.0), Vector3(0, 0.25, 0), "wood")
+	_b(Vector3(0.3, 4.5, 0.3), Vector3(-1.5, 2.5, 0), "wood_dark")
+	_b(Vector3(0.3, 4.5, 0.3), Vector3(1.5, 2.5, 0), "wood_dark")
+	_b(Vector3(3.6, 0.3, 0.3), Vector3(0, 4.7, 0), "wood_dark")
+	_s(S.DECORATION, ["cage"], Vector3(4.0, 0, 1.5), 0.3)
+	_s(S.DECORATION, ["bones", "remains"], Vector3(0.4, 0.5, 0.6), 0.0)
+	_marker(_site, "Note", Vector3(-0.8, 0.52, -0.9), 0.0)
+	_done(file)
+
+
+# Mounds of the plague dead, burnt carts, the ghouls that feed there
+func _plague_pit() -> void:
+	var file := "plague_pit_a"
+	_new(file, "plague_pit", Vector3i(8, 1, 8))
+	for i in 7:
+		var a := TAU * i / 7.0
+		_b(Vector3(4.0, 0.9, 2.4), Vector3(cos(a) * 7.0, 0.3, sin(a) * 7.0), "ash", true, -a)
+		_s(S.DECORATION, ["bones", "remains"], Vector3(cos(a) * 4.5, 0, sin(a) * 4.5), a)
+	_b(Vector3(6.0, 0.2, 6.0), Vector3(0, 0.05, 0), "rock_dark", false)
+	_s(S.DECORATION, ["cart", "wreck"], Vector3(11.0, 0, 3.0), 1.0)
+	_s(S.DECORATION, ["grave", "gravestone"], Vector3(-10.0, 0, -6.0), 0.4)
+	_s(S.BOSS, [], Vector3(0, 0, 2.0))
+	_s(S.ENEMY, [], Vector3(5.0, 0, -4.0), 0.0, 0.9)
+	_s(S.ENEMY, [], Vector3(-5.0, 0, 3.0), 0.0, 0.8)
+	_s(S.LOOT, [], Vector3(1.5, 0, -1.0), 0.0, 0.9)
+	_done(file)
+
+
+# An altar to the fire on a stepped dais: braziers burning, the cult that tends it
+func _fire_altar() -> void:
+	var file := "fire_altar_a"
+	_new(file, "fire_altar", Vector3i(8, 2, 8))
+	for k in 3:
+		var w := 12.0 - k * 3.5
+		_b(Vector3(w, 0.5, w), Vector3(0, 0.25 + k * 0.5, 0), "stone_dark")
+	_b(Vector3(2.0, 1.0, 1.2), Vector3(0, 2.0, 0), "rock_dark")
+	_b(Vector3(1.2, 0.4, 0.8), Vector3(0, 2.7, 0), "glow", false)
+	for i in 4:
+		var a := TAU * i / 4.0 + PI * 0.25
+		_b(Vector3(0.9, 5.0, 0.9), Vector3(cos(a) * 7.5, 2.5, sin(a) * 7.5), "stone_dark")
+		_s(S.LIGHT, ["brazier"], Vector3(cos(a) * 4.0, 1.0, sin(a) * 4.0), 0.0)
+	_s(S.BOSS, [], Vector3(0, 1.5, -2.5))
+	_s(S.ENEMY, [], Vector3(5.0, 0, 6.0), 0.0, 0.9)
+	_s(S.ENEMY, [], Vector3(-6.0, 0, 5.0), 0.0, 0.8)
+	_s(S.LOOT, [], Vector3(0, 2.5, 0.6), 0.0, 1.0)
+	_marker(_site, "Inscription", Vector3(0, 1.6, -3.2), PI)
+	_done(file)
+
+
+# A camp the cold took: tents half buried, their sleepers frozen, a last note
+func _frozen_camp() -> void:
+	var file := "frozen_camp_a"
+	_new(file, "frozen_camp", Vector3i(6, 1, 6))
+	_s(S.LIGHT, ["campfire"], Vector3.ZERO, 0.0, 0.0)  # long cold
+	for i in 3:
+		var a := TAU * i / 3.0 + 0.2
+		_s(S.FURNITURE, ["tent"], Vector3(cos(a) * 6.0, 0, sin(a) * 6.0), -a + PI * 0.5)
+		_b(Vector3(3.0, 0.6, 2.0), Vector3(cos(a) * 6.0, 0.2, sin(a) * 6.0), "ice", false, -a)
+		_s(S.DECORATION, ["bones", "remains"], Vector3(cos(a) * 3.0, 0, sin(a) * 3.0), a)
+	_s(S.CHEST, [], Vector3(0, 0, -8.0), 0.0, 1.0)
+	_marker(_site, "Note", Vector3(1.0, 0.05, 1.0), 0.0)
+	_s(S.ENEMY, [], Vector3(-4.0, 0, 4.0), 0.0, 0.6)
+	_done(file)
+
+
+# A jetty in a quiet cove: crates off the boats, a tent, the smugglers who unload them
+func _smugglers_landing() -> void:
+	var file := "smugglers_landing_a"
+	_new(file, "smugglers_landing", Vector3i(8, 1, 8))
+	_b(Vector3(3.0, 0.25, 12.0), Vector3(0, 0.4, -10.0), "wood")
+	for z in [-5.0, -9.0, -13.0]:
+		for x in [-1.3, 1.3]:
+			_b(Vector3(0.3, 2.4, 0.3), Vector3(x, -0.6, z), "wood_dark")
+	_s(S.FURNITURE, ["boat"], Vector3(3.2, 0, -12.0), 0.2)
+	for i in 4:
+		_s(S.DECORATION, ["crate", "barrel", "sack"], Vector3(-4.0 + i * 2.2, 0, 2.0 + (i % 2) * 1.5), i * 0.6)
+	_s(S.FURNITURE, ["tent"], Vector3(8.0, 0, 5.0), 0.8)
+	_s(S.LIGHT, ["campfire"], Vector3(4.0, 0, 8.0))
+	_s(S.CHEST, [], Vector3(-7.0, 0, 6.0), 0.4, 1.0)
+	_s(S.BOSS, [], Vector3(2.0, 0, 5.0))
+	_s(S.ENEMY, ["guard"], Vector3(0, 0.5, -6.0), PI, 0.9)
+	_s(S.ENEMY, [], Vector3(-5.0, 0, 9.0), 0.0, 0.8)
+	_done(file)
+
+
+# A heap of stones on a height, raised over someone long dead, words cut in its foot
+func _cairn(v: int) -> void:
+	var file := "cairn_" + "ab"[v]
+	_new(file, "cairn", Vector3i(3, 1, 3))
+	var layers := 4 + v
+	for k in layers:
+		var r := 2.4 - k * 0.45
+		for i in 6 - k:
+			var a := TAU * i / (6.0 - k) + k * 0.5
+			_b(Vector3(1.1, 0.7, 0.9), Vector3(cos(a) * r, 0.35 + k * 0.6, sin(a) * r), "rock", true, a)
+	_b(Vector3(0.7, 1.2, 0.4), Vector3(0, layers * 0.6 + 0.6, 0), "stone")
+	_marker(_site, "Inscription", Vector3(0, 0.8, -2.8), PI)
+	_s(S.LOOT, [], Vector3(1.6, 0, -2.2), 0.0, 0.5)
+	_s(S.DECORATION, ["bones", "remains"], Vector3(-2.2, 0, 1.4), 0.6)
+	_s(S.LIGHT, ["candle"], Vector3(0.6, 0, -2.6), 0.0)
+	_s(S.DECORATION, ["rock", "boulder"], Vector3(3.0, 0, 1.0), 1.2)
+	_done(file)
+
+
+# A ring of old stones round a great altar in the trees, where the green is blessed
+func _druid_grove() -> void:
+	var file := "druid_grove_a"
+	_new(file, "druid_grove", Vector3i(9, 2, 9))
+	for i in 7:
+		var a := TAU * i / 7.0
+		var tall := 3.4 + (i % 2) * 1.0
+		_b(Vector3(1.0, tall, 0.8), Vector3(cos(a) * 9.0, tall * 0.5, sin(a) * 9.0), "moss_stone", true, -a)
+	_b(Vector3(3.0, 0.9, 2.0), Vector3(0, 0.45, 0), "moss_stone")
+	_marker(_site, "Blessing", Vector3(0, 0.9, -1.4), 0.0)
+	for i in 8:
+		var a := TAU * i / 8.0 + 0.2
+		_marker(_site, "Herb%d" % i, Vector3(cos(a) * 5.0, 0, sin(a) * 5.0), a)
+	for i in 4:
+		_s(S.LIGHT, ["candle"], Vector3(cos(TAU * i / 4.0) * 2.4, 0, sin(TAU * i / 4.0) * 2.4), 0.0)
+	_done(file)
+
 
 # ---------------------------------------------------------------- kinds and biomes
 

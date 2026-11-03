@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/monastery.tres" id="1_lkhk3"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="2_odaok"]
+
+[resource]
+script = ExtResource("2_odaok")
+dungeon = ExtResource("1_lkhk3")
+shape = 1
+shape_scale = 1.1
+color = Color(0.5, 0.48, 0.44, 1)
+enter_name = "Ruined Monastery"
+id = &"monastery_entrance"
+display_name = "Monastery Doors"
+map_color = Color(0.85, 0.8, 0.6, 1)
+footprint_radius = 18.0
+flatten_radius = 9.0
+max_slope_deg = 20.0
+prefer = "high"
+min_same_distance = 900.0
+path_to_road = 300.0

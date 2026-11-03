@@ -25,8 +25,14 @@ static func plan(map: WorldMap) -> RiverNetwork:
 	var settings := map.settings
 	if not settings.rivers_enabled or not settings.is_regions() or map.placements.is_empty():
 		return net
+	for area in map.get_island_rects():  # each island on its own grid (not the open sea between)
+		_plan_area(map, net, area.grow(500.0))
+	return net
+
+
+static func _plan_area(map: WorldMap, net: RiverNetwork, b: Rect2) -> void:
+	var settings := map.settings
 	var cell := settings.river_grid
-	var b := map.get_bounds()
 	var origin := b.position
 	var w := ceili(b.size.x / cell)
 	var h := ceili(b.size.y / cell)
@@ -173,7 +179,9 @@ static func plan(map: WorldMap) -> RiverNetwork:
 		candidates.append({"group": group, "level": level})
 	# the biggest hollows become lakes
 	candidates.sort_custom(func(a: Dictionary, b2: Dictionary) -> bool: return (a["group"] as PackedInt32Array).size() > (b2["group"] as PackedInt32Array).size())
-	for cand: Dictionary in candidates.slice(0, settings.max_lakes):
+	# at most max_lakes on a 12 km island, fewer on smaller ones
+	var cap := maxi(1, roundi(float(settings.max_lakes) * b.get_area() / 1.69e8))
+	for cand: Dictionary in candidates.slice(0, cap):
 		var group: PackedInt32Array = cand["group"]
 		var level: float = cand["level"]
 		var id := lake_list.size()
@@ -183,7 +191,7 @@ static func plan(map: WorldMap) -> RiverNetwork:
 			lake_levels[c] = level
 			center += Vector2(origin.x + (float(c % w) + 0.5) * cell, origin.y + (float(c / w) + 0.5) * cell)
 		lake_list.append({"center": center / float(group.size()), "level": level, "cells": group.size()})
-	net.set_lakes(origin, cell, w, h, lake_levels, lake_list)
+	net.add_lakes(origin, cell, w, h, lake_levels, lake_list)
 
 	# 3. rain gathers downhill (upstream cells come later in the flood order)
 	var area := cell * cell / 1.0e6
@@ -318,7 +326,7 @@ static func plan(map: WorldMap) -> RiverNetwork:
 				points[k] = Vector3(points[k].x, minf(points[k].y, v) if t["end"] != "lake" else v, points[k].z)
 		made.append({"points": points, "widths": widths})
 		net.add_polyline(points, widths, widths[total - 1] >= 3.2, String(t["end"]))
-	return net
+
 
 
 static func _chaikin(pts: PackedVector2Array, rounds: int) -> PackedVector2Array:

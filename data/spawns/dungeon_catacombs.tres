@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_i7mo8"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_3671a"]
+[ext_resource type="Resource" path="res://data/enemies/skeleton.tres" id="3_uc06o"]
+[ext_resource type="Resource" path="res://data/enemies/grave_ghoul.tres" id="4_t30iw"]
+[ext_resource type="Resource" path="res://data/enemies/giant_rat.tres" id="5_mxl4b"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="6_fqygp"]
+
+[sub_resource type="Resource" id="Resource_4736c"]
+script = ExtResource("1_i7mo8")
+members = Array[ExtResource("2_3671a")]([ExtResource("3_uc06o")])
+weight = 3.0
+count_min = 2
+count_max = 4
+
+[sub_resource type="Resource" id="Resource_rj4rv"]
+script = ExtResource("1_i7mo8")
+members = Array[ExtResource("2_3671a")]([ExtResource("4_t30iw")])
+weight = 2.0
+count_max = 2
+
+[sub_resource type="Resource" id="Resource_hyeac"]
+script = ExtResource("1_i7mo8")
+members = Array[ExtResource("2_3671a")]([ExtResource("5_mxl4b")])
+weight = 2.0
+count_min = 2
+count_max = 4
+
+[resource]
+script = ExtResource("6_fqygp")
+entries = Array[ExtResource("1_i7mo8")]([SubResource("Resource_4736c"), SubResource("Resource_rj4rv"), SubResource("Resource_hyeac")])

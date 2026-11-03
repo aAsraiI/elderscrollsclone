@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="IslandData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/biome_placement.gd" id="1_s72wh"]
+[ext_resource type="Resource" path="res://data/world/swamp.tres" id="2_na1pq"]
+[ext_resource type="Resource" path="res://data/world/coast.tres" id="3_e3es7"]
+[ext_resource type="Script" path="res://scripts/world/island_data.gd" id="4_7yb0e"]
+
+[sub_resource type="Resource" id="Resource_8k16v"]
+script = ExtResource("1_s72wh")
+biome = ExtResource("2_na1pq")
+cell = Vector2i(21, 2)
+size_cells = Vector2i(5, 6)
+level_min = 20
+level_max = 34
+
+[sub_resource type="Resource" id="Resource_x73yq"]
+script = ExtResource("1_s72wh")
+biome = ExtResource("3_e3es7")
+cell = Vector2i(26, 2)
+size_cells = Vector2i(3, 6)
+level_min = 18
+level_max = 30
+
+[resource]
+script = ExtResource("4_7yb0e")
+name = "Saltmarsh Isles"
+placements = Array[ExtResource("1_s72wh")]([SubResource("Resource_8k16v"), SubResource("Resource_x73yq")])
+roundness = 0.3

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_rh2tc"]
+[ext_resource type="PackedScene" path="res://scenes/sites/druid_grove_a.tscn" id="2_i0ot7"]
+
+[resource]
+script = ExtResource("1_rh2tc")
+sites = Array[PackedScene]([ExtResource("2_i0ot7")])
+map_icon = "stones"
+enter_name = "Druid Grove"
+id = &"site_druid_grove"
+display_name = "Druid Grove"
+map_color = Color(0.65, 0.65, 0.7, 1)
+footprint_radius = 18.0
+max_slope_deg = 20.0
+min_same_distance = 1500.0

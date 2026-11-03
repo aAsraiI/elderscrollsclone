@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="IslandData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/biome_placement.gd" id="1_dqfv3"]
+[ext_resource type="Resource" path="res://data/world/forest.tres" id="2_vny44"]
+[ext_resource type="Resource" path="res://data/world/plains.tres" id="3_4g3ho"]
+[ext_resource type="Resource" path="res://data/world/lakeland.tres" id="4_nrk0u"]
+[ext_resource type="Script" path="res://scripts/world/island_data.gd" id="5_3t7nt"]
+
+[sub_resource type="Resource" id="Resource_behhr"]
+script = ExtResource("1_dqfv3")
+biome = ExtResource("2_vny44")
+cell = Vector2i(-27, 5)
+size_cells = Vector2i(5, 5)
+level_min = 4
+level_max = 14
+
+[sub_resource type="Resource" id="Resource_db2px"]
+script = ExtResource("1_dqfv3")
+biome = ExtResource("3_4g3ho")
+cell = Vector2i(-27, 10)
+size_cells = Vector2i(5, 4)
+level_min = 3
+level_max = 12
+
+[sub_resource type="Resource" id="Resource_kjylk"]
+script = ExtResource("1_dqfv3")
+biome = ExtResource("4_nrk0u")
+cell = Vector2i(-22, 6)
+size_cells = Vector2i(3, 6)
+level_min = 5
+level_max = 15
+
+[resource]
+script = ExtResource("5_3t7nt")
+name = "Greenisle"
+placements = Array[ExtResource("1_dqfv3")]([SubResource("Resource_behhr"), SubResource("Resource_db2px"), SubResource("Resource_kjylk")])

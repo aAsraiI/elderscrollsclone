@@ -120,7 +120,9 @@ func t_in_game() -> void:
 	eq.equip(bow)
 	var ranged := p.get_node("RangedCombat") as RangedCombat
 	var fwd := -p.global_transform.basis.z
-	var target := Enemy.spawn(current_scene, p.global_position + fwd * 8.0 + Vector3.UP * 0.4, null)
+	var at := p.global_position + fwd * 8.0
+	at.y = maxf(at.y, wm.get_height_at(at.x, at.z)) + 0.4  # on the ground there (the start may be on a slope)
+	var target := Enemy.spawn(current_scene, at, null)
 	target.disposition = Enemy.Disposition.HOSTILE
 	await physics(5)
 	var hp := target.stats.health

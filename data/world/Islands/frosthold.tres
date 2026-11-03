@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="IslandData" format=3]
+
+[ext_resource type="Script" path="res://scripts/world/biome_placement.gd" id="1_6qnkc"]
+[ext_resource type="Resource" path="res://data/world/tundra.tres" id="2_78s4y"]
+[ext_resource type="Resource" path="res://data/world/frozen_crown.tres" id="3_qwdtl"]
+[ext_resource type="Script" path="res://scripts/world/island_data.gd" id="4_e8tkm"]
+
+[sub_resource type="Resource" id="Resource_3vvfi"]
+script = ExtResource("1_6qnkc")
+biome = ExtResource("2_78s4y")
+cell = Vector2i(18, -24)
+size_cells = Vector2i(5, 5)
+level_min = 60
+level_max = 80
+
+[sub_resource type="Resource" id="Resource_03qer"]
+script = ExtResource("1_6qnkc")
+biome = ExtResource("3_qwdtl")
+cell = Vector2i(23, -24)
+size_cells = Vector2i(4, 5)
+level_min = 70
+level_max = 90
+
+[resource]
+script = ExtResource("4_e8tkm")
+name = "Frosthold"
+placements = Array[ExtResource("1_6qnkc")]([SubResource("Resource_3vvfi"), SubResource("Resource_03qer")])
+roundness = 0.38

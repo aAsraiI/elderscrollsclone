@@ -39,7 +39,7 @@ var _visual: Node3D
 const HERB_INFO := {
 	"heather": [Color(0.62, 0.38, 0.6), ["kit/plants/other/flora_heather_01"], false],
 	"bog_bean": [Color(0.8, 0.75, 0.55), ["kit/plants/bitter_coast/flora_bc_podplant_01", "kit/plants/bitter_coast/flora_bc_podplant_02"], true],
-	"shelf_fungus": [Color(0.72, 0.55, 0.32), ["kit/plants/bitter_coast/flora_bc_shelffungus_01", "kit/plants/other/flora_t_shelffungus_01"], false],
+	"shelf_fungus": [Color(0.72, 0.55, 0.32), ["kit/plants/mushrooms/flora_bc_mushroom_06", "kit/plants/mushrooms/flora_bc_mushroom_07"], false],  # (Morrowind's shelf fungus grows sideways off trunks)
 	"spore_pod": [Color(0.55, 0.6, 0.3), ["kit/plants/other/flora_muckpod_01", "kit/plants/other/flora_t_podbud_01"], false],
 	"cattail_root": [Color(0.42, 0.28, 0.16), [], true],
 	"cloudberries": [Color(0.95, 0.62, 0.25), ["kit/plants/solstheim/flora_bm_shrub_02"], false],

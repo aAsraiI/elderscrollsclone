@@ -34,6 +34,11 @@
 [ext_resource type="Resource" path="res://data/world/Sites/fishing_spot.tres" id="41_dn32i"]
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="42_cm7t1"]
 [ext_resource type="Resource" path="res://data/world/Sites/wayside_inn.tres" id="43_n8dof"]
+[ext_resource type="Resource" path="res://data/world/POIs/smugglers_cove_entrance.tres" id="45_522t3"]
+[ext_resource type="Resource" path="res://data/world/POIs/catacombs_entrance.tres" id="46_3ya0j"]
+[ext_resource type="Resource" path="res://data/world/Sites/gallows.tres" id="47_n8dof"]
+[ext_resource type="Resource" path="res://data/world/Sites/smugglers_landing.tres" id="48_i47bs"]
+[ext_resource type="Resource" path="res://data/world/Sites/druid_grove.tres" id="49_swje4"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wanderer.tres" id="enc_0"]
 [ext_resource type="Resource" path="res://data/encounters/plains_caravan.tres" id="enc_1"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="enc_2"]
@@ -156,33 +161,36 @@ follow_ground = true
 [sub_resource type="Resource" id="rule_0"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_0")
-count_min = 0.5
-count_max = 1.0
+count_min = 0.3
+count_max = 0.6
 extra_spacing = 60.0
 
 [sub_resource type="Resource" id="rule_1"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_1")
-count_max = 1.5
+count_min = 0.5
+count_max = 0.75
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="rule_2"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_2")
-count_min = 0.5
-count_max = 1.0
+count_min = 0.3
+count_max = 0.6
 extra_spacing = 60.0
 
 [sub_resource type="Resource" id="rule_3"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_3")
+count_min = 0.4
+count_max = 0.8
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="rule_4"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_4")
-count_min = 0.5
-count_max = 1.5
+count_min = 0.25
+count_max = 0.75
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="Resource_gcxwx"]
@@ -417,6 +425,46 @@ count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
+[sub_resource type="Resource" id="Resource_gr2ja"]
+script = ExtResource("rule_script")
+poi = ExtResource("45_522t3")
+count_min = 0.04
+count_max = 0.08
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_615cn"]
+script = ExtResource("rule_script")
+poi = ExtResource("46_3ya0j")
+count_min = 0.05
+count_max = 0.09
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_gdhgs"]
+script = ExtResource("rule_script")
+poi = ExtResource("47_n8dof")
+count_min = 0.04199999999999999
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_bxp1t"]
+script = ExtResource("rule_script")
+poi = ExtResource("48_i47bs")
+count_min = 0.0525
+count_max = 0.09750000000000002
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_8qmbi"]
+script = ExtResource("rule_script")
+poi = ExtResource("49_swje4")
+count_min = 0.04199999999999999
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
 [resource]
 script = ExtResource("1_biome")
 id = &"lakeland"
@@ -438,7 +486,8 @@ tree_color = Color(0.24, 0.44, 0.2, 1)
 flora = Array[ExtResource("9_ikkrr")]([SubResource("Resource_ikkrr"), SubResource("Resource_522t3"), SubResource("Resource_3ya0j"), SubResource("Resource_dn32i"), SubResource("Resource_cm7t1"), SubResource("Resource_n8dof"), SubResource("Resource_u8ybc")])
 herbs = PackedStringArray("water_mint:3", "cattail_root:3", "swamp_lily:2", "bulbroot:2", "yarrow:1", "saltgrass:1", "lavender:1", "cornflower:1")
 herb_density = 1.3
-poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("Resource_gcxwx"), SubResource("Resource_ey0a8"), SubResource("Resource_ppbr2"), SubResource("Resource_b0wsu"), SubResource("Resource_6qkxj"), SubResource("Resource_c5swg"), SubResource("Resource_n0ny7"), SubResource("Resource_bvi3m"), SubResource("Resource_gxgj0"), SubResource("Resource_32jxf"), SubResource("Resource_72srd"), SubResource("Resource_xn3h3"), SubResource("Resource_5hbin"), SubResource("Resource_es176"), SubResource("Resource_50040"), SubResource("Resource_6gimb"), SubResource("Resource_u7emh"), SubResource("Resource_ggotc"), SubResource("Resource_vlksw"), SubResource("Resource_ahlt6"), SubResource("Resource_st3oq"), SubResource("Resource_1jlj8"), SubResource("Resource_i47bs"), SubResource("Resource_swje4"), SubResource("Resource_c2kg5"), SubResource("Resource_r4uva"), SubResource("Resource_gduai"), SubResource("Resource_70cd6"), SubResource("Resource_fsfps")])
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("Resource_gcxwx"), SubResource("Resource_ey0a8"), SubResource("Resource_ppbr2"), SubResource("Resource_b0wsu"), SubResource("Resource_6qkxj"), SubResource("Resource_c5swg"), SubResource("Resource_n0ny7"), SubResource("Resource_bvi3m"), SubResource("Resource_gxgj0"), SubResource("Resource_32jxf"), SubResource("Resource_72srd"), SubResource("Resource_xn3h3"), SubResource("Resource_5hbin"), SubResource("Resource_es176"), SubResource("Resource_50040"), SubResource("Resource_6gimb"), SubResource("Resource_u7emh"), SubResource("Resource_ggotc"), SubResource("Resource_vlksw"), SubResource("Resource_ahlt6"), SubResource("Resource_st3oq"), SubResource("Resource_1jlj8"), SubResource("Resource_i47bs"), SubResource("Resource_swje4"), SubResource("Resource_c2kg5"), SubResource("Resource_r4uva"), SubResource("Resource_gduai"), SubResource("Resource_70cd6"), SubResource("Resource_fsfps"), SubResource("Resource_gr2ja"), SubResource("Resource_615cn"), SubResource("Resource_gdhgs"), SubResource("Resource_bxp1t"), SubResource("Resource_8qmbi")])
 level_min = 2
 level_max = 12
 encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("6_gcxwx"), ExtResource("7_bvegv"), ExtResource("8_0hgwe")])
+metadata/thinned_121 = true

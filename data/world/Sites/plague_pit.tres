@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_dead_ghouls.tres" id="1_aqp7s"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_n1yyc"]
+[ext_resource type="PackedScene" path="res://scenes/sites/plague_pit_a.tscn" id="3_otdt6"]
+
+[resource]
+script = ExtResource("2_n1yyc")
+sites = Array[PackedScene]([ExtResource("3_otdt6")])
+occupants = ExtResource("1_aqp7s")
+map_icon = "grave"
+enter_name = "Plague Pit"
+id = &"site_plague_pit"
+display_name = "Plague Pit"
+map_color = Color(0.5, 0.55, 0.6, 1)
+footprint_radius = 16.0
+flatten_radius = 12.0
+max_slope_deg = 12.0
+prefer = "low"
+min_same_distance = 1000.0

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_umoov"]
+
+[resource]
+script = ExtResource("1_umoov")
+themes = PackedStringArray("ruin", "mine")
+mix = 0.3
+rooms_base = 14
+rooms_per_10_levels = 4
+rooms_max = 50
+required = PackedStringArray("fallen_hall", "library")
+branching = 0.45
+extra_floors = 3
+light = 0

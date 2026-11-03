@@ -276,6 +276,14 @@ func is_under_water(height: float) -> bool:
 	return settings.water_enabled and height < settings.sea_level
 
 
+## The box round each island's land (one box for an older world: its bounds)
+func get_island_rects() -> Array[Rect2]:
+	if _regions:
+		return _isl_rect.duplicate()
+	var out: Array[Rect2] = [_bounds]
+	return out
+
+
 ## Is this spot out past the coastline (Regions layouts; always false for the older worlds)?
 func is_sea(x: float, z: float) -> bool:
 	return _regions and _coast_sdf(x, z) > 0.0
@@ -875,9 +883,10 @@ func _init_regions() -> void:
 	for k in _isl_rect.size():
 		var data: IslandData = settings.islands[k - 1] if k > 0 and k - 1 < settings.islands.size() else null
 		var small := minf(_isl_rect[k].size.x, _isl_rect[k].size.y)
-		var fit := clampf(small / 9000.0, 0.15, 1.0)
+		var fit := clampf(small / 6500.0, 0.3, 1.0)
+		var coast_fit := clampf(small / 5000.0, 0.3, 1.0)  # small islands keep a lively coast
 		_isl_round.append(small * (data.roundness if data != null else 0.4))
-		_isl_cwarp.append(data.coast_warp if data != null and data.coast_warp >= 0.0 else settings.coast_warp * fit)
+		_isl_cwarp.append(data.coast_warp if data != null and data.coast_warp >= 0.0 else settings.coast_warp * coast_fit)
 		_isl_rwarp.append((data.region_warp / maxf(settings.region_warp_strength, 1.0)) if data != null and data.region_warp >= 0.0 else fit)
 	_rwarp_x = _make_noise("rwarp_x", settings.region_warp_scale, 3, FastNoiseLite.FRACTAL_FBM)
 	_rwarp_z = _make_noise("rwarp_z", settings.region_warp_scale, 3, FastNoiseLite.FRACTAL_FBM)

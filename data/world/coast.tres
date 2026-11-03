@@ -44,6 +44,9 @@
 [ext_resource type="Resource" path="res://data/world/Sites/fishing_spot.tres" id="40_kptkv"]
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="41_dg1ua"]
 [ext_resource type="Resource" path="res://data/world/Sites/wayside_inn.tres" id="42_4w7wl"]
+[ext_resource type="Resource" path="res://data/world/POIs/smugglers_cove_entrance.tres" id="44_j8y7k"]
+[ext_resource type="Resource" path="res://data/world/POIs/pirate_hold_entrance.tres" id="45_l580p"]
+[ext_resource type="Resource" path="res://data/world/Sites/smugglers_landing.tres" id="46_kptkv"]
 
 [sub_resource type="Resource" id="Resource_0oev3"]
 script = ExtResource("10_0oev3")
@@ -157,33 +160,36 @@ follow_ground = true
 [sub_resource type="Resource" id="Resource_7ta4w"]
 script = ExtResource("6_ss271")
 poi = ExtResource("7_11qyg")
-count_min = 0.5
-count_max = 1.0
+count_min = 0.3
+count_max = 0.6
 extra_spacing = 60.0
 
 [sub_resource type="Resource" id="Resource_8m2gg"]
 script = ExtResource("6_ss271")
 poi = ExtResource("8_jgf62")
-count_max = 1.5
+count_min = 0.5
+count_max = 0.75
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="Resource_ar1jx"]
 script = ExtResource("6_ss271")
 poi = ExtResource("9_snnxj")
-count_min = 0.5
-count_max = 1.0
+count_min = 0.3
+count_max = 0.6
 extra_spacing = 60.0
 
 [sub_resource type="Resource" id="Resource_51a4c"]
 script = ExtResource("6_ss271")
 poi = ExtResource("10_xkhh2")
+count_min = 0.4
+count_max = 0.8
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="Resource_nnn3e"]
 script = ExtResource("6_ss271")
 poi = ExtResource("11_jfcnk")
-count_min = 0.5
-count_max = 1.5
+count_min = 0.25
+count_max = 0.75
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="Resource_jxyjy"]
@@ -402,6 +408,30 @@ count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
+[sub_resource type="Resource" id="Resource_pi5fd"]
+script = ExtResource("6_ss271")
+poi = ExtResource("44_j8y7k")
+count_min = 0.15
+count_max = 0.25
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_hb64h"]
+script = ExtResource("6_ss271")
+poi = ExtResource("45_l580p")
+count_min = 0.06
+count_max = 0.1
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_hs8iy"]
+script = ExtResource("6_ss271")
+poi = ExtResource("46_kptkv")
+count_min = 0.0525
+count_max = 0.09750000000000002
+extra_spacing = 40.0
+border_margin = 40.0
+
 [resource]
 script = ExtResource("12_6utju")
 id = &"coast"
@@ -429,7 +459,8 @@ tree_density = 8.0
 tree_color = Color(0.24, 0.44, 0.2, 1)
 flora = Array[ExtResource("10_0oev3")]([SubResource("Resource_0oev3"), SubResource("Resource_j8y7k"), SubResource("Resource_l580p"), SubResource("Resource_kptkv"), SubResource("Resource_dg1ua"), SubResource("Resource_4w7wl"), SubResource("Resource_kqeon")])
 herbs = PackedStringArray("sea_kelp:3", "saltgrass:3", "thistle:2", "blue_mountain_flower:1", "yarrow:1", "cattail_root:1")
-poi_rules = Array[ExtResource("6_ss271")]([SubResource("Resource_7ta4w"), SubResource("Resource_8m2gg"), SubResource("Resource_ar1jx"), SubResource("Resource_51a4c"), SubResource("Resource_nnn3e"), SubResource("Resource_jxyjy"), SubResource("Resource_03kbe"), SubResource("Resource_hohnj"), SubResource("Resource_e6l7g"), SubResource("Resource_ganxl"), SubResource("Resource_h7mrj"), SubResource("Resource_qtw07"), SubResource("Resource_l5va8"), SubResource("Resource_vdg3e"), SubResource("Resource_oug4r"), SubResource("Resource_kwhdp"), SubResource("Resource_57tib"), SubResource("Resource_2ypjr"), SubResource("Resource_rgyfr"), SubResource("Resource_nh5qi"), SubResource("Resource_ab366"), SubResource("Resource_owiom"), SubResource("Resource_gq0nc"), SubResource("Resource_ymnsv"), SubResource("Resource_c5k6d"), SubResource("Resource_kt7hx"), SubResource("Resource_j2t8c"), SubResource("Resource_mvd4n"), SubResource("Resource_s8y5h"), SubResource("Resource_0bwvi"), SubResource("Resource_ot7fj"), SubResource("Resource_54r7c")])
+poi_rules = Array[ExtResource("6_ss271")]([SubResource("Resource_7ta4w"), SubResource("Resource_8m2gg"), SubResource("Resource_ar1jx"), SubResource("Resource_51a4c"), SubResource("Resource_nnn3e"), SubResource("Resource_jxyjy"), SubResource("Resource_03kbe"), SubResource("Resource_hohnj"), SubResource("Resource_e6l7g"), SubResource("Resource_ganxl"), SubResource("Resource_h7mrj"), SubResource("Resource_qtw07"), SubResource("Resource_l5va8"), SubResource("Resource_vdg3e"), SubResource("Resource_oug4r"), SubResource("Resource_kwhdp"), SubResource("Resource_57tib"), SubResource("Resource_2ypjr"), SubResource("Resource_rgyfr"), SubResource("Resource_nh5qi"), SubResource("Resource_ab366"), SubResource("Resource_owiom"), SubResource("Resource_gq0nc"), SubResource("Resource_ymnsv"), SubResource("Resource_c5k6d"), SubResource("Resource_kt7hx"), SubResource("Resource_j2t8c"), SubResource("Resource_mvd4n"), SubResource("Resource_s8y5h"), SubResource("Resource_0bwvi"), SubResource("Resource_ot7fj"), SubResource("Resource_54r7c"), SubResource("Resource_pi5fd"), SubResource("Resource_hb64h"), SubResource("Resource_hs8iy")])
 level_min = 10
 level_max = 27
 encounters = Array[ExtResource("1_bgs2j")]([ExtResource("2_7cgks"), ExtResource("3_jxyjy"), ExtResource("4_03kbe"), ExtResource("5_iqdjq"), ExtResource("6_03kbe"), ExtResource("7_iqdjq"), ExtResource("8_yy5c7"), ExtResource("9_lqvpx")])
+metadata/thinned_121 = true

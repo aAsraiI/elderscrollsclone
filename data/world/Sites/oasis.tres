@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_ou50a"]
+[ext_resource type="PackedScene" path="res://scenes/sites/oasis_a.tscn" id="2_ffjtv"]
+
+[resource]
+script = ExtResource("1_ou50a")
+sites = Array[PackedScene]([ExtResource("2_ffjtv")])
+map_icon = "camp"
+enter_name = "Oasis"
+id = &"site_oasis"
+display_name = "Oasis"
+map_color = Color(0.8, 0.45, 0.3, 1)
+footprint_radius = 22.0
+max_slope_deg = 20.0
+prefer = "low"
+min_same_distance = 1400.0
+path_to_road = 200.0

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_5ggbo"]
+
+[resource]
+script = ExtResource("1_5ggbo")
+themes = PackedStringArray("crypt", "sewer")
+mix = 0.35
+rooms_base = 10
+rooms_max = 30
+required = PackedStringArray("catacomb", "ossuary", "burial_hall")
+branching = 0.45
+corridors = 0.6
+extra_floors = 1
+light = 0

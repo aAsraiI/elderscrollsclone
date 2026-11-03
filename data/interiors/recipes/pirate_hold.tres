@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_ty41n"]
+
+[resource]
+script = ExtResource("1_ty41n")
+themes = PackedStringArray("fort", "cave")
+mix = 0.35
+rooms_base = 9
+required = PackedStringArray("storeroom", "mess_hall", "cells")
+corridors = 0.5
+extra_floors = 1
+density = 1.1

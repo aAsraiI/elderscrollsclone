@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/deep_delve.tres" id="1_nsadq"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="2_xnw7e"]
+
+[resource]
+script = ExtResource("2_xnw7e")
+dungeon = ExtResource("1_nsadq")
+shape_scale = 1.2
+color = Color(0.38, 0.32, 0.26, 1)
+enter_name = "The Deep Delve"
+id = &"deep_delve_entrance"
+display_name = "Delve Mouth"
+map_color = Color(0.8, 0.6, 0.35, 1)
+flatten_radius = 10.0
+max_slope_deg = 20.0
+prefer = "high"
+min_same_distance = 900.0
+path_to_road = 300.0

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/enc_swamp_hag.tres" id="1_k2vqq"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_2qn8y"]
+[ext_resource type="PackedScene" path="res://scenes/sites/witch_hut_a.tscn" id="3_ramdw"]
+
+[resource]
+script = ExtResource("2_2qn8y")
+sites = Array[PackedScene]([ExtResource("3_ramdw")])
+occupants = ExtResource("1_k2vqq")
+map_icon = "shrine"
+enter_name = "Witch's Hut"
+id = &"site_witch_hut"
+display_name = "Witch's Hut"
+map_color = Color(0.7, 0.8, 1, 1)
+footprint_radius = 14.0
+flatten_radius = 10.0
+max_slope_deg = 12.0
+prefer = "low"
+min_same_distance = 1400.0

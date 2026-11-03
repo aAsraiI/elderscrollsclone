@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_nl7kx"]
+
+[resource]
+script = ExtResource("1_nl7kx")
+themes = PackedStringArray("cave", "sewer")
+mix = 0.3
+rooms_base = 7
+rooms_per_10_levels = 2
+rooms_max = 20
+required = PackedStringArray("lake", "cavern")

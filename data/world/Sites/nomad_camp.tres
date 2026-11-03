@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_2544e"]
+[ext_resource type="PackedScene" path="res://scenes/sites/nomad_camp_a.tscn" id="2_qogcj"]
+
+[resource]
+script = ExtResource("1_2544e")
+sites = Array[PackedScene]([ExtResource("2_qogcj")])
+map_icon = "camp"
+enter_name = "Nomad Camp"
+id = &"site_nomad_camp"
+display_name = "Nomad Camp"
+map_color = Color(0.8, 0.45, 0.3, 1)
+flatten_radius = 16.0
+max_slope_deg = 12.0
+min_same_distance = 1200.0

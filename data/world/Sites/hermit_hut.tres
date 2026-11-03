@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_2rhra"]
+[ext_resource type="PackedScene" path="res://scenes/sites/hermit_hut_a.tscn" id="2_5jieq"]
+
+[resource]
+script = ExtResource("1_2rhra")
+sites = Array[PackedScene]([ExtResource("2_5jieq")])
+map_icon = "farm"
+enter_name = "Hermit's Hut"
+id = &"site_hermit_hut"
+display_name = "Hermit's Hut"
+map_color = Color(0.85, 0.8, 0.4, 1)
+footprint_radius = 12.0
+flatten_radius = 9.0
+max_slope_deg = 12.0
+min_same_distance = 1200.0

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/echoing_halls.tres" id="1_ivy6n"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="2_6giw7"]
+
+[resource]
+script = ExtResource("2_6giw7")
+dungeon = ExtResource("1_ivy6n")
+shape = 1
+shape_scale = 1.2
+color = Color(0.5, 0.42, 0.3, 1)
+enter_name = "Echoing Halls"
+id = &"echoing_halls_entrance"
+display_name = "Hall Doors"
+map_color = Color(0.95, 0.75, 0.35, 1)
+flatten_radius = 10.0
+max_slope_deg = 20.0
+min_same_distance = 900.0
+path_to_road = 300.0

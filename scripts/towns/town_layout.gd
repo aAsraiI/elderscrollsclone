@@ -63,6 +63,8 @@ var buildings: Array[BuildingPlot] = []
 var streets: Array[Street] = []
 ## Local points at the ends of the main street, where roads join the town
 var gates: Array[Vector3] = []
+## The ground height at each gate (empty = the town's middle height)
+var gate_y := PackedFloat32Array()
 ## Alpha 1.14: the wall round the town, following its shape (local x, z points, closed), and what it
 ## is made of: "stone", "thick" (a city's, with a ditch), "palisade" (a village's), or "" (none)
 var wall_poly := PackedVector2Array()
@@ -103,6 +105,10 @@ static func generate(p_data: TownData, placed: PlacedPOI, town_name: String, map
 	t._dress(rng)
 	if not t.named.is_empty():
 		t._assign_cast(QuestBook.cast_for(town_name))
+	if map != null:  # each gate's own ground (the town's ground may be tilted)
+		for g in t.gates:
+			var gw := t.to_world(g)
+			t.gate_y.append(map.get_height(gw.x, gw.z))
 	for b in t.buildings:
 		b.town_id = t.town_id
 		b.town_name = town_name
@@ -126,7 +132,7 @@ func get_gates_world() -> Array[Vector3]:
 	var out: Array[Vector3] = []
 	for g in gates:
 		var w := to_world(g)
-		out.append(Vector3(w.x, origin.y, w.z))
+		out.append(Vector3(w.x, gate_y[out.size()] if out.size() < gate_y.size() else origin.y, w.z))
 	return out
 
 
@@ -782,22 +788,30 @@ func _wall_outline(rng: RandomNumberGenerator) -> void:
 		wall_kind = ""
 		return
 	hull.remove_at(hull.size() - 1)  # convex_hull closes the loop; we keep it open
-	# out a little way from the middle, then rounded (two rounds of corner cutting)
+	# the middle of the hull
 	var center := Vector2.ZERO
 	for p in hull:
 		center += p
 	center /= hull.size()
+	# out a little way, rounded; further out until the rounding leaves every building inside (a
+	# building on a sharp corner of the hull could otherwise end up outside its own wall)
+	var base := hull
 	var out := 6.0 if wall_kind != "palisade" else 4.0
-	for i in hull.size():
-		hull[i] += (hull[i] - center).normalized() * out
-	for round_i in 2:
-		var cut := PackedVector2Array()
+	for attempt in 6:
+		hull = base.duplicate()
 		for i in hull.size():
-			var a := hull[i]
-			var b := hull[(i + 1) % hull.size()]
-			cut.append(a.lerp(b, 0.25))
-			cut.append(a.lerp(b, 0.75))
-		hull = cut
+			hull[i] += (hull[i] - center).normalized() * out
+		for round_i in 2:
+			var cut := PackedVector2Array()
+			for i in hull.size():
+				var a := hull[i]
+				var b := hull[(i + 1) % hull.size()]
+				cut.append(a.lerp(b, 0.25))
+				cut.append(a.lerp(b, 0.75))
+			hull = cut
+		if buildings.all(func(bp: BuildingPlot) -> bool: return Geometry2D.is_point_in_polygon(Vector2(bp.local_pos.x, bp.local_pos.z), hull)):
+			break
+		out += 4.0
 	wall_poly = hull
 	# the gates: where the main street's line crosses the wall, each side; the street runs out to them
 	var new_gates: Array[Vector3] = []

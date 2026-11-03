@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_8xqox"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_43nkw"]
+[ext_resource type="Resource" path="res://data/enemies/grave_ghoul.tres" id="3_uiqnk"]
+[ext_resource type="Resource" path="res://data/enemies/skeleton.tres" id="4_844vj"]
+[ext_resource type="Resource" path="res://data/enemies/ash_cultist.tres" id="5_um3c7"]
+[ext_resource type="Resource" path="res://data/enemies/crypt_warden.tres" id="6_nxbxg"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="7_cvu2n"]
+
+[sub_resource type="Resource" id="Resource_ih3ub"]
+script = ExtResource("1_8xqox")
+members = Array[ExtResource("2_43nkw")]([ExtResource("3_uiqnk")])
+weight = 2.0
+count_max = 2
+
+[sub_resource type="Resource" id="Resource_dewit"]
+script = ExtResource("1_8xqox")
+members = Array[ExtResource("2_43nkw")]([ExtResource("4_844vj")])
+weight = 2.0
+count_min = 2
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_yf3td"]
+script = ExtResource("1_8xqox")
+members = Array[ExtResource("2_43nkw")]([ExtResource("5_um3c7")])
+weight = 2.0
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_pj2ws"]
+script = ExtResource("1_8xqox")
+members = Array[ExtResource("2_43nkw")]([ExtResource("6_nxbxg")])
+min_level = 20
+
+[resource]
+script = ExtResource("7_cvu2n")
+entries = Array[ExtResource("1_8xqox")]([SubResource("Resource_ih3ub"), SubResource("Resource_dewit"), SubResource("Resource_yf3td"), SubResource("Resource_pj2ws")])

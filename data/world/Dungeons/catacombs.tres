@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="DungeonData" format=3]
+
+[ext_resource type="Resource" path="res://data/enemies/wight_lord.tres" id="1_qri06"]
+[ext_resource type="Script" path="res://scripts/items/loot_entry.gd" id="2_uisxq"]
+[ext_resource type="Resource" path="res://data/interiors/recipes/catacombs.tres" id="3_6mbp5"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_data.gd" id="4_tp3xc"]
+[ext_resource type="Resource" path="res://data/spawns/dungeon_catacombs.tres" id="5_1cd7x"]
+
+[resource]
+script = ExtResource("4_tp3xc")
+id = &"catacombs"
+display_name = "Forgotten Catacombs"
+chests_min = 2
+chests_max = 5
+spawn_table = ExtResource("5_1cd7x")
+boss = ExtResource("1_qri06")
+level_offset = 1
+wall_color = Color(0.33, 0.31, 0.29, 1)
+light_color = Color(1, 0.7, 0.42, 1)
+light_energy = 1.2
+theme = "crypt"
+recipe = ExtResource("3_6mbp5")

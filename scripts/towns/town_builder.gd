@@ -523,15 +523,26 @@ static func _pier(root: Node3D, layout: TownLayout, placed: PlacedPOI, map: Worl
 	var fishers := false
 	for b in layout.buildings:
 		fishers = fishers or b.trade == "fisherman"
-	if not fishers:
+	var port := bool(placed.extra.get("port", false))
+	if not fishers and not port:
 		return
 	var out := Vector3(layout.shore.x, 0.0, layout.shore.z).normalized()
 	var yaw := atan2(out.x, out.z)
 	var sea := map.settings.sea_level - placed.position.y
-	for k in 4:
+	var sections := 9 if port else 4  # a port's pier runs out to deeper water, for the ship
+	for k in sections:
 		var at := layout.shore + out * (1.5 + 2.2 * float(k))
 		POIBuilder.add_box(root, Vector3(2.2, 0.2, 2.2), Vector3(at.x, sea + 0.5, at.z), Color(0.45, 0.33, 0.2), yaw)
 		POIBuilder.add_box(root, Vector3(0.2, 3.0, 0.2), Vector3(at.x, sea - 1.0, at.z) + Basis(Vector3.UP, yaw) * Vector3(1.0, 0, 0), DOOR_COLOR, 0.0, Vector3.ZERO, false)
+	if port:
+		# the ship to the other ports, moored along the far end of the pier
+		var ship := SeaPassage.new()
+		ship.name = "Ship"
+		ship.town_id = placed.id
+		var berth := layout.shore + out * (1.5 + 2.2 * 6.0) + Basis(Vector3.UP, yaw) * Vector3(-4.0, 0, 0)
+		root.add_child(ship)
+		ship.position = Vector3(berth.x, sea - 0.6, berth.z)
+		ship.rotation.y = yaw
 	# The town's rowboat, tied alongside the end of the pier (unless you sailed off in it)
 	if not Boat.taken_from(placed.id):
 		var tie := layout.shore + out * (1.5 + 2.2 * 3.0) + Basis(Vector3.UP, yaw) * Vector3(2.3, 0, 0)

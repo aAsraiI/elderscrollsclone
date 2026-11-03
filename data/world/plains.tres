@@ -30,6 +30,9 @@
 [ext_resource type="Resource" path="res://data/world/Sites/fishing_spot.tres" id="40_ov12w"]
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="41_ubmtw"]
 [ext_resource type="Resource" path="res://data/world/Sites/wayside_inn.tres" id="42_jhapa"]
+[ext_resource type="Resource" path="res://data/world/POIs/beast_lair_entrance.tres" id="44_gug8d"]
+[ext_resource type="Resource" path="res://data/world/POIs/catacombs_entrance.tres" id="45_ny0k1"]
+[ext_resource type="Resource" path="res://data/world/Sites/gallows.tres" id="46_ov12w"]
 [ext_resource type="Resource" path="res://data/encounters/plains_ambush.tres" id="enc_0"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="enc_1"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wanderer.tres" id="enc_2"]
@@ -149,43 +152,50 @@ follow_ground = true
 [sub_resource type="Resource" id="rule_0"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_0")
-count_max = 2.5
+count_min = 0.6
+count_max = 1.5
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="rule_1"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_1")
+count_min = 0.5
+count_max = 1.0
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="rule_2"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_2")
-count_min = 0.5
-count_max = 1.0
+count_min = 0.3
+count_max = 0.6
 extra_spacing = 60.0
 
 [sub_resource type="Resource" id="rule_3"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_3")
+count_min = 0.5
+count_max = 1.0
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="rule_4"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_4")
-count_min = 0.5
-count_max = 1.0
+count_min = 0.3
+count_max = 0.6
 extra_spacing = 60.0
 
 [sub_resource type="Resource" id="rule_5"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_5")
-count_min = 2.0
-count_max = 3.5
+count_min = 0.8
+count_max = 1.4
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="rule_6"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_6")
+count_min = 0.6
+count_max = 1.2
 extra_spacing = 50.0
 
 [sub_resource type="Resource" id="Resource_r3ovm"]
@@ -412,6 +422,30 @@ count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
+[sub_resource type="Resource" id="Resource_0q02u"]
+script = ExtResource("rule_script")
+poi = ExtResource("44_gug8d")
+count_min = 0.04
+count_max = 0.08
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_c4vno"]
+script = ExtResource("rule_script")
+poi = ExtResource("45_ny0k1")
+count_min = 0.06
+count_max = 0.1
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_popvq"]
+script = ExtResource("rule_script")
+poi = ExtResource("46_ov12w")
+count_min = 0.04199999999999999
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
 [resource]
 script = ExtResource("1_biome")
 id = &"plains"
@@ -433,5 +467,6 @@ tree_color = Color(0.24, 0.44, 0.18, 1)
 flora = Array[ExtResource("7_x7qan")]([SubResource("Resource_x7qan"), SubResource("Resource_gug8d"), SubResource("Resource_ny0k1"), SubResource("Resource_ov12w"), SubResource("Resource_ubmtw"), SubResource("Resource_jhapa"), SubResource("Resource_fu2cw")])
 herbs = PackedStringArray("red_poppy:3", "yarrow:3", "cornflower:3", "lavender:2", "wild_garlic:2", "bramble_berries:2", "bulbroot:1", "thistle:1", "blue_mountain_flower:1", "water_mint:2", "cattail_root:1")
 herb_density = 1.2
-poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("rule_5"), SubResource("rule_6"), SubResource("Resource_r3ovm"), SubResource("Resource_kphei"), SubResource("Resource_qmb38"), SubResource("Resource_eay81"), SubResource("Resource_ps87v"), SubResource("Resource_x1dsh"), SubResource("Resource_rfcgj"), SubResource("Resource_3qqjl"), SubResource("Resource_k0u2d"), SubResource("Resource_rj7rt"), SubResource("Resource_rd7ta"), SubResource("Resource_b30ys"), SubResource("Resource_v8j6l"), SubResource("Resource_vg5i6"), SubResource("Resource_cbwrt"), SubResource("Resource_51mgi"), SubResource("Resource_2da6y"), SubResource("Resource_pvcn7"), SubResource("Resource_4b413"), SubResource("Resource_v0mc6"), SubResource("Resource_iul8v"), SubResource("Resource_ipjmt"), SubResource("Resource_utvr3"), SubResource("Resource_yahen"), SubResource("Resource_yboh7"), SubResource("Resource_0ywal"), SubResource("Resource_6bkho"), SubResource("Resource_salbl")])
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("rule_4"), SubResource("rule_5"), SubResource("rule_6"), SubResource("Resource_r3ovm"), SubResource("Resource_kphei"), SubResource("Resource_qmb38"), SubResource("Resource_eay81"), SubResource("Resource_ps87v"), SubResource("Resource_x1dsh"), SubResource("Resource_rfcgj"), SubResource("Resource_3qqjl"), SubResource("Resource_k0u2d"), SubResource("Resource_rj7rt"), SubResource("Resource_rd7ta"), SubResource("Resource_b30ys"), SubResource("Resource_v8j6l"), SubResource("Resource_vg5i6"), SubResource("Resource_cbwrt"), SubResource("Resource_51mgi"), SubResource("Resource_2da6y"), SubResource("Resource_pvcn7"), SubResource("Resource_4b413"), SubResource("Resource_v0mc6"), SubResource("Resource_iul8v"), SubResource("Resource_ipjmt"), SubResource("Resource_utvr3"), SubResource("Resource_yahen"), SubResource("Resource_yboh7"), SubResource("Resource_0ywal"), SubResource("Resource_6bkho"), SubResource("Resource_salbl"), SubResource("Resource_0q02u"), SubResource("Resource_c4vno"), SubResource("Resource_popvq")])
 encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("enc_4")])
+metadata/thinned_121 = true

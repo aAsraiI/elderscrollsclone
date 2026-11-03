@@ -1,0 +1,90 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_wgf5l"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood.tres" id="2_n3try"]
+[ext_resource type="Material" path="res://data/interiors/materials/wood_dark.tres" id="3_yclbt"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/sacks.tscn" id="4_n3try"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/bones.tscn" id="5_yclbt"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ng4yh"]
+size = Vector3(4, 0.5, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_l0w0w"]
+size = Vector3(4, 0.5, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j4tb6"]
+size = Vector3(0.3, 4.5, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yjxp7"]
+size = Vector3(0.3, 4.5, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tewl5"]
+size = Vector3(0.3, 4.5, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_j3bs6"]
+size = Vector3(0.3, 4.5, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n5k43"]
+size = Vector3(3.6, 0.3, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ls2et"]
+size = Vector3(3.6, 0.3, 0.3)
+
+[node name="GallowsA" type="Node3D" unique_id=119360105]
+script = ExtResource("1_wgf5l")
+site_kind = "gallows"
+biomes = PackedStringArray("plains", "deadlands", "highlands", "lakeland")
+size_class = 0
+min_distance = 1500.0
+map_icon = "grave"
+themes = PackedStringArray("ruin")
+cells = Vector3i(3, 1, 3)
+
+[node name="Part1" type="StaticBody3D" parent="." unique_id=639303124 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part1" unique_id=251477691]
+material_override = ExtResource("2_n3try")
+mesh = SubResource("BoxMesh_ng4yh")
+
+[node name="Shape" type="CollisionShape3D" parent="Part1" unique_id=573723315]
+shape = SubResource("BoxShape3D_l0w0w")
+
+[node name="Part2" type="StaticBody3D" parent="." unique_id=466665033 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2.5, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part2" unique_id=1668706353]
+material_override = ExtResource("3_yclbt")
+mesh = SubResource("BoxMesh_j4tb6")
+
+[node name="Shape" type="CollisionShape3D" parent="Part2" unique_id=578522741]
+shape = SubResource("BoxShape3D_yjxp7")
+
+[node name="Part3" type="StaticBody3D" parent="." unique_id=37080850 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.5, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part3" unique_id=681325544]
+material_override = ExtResource("3_yclbt")
+mesh = SubResource("BoxMesh_tewl5")
+
+[node name="Shape" type="CollisionShape3D" parent="Part3" unique_id=1918941553]
+shape = SubResource("BoxShape3D_j3bs6")
+
+[node name="Part4" type="StaticBody3D" parent="." unique_id=1187007381 groups=["interior_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.7, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part4" unique_id=2121659982]
+material_override = ExtResource("3_yclbt")
+mesh = SubResource("BoxMesh_n5k43")
+
+[node name="Shape" type="CollisionShape3D" parent="Part4" unique_id=1949059284]
+shape = SubResource("BoxShape3D_ls2et")
+
+[node name="Sacks" parent="." unique_id=211499194 instance=ExtResource("4_n3try")]
+transform = Transform3D(0.946029, 0, 0.32408193, 0, 1, 0, -0.32408193, 0, 0.946029, 4, 0, 1.5)
+
+[node name="Bones" parent="." unique_id=190940147 instance=ExtResource("5_yclbt")]
+transform = Transform3D(0.9998908, 0, 0.014775767, 0, 1, 0, -0.014775767, 0, 0.9998908, 0.4, 0.5, 0.6)
+
+[node name="Note" type="Marker3D" parent="." unique_id=54006011]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.52, -0.9)

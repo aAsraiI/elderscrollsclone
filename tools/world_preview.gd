@@ -134,6 +134,9 @@ func _census(map: WorldMap, pois: Array[PlacedPOI]) -> void:
 		line.append("%s %d" % [n, kinds[n]])
 	print("places: %d  |  %s" % [pois.size(), ", ".join(line)])
 	print("by biome: ", per_biome)
+	for p in pois:
+		if bool(p.extra.get("port", false)):
+			print("port: %s at %d, %d" % [p.town.display_name if p.town != null else p.id, roundi(p.position.x), roundi(p.position.z)])
 	if map.rivers != null:
 		print("rivers: %d, lakes: %d, river length %.1f km" % [map.rivers.river_count(), map.rivers.lake_count(), map.rivers.total_length() / 1000.0])
 

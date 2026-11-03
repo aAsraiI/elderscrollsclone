@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_lmh26"]
+
+[resource]
+script = ExtResource("1_lmh26")
+themes = PackedStringArray("cave", "lair")
+mix = 0.35
+rooms_base = 6
+rooms_per_10_levels = 2
+rooms_max = 18
+required = PackedStringArray("lake")
+branching = 0.3
+corridors = 0.5
+light = 0

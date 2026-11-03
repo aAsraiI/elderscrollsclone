@@ -205,7 +205,7 @@ func t_plan() -> void:
 		check("the city has plenty of houses", cl.count_kind(BuildingPlot.Kind.HOUSE) >= 8, str(cl.count_kind(BuildingPlot.Kind.HOUSE)))
 		var flat := true
 		for bp in cl.buildings:
-			if absf(bp.world_pos.y - city.position.y) > 0.5:
+			if absf(bp.world_pos.y - map.get_height(bp.world_pos.x, bp.world_pos.z)) > 0.3:  # on its own (tilted, leveled) ground
 				flat = false
 		check("the city's buildings stand on its leveled ground", flat)
 

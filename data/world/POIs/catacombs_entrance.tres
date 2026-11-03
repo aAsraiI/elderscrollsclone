@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/catacombs.tres" id="1_rpaet"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="2_1cncw"]
+
+[resource]
+script = ExtResource("2_1cncw")
+dungeon = ExtResource("1_rpaet")
+shape = 1
+color = Color(0.4, 0.38, 0.36, 1)
+enter_name = "Forgotten Catacombs"
+id = &"catacombs_entrance"
+display_name = "Catacomb Stair"
+map_color = Color(0.75, 0.7, 0.6, 1)
+footprint_radius = 14.0
+flatten_radius = 7.0
+max_slope_deg = 20.0
+prefer = "low"
+min_same_distance = 900.0
+path_to_road = 300.0

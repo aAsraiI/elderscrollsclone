@@ -76,9 +76,14 @@ func t_plan() -> Array[PlacedPOI]:
 	print("-- the realm, planned")
 	var s := load(W + "realm_world.tres") as WorldSettings
 	var map := WorldMap.new(s, 1337)
-	var towns := SettlementPlanner.plan(map)
-	map.set_pads(towns)
-	SettlementPlanner.lay_out(map, towns)
+	var all_towns := SettlementPlanner.plan(map)
+	# the islands' towns and ports (1.21) are not named settlements of the realm
+	var towns: Array[PlacedPOI] = []
+	for t in all_towns:
+		if not t.named.is_empty():
+			towns.append(t)
+	map.set_pads(all_towns)
+	SettlementPlanner.lay_out(map, all_towns)
 	realm_map = map
 	check("all 44 settlements are placed", towns.size() == 44, str(towns.size()))
 	var by_name := {}
@@ -125,9 +130,10 @@ func t_plan() -> Array[PlacedPOI]:
 	var again := SettlementPlanner.plan(map2)
 	map2.set_pads(again)
 	SettlementPlanner.lay_out(map2, again)
-	var same := again.size() == towns.size()
-	for i in mini(again.size(), towns.size()):
-		same = same and again[i].id == towns[i].id and again[i].town.display_name == towns[i].town.display_name and again[i].town.get_seat().id == towns[i].town.get_seat().id
+	var named_again := again.filter(func(t: PlacedPOI) -> bool: return not t.named.is_empty())
+	var same := named_again.size() == towns.size()
+	for i in mini(named_again.size(), towns.size()):
+		same = same and named_again[i].id == towns[i].id and named_again[i].town.display_name == towns[i].town.display_name and named_again[i].town.get_seat().id == towns[i].town.get_seat().id
 	check("the same seed plans the same towns and seats", same)
 	# another seed moves them but keeps the names
 	var map3 := WorldMap.new(s, 99)
@@ -137,7 +143,8 @@ func t_plan() -> Array[PlacedPOI]:
 	var other_names := {}
 	for t in other:
 		other_names[t.town.display_name] = true
-	check("another world seed keeps every name", other.size() == 44 and other_names.size() == 44)
+	var other_named := other.filter(func(t: PlacedPOI) -> bool: return not t.named.is_empty())
+	check("another world seed keeps every name", other_named.size() == 44 and other_names.size() >= 44)
 	return towns
 
 
@@ -237,7 +244,8 @@ func t_world() -> void:
 	check("the game builds the realm", wm != null and player != null and wm.settings.named_settlements)
 	if wm == null or player == null:
 		return
-	check("with all 44 named settlements", wm.towns.size() == 44, str(wm.towns.size()))
+	var named_towns := wm.towns.filter(func(t: PlacedPOI) -> bool: return not t.named.is_empty())
+	check("with all 44 named settlements (and %d on the islands)" % (wm.towns.size() - named_towns.size()), named_towns.size() == 44, str(named_towns.size()))
 	var town := wm.get_town_at(player.global_position, 200.0)
 	if town == null:
 		town = wm.towns[0]

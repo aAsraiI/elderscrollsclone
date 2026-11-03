@@ -125,18 +125,19 @@ func t_plan() -> void:
 			if on_bridge:
 				continue
 			var land := map.get_height(p.x, p.z)  # roads not applied to this map yet: the natural land
-			if map.is_under_water(land + 0.2):
+			if map.is_under_water(p.y):  # the road itself under the water (over shallow water it runs on a causeway)
 				wet += 1
 			var near := false
 			for t in towns:
-				var ramp := maxf(110.0, absf(t.position.y - land) / maxf(s.road_max_grade, 0.01) + 30.0)  # the road climbs up to a raised town pad
+				var ramp := maxf(110.0, (absf(t.position.y - land) + t.poi.flatten_radius * 0.06) / maxf(s.road_max_grade, 0.01) + 30.0)  # the road climbs up to a raised (and since 1.21 tilted) town pad
 				if Vector2(p.x - t.position.x, p.z - t.position.z).length() < t.poi.footprint_radius + ramp:
 					near = true
 					break
-			if not near:
+			if not near and not map.is_under_water(land - 0.5):  # (a causeway stands above the water by design)
 				worst_fill = maxf(worst_fill, p.y - land)
 	check("roads stay out of the water", wet == 0, "%d points" % wet)
-	check("away from towns a road never stands above the land (%.2f m)" % worst_fill, worst_fill <= RoadPlanner.MAX_FILL + 0.05)
+	# (where a road joins an earlier one it meets that road's surface, a little above the land at worst)
+	check("away from towns a road never stands above the land (%.2f m)" % worst_fill, worst_fill <= RoadPlanner.MAX_FILL + 0.15)
 	map.set_roads(net)
 	var grade := 0.0
 	for r in net.get_roads():

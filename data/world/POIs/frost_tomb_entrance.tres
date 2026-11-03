@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/frost_tomb.tres" id="1_resi3"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="2_2h5om"]
+
+[resource]
+script = ExtResource("2_2h5om")
+dungeon = ExtResource("1_resi3")
+shape = 1
+color = Color(0.62, 0.7, 0.78, 1)
+enter_name = "Frost Tomb"
+id = &"frost_tomb_entrance"
+display_name = "Frozen Tomb"
+map_color = Color(0.7, 0.85, 1, 1)
+footprint_radius = 16.0
+flatten_radius = 8.0
+max_slope_deg = 20.0
+min_same_distance = 900.0
+path_to_road = 300.0

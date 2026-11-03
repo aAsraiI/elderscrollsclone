@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_cyrdy"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_21dgj"]
+[ext_resource type="Resource" path="res://data/enemies/deserter.tres" id="3_jyq4i"]
+[ext_resource type="Resource" path="res://data/enemies/reaver.tres" id="4_vnmap"]
+[ext_resource type="Resource" path="res://data/enemies/raider_marauder.tres" id="5_smvjv"]
+[ext_resource type="Resource" path="res://data/enemies/skeleton_knight.tres" id="6_ja3ha"]
+[ext_resource type="Resource" path="res://data/enemies/bandit_brute.tres" id="7_club0"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="8_hoyud"]
+
+[sub_resource type="Resource" id="Resource_cwtit"]
+script = ExtResource("1_cyrdy")
+members = Array[ExtResource("2_21dgj")]([ExtResource("3_jyq4i")])
+weight = 2.0
+count_min = 2
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_rwx5t"]
+script = ExtResource("1_cyrdy")
+members = Array[ExtResource("2_21dgj")]([ExtResource("4_vnmap")])
+weight = 2.0
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_6nvob"]
+script = ExtResource("1_cyrdy")
+members = Array[ExtResource("2_21dgj")]([ExtResource("5_smvjv")])
+weight = 2.0
+count_max = 2
+
+[sub_resource type="Resource" id="Resource_lssa5"]
+script = ExtResource("1_cyrdy")
+members = Array[ExtResource("2_21dgj")]([ExtResource("6_ja3ha")])
+count_max = 2
+min_level = 30
+
+[sub_resource type="Resource" id="Resource_lsgal"]
+script = ExtResource("1_cyrdy")
+members = Array[ExtResource("2_21dgj")]([ExtResource("7_club0")])
+
+[resource]
+script = ExtResource("8_hoyud")
+entries = Array[ExtResource("1_cyrdy")]([SubResource("Resource_cwtit"), SubResource("Resource_rwx5t"), SubResource("Resource_6nvob"), SubResource("Resource_lssa5"), SubResource("Resource_lsgal")])

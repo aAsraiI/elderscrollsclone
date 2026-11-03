@@ -153,7 +153,7 @@ const FLORA := {
 	],
 	"swamp": [
 		{"name": "swamp trees", "shape": S.DEAD, "size": Z.TREE, "density": 36.0, "clump_scale": 220.0, "clumping": 0.5, "water_ok": true,
-			"models": ["bitter_coast/flora_bc_tree_01", "bitter_coast/flora_bc_tree_03", "bitter_coast/flora_bc_tree_05", "bitter_coast/flora_bc_tree_07", "bitter_coast/flora_bc_tree_09", "bitter_coast/flora_bc_tree_10"],
+			"models": ["bitter_coast/flora_bc_tree_01", "bitter_coast/flora_bc_tree_03", "bitter_coast/flora_bc_tree_05", "bitter_coast/flora_bc_tree_07", "bitter_coast/flora_bc_tree_08", "bitter_coast/flora_bc_tree_10"],
 			"scale_min": 0.42, "scale_max": 0.65, "height": 9.0, "color": Color(0.27, 0.3, 0.18), "sink": 0.4, "trunk_radius": 0.45},
 		{"name": "cypress knees", "shape": S.STUMP, "size": Z.GROUND, "density": 50.0, "clump_scale": 60.0, "clumping": 0.7, "water_ok": true,
 			"models": ["bitter_coast/flora_bc_knee_01", "bitter_coast/flora_bc_knee_02", "bitter_coast/flora_bc_knee_03", "bitter_coast/flora_bc_knee_04"],
@@ -162,7 +162,7 @@ const FLORA := {
 			"models": ["trees/flora_tree_ac_03", "trees/flora_tree_ac_04"], "scale_min": 0.6, "scale_max": 0.9, "height": 6.0,
 			"color": Color(0.55, 0.45, 0.32), "sink": 0.2, "trunk_radius": 0.3},
 		{"name": "giant mushrooms", "shape": S.MUSHROOM, "size": Z.TREE, "density": 1.2, "clump_scale": 500.0, "clumping": 0.9,
-			"models": ["other/flora_emp_parasol_01", "other/flora_emp_parasol_03", "mushrooms/flora_t_mushroom_02"], "scale_min": 0.45, "scale_max": 0.7,
+			"models": ["other/flora_emp_parasol_01", "other/flora_emp_parasol_02", "mushrooms/flora_t_mushroom_02"], "scale_min": 0.45, "scale_max": 0.7,
 			"height": 6.0, "color": Color(0.6, 0.5, 0.35), "trunk_radius": 0.6},
 		{"name": "marsh grass", "shape": S.REEDS, "size": Z.PLANT, "density": 320.0, "clump_scale": 50.0, "clumping": 0.5, "water_ok": true,
 			"models": ["bitter_coast/flora_bc_grass_01", "bitter_coast/flora_bc_grass_02"], "scale_min": 0.6, "scale_max": 1.0,
@@ -379,6 +379,18 @@ const LAYOUT := [
 ]
 const SPAWN := 13  # plains: you start in the south
 
+## Islands out in the sea (data/world/Islands/<file>.tres, IslandData), each like the main island:
+## [file, name, roundness, [[biome, cell x, cell y, width, height, level min, level max], ...]]
+## The main island runs from cell -12 to 12 both ways; these keep 2-3 km of sea from it.
+const ISLANDS := [
+	["isle_of_cinders", "Isle of Cinders", 0.45, [["ashlands", -25, -23, 6, 6, 72, 95]]],
+	["frosthold", "Frosthold", 0.38, [["tundra", 18, -24, 5, 5, 60, 80], ["frozen_crown", 23, -24, 4, 5, 70, 90]]],
+	["saltmarsh_isles", "Saltmarsh Isles", 0.3, [["swamp", 21, 2, 5, 6, 20, 34], ["coast", 26, 2, 3, 6, 18, 30]]],
+	["greenisle", "Greenisle", 0.42, [["forest", -27, 5, 5, 5, 4, 14], ["plains", -27, 10, 5, 4, 3, 12], ["lakeland", -22, 6, 3, 6, 5, 15]]],
+	["sunreach", "Sunreach", 0.36, [["desert", -6, 18, 5, 5, 30, 46], ["badlands", -1, 17, 5, 4, 34, 50], ["highlands", -1, 21, 4, 4, 28, 44],
+		["plains", -6, 23, 5, 3, 26, 40], ["coast", 3, 18, 4, 6, 28, 42]]],
+]
+
 
 func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
@@ -450,6 +462,28 @@ func _initialize() -> void:
 		s.towns_per_region_max = 1
 		s.town_spacing = 380.0
 		s.road_grid = 36.0
+		_save(s, W + "realm_world.tres")
+	if all or args.has("islands"):
+		var s := load(W + "realm_world.tres") as WorldSettings
+		var list: Array[IslandData] = []
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(W + "Islands"))
+		for row: Array in ISLANDS:
+			var isle := IslandData.new()
+			isle.name = row[1]
+			isle.roundness = row[2]
+			var ps: Array[BiomePlacement] = []
+			for pr: Array in row[3]:
+				var p := BiomePlacement.new()
+				p.biome = load(W + pr[0] + ".tres") as BiomeData
+				p.cell = Vector2i(pr[1], pr[2])
+				p.size_cells = Vector2i(pr[3], pr[4])
+				p.level_min = pr[5]
+				p.level_max = pr[6]
+				ps.append(p)
+			isle.placements = ps
+			_save(isle, W + "Islands/%s.tres" % row[0])
+			list.append(load(W + "Islands/%s.tres" % row[0]) as IslandData)
+		s.islands = list
 		_save(s, W + "realm_world.tres")
 	quit()
 

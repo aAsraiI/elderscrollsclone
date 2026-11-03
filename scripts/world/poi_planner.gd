@@ -87,7 +87,9 @@ static func plan(map: WorldMap, already: Array[PlacedPOI] = []) -> Array[PlacedP
 				var sb := b.poi is SitePOIData
 				if sa != sb:
 					return sb
-				return a.poi.footprint_radius > b.poi.footprint_radius)
+				if a.poi.footprint_radius != b.poi.footprint_radius:
+					return a.poi.footprint_radius > b.poi.footprint_radius
+				return a.poi.get_key() < b.poi.get_key())  # sort_custom is not stable: a tie is broken by name
 
 			for rule in rules:
 				if (rule.poi is SitePOIData) != sites_pass:
@@ -187,6 +189,8 @@ static func find_spot(map: WorldMap, rng: RandomNumberGenerator, area: Rect2, re
 		found += 1
 		if found >= 6:
 			break
+	if poi.prefer == "water" and best_score <= 0.0:
+		return Vector3.INF  # a dock or a mill with no water near it is no place at all
 	return best
 
 

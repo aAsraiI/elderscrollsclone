@@ -1,0 +1,51 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_ns6ea"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_4a5cg"]
+[ext_resource type="Resource" path="res://data/enemies/skeleton.tres" id="3_xyqh2"]
+[ext_resource type="Resource" path="res://data/enemies/grave_ghoul.tres" id="4_2dk3m"]
+[ext_resource type="Resource" path="res://data/enemies/barrow_wight.tres" id="5_v8kdc"]
+[ext_resource type="Resource" path="res://data/enemies/skeleton_knight.tres" id="6_3ct7d"]
+[ext_resource type="Resource" path="res://data/enemies/crypt_warden.tres" id="7_q2edl"]
+[ext_resource type="Resource" path="res://data/enemies/vampire.tres" id="8_f3e48"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="9_5bpbg"]
+
+[sub_resource type="Resource" id="Resource_cv1d3"]
+script = ExtResource("1_ns6ea")
+members = Array[ExtResource("2_4a5cg")]([ExtResource("3_xyqh2")])
+weight = 3.0
+count_min = 2
+count_max = 4
+
+[sub_resource type="Resource" id="Resource_pchne"]
+script = ExtResource("1_ns6ea")
+members = Array[ExtResource("2_4a5cg")]([ExtResource("4_2dk3m")])
+weight = 3.0
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_d8djm"]
+script = ExtResource("1_ns6ea")
+members = Array[ExtResource("2_4a5cg")]([ExtResource("5_v8kdc")])
+weight = 2.0
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_47h4r"]
+script = ExtResource("1_ns6ea")
+members = Array[ExtResource("2_4a5cg")]([ExtResource("6_3ct7d")])
+weight = 2.0
+count_max = 2
+min_level = 30
+
+[sub_resource type="Resource" id="Resource_isfku"]
+script = ExtResource("1_ns6ea")
+members = Array[ExtResource("2_4a5cg")]([ExtResource("7_q2edl")])
+min_level = 40
+
+[sub_resource type="Resource" id="Resource_4ynqs"]
+script = ExtResource("1_ns6ea")
+members = Array[ExtResource("2_4a5cg")]([ExtResource("8_f3e48")])
+min_level = 50
+
+[resource]
+script = ExtResource("9_5bpbg")
+entries = Array[ExtResource("1_ns6ea")]([SubResource("Resource_cv1d3"), SubResource("Resource_pchne"), SubResource("Resource_d8djm"), SubResource("Resource_47h4r"), SubResource("Resource_isfku"), SubResource("Resource_4ynqs")])

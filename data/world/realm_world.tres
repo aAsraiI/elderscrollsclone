@@ -1,11 +1,17 @@
 [gd_resource type="Resource" script_class="WorldSettings" format=3]
 
+[ext_resource type="Script" path="res://scripts/world/island_data.gd" id="1_c8es5"]
 [ext_resource type="Script" path="res://scripts/world/biome_placement.gd" id="1_qgs1d"]
+[ext_resource type="Resource" path="res://data/world/Islands/isle_of_cinders.tres" id="2_3nga5"]
 [ext_resource type="Resource" path="res://data/world/ashlands.tres" id="2_aqfs7"]
+[ext_resource type="Resource" path="res://data/world/Islands/frosthold.tres" id="3_gmj17"]
 [ext_resource type="Resource" path="res://data/world/frozen_crown.tres" id="3_y1kvr"]
+[ext_resource type="Resource" path="res://data/world/Islands/saltmarsh_isles.tres" id="4_1m1th"]
 [ext_resource type="Resource" path="res://data/world/tundra.tres" id="4_upafo"]
+[ext_resource type="Resource" path="res://data/world/Islands/greenisle.tres" id="5_lytf7"]
 [ext_resource type="Resource" path="res://data/world/snow_mountains.tres" id="5_rm7cf"]
 [ext_resource type="Resource" path="res://data/world/highlands.tres" id="6_6wl4j"]
+[ext_resource type="Resource" path="res://data/world/Islands/sunreach.tres" id="6_jowvw"]
 [ext_resource type="Resource" path="res://data/world/badlands.tres" id="7_pdoki"]
 [ext_resource type="Resource" path="res://data/world/deadlands.tres" id="8_or8ad"]
 [ext_resource type="Resource" path="res://data/world/desert.tres" id="9_qvp6h"]
@@ -163,6 +169,7 @@ placements = Array[ExtResource("1_qgs1d")]([SubResource("Resource_c31fq"), SubRe
 spawn_placement = 13
 border_warp_strength = 260.0
 border_warp_scale = 900.0
+islands = Array[ExtResource("1_c8es5")]([ExtResource("2_3nga5"), ExtResource("3_gmj17"), ExtResource("4_1m1th"), ExtResource("5_lytf7"), ExtResource("6_jowvw")])
 edge_width = 20.0
 poi_edge_margin = 30.0
 water_enabled = true

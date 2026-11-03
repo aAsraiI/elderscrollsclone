@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_cpfll"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_t4hre"]
+[ext_resource type="Resource" path="res://data/enemies/smuggler.tres" id="3_qx752"]
+[ext_resource type="Resource" path="res://data/enemies/cutthroat.tres" id="4_ql650"]
+[ext_resource type="Resource" path="res://data/enemies/sea_raider.tres" id="5_xw1p6"]
+[ext_resource type="Resource" path="res://data/enemies/giant_rat.tres" id="6_k6dl7"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="7_igg6y"]
+
+[sub_resource type="Resource" id="Resource_hatln"]
+script = ExtResource("1_cpfll")
+members = Array[ExtResource("2_t4hre")]([ExtResource("3_qx752")])
+weight = 3.0
+count_min = 2
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_f22pl"]
+script = ExtResource("1_cpfll")
+members = Array[ExtResource("2_t4hre")]([ExtResource("4_ql650")])
+weight = 2.0
+count_max = 2
+
+[sub_resource type="Resource" id="Resource_hysuh"]
+script = ExtResource("1_cpfll")
+members = Array[ExtResource("2_t4hre")]([ExtResource("5_xw1p6")])
+weight = 2.0
+count_max = 2
+
+[sub_resource type="Resource" id="Resource_x3c7g"]
+script = ExtResource("1_cpfll")
+members = Array[ExtResource("2_t4hre")]([ExtResource("6_k6dl7")])
+count_min = 2
+count_max = 4
+
+[resource]
+script = ExtResource("7_igg6y")
+entries = Array[ExtResource("1_cpfll")]([SubResource("Resource_hatln"), SubResource("Resource_f22pl"), SubResource("Resource_hysuh"), SubResource("Resource_x3c7g")])

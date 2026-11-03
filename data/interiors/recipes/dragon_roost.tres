@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_jac4q"]
+
+[resource]
+script = ExtResource("1_jac4q")
+themes = PackedStringArray("lair", "cave")
+mix = 0.4
+rooms_base = 10
+rooms_max = 34
+required = PackedStringArray("den", "sanctum")
+branching = 0.3
+corridors = 0.4
+extra_floors = 2
+density = 0.9
+light = 0

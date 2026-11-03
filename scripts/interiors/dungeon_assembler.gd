@@ -36,6 +36,7 @@ var secret_link: Array = []
 ## The hand-made set-piece's room index, or -1
 var set_piece := -1
 var set_tried := false
+var _target := 0  # rooms the recipe wants at this level
 
 
 ## Plans an interior. Returns the plan (no nodes yet): call build() to make the scene.
@@ -60,6 +61,7 @@ func _run() -> void:
 		return
 	_add(_pick(entrances), Transform3D.IDENTITY, null)
 	var target := recipe.rooms_for(level)
+	_target = target
 	var required := Array(recipe.required)
 	var floors_left := recipe.extra_floors
 	var tries := 0
@@ -105,7 +107,9 @@ func _room_count() -> int:
 # A corridor between rooms now and then; stairs while floors are still wanted; else a room
 func _next_role(from: Placed, floors_left: int) -> int:
 	var r: int = from.entry.role
-	if floors_left > 0 and rng.randf() < 0.25 and r != RoomModule.Role.STAIRS:
+	# stairs come sooner the more floors are still owed for the rooms left to place
+	var stair_chance := clampf(float(floors_left) * 3.0 / maxf(float(_target - _room_count()), 1.0), 0.25, 0.75)
+	if floors_left > 0 and rng.randf() < stair_chance and r != RoomModule.Role.STAIRS:
 		return RoomModule.Role.STAIRS
 	if r in [RoomModule.Role.ROOM, RoomModule.Role.HALL, RoomModule.Role.ENTRANCE, RoomModule.Role.STAIRS] and rng.randf() < recipe.corridors:
 		return RoomModule.Role.JUNCTION if rng.randf() < 0.3 else RoomModule.Role.CORRIDOR

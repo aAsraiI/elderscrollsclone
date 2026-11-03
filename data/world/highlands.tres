@@ -38,6 +38,13 @@
 [ext_resource type="Resource" path="res://data/world/Sites/ore_outcrop.tres" id="44_8hu27"]
 [ext_resource type="Resource" path="res://data/world/Sites/nest.tres" id="45_m8q1e"]
 [ext_resource type="Resource" path="res://data/world/Sites/wayside_inn.tres" id="46_48jbe"]
+[ext_resource type="Resource" path="res://data/world/POIs/beast_lair_entrance.tres" id="48_tebx0"]
+[ext_resource type="Resource" path="res://data/world/POIs/catacombs_entrance.tres" id="49_ls7bt"]
+[ext_resource type="Resource" path="res://data/world/POIs/monastery_entrance.tres" id="50_shmte"]
+[ext_resource type="Resource" path="res://data/world/Sites/hermit_hut.tres" id="51_as6bj"]
+[ext_resource type="Resource" path="res://data/world/Sites/gallows.tres" id="52_kaa6h"]
+[ext_resource type="Resource" path="res://data/world/Sites/cairn.tres" id="53_7wa5q"]
+[ext_resource type="Resource" path="res://data/world/Sites/druid_grove.tres" id="54_rxkev"]
 [ext_resource type="Resource" path="res://data/encounters/snow_reavers.tres" id="enc_0"]
 [ext_resource type="Resource" path="res://data/encounters/snow_beasts.tres" id="enc_1"]
 [ext_resource type="Resource" path="res://data/encounters/plains_wolves.tres" id="enc_2"]
@@ -151,27 +158,29 @@ scale_max = 1.0
 [sub_resource type="Resource" id="rule_0"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_0")
-count_max = 1.5
+count_min = 0.6
+count_max = 0.8999999999999999
 extra_spacing = 60.0
 
 [sub_resource type="Resource" id="rule_1"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_1")
-count_min = 2.0
-count_max = 3.0
+count_min = 0.8
+count_max = 1.2000000000000002
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="rule_2"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_2")
-count_max = 1.5
+count_min = 0.5
+count_max = 0.75
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="rule_3"]
 script = ExtResource("rule_script")
 poi = ExtResource("poi_3")
-count_min = 0.5
-count_max = 1.5
+count_min = 0.3
+count_max = 0.8999999999999999
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="Resource_ox1p8"]
@@ -439,6 +448,62 @@ count_max = 0.117
 extra_spacing = 40.0
 border_margin = 40.0
 
+[sub_resource type="Resource" id="Resource_iep0a"]
+script = ExtResource("rule_script")
+poi = ExtResource("48_tebx0")
+count_min = 0.06
+count_max = 0.1
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_f4p3d"]
+script = ExtResource("rule_script")
+poi = ExtResource("49_ls7bt")
+count_min = 0.04
+count_max = 0.07
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_lfi1i"]
+script = ExtResource("rule_script")
+poi = ExtResource("50_shmte")
+count_min = 0.05
+count_max = 0.08
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_rm86r"]
+script = ExtResource("rule_script")
+poi = ExtResource("51_as6bj")
+count_min = 0.063
+count_max = 0.117
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_wstnn"]
+script = ExtResource("rule_script")
+poi = ExtResource("52_kaa6h")
+count_min = 0.04199999999999999
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_prht7"]
+script = ExtResource("rule_script")
+poi = ExtResource("53_7wa5q")
+count_min = 0.08399999999999999
+count_max = 0.156
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_wcjoo"]
+script = ExtResource("rule_script")
+poi = ExtResource("54_rxkev")
+count_min = 0.04199999999999999
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
 [resource]
 script = ExtResource("1_biome")
 id = &"highlands"
@@ -473,7 +538,8 @@ tree_color = Color(0.16, 0.32, 0.18, 1)
 flora = Array[ExtResource("9_r6ctu")]([SubResource("Resource_r6ctu"), SubResource("Resource_tebx0"), SubResource("Resource_ls7bt"), SubResource("Resource_shmte"), SubResource("Resource_8hu27"), SubResource("Resource_m8q1e"), SubResource("Resource_48jbe")])
 herbs = PackedStringArray("heather:4", "yarrow:2", "blue_mountain_flower:2", "juniper_berries:2", "red_mountain_flower:2", "thistle:1", "mandrake_root:1", "water_mint:1")
 herb_density = 1.1
-poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_ox1p8"), SubResource("Resource_imqa2"), SubResource("Resource_rwip1"), SubResource("Resource_j2nbg"), SubResource("Resource_kaa6h"), SubResource("Resource_7wa5q"), SubResource("Resource_rxkev"), SubResource("Resource_4xdj6"), SubResource("Resource_ksok1"), SubResource("Resource_uv45p"), SubResource("Resource_jjxd7"), SubResource("Resource_aq5p8"), SubResource("Resource_e1q4i"), SubResource("Resource_bg0w3"), SubResource("Resource_0e3lb"), SubResource("Resource_0yq8g"), SubResource("Resource_ku8he"), SubResource("Resource_vuwet"), SubResource("Resource_veu3j"), SubResource("Resource_tajxu"), SubResource("Resource_0pf3v"), SubResource("Resource_cwoc5"), SubResource("Resource_i0e47"), SubResource("Resource_ne7kq"), SubResource("Resource_01wbe"), SubResource("Resource_as6bj"), SubResource("Resource_qbt27"), SubResource("Resource_xlb2d"), SubResource("Resource_kbb78"), SubResource("Resource_8w2b3"), SubResource("Resource_qbkqy"), SubResource("Resource_ql1ns"), SubResource("Resource_mwwfe")])
+poi_rules = Array[ExtResource("rule_script")]([SubResource("rule_0"), SubResource("rule_1"), SubResource("rule_2"), SubResource("rule_3"), SubResource("Resource_ox1p8"), SubResource("Resource_imqa2"), SubResource("Resource_rwip1"), SubResource("Resource_j2nbg"), SubResource("Resource_kaa6h"), SubResource("Resource_7wa5q"), SubResource("Resource_rxkev"), SubResource("Resource_4xdj6"), SubResource("Resource_ksok1"), SubResource("Resource_uv45p"), SubResource("Resource_jjxd7"), SubResource("Resource_aq5p8"), SubResource("Resource_e1q4i"), SubResource("Resource_bg0w3"), SubResource("Resource_0e3lb"), SubResource("Resource_0yq8g"), SubResource("Resource_ku8he"), SubResource("Resource_vuwet"), SubResource("Resource_veu3j"), SubResource("Resource_tajxu"), SubResource("Resource_0pf3v"), SubResource("Resource_cwoc5"), SubResource("Resource_i0e47"), SubResource("Resource_ne7kq"), SubResource("Resource_01wbe"), SubResource("Resource_as6bj"), SubResource("Resource_qbt27"), SubResource("Resource_xlb2d"), SubResource("Resource_kbb78"), SubResource("Resource_8w2b3"), SubResource("Resource_qbkqy"), SubResource("Resource_ql1ns"), SubResource("Resource_mwwfe"), SubResource("Resource_iep0a"), SubResource("Resource_f4p3d"), SubResource("Resource_lfi1i"), SubResource("Resource_rm86r"), SubResource("Resource_wstnn"), SubResource("Resource_prht7"), SubResource("Resource_wcjoo")])
 level_min = 10
 level_max = 24
 encounters = Array[ExtResource("enc_script")]([ExtResource("enc_0"), ExtResource("enc_1"), ExtResource("enc_2"), ExtResource("enc_3"), ExtResource("6_rwip1"), ExtResource("7_u8k0c"), ExtResource("8_hdd4b")])
+metadata/thinned_121 = true

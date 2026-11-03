@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/spawns/dungeon_ashen.tres" id="1_yco0o"]
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="2_111c2"]
+[ext_resource type="PackedScene" path="res://scenes/sites/fire_altar_a.tscn" id="3_ui0gx"]
+
+[resource]
+script = ExtResource("2_111c2")
+sites = Array[PackedScene]([ExtResource("3_ui0gx")])
+occupants = ExtResource("1_yco0o")
+map_icon = "stones"
+enter_name = "Fire Altar"
+id = &"site_fire_altar"
+display_name = "Fire Altar"
+map_color = Color(0.65, 0.65, 0.7, 1)
+footprint_radius = 16.0
+flatten_radius = 12.0
+max_slope_deg = 12.0
+prefer = "high"
+min_same_distance = 1200.0

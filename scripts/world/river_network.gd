@@ -35,11 +35,7 @@ var _bhw := PackedFloat64Array()
 var _grid := {}  # Vector2i -> PackedInt32Array of segment indices
 
 # Lakes: a coarse grid of water levels (-INF = no lake)
-var _lake_min := Vector2.ZERO
-var _lake_cell := 40.0
-var _lake_w := 0
-var _lake_h := 0
-var _lake_level := PackedFloat32Array()
+var _lake_grids: Array[Dictionary] = []  # one per island: {"min", "cell", "w", "h", "levels", "rect"}
 var _lake_count := 0
 ## Lakes for the map and the planners: {"center": Vector2, "level": float, "cells": int}
 var lakes: Array[Dictionary] = []
@@ -91,39 +87,43 @@ func add_polyline(points: PackedVector3Array, widths: PackedFloat32Array, is_riv
 
 
 ## The lakes as a grid of water levels (-INF where there is none), cell meters each
-func set_lakes(origin: Vector2, cell: float, w: int, h: int, levels: PackedFloat32Array, list: Array[Dictionary]) -> void:
-	_lake_min = origin
-	_lake_cell = cell
-	_lake_w = w
-	_lake_h = h
-	_lake_level = levels
-	lakes = list
-	_lake_count = list.size()
+func add_lakes(origin: Vector2, cell: float, w: int, h: int, levels: PackedFloat32Array, list: Array[Dictionary]) -> void:
+	_lake_grids.append({"min": origin, "cell": cell, "w": w, "h": h, "levels": levels,
+		"rect": Rect2(origin, Vector2(w, h) * cell)})
+	lakes.append_array(list)
+	_lake_count += list.size()
 
 
 # (the lake's water level here or -INF, how much this is lake: 1 in the middle, 0 a cell away from
 # it, blended smoothly between the lake grid's cell centers so the shore is never square)
 func _lake_at(x: float, z: float) -> Vector2:
-	if _lake_level.is_empty():
-		return Vector2(-INF, 0.0)
-	var fx := (x - _lake_min.x) / _lake_cell - 0.5
-	var fz := (z - _lake_min.y) / _lake_cell - 0.5
-	var i0 := floori(fx)
-	var j0 := floori(fz)
-	var tx := fx - float(i0)
-	var tz := fz - float(j0)
-	var level := -INF
-	var m := 0.0
-	for k in 4:
-		var i := i0 + (k & 1)
-		var j := j0 + (k >> 1)
-		if i < 0 or j < 0 or i >= _lake_w or j >= _lake_h:
+	for g: Dictionary in _lake_grids:
+		if not (g["rect"] as Rect2).has_point(Vector2(x, z)):
 			continue
-		var lv := _lake_level[j * _lake_w + i]
-		if lv > -INF:
-			level = maxf(level, lv)
-			m += (tx if k & 1 else 1.0 - tx) * (tz if k >> 1 else 1.0 - tz)
-	return Vector2(level, m)
+		var cell: float = g["cell"]
+		var lmin: Vector2 = g["min"]
+		var w: int = g["w"]
+		var h: int = g["h"]
+		var levels: PackedFloat32Array = g["levels"]
+		var fx := (x - lmin.x) / cell - 0.5
+		var fz := (z - lmin.y) / cell - 0.5
+		var i0 := floori(fx)
+		var j0 := floori(fz)
+		var tx := fx - float(i0)
+		var tz := fz - float(j0)
+		var level := -INF
+		var m := 0.0
+		for k in 4:
+			var i := i0 + (k & 1)
+			var j := j0 + (k >> 1)
+			if i < 0 or j < 0 or i >= w or j >= h:
+				continue
+			var lv := levels[j * w + i]
+			if lv > -INF:
+				level = maxf(level, lv)
+				m += (tx if k & 1 else 1.0 - tx) * (tz if k >> 1 else 1.0 - tz)
+		return Vector2(level, m)
+	return Vector2(-INF, 0.0)
 
 
 ## Height of the water surface here (river or lake), or -INF

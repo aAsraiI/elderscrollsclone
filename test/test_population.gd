@@ -860,10 +860,11 @@ func t_world() -> void:
 	check("the cave has enemies at the biome's level", inside.size() >= 1, str(inside.size()))
 	var dungeon_levels_ok := true
 	var biome_here := wm.get_biome_at(entrance.position.x, entrance.position.z)
+	var band := wm.map.get_level_band(entrance.position.x, entrance.position.z)  # the region's own levels (islands set their own)
 	for e in inside:
-		if e.level < biome_here.level_min or e.level > biome_here.level_max + 4:
+		if e.level < floorf(band.x) - 2 or e.level > ceilf(band.y) + 4:
 			dungeon_levels_ok = false
-	check("whose levels follow the land the entrance is in (%d-%d)" % [biome_here.level_min, biome_here.level_max], dungeon_levels_ok)
+	check("whose levels follow the land the entrance is in (%s, %d-%d)" % [biome_here.display_name, roundi(band.x), roundi(band.y)], dungeon_levels_ok)
 	check("random encounters never start inside a dungeon", em.try_encounter(true).is_empty())
 	var inside_root: Node = wm.dungeons._root
 	await wm.dungeons.exit()

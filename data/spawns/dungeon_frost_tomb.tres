@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_26331"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_dhjtw"]
+[ext_resource type="Resource" path="res://data/enemies/barrow_wight.tres" id="3_e7cmk"]
+[ext_resource type="Resource" path="res://data/enemies/ice_wraith.tres" id="4_0bsfx"]
+[ext_resource type="Resource" path="res://data/enemies/skeleton_knight.tres" id="5_ueg3r"]
+[ext_resource type="Resource" path="res://data/enemies/frost_raider.tres" id="6_wxopp"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="7_ktyy3"]
+
+[sub_resource type="Resource" id="Resource_e3n1u"]
+script = ExtResource("1_26331")
+members = Array[ExtResource("2_dhjtw")]([ExtResource("3_e7cmk")])
+weight = 3.0
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_k7wps"]
+script = ExtResource("1_26331")
+members = Array[ExtResource("2_dhjtw")]([ExtResource("4_0bsfx")])
+weight = 2.0
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_jsuli"]
+script = ExtResource("1_26331")
+members = Array[ExtResource("2_dhjtw")]([ExtResource("5_ueg3r")])
+weight = 2.0
+count_max = 2
+
+[sub_resource type="Resource" id="Resource_c831p"]
+script = ExtResource("1_26331")
+members = Array[ExtResource("2_dhjtw")]([ExtResource("6_wxopp")])
+count_max = 2
+
+[resource]
+script = ExtResource("7_ktyy3")
+entries = Array[ExtResource("1_26331")]([SubResource("Resource_e3n1u"), SubResource("Resource_k7wps"), SubResource("Resource_jsuli"), SubResource("Resource_c831p")])

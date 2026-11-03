@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="SpawnTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/actors/spawn_entry.gd" id="1_nherd"]
+[ext_resource type="Script" path="res://scripts/actors/enemy_data.gd" id="2_warq3"]
+[ext_resource type="Resource" path="res://data/enemies/harpy.tres" id="3_y2lyv"]
+[ext_resource type="Resource" path="res://data/enemies/ash_hound.tres" id="4_sie1h"]
+[ext_resource type="Resource" path="res://data/enemies/fire_spirit.tres" id="5_pd5ek"]
+[ext_resource type="Resource" path="res://data/enemies/frost_raider.tres" id="6_yd0f0"]
+[ext_resource type="Script" path="res://scripts/actors/spawn_table.gd" id="7_jqkh8"]
+
+[sub_resource type="Resource" id="Resource_vr8q6"]
+script = ExtResource("1_nherd")
+members = Array[ExtResource("2_warq3")]([ExtResource("3_y2lyv")])
+weight = 2.0
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_utt4m"]
+script = ExtResource("1_nherd")
+members = Array[ExtResource("2_warq3")]([ExtResource("4_sie1h")])
+weight = 2.0
+count_min = 2
+count_max = 3
+
+[sub_resource type="Resource" id="Resource_y7f8w"]
+script = ExtResource("1_nherd")
+members = Array[ExtResource("2_warq3")]([ExtResource("5_pd5ek")])
+weight = 2.0
+count_max = 2
+
+[sub_resource type="Resource" id="Resource_fyfdg"]
+script = ExtResource("1_nherd")
+members = Array[ExtResource("2_warq3")]([ExtResource("6_yd0f0")])
+count_max = 2
+
+[resource]
+script = ExtResource("7_jqkh8")
+entries = Array[ExtResource("1_nherd")]([SubResource("Resource_vr8q6"), SubResource("Resource_utt4m"), SubResource("Resource_y7f8w"), SubResource("Resource_fyfdg")])

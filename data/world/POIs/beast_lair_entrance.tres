@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="DungeonEntrancePOIData" format=3]
+
+[ext_resource type="Resource" path="res://data/world/Dungeons/beast_lair.tres" id="1_ln4ap"]
+[ext_resource type="Script" path="res://scripts/dungeons/dungeon_entrance_poi_data.gd" id="2_qynxe"]
+
+[resource]
+script = ExtResource("2_qynxe")
+dungeon = ExtResource("1_ln4ap")
+color = Color(0.34, 0.3, 0.25, 1)
+enter_name = "Beast Lair"
+id = &"beast_lair_entrance"
+display_name = "Lair"
+map_color = Color(0.6, 0.45, 0.3, 1)
+footprint_radius = 12.0
+flatten_radius = 6.0
+max_slope_deg = 20.0
+min_same_distance = 900.0
+path_to_road = 300.0

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DungeonRecipe" format=3]
+
+[ext_resource type="Script" path="res://scripts/interiors/dungeon_recipe.gd" id="1_fcrrh"]
+
+[resource]
+script = ExtResource("1_fcrrh")
+themes = PackedStringArray("fort", "crypt")
+mix = 0.25
+rooms_base = 18
+rooms_per_10_levels = 4
+rooms_max = 60
+required = PackedStringArray("barracks", "war_room", "kitchen", "armory", "commander", "great_hall", "cells")
+branching = 0.4
+corridors = 0.5
+extra_floors = 3
+density = 1.2

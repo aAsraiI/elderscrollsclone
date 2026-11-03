@@ -36,6 +36,11 @@
 [ext_resource type="Resource" path="res://data/world/Sites/lost_pack.tres" id="32_yqn18"]
 [ext_resource type="Resource" path="res://data/world/Sites/herb_patch.tres" id="33_2llix"]
 [ext_resource type="Resource" path="res://data/world/Sites/nest.tres" id="34_u30it"]
+[ext_resource type="Resource" path="res://data/world/POIs/necropolis_entrance.tres" id="36_hwl1y"]
+[ext_resource type="Resource" path="res://data/world/POIs/witch_hollow_entrance.tres" id="37_yqn18"]
+[ext_resource type="Resource" path="res://data/world/Sites/witch_hut.tres" id="38_rl0tb"]
+[ext_resource type="Resource" path="res://data/world/Sites/gallows.tres" id="39_5vqf7"]
+[ext_resource type="Resource" path="res://data/world/Sites/plague_pit.tres" id="40_3jjlk"]
 
 [sub_resource type="Resource" id="Resource_dw3du"]
 script = ExtResource("8_dw3du")
@@ -119,25 +124,29 @@ trunk_radius = 0.6
 [sub_resource type="Resource" id="Resource_pg31t"]
 script = ExtResource("5_0r0nr")
 poi = ExtResource("6_eufsy")
+count_min = 0.6
+count_max = 1.2
 extra_spacing = 50.0
 
 [sub_resource type="Resource" id="Resource_u7b4k"]
 script = ExtResource("5_0r0nr")
 poi = ExtResource("7_3ihvc")
-count_max = 1.5
+count_min = 0.5
+count_max = 0.75
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="Resource_xg30r"]
 script = ExtResource("5_0r0nr")
 poi = ExtResource("8_j1jv5")
-count_max = 1.5
+count_min = 0.5
+count_max = 0.75
 extra_spacing = 40.0
 
 [sub_resource type="Resource" id="Resource_hv32u"]
 script = ExtResource("5_0r0nr")
 poi = ExtResource("9_loyen")
-count_min = 0.5
-count_max = 1.0
+count_min = 0.3
+count_max = 0.6
 extra_spacing = 60.0
 
 [sub_resource type="Resource" id="Resource_4v8qn"]
@@ -316,6 +325,46 @@ count_max = 0.104
 extra_spacing = 40.0
 border_margin = 40.0
 
+[sub_resource type="Resource" id="Resource_u7hvv"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("36_hwl1y")
+count_mode = 0
+count_max = 1.0
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_gwxi4"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("37_yqn18")
+count_min = 0.06
+count_max = 0.1
+extra_spacing = 80.0
+border_margin = 80.0
+
+[sub_resource type="Resource" id="Resource_fawtu"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("38_rl0tb")
+count_min = 0.0525
+count_max = 0.09750000000000002
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_2dpki"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("39_5vqf7")
+count_min = 0.04199999999999999
+count_max = 0.078
+extra_spacing = 40.0
+border_margin = 40.0
+
+[sub_resource type="Resource" id="Resource_5jmog"]
+script = ExtResource("5_0r0nr")
+poi = ExtResource("40_3jjlk")
+count_min = 0.063
+count_max = 0.117
+extra_spacing = 40.0
+border_margin = 40.0
+
 [resource]
 script = ExtResource("10_puq31")
 id = &"deadlands"
@@ -347,7 +396,8 @@ tree_color = Color(0.3, 0.28, 0.25, 1)
 flora = Array[ExtResource("8_dw3du")]([SubResource("Resource_dw3du"), SubResource("Resource_hwl1y"), SubResource("Resource_yqn18"), SubResource("Resource_2llix"), SubResource("Resource_u30it"), SubResource("Resource_hd0sp")])
 herbs = PackedStringArray("grave_moss:4", "belladonna:3", "wolfsbane:2", "spore_pod:1", "nightshade:2")
 herb_density = 0.9
-poi_rules = Array[ExtResource("5_0r0nr")]([SubResource("Resource_pg31t"), SubResource("Resource_u7b4k"), SubResource("Resource_xg30r"), SubResource("Resource_hv32u"), SubResource("Resource_4v8qn"), SubResource("Resource_dh2ua"), SubResource("Resource_rl0tb"), SubResource("Resource_5vqf7"), SubResource("Resource_3jjlk"), SubResource("Resource_s2oqk"), SubResource("Resource_4qx1b"), SubResource("Resource_vc6xi"), SubResource("Resource_8kjoq"), SubResource("Resource_h1yk6"), SubResource("Resource_n0dfg"), SubResource("Resource_fubn8"), SubResource("Resource_1jmkj"), SubResource("Resource_ndyor"), SubResource("Resource_1tsk0"), SubResource("Resource_i0e7v"), SubResource("Resource_ujhy3"), SubResource("Resource_fkypy"), SubResource("Resource_jyubn"), SubResource("Resource_jnvga"), SubResource("Resource_e3xh7"), SubResource("Resource_64eqq")])
+poi_rules = Array[ExtResource("5_0r0nr")]([SubResource("Resource_pg31t"), SubResource("Resource_u7b4k"), SubResource("Resource_xg30r"), SubResource("Resource_hv32u"), SubResource("Resource_4v8qn"), SubResource("Resource_dh2ua"), SubResource("Resource_rl0tb"), SubResource("Resource_5vqf7"), SubResource("Resource_3jjlk"), SubResource("Resource_s2oqk"), SubResource("Resource_4qx1b"), SubResource("Resource_vc6xi"), SubResource("Resource_8kjoq"), SubResource("Resource_h1yk6"), SubResource("Resource_n0dfg"), SubResource("Resource_fubn8"), SubResource("Resource_1jmkj"), SubResource("Resource_ndyor"), SubResource("Resource_1tsk0"), SubResource("Resource_i0e7v"), SubResource("Resource_ujhy3"), SubResource("Resource_fkypy"), SubResource("Resource_jyubn"), SubResource("Resource_jnvga"), SubResource("Resource_e3xh7"), SubResource("Resource_64eqq"), SubResource("Resource_u7hvv"), SubResource("Resource_gwxi4"), SubResource("Resource_fawtu"), SubResource("Resource_2dpki"), SubResource("Resource_5jmog")])
 level_min = 50
 level_max = 73
 encounters = Array[ExtResource("1_tdexh")]([ExtResource("2_ocdib"), ExtResource("3_4v8qn"), ExtResource("4_dh2ua"), ExtResource("5_dh2ua"), ExtResource("6_0r0nr"), ExtResource("7_koxu8")])
+metadata/thinned_121 = true

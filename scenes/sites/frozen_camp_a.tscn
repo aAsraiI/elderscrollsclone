@@ -1,0 +1,82 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/exterior_site.gd" id="1_b0tbb"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/tent.tscn" id="2_3m4v8"]
+[ext_resource type="Script" path="res://scripts/interiors/spawn_socket.gd" id="2_rqg5r"]
+[ext_resource type="Material" path="res://data/interiors/materials/ice.tres" id="3_3m4v8"]
+[ext_resource type="PackedScene" path="res://scenes/interiors/props/weapon_heap.tscn" id="4_v4ghs"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_v4ghs"]
+size = Vector3(3, 0.6, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_c1xth"]
+size = Vector3(3, 0.6, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wwbfo"]
+size = Vector3(3, 0.6, 2)
+
+[node name="FrozenCampA" type="Node3D" unique_id=974036342]
+script = ExtResource("1_b0tbb")
+site_kind = "frozen_camp"
+biomes = PackedStringArray("frozen_crown", "snow_mountains", "tundra")
+min_distance = 1000.0
+themes = PackedStringArray("camp")
+cells = Vector3i(6, 1, 6)
+
+[node name="Tent" parent="." unique_id=790999050 instance=ExtResource("2_3m4v8")]
+transform = Transform3D(0.25215742, 0, 0.9676863, 0, 1, 0, -0.9676863, 0, 0.25215742, 5.8803997, 0, 1.192016)
+
+[node name="Part1" type="Node3D" parent="." unique_id=598541137 groups=["interior_geometry"]]
+transform = Transform3D(0.9800666, 0, -0.19866933, 0, 1, 0, 0.19866933, 0, 0.9800666, 5.8803997, 0.2, 1.192016)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part1" unique_id=1238268216]
+material_override = ExtResource("3_3m4v8")
+mesh = SubResource("BoxMesh_v4ghs")
+
+[node name="WeaponHeap" parent="." unique_id=212059753 instance=ExtResource("4_v4ghs")]
+transform = Transform3D(0.9871427, 0, 0.15984139, 0, 1, 0, -0.15984139, 0, 0.9871427, 2.9401999, 0, 0.596008)
+
+[node name="Tent2" parent="." unique_id=1504336363 instance=ExtResource("2_3m4v8")]
+transform = Transform3D(0.7009799, 0, -0.7131811, 0, 1, 0, 0.7131811, 0, 0.7009799, -3.9725158, 0, 4.4965672)
+
+[node name="Part2" type="Node3D" parent="." unique_id=1046593990 groups=["interior_geometry"]]
+transform = Transform3D(-0.66208607, 0, -0.7494278, 0, 1, 0, 0.7494278, 0, -0.66208607, -3.9725158, 0.2, 4.4965672)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part2" unique_id=1783792427]
+material_override = ExtResource("3_3m4v8")
+mesh = SubResource("BoxMesh_c1xth")
+
+[node name="WeaponHeap2" parent="." unique_id=1090349338 instance=ExtResource("4_v4ghs")]
+transform = Transform3D(-0.65145576, 0, 0.7586866, 0, 1, 0, -0.7586866, 0, -0.65145576, -1.9862579, 0, 2.2482836)
+
+[node name="Tent3" parent="." unique_id=1373480605 instance=ExtResource("2_3m4v8")]
+transform = Transform3D(-0.9098415, 0, -0.41495618, 0, 1, 0, 0.41495618, 0, -0.9098415, -1.9078836, 0, -5.6885834)
+
+[node name="Part3" type="Node3D" parent="." unique_id=265522552 groups=["interior_geometry"]]
+transform = Transform3D(-0.31798068, 0, 0.94809717, 0, 1, 0, -0.94809717, 0, -0.31798068, -1.9078836, 0.2, -5.6885834)
+
+[node name="Mesh" type="MeshInstance3D" parent="Part3" unique_id=439832196]
+material_override = ExtResource("3_3m4v8")
+mesh = SubResource("BoxMesh_wwbfo")
+
+[node name="WeaponHeap3" parent="." unique_id=1590809476 instance=ExtResource("4_v4ghs")]
+transform = Transform3D(-0.21565913, 0, -0.9764687, 0, 1, 0, 0.9764687, 0, -0.21565913, -0.9539418, 0, -2.8442917)
+
+[node name="Chest10" type="Marker3D" parent="." unique_id=1310281693]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
+script = ExtResource("2_rqg5r")
+kind = 3
+tags = PackedStringArray()
+chance = 1.0
+pool = PackedStringArray()
+
+[node name="Note" type="Marker3D" parent="." unique_id=67701460]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.05, 1)
+
+[node name="Enemy12" type="Marker3D" parent="." unique_id=1074431211]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 4)
+script = ExtResource("2_rqg5r")
+kind = 5
+tags = PackedStringArray()
+chance = 0.6
+pool = PackedStringArray()

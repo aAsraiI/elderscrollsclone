@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SitePOIData" format=3]
+
+[ext_resource type="Script" path="res://scripts/sites/site_poi_data.gd" id="1_jimlf"]
+[ext_resource type="PackedScene" path="res://scenes/sites/gallows_a.tscn" id="2_7ipj1"]
+
+[resource]
+script = ExtResource("1_jimlf")
+sites = Array[PackedScene]([ExtResource("2_7ipj1")])
+map_icon = "grave"
+enter_name = "Gallows"
+id = &"site_gallows"
+display_name = "Gallows"
+map_color = Color(0.5, 0.55, 0.6, 1)
+footprint_radius = 8.0
+flatten_radius = 6.0
+max_slope_deg = 12.0
+prefer = "road"
+min_same_distance = 1500.0

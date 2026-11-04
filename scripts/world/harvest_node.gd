@@ -222,6 +222,9 @@ static func _herb_mesh(id: String) -> ArrayMesh:
 func _build_visual() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
+	if kind in GATHER:
+		_gather_visual()
+		return
 	if kind == "herb":
 		var model := ModelLibrary.first(HERB_INFO[item_id][1]) if HERB_INFO.has(item_id) else ""
 		var mesh: Mesh = ModelLibrary.merged_mesh(model, 0.0, 0.03) if model != "" else null
@@ -253,6 +256,8 @@ func _add_part(mesh: Mesh, mat: Material, xf: Transform3D) -> void:
 	mi.material_override = mat
 	mi.transform = xf
 	mi.visibility_range_end = DRAW_DISTANCE
+	if kind in GATHER:
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF  # 1.25: small things cast no shadow
 	_visual.add_child(mi)
 
 
@@ -271,7 +276,7 @@ func is_ready() -> bool:
 	var rec := WorldState.get_record(key)
 	if rec.is_empty():
 		return true
-	var wait := HERB_REGROW_DAYS if kind == "herb" else ORE_REGROW_DAYS
+	var wait: int = HERB_REGROW_DAYS if kind == "herb" else (int(GATHER[kind][1]) if kind in GATHER else ORE_REGROW_DAYS)
 	return _today() - int(rec.get("day", -999)) >= wait
 
 
@@ -296,18 +301,24 @@ func get_prompt() -> String:
 		return ""
 	if kind == "herb":
 		return "Pick %s" % item.display_name
+	if kind in GATHER:
+		if not is_ready():
+			return ""
+		return ("Break up the rock" + ("" if _has_pickaxe() else "  (needs a pickaxe)")) if kind == "rock" else "Gather %s" % item.display_name
 	return "Mine %s" % item.display_name.trim_suffix(" Ore") + " Vein" + ("" if _has_pickaxe() else "  (needs a pickaxe)")
 
 
 func _has_pickaxe() -> bool:
 	var player := get_tree().get_first_node_in_group("player")
 	var inv := player.get_node_or_null("Inventory") as Inventory if player != null else null
-	var pick := load(MAT + "pickaxe.tres") as ItemData if ResourceLoader.exists(MAT + "pickaxe.tres") else null
-	return inv != null and pick != null and inv.has_item(pick)
+	return inv != null and pick_tier(inv) >= 0
 
 
 func interact(actor: Inventory) -> void:
 	if actor == null or not is_ready():
+		return
+	if kind in GATHER:
+		_gather(actor)  # 1.25: stone, branches, fibre, clay
 		return
 	var item := _item()
 	if item == null:
@@ -316,6 +327,10 @@ func interact(actor: Inventory) -> void:
 	if kind == "ore":
 		if not _has_pickaxe():
 			Locks.toast(get_tree(), "You need a pickaxe to mine this", true)
+			return
+		var need := int(ORE_TIER.get(item_id, 0))
+		if pick_tier(actor) < need:
+			Locks.toast(get_tree(), "This is too hard for your pick. You need a %s." % PICKS[need][1], true)  # 1.25: tool tiers
 			return
 		count = 2 + int(get_meta("pick", 0)) % 2
 		var skills := actor.get_parent().get_node_or_null("Skills") as Skills
@@ -343,3 +358,94 @@ func interact(actor: Inventory) -> void:
 	WorldState.set_record(key, {"day": _today()})
 	Locks.toast(get_tree(), "%s x%d" % [item.display_name, count])
 	_refresh()
+
+
+# ---------------------------------------------------------------- 1.25: tool tiers and gathering
+
+## [item id, name] by tier: a better pick mines harder ore
+const PICKS := [["stone_pickaxe", "Stone Pickaxe"], ["pickaxe", "Pickaxe"], ["steel_pickaxe", "Steel Pickaxe"], ["ebon_pickaxe", "Ebon Pickaxe"], ["astral_pickaxe", "Astral Pickaxe"]]
+const ORE_TIER := {"iron_ore": 0, "corundum_ore": 0, "silver_ore": 1, "gold_ore": 1, "obsidian_ore": 2, "ebony_ore": 2,
+	"dragonstone_ore": 3, "star_ore": 3, "void_ore": 4, "sun_ore": 4, "astral_ore": 4, "primordial_ore": 4}
+## What you can gather without a tool (or with a pick, for rock): kind -> [item id, regrow days, extra id, extra chance]
+const GATHER := {"rock": ["stone", 2, "flint", 0.3], "branches": ["firewood", 2, "", 0.0], "fibre": ["plant_fibre", 2, "", 0.0], "clay": ["clay", 3, "", 0.0]}
+
+
+## The best pick in a bag (-1 = none)
+static func pick_tier(inv: Inventory) -> int:
+	if inv == null:
+		return -1
+	var best := -1
+	for i in PICKS.size():
+		var path := MAT + String(PICKS[i][0]) + ".tres"
+		if ResourceLoader.exists(path) and inv.has_item(load(path) as ItemData):
+			best = i
+	return best
+
+
+static func make_gather(chunk: Node3D, local: Vector3, world_pos: Vector3, gather_kind: String) -> HarvestNode:
+	var n := HarvestNode.new()
+	n.kind = gather_kind
+	n.item_id = String(GATHER[gather_kind][0])
+	n.key = "harvest/%d_%d" % [roundi(world_pos.x), roundi(world_pos.z)]
+	n.position = local
+	chunk.add_child(n)
+	return n
+
+
+func _gather(actor: Inventory) -> void:
+	var g: Array = GATHER[kind]
+	if kind == "rock" and pick_tier(actor) < 0:
+		Locks.toast(get_tree(), "You need a pickaxe to break stone (a stone one will do)", true)
+		return
+	var item := load(MAT + String(g[0]) + ".tres") as ItemData
+	if item == null:
+		return
+	var count := 1 + (1 if randf() < 0.4 else 0)
+	actor.add_item(item, count)
+	var got := "%s x%d" % [item.display_name, count]
+	if String(g[2]) != "" and randf() < float(g[3]):
+		var extra := load(MAT + String(g[2]) + ".tres") as ItemData
+		if extra != null:
+			actor.add_item(extra, 1)
+			got += ", " + extra.display_name
+	var skills := actor.get_parent().get_node_or_null("Skills") as Skills
+	if skills != null:
+		skills.add_xp(&"survival", 2.0)
+	WorldState.set_record(key, {"day": _today()})
+	Locks.toast(get_tree(), got)
+	_refresh()
+
+
+static var _gather_meshes := {}
+
+
+func _gather_visual() -> void:
+	match kind:
+		"rock":
+			_add_part(NatureMeshes.rock_mesh(2), _material(Color(0.45, 0.44, 0.42)), Transform3D(Basis.from_scale(Vector3(0.7, 0.5, 0.6)), Vector3(0, 0.15, 0)))
+		"branches":
+			if _gather_meshes.has("branches"):
+				_add_part(_gather_meshes["branches"], _material(Color(0.36, 0.25, 0.15)), Transform3D(Basis(Vector3.UP, float(absi(key.hash()) % 628) / 100.0), Vector3.ZERO))
+				return
+			var st := SurfaceTool.new()
+			st.begin(Mesh.PRIMITIVE_TRIANGLES)
+			for i in 4:
+				var c := CylinderMesh.new()
+				c.top_radius = 0.03
+				c.bottom_radius = 0.045
+				c.height = 1.1
+				c.radial_segments = 5
+				st.append_from(c, 0, Transform3D(Basis(Vector3.UP, i * 0.9) * Basis(Vector3.FORWARD, PI * 0.5 - 0.08), Vector3(0, 0.05 + i * 0.03, 0)))
+			_gather_meshes["branches"] = st.commit()  # 1.25: made once, shared by every pile of branches
+			_add_part(_gather_meshes["branches"], _material(Color(0.36, 0.25, 0.15)), Transform3D.IDENTITY)
+		"fibre":
+			_add_part(_herb_mesh("saltgrass"), null, Transform3D.IDENTITY)
+		"clay":
+			if not _gather_meshes.has("clay"):
+				var s := SphereMesh.new()
+				s.radius = 0.45
+				s.height = 0.3
+				s.radial_segments = 10
+				s.rings = 4
+				_gather_meshes["clay"] = s
+			_add_part(_gather_meshes["clay"], _material(Color(0.55, 0.38, 0.28)), Transform3D(Basis.IDENTITY, Vector3(0, 0.02, 0)))

@@ -208,6 +208,25 @@ static func scatter(map: WorldMap, coord: Vector2i, chunk_size: float, quads: in
 				ores.append({"pos": Vector3(lx, _height(verts, lx, lz, spacing, vps), lz), "pick": rng.randi()})
 				break
 	out["ores"] = ores
+	# 1.25: things to gather by hand: stone, fallen branches, fibre plants, clay by the water
+	var gather: Array = []
+	for i in 5:
+		var lx := rng.randf() * chunk_size
+		var lz := rng.randf() * chunk_size
+		var k := _nearest(lx, lz, spacing, vps)
+		if ok[k] != 1 or rng.randf() > 0.55:
+			continue
+		var biome2: BiomeData = biome_list.get(biomes[k])
+		var bid := String(biome2.id) if biome2 != null else ""
+		var what := "rock"
+		if near[k] > 0.35 and rng.randf() < 0.6:
+			what = "clay"
+		elif bid in ["forest", "plains", "highlands", "lakeland", "swamp", "tundra"] and rng.randf() < 0.45:
+			what = "branches"
+		elif bid in ["plains", "lakeland", "swamp", "forest", "coast"] and rng.randf() < 0.5:
+			what = "fibre"
+		gather.append({"pos": Vector3(lx, _height(verts, lx, lz, spacing, vps), lz), "kind": what})
+	out["gather"] = gather
 	return out
 
 
@@ -283,6 +302,8 @@ static func apply(chunk: TerrainChunk, d: Dictionary) -> void:
 		HarvestNode.make_herb_id(chunk, h["pos"], origin + h["pos"], String(h["id"]), int(h["pick"]))
 	for o in d.get("ores", []):
 		HarvestNode.make_ore(chunk, o["pos"], origin + o["pos"], int(o["pick"]))
+	for gi in d.get("gather", []):
+		HarvestNode.make_gather(chunk, gi["pos"], origin + gi["pos"], String(gi["kind"]))
 
 
 ## The cover you only see up close: grass, flowers, rocks and bushes (all tagged "cover")

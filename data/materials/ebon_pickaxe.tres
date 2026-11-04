@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_6ph1c"]
+
+[resource]
+script = ExtResource("1_6ph1c")
+id = &"ebon_pickaxe"
+display_name = "Ebon Pickaxe"
+description = "Black metal that bites through dragonstone and star-metal."
+item_type = 9
+weight = 9.0
+value = 600
+loot_tags = PackedStringArray("smithy", "mine")
+ingredient_effects = PackedStringArray()

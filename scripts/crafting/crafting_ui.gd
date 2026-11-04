@@ -10,7 +10,7 @@ extends CanvasLayer
 ## The game is paused while it is open. E / Enter does the main action, Esc closes.
 
 const MODES := {
-	"forge": ["Forge"], "smelter": ["Smelt"], "tanning_rack": ["Tan"], "cooking_pot": ["Cook"],
+	"forge": ["Forge", "Salvage"], "smelter": ["Smelt"], "tanning_rack": ["Tan"], "cooking_pot": ["Cook"],
 	"workbench": ["Tinker", "Improve Armor"], "grindstone": ["Improve Weapons"], "alchemy_lab": ["Brew"],
 	"enchanter": ["Enchant", "Disenchant"], "spell_altar": ["Make a Spell"],
 }
@@ -237,6 +237,8 @@ func _refresh() -> void:
 			_list_enchant()
 		"Disenchant":
 			_list_disenchant()
+		"Salvage":
+			_list_salvage()
 		"Make a Spell":
 			_list_spellmaking()
 	_on_select()
@@ -251,6 +253,8 @@ func _list_recipes() -> void:
 	var groups := {}
 	var first: TreeItem = null
 	for r in Recipes.for_station(_station_of_mode()):
+		if not Recipes.is_known(r, _inv):
+			continue  # 1.25: a recipe shows once you have held what it needs
 		var n := Recipes.can_make(r, _inv)
 		var skill_ok := _skills == null or _skills.get_level(StringName(r["skill"])) >= int(r["level"])
 		if _only_can.button_pressed and (n <= 0 or not skill_ok):
@@ -394,6 +398,18 @@ func _on_select() -> void:
 			if m is ItemData:
 				t = "[b]%s[/b]\n\n%s\nDisenchanting destroys it, but you learn its enchantment for good." % [m.display_name, m.get_combat_description()]
 				_action.disabled = false
+		"Salvage":
+			_action.text = "Salvage (E)"
+			if m is ItemData:
+				var back := Recipes.salvage_yield(m)
+				t = "[b]%s[/b]
+
+Break it down for its metal and leather:
+%s
+
+It is gone for good." % [m.display_name, "
+".join(back.map(func(b): return "  %s x%d" % [Recipes.load_item(Recipes.MAT + String(b[0]) + ".tres").display_name, int(b[1])]))]
+				_action.disabled = back.is_empty()
 		"Make a Spell":
 			_action.text = "Create spell (E)"
 			t = _spell_text()
@@ -613,6 +629,11 @@ func _do_action() -> void:
 				var learned := Enchanting.disenchant(_player, m)
 				Locks.toast(get_tree(), ("Learned: " + ", ".join(learned.map(func(id: StringName) -> String: return MagicEffects.display_name(id)))) if not learned.is_empty() else "You already knew that enchantment.")
 				_refresh()
+		"Salvage":
+			if m is ItemData:
+				var got := Recipes.salvage(_player, m)
+				Locks.toast(get_tree(), "Salvaged: " + got if got != "" else "Nothing worth keeping in it.", got == "")
+				_refresh()
 		"Make a Spell":
 			if _make_spell_problem() == "":
 				var s := _draft()
@@ -704,3 +725,17 @@ func _handle_click() -> void:
 				elif m.has("remove"):
 					_sm_effects.remove_at(int(m["remove"]))
 					_refresh()
+
+
+# 1.25: weapons and armour you could break down at the forge
+func _list_salvage() -> void:
+	var root := _tree.create_item()
+	var first: TreeItem = null
+	for s in _inv.stacks:
+		var it: ItemData = s.item
+		if not Recipes.salvage_yield(it).is_empty() and not QuestItems.is_quest_item(it):
+			var r := _row(root, it.display_name + (" x%d" % s.count if s.count > 1 else ""), "", it)
+			if first == null:
+				first = r
+	if first != null:
+		first.select(0)

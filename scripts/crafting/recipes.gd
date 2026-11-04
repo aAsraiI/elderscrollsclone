@@ -61,6 +61,12 @@ static func _ensure() -> void:
 	_add("smelter", MAT + "sunsteel_ingot.tres", 1, [["sun_ore", 2]], 125)
 	_add("smelter", MAT + "astral_ingot.tres", 1, [["astral_ore", 2]], 150)
 	_add("smelter", MAT + "primordial_ingot.tres", 1, [["primordial_ore", 2]], 175)
+	# 1.25: tools from what you gather, and picks for harder ore
+	_add("workbench", MAT + "stone_pickaxe.tres", 1, [["stone", 2], ["firewood", 1], ["plant_fibre", 2]], 1)
+	_add("workbench", "res://data/clutter/rope.tres", 1, [["plant_fibre", 3]], 1, "tinkering")
+	_add("forge", MAT + "steel_pickaxe.tres", 1, [["steel_ingot", 2], ["firewood", 1]], 20)
+	_add("forge", MAT + "ebon_pickaxe.tres", 1, [["ebon_ingot", 2], ["firewood", 1]], 60)
+	_add("forge", MAT + "astral_pickaxe.tres", 1, [["astral_ingot", 2], ["firewood", 1]], 150)
 	# ---- tanning rack
 	_add("tanning_rack", MAT + "leather.tres", 1, [["animal_hide", 1]], 1)
 	_add("tanning_rack", MAT + "leather.tres", 1, [["wolf_pelt", 1]], 1)
@@ -260,3 +266,79 @@ static func improve(player: Node, item: ItemData) -> ItemData:
 	if skills != null:
 		skills.add_xp(&"smithing", 8.0 + float(item.tier) * 3.0)
 	return better
+
+
+# ---------------------------------------------------------------- 1.25: salvage
+
+## What breaking down a weapon or armour piece gives back: [[material id, count]] (empty = nothing)
+static func salvage_yield(item: ItemData) -> Array:
+	if item == null or not (item.item_type == ItemData.ItemType.WEAPON or item.item_type == ItemData.ItemType.ARMOR):
+		return []
+	if item.legendary if "legendary" in item else false:
+		return []
+	var out: Array = []
+	var t := clampi(item.tier - 1, 0, TIER_INGOT.size() - 1)
+	var heavy := item.governing_skill == "heavy_armor" or item.item_type == ItemData.ItemType.WEAPON
+	var n := clampi(int(item.weight / 6.0), 1, 4)
+	if heavy:
+		out.append([TIER_INGOT[t], n])
+	else:
+		out.append(["leather", n])
+	out.append(["leather_strips", 1])
+	return out
+
+
+## Breaks an item down; returns what you got ("" = nothing)
+static func salvage(player: Node, item: ItemData) -> String:
+	var inv := player.get_node_or_null("Inventory") as Inventory if player != null else null
+	var back := salvage_yield(item)
+	if inv == null or back.is_empty() or not inv.has_item(item):
+		return ""
+	var eq := player.get_node_or_null("Equipment") as Equipment
+	if eq != null:
+		for slot in eq.slots:
+			if eq.slots[slot] == item and inv.get_count(item) <= 1:
+				return ""  # not what you are wearing
+	inv.remove_item(item, 1)
+	var parts := PackedStringArray()
+	for b in back:
+		var m := load_item(MAT + String(b[0]) + ".tres")
+		if m != null:
+			inv.add_item(m, int(b[1]))
+			parts.append("%s x%d" % [m.display_name, int(b[1])])
+	var skills := player.get_node_or_null("Skills") as Skills
+	if skills != null:
+		skills.add_xp(&"smithing", 3.0)
+	return ", ".join(parts)
+
+
+# ---------------------------------------------------------------- 1.25: recipes you discover
+
+const KNOWN := "known_materials"
+
+
+## Remembers every material now in a bag (a recipe shows once you have held all it needs)
+static func learn_from(inv: Inventory) -> void:
+	if inv == null:
+		return
+	var rec := WorldState.get_record(KNOWN)
+	var changed := false
+	for s in inv.stacks:
+		var id := String(s.item.id)
+		if not rec.has(id):
+			if not changed:
+				rec = rec.duplicate()
+			rec[id] = true
+			changed = true
+	if changed:
+		WorldState.set_record(KNOWN, rec)
+
+
+static func is_known(r: Dictionary, inv: Inventory) -> bool:
+	learn_from(inv)
+	var rec := WorldState.get_record(KNOWN)
+	for i in r.get("inputs", []):
+		var it := load_item(String(i[0]))
+		if it == null or not rec.has(String(it.id)):
+			return false
+	return true

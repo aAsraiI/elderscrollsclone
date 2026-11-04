@@ -19,3 +19,17 @@ cold, World Creation option). Test suite: `test/test_alpha125.gd`.
 - **Tiredness**: weary and exhausted, your skills improve more slowly.
 - **Comfort**: sleeping in a house or inn, by a fire, among furnishings makes your Well Rested longer
   (4 to 12 hours) and stronger.
+
+## Gathering and tools (1.25.2)
+
+- **Things to gather** on every stretch of land, a few per 64 m: rocks (stone, sometimes flint: needs any
+  pickaxe), fallen branches (firewood), fibre plants (plant fibre) and clay at the water's edge. E gathers;
+  they grow back in two or three days. New materials: Stone, Flint, Firewood, Plant Fibre, Clay.
+- **Pickaxe tiers**: Stone Pickaxe (stone, firewood and fibre at a workbench), Pickaxe (iron), Steel, Ebon,
+  Astral (at the forge). Iron and corundum need any pick; silver and gold an iron one; obsidian and
+  ebony steel; dragonstone and star-metal ebon; the island ores astral. Your best pick in the pack counts.
+- **Rope** from plant fibre at a workbench.
+- **Salvage** (a new tab at the forge): break weapons and armour down for their ingots or leather, and a
+  strip of leather. Not what you are wearing, and not legendaries.
+- **Recipes you discover**: a crafting recipe shows once you have held everything it needs (whatever is
+  in your pack counts the moment you open a station).

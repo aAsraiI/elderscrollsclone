@@ -43,6 +43,7 @@ func _run() -> void:
 		(p.get_node("Stats") as Stats).add_modifiers("test_tough", {"max_health": 100000.0})
 		wm.clock.set_time(12.0)
 		await t_body()
+		await t_gathering()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	GameRules.set_rule("survival", false)
@@ -102,3 +103,60 @@ func t_body() -> void:
 	surv._update_stages()
 	check("more comfort, a longer rest", Survival.rest_minutes(4) > Survival.rest_minutes(0))
 	check("heat and wet have stages too", surv.status_lines() is PackedStringArray and Survival.STAGE_NAMES.has("heat") and Survival.STAGE_NAMES.has("wet"))
+
+
+func t_gathering() -> void:
+	print("-- gathering, tools, salvage, recipes")
+	var inv := p.get_node("Inventory") as Inventory
+	var nodes := root.find_children("*", "StaticBody3D", true, false).filter(func(n): return n is HarvestNode and (n as HarvestNode).kind in HarvestNode.GATHER)
+	check("the land has things to gather", nodes.size() > 0, str(nodes.size()))
+	var kinds := {}
+	for n in nodes:
+		kinds[(n as HarvestNode).kind] = true
+	check("of several kinds", kinds.size() >= 2, str(kinds.keys()))
+	# gather some by hand
+	var fibre: HarvestNode = null
+	var rock: HarvestNode = null
+	for n in nodes:
+		if (n as HarvestNode).kind in ["fibre", "branches", "clay"] and fibre == null and (n as HarvestNode).is_ready():
+			fibre = n
+		if (n as HarvestNode).kind == "rock" and rock == null and (n as HarvestNode).is_ready():
+			rock = n
+	if fibre != null:
+		var before := inv.stacks.size()
+		fibre.interact(inv)
+		check("gathering by hand fills your pack", inv.stacks.size() > before or not fibre.is_ready())
+		check("and it grows back later, not now", not fibre.is_ready())
+	if rock != null:
+		var stone := load("res://data/materials/stone.tres") as ItemData
+		var n0 := inv.get_count(stone)
+		rock.interact(inv)
+		check("stone needs a pick", inv.get_count(stone) == n0)
+		inv.add_item(load("res://data/materials/stone_pickaxe.tres"), 1)
+		rock.interact(inv)
+		check("a stone pick will do", inv.get_count(stone) > n0)
+	# picks by tier
+	check("a stone pick is the lowest tier", HarvestNode.pick_tier(inv) == 0)
+	check("obsidian needs a steel pick", int(HarvestNode.ORE_TIER["obsidian_ore"]) == 2)
+	inv.add_item(load("res://data/materials/steel_pickaxe.tres"), 1)
+	check("your best pick counts", HarvestNode.pick_tier(inv) == 2)
+	# salvage
+	var sword := load("res://data/weapons/iron_sword.tres") as ItemData
+	inv.add_item(sword, 1)
+	var ingot := load("res://data/materials/iron_ingot.tres") as ItemData
+	var i0 := inv.get_count(ingot)
+	var got := Recipes.salvage(p, sword)
+	check("a sword breaks down into iron", got != "" and inv.get_count(ingot) > i0, got)
+	# recipes you discover
+	WorldState.erase_record(Recipes.KNOWN)
+	var stone_pick: Dictionary = {}
+	for r in Recipes.for_station("workbench"):
+		if String(r["result"]).ends_with("stone_pickaxe.tres"):
+			stone_pick = r
+	var empty := Inventory.new()
+	check("a recipe stays hidden until you have held what it needs", not Recipes.is_known(stone_pick, empty))
+	empty.add_item(load("res://data/materials/stone.tres"), 1)
+	empty.add_item(load("res://data/materials/firewood.tres"), 1)
+	empty.add_item(load("res://data/materials/plant_fibre.tres"), 1)
+	check("then it shows", Recipes.is_known(stone_pick, empty))
+	empty.free()

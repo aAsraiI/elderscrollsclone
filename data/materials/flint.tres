@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_o45as"]
+
+[resource]
+script = ExtResource("1_o45as")
+id = &"flint"
+display_name = "Flint"
+description = "A sharp, glassy stone. Struck on steel it makes sparks; knapped, an edge."
+item_type = 7
+weight = 0.3
+value = 3
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("camp")
+ingredient_effects = PackedStringArray()

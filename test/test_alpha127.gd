@@ -42,12 +42,14 @@ func _run() -> void:
 		(p.get_node("Stats") as Stats).add_modifiers("test_tough", {"max_health": 100000.0})
 		(p.get_node("Stats") as Stats).revive()
 		wm.clock.set_time(12.0)
+		GameRules._rules["encounter_rate"] = 0.0
 		await t_data()
 		await t_achievements()
 		await t_guide()
 		await t_journal()
 		await t_ranged()
 		await t_durability()
+		await t_build()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -176,6 +178,10 @@ func t_journal() -> void:
 
 func t_ranged() -> void:
 	print("-- crossbows, thrown weapons, where it hits")
+	for e in get_nodes_in_group("enemies"):  # nothing wanders in and knocks the bow about
+		if not e.has_meta("player_ally"):
+			e.queue_free()
+	await frames(2)
 	var inv := p.get_node("Inventory") as Inventory
 	var eq := p.get_node("Equipment") as Equipment
 	var rc := p.get_node("RangedCombat") as RangedCombat
@@ -193,7 +199,8 @@ func t_ranged() -> void:
 	check("it shoots bolts", rc.best_arrow() == bolt)
 	var shots := Achievements.count("shot")
 	rc.begin_draw()
-	check("one click shoots at full power", inv.get_count(bolt) == 9 and Achievements.count("shot") == shots + 1)
+	check("one click shoots at full power", inv.get_count(bolt) == 9 and Achievements.count("shot") == shots + 1, "%d bolts, shots %d->%d, stunned %s" % [inv.get_count(bolt), shots, Achievements.count("shot"), (p.get_node("MeleeCombat") as MeleeCombat).is_stunned()])
+	var mc := p.get_node("MeleeCombat") as MeleeCombat
 	check("then it has to be wound again", rc.reload_ratio() < 0.2 and not rc.begin_draw() and inv.get_count(bolt) == 9)
 	await secs(cb.draw_time + 0.2)
 	check("and is ready after its reload time", rc.reload_ratio() >= 1.0)
@@ -203,9 +210,9 @@ func t_ranged() -> void:
 	await frames(2)
 	check("throwing knives go in the hand as a stack", eq.get_main_hand() == knife and rc.best_arrow() == knife)
 	rc.begin_draw()
+	var flying := root.find_children("*", "Arrow", true, false)
 	await frames(2)
 	check("left click throws one", inv.get_count(knife) == 2)
-	var flying := root.find_children("*", "Arrow", true, false)
 	check("it flies as a knife", flying.any(func(a: Node) -> bool: return (a as Arrow).item == knife and a.get_node_or_null("Spin") != null))
 	check("the forge makes them", Recipes.all().any(func(r: Dictionary) -> bool: return String(r["result"]).ends_with("iron_throwing_knife.tres")) and Recipes.all().any(func(r: Dictionary) -> bool: return String(r["result"]).ends_with("iron_crossbow.tres")))
 	# where it hits
@@ -255,3 +262,49 @@ func t_durability() -> void:
 	check("with it off nothing wears", Durability.weapon_mult(sword) == 1.0 and Durability.text(sword) == "")
 	GameRules._rules["durability"] = true
 	WorldState.erase_record(Durability.RECORD)
+
+
+func t_build() -> void:
+	print("-- perk moves, synergies, titles")
+	var sk := p.get_node("Skills") as Skills
+	var pa := p.get_node_or_null("PerkAbilities") as PerkAbilities
+	check("the player has perk moves", pa != null)
+	check("none until a perk gives one", PerkAbilities.owned(p).is_empty() and pa.use() != "")
+	sk.build.owned["wa_whirlwind_sprint"] = 1
+	sk.build.owned["g_shield_charge"] = 1
+	check("a perk gives a move", PerkAbilities.owned(p) == ["shield_charge", "whirlwind"])
+	check("Shift+G picks the next", pa.cycle() == "whirlwind" and pa.current() == "whirlwind")
+	(p.get_node("Stats") as Stats).modify_vital("stamina", 1000.0)
+	var start := p.global_position
+	check("G uses it", pa.use() == "")
+	await secs(0.5)
+	var moved := Vector2(p.global_position.x - start.x, p.global_position.z - start.z).length()
+	check("whirlwind sprint carries you far", moved > 6.0, "%.1f m" % moved)
+	check("then it has a cooldown", pa.use() != "" and pa.cooldown_left("whirlwind") > 5.0)
+	pa.cycle()
+	var at := p.global_position - p.global_transform.basis.z * 3.0
+	at.y = wm.get_height_at(at.x, at.z) + 0.5
+	var foe := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 5, wm, at, RandomNumberGenerator.new())
+	await frames(3)
+	var hp := foe.stats.health
+	(p.get_node("Stats") as Stats).modify_vital("stamina", 1000.0)
+	check("shield charge works", pa.current() == "shield_charge" and pa.use() == "")
+	check("and strikes whoever is in the way", foe.stats.health < hp, "%.0f -> %.0f" % [hp, foe.stats.health])
+	foe.queue_free()
+	# synergies
+	check("no synergy from one tree", sk.build.synergies().is_empty())
+	sk.build.owned["w_brawn"] = 1
+	sk.build.owned["s_spell_mastery"] = 1
+	sk.build.apply()
+	sk.build.announce_synergies(self)
+	check("two perks from two trees give a hidden third", sk.build.synergies().any(func(s: Array) -> bool: return s[0] == "spellblade"))
+	check("its bonus counts", (p.get_node("Stats") as Stats).get_stat("spell_power") >= 0.1 - 0.001, str((p.get_node("Stats") as Stats).get_stat("spell_power")))
+	check("it is announced once", Achievements.count("synergy") == 1)
+	sk.build.announce_synergies(self)
+	check("only once", Achievements.count("synergy") == 1)
+	# titles
+	check("no title before level 10", CharacterBuild.title(sk) == "" or sk.get_player_level() >= 10)
+	for i in 40:
+		sk.set_level(&"sneak", sk.get_level(&"sneak") + 1)
+		sk.set_level(&"security", sk.get_level(&"security") + 1)
+	check("a build earns a title", sk.get_player_level() < 10 or CharacterBuild.title(sk) != "", "%d %s" % [sk.get_player_level(), CharacterBuild.archetype(sk)])

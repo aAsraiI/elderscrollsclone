@@ -228,6 +228,13 @@ func _physics_process(delta: float) -> void:
 
 	velocity.x = lerpf(velocity.x, direction.x * speed, accel * delta)
 	velocity.z = lerpf(velocity.z, direction.z * speed, accel * delta)
+	if has_meta("dash"):  # 1.27: a perk move (PerkAbilities) carries you for a moment
+		var dash: Dictionary = get_meta("dash")
+		if Time.get_ticks_msec() < int(dash["until"]):
+			velocity.x = (dash["vel"] as Vector3).x
+			velocity.z = (dash["vel"] as Vector3).z
+		else:
+			remove_meta("dash")
 
 	var was_in_air := not is_on_floor()
 	var falling_speed := -velocity.y
@@ -375,7 +382,7 @@ func _ensure_helpers() -> void:
 		right.name = "SpellCasterRight"
 		right.hand = "right"
 		add_child(right)
-	for extra in [["Afflictions", Afflictions], ["Survival", Survival], ["Powers", Powers], ["NightVision", NightVision], ["ThirdPerson", ThirdPerson], ["Swimming", Swimming], ["Rider", Rider], ["SoundFX", SoundFX], ["Tutorial", Tutorial], ["Followers", Followers], ["RangedCombat", RangedCombat], ["CouncilUI", CouncilUI], ["DebugConsole", DebugConsole], ["Homestead", Homestead]]:
+	for extra in [["Afflictions", Afflictions], ["Survival", Survival], ["Powers", Powers], ["NightVision", NightVision], ["ThirdPerson", ThirdPerson], ["Swimming", Swimming], ["Rider", Rider], ["SoundFX", SoundFX], ["Tutorial", Tutorial], ["Followers", Followers], ["RangedCombat", RangedCombat], ["CouncilUI", CouncilUI], ["DebugConsole", DebugConsole], ["Homestead", Homestead], ["PerkAbilities", PerkAbilities]]:
 		if get_node_or_null(extra[0]) == null:
 			var n: Node = extra[1].new()
 			n.name = extra[0]

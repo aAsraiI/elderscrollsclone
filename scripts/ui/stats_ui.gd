@@ -787,6 +787,18 @@ func _refresh_build() -> void:
 	for e in top:
 		best.append("%s %d (%s)" % [(e[0] as SkillData).display_name, int(e[1]), SkillDatabase.rank_name(int(e[1]))])
 	t += "Best skills: %s\n" % ", ".join(best)
+	if CharacterBuild.title(skills) != "":
+		t += "People call you [b]%s[/b].\n" % CharacterBuild.title(skills)  # 1.27
+	if skills.build != null and not skills.build.synergies().is_empty():
+		var syn := PackedStringArray()
+		for s in skills.build.synergies():
+			syn.append("%s (%s)" % [s[1], s[5]])
+		t += "Synergies: %s\n" % "; ".join(syn)
+	if not PerkAbilities.owned(get_parent()).is_empty():
+		var mv := PackedStringArray()
+		for id in PerkAbilities.owned(get_parent()):
+			mv.append(String(PerkAbilities.LIST[id][0]))
+		t += "Moves (G, Shift+G for the next): %s\n" % ", ".join(mv)
 	var player := get_parent()
 	if player != null and player.has_meta("character"):
 		var data: Dictionary = player.get_meta("character")

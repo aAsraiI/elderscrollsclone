@@ -79,6 +79,10 @@ static func aside(s: DialogueEngine.Speaker, player: Node) -> String:
 		options.append(CLASS_LINES[arche])
 	if BACKGROUND_LINES.has(String(ch.get("background", ""))):
 		options.append(BACKGROUND_LINES[String(ch["background"])])
+	var t := CharacterBuild.title(player.get_node_or_null("Skills") as Skills)  # 1.27: the name your build has earned
+	if t != "":
+		options.append("So you're the one they call %s. I've heard the stories." % t)
+		options.append("%s, is it? The name suits you." % t.capitalize() if t.begins_with("the ") else "%s, is it? The name suits you." % t)
 	if options.is_empty():
 		return ""
 	return options[(h / 1000) % options.size()]

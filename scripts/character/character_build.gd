@@ -123,6 +123,7 @@ func take(id: String) -> bool:
 		return false
 	owned[id] = rank_of(id) + 1
 	apply()
+	announce_synergies(skills.get_tree() if skills != null and skills.is_inside_tree() else null)  # 1.27
 	return true
 
 
@@ -174,6 +175,9 @@ func apply() -> void:
 			continue
 		for k in p["stats"]:
 			perks[k] = float(perks.get(k, 0.0)) + float(p["stats"][k]) * int(owned[id])
+	for syn in synergies():  # 1.27: two perks from different trees give a hidden third
+		for k in syn[4]:
+			perks[k] = float(perks.get(k, 0.0)) + float(syn[4][k])
 	_push("build_perks", perks)
 	var attrs := {}
 	for a in attr_spent:
@@ -190,6 +194,68 @@ func _push(source: String, mods: Dictionary) -> void:
 		skills.stats.remove_modifiers(source)
 	else:
 		skills.stats.add_modifiers(source, mods)
+
+
+# ---------------------------------------------------------------- 1.27: talent synergies
+
+## [id, name, perk a, perk b, stats, what it does]: own both and the third is yours
+const SYNERGIES := [
+	["spellblade", "Spellblade", "w_brawn", "s_spell_mastery", {"damage_pct": 0.05, "spell_power": 0.05}, "Steel and spell: weapons and spells both a little stronger."],
+	["shadow_archer", "Shadow Archer", "m_overdraw", "sh_backstab", {"bow_damage": 0.10, "sneak_attack_bonus": 0.15}, "Arrows from the dark hit harder."],
+	["battlemage", "Battlemage", "g_armor_training", "s_reserves", {"max_magicka": 25.0, "armor_pct": 0.05}, "Armour and magicka both."],
+	["juggernaut", "Juggernaut", "w_battle_hardened", "g_toughness", {"max_health": 30.0, "poise_bonus": 0.10}, "Hard to hurt, hard to stop."],
+	["ranger_stride", "Ranger's Stride", "m_ranger", "wa_fleet", {"move_speed_mult": 0.04, "bow_damage": 0.05}, "Light on your feet with a bow in hand."],
+	["poison_master", "Poison Master", "sh_poisoner", "a_alchemist", {"alchemy_potency": 0.10, "resist_poison": 0.10}, "Poisons that bite, and a body that shrugs them off."],
+	["warlord", "Warlord", "w_precision", "l_commander", {"crit_chance": 0.02, "follower_damage": 0.10}, "You and yours strike true."],
+	["holy_warrior", "Holy Warrior", "g_spell_ward", "l_devout", {"resist_magic": 0.05, "bane_undead": 0.10}, "Faith as armour against the dark."],
+	["wandering_smith", "Wandering Smith", "a_forgemaster", "wa_pack_mule", {"carry_capacity": 25.0, "smithing_potency": 0.05}, "Carry your forge on your back."],
+	["nightblade", "Nightblade", "sh_stealthy", "s_mesmerist", {"power_illusion": 0.10, "noise_mult": -0.05}, "Quiet steps and quieter minds."],
+]
+
+
+## The synergies you have
+func synergies() -> Array:
+	var out := []
+	for syn in SYNERGIES:
+		if rank_of(syn[2]) > 0 and rank_of(syn[3]) > 0:
+			out.append(syn)
+	return out
+
+
+## Says so the first time each one is earned (CharacterBuild.take calls it)
+func announce_synergies(tree: SceneTree) -> void:
+	var known: Array = (WorldState.get_record("synergies").get("ids", []) as Array).duplicate()
+	for syn in synergies():
+		if not known.has(syn[0]):
+			known.append(syn[0])
+			Achievements.note("synergy")
+			if tree != null:
+				Notices.quest(tree, "Synergy", "%s: %s" % [syn[1], syn[5]])
+				DialogueState.system_entry("Knowledge", "Synergy: %s. %s" % [syn[1], syn[5]], "")
+	WorldState.set_record("synergies", {"ids": known})
+
+
+# ---------------------------------------------------------------- 1.27: titles
+
+## A name people call you by, from your build (level 10 and up)
+const TITLES := {
+	"Warrior": "the Bold", "Knight": "the Unbroken", "Mage": "Stormcaller", "Thief": "the Unseen", "Scout": "Swiftfoot",
+	"Diplomat": "Silvertongue", "Artisan": "Steelhand", "Ranger": "the Wild", "Spellsword": "the Spellblade",
+	"Assassin": "the Quiet Knife", "Skirmisher": "the Restless", "Warlord": "the Iron Voice", "Weaponsmith": "Forgeborn",
+	"Hunter": "the Huntsman", "Battlemage": "Spellshield", "Sentinel": "the Watchful", "Vanguard": "the First Through",
+	"Paladin": "the Righteous", "Armorer": "Ironclad", "Warden": "the Warden", "Nightblade": "Nightblade",
+	"Windcaller": "Windcaller", "Sage": "the Wise", "Enchanter": "Runeweaver", "Druid": "Greenwarden", "Acrobat": "the Nimble",
+	"Agent": "the Many-Faced", "Saboteur": "the Saboteur", "Stalker": "Shadowstalker", "Bard": "Songweaver",
+	"Pilgrim": "the Pilgrim", "Wayfarer": "the Wayfarer", "Merchant": "Goldpurse", "Shepherd": "the Shepherd",
+	"Homesteader": "Hearthkeeper", "Adventurer": "the Adventurer",
+}
+const TITLE_LEVEL := 10
+
+
+static func title(sk: Skills) -> String:
+	if sk == null or sk.get_player_level() < TITLE_LEVEL:
+		return ""
+	return String(TITLES.get(archetype(sk), ""))
 
 
 # ---------------------------------------------------------------- what kind of hero

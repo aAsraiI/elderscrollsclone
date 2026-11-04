@@ -130,6 +130,7 @@ static func _warrior() -> void:
 static func _guardian() -> void:
 	var t := "Guardian"
 	_p("g_toughness", "Toughness", t, "You can take a beating.", {"max_health": 15.0}, 5, 1, 8)
+	_p("g_shield_charge", "Shield Charge", t, "A move of your own (G): rush forward, striking and staggering everyone in the way.", {}, 1, 15, 10, ["g_toughness"])  # 1.27
 	_p("g_armor_training", "Armor Training", t, "You get more from the armor you wear.", {"armor_pct": 0.05}, 3, 4, 10)
 	_p("g_shield_wall", "Shield Wall", t, "Your blocks stop more.", {"block_strength": 0.05}, 2, 6, 12)
 	_p("g_iron_guard", "Iron Guard", t, "Blocking tires you less.", {"block_cost_mult": -0.10}, 2, 10, 12, ["g_shield_wall"])
@@ -179,6 +180,7 @@ static func _spellcaster() -> void:
 static func _shadow() -> void:
 	var t := "Shadow"
 	_p("sh_stealthy", "Stealthy", t, "You make less noise.", {"noise_mult": -0.08}, 3, 2, 8)
+	_p("sh_shadow_step", "Shadow Step", t, "A move of your own (G): step behind the foe you look at and fade from sight for 3 s.", {}, 1, 20, 10, ["sh_stealthy"])  # 1.27
 	_p("sh_backstab", "Backstab", t, "Sneak attacks hit much harder.", {"sneak_attack_bonus": 0.25}, 3, 5, 10)
 	_p("sh_light_fingers", "Light Fingers", t, "Locks give way more easily.", {"security_bonus": 0.05}, 3, 3, 10)
 	_p("sh_silent_steps", "Silent Steps", t, "You sneak faster.", {"sneak_speed_mult": 0.10}, 2, 10, 12, ["sh_stealthy"])
@@ -194,6 +196,7 @@ static func _shadow() -> void:
 static func _wanderer() -> void:
 	var t := "Wanderer"
 	_p("wa_fleet", "Fleet", t, "You move faster.", {"move_speed_mult": 0.03}, 3, 2, 10)
+	_p("wa_whirlwind_sprint", "Whirlwind Sprint", t, "A move of your own (G): a burst of speed, 12 m straight ahead in a blink.", {}, 1, 12, 10, ["wa_fleet"])  # 1.27
 	_p("wa_spring_heel", "Spring Heel", t, "You jump higher.", {"jump_mult": 0.10}, 3, 3, 10)
 	_p("wa_rolling_landing", "Rolling Landing", t, "Falls hurt less.", {"fall_resist": 0.15}, 2, 6, 10, ["wa_spring_heel"])
 	_p("wa_pack_mule", "Pack Mule", t, "You carry more.", {"carry_capacity": 25.0}, 4, 1, 8)

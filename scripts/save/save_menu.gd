@@ -267,7 +267,7 @@ func _refresh() -> void:
 		if s["exists"] and not meta.is_empty():
 			row.set_text(1, String(meta.get("time_text", "")).replace("T", "  "))
 			row.set_text(2, SaveUtil.format_duration(float(meta.get("playtime", 0.0))))
-			row.set_text(3, str(int(meta.get("level", 1))))
+			row.set_text(3, str(int(meta.get("level", 1))) + (("  " + String(meta["title"])) if String(meta.get("title", "")) != "" else ""))  # 1.27: the title too
 			row.set_text(4, String(meta.get("location", "")))
 			row.set_text(5, str(int(meta.get("seed", 0))))
 		elif s["exists"]:

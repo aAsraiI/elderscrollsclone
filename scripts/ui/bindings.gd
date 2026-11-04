@@ -19,6 +19,7 @@ const REBINDABLE := [
 	["favorites", "Favorites", KEY_Q], ["wait", "Wait", KEY_T], ["magic_menu", "Magic page", KEY_P],
 	["racial_power", "Racial power", KEY_Z], ["beast_form", "Werewolf: change", KEY_B],
 	["toggle_view", "First / third person", KEY_V], ["quicksave", "Quicksave", KEY_F5], ["quickload", "Quickload", KEY_F9],
+	["perk_ability", "Perk move (Shift: the next one)", KEY_G],
 ]
 const PAD := {
 	"jump": JOY_BUTTON_A, "interact": JOY_BUTTON_X, "sneak": JOY_BUTTON_B, "sprint": JOY_BUTTON_LEFT_STICK,

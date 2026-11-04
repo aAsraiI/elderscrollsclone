@@ -354,6 +354,7 @@ func _make_meta(player: Node3D, world: WorldManager) -> Dictionary:
 		"version": SAVE_VERSION,
 		"game_version": game_version,
 		"level": 1,
+		"title": "",
 		"location": "",
 		"seed": 0,
 	}
@@ -374,6 +375,7 @@ func _make_meta(player: Node3D, world: WorldManager) -> Dictionary:
 	var skills := player.get_node_or_null("Skills") as Skills
 	if skills != null:
 		meta["level"] = skills.get_player_level()
+		meta["title"] = CharacterBuild.title(skills)  # 1.27
 	return meta
 
 

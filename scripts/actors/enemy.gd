@@ -1728,6 +1728,7 @@ func _on_staggered(info: DamageInfo) -> void:
 func _on_died() -> void:
 	if state == State.DEAD:
 		return
+	set_meta("died_at", Time.get_ticks_msec() / 1000.0)  # 1.24: scavengers come to an old body
 	_enter_state(State.DEAD)
 	remove_from_group("enemies")
 	ActorRegistry.remove(self)

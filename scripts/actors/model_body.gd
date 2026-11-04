@@ -34,6 +34,7 @@ const ROLE_CLIPS := {
 	"work": ["Interact", "Use_Item", "PickUp"],
 	"chop": ["1H_Melee_Attack_Chop", "2H_Melee_Attack_Chop", "Punch"],
 	"talk": ["Idle_B", "Taunt", "Clapping", "Idle"],
+	"graze": ["Eating", "Eat", "Idle3", "Idle2", "Idle4", "Idle"],  # 1.24: animals grazing, drinking
 	"drink": ["Use_Item", "Idle"],
 	"stun": ["Hit_B", "Hit_A", "Hit"],
 }
@@ -408,6 +409,7 @@ func animate(delta: float, speed: float) -> void:
 			&"chop": _play("chop", 0.6); return
 			&"talk": _play("talk"); return
 			&"drink": _play("drink"); return
+			&"graze": _play("graze", 0.8); return
 	if fighting:
 		var main: ItemData = e.equipment.get_main_hand() if e != null and e.equipment != null else null
 		_play("idle_combat_2h" if main != null and main.two_handed else "idle_combat")

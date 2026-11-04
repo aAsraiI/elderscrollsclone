@@ -60,6 +60,7 @@ func _process(delta: float) -> void:
 		return
 	_spawn_t = SPAWN_EVERY
 	_let_go(p)
+	_scavengers(p)
 	if not enabled or inside or groups.size() >= MAX_GROUPS or _near_town(p.global_position):
 		return
 	_spawn_group(p)
@@ -226,12 +227,17 @@ func _tend(p: Node3D) -> void:
 				continue
 			if ActorLOD.is_frozen(en):
 				continue
+			if en.has_meta("scavenge_to") and en.state == Enemy.State.IDLE:
+				var to: Vector3 = en.get_meta("scavenge_to")
+				en.remove_meta("scavenge_to")
+				en.follow_route(PackedVector3Array([to]), false, 0.6)  # off to the body
 			if lead_ok and en != leader and en.has_meta("follows") and en.get_fight_target() == null:
 				en._home = leader.global_position  # wander around the lead animal
 				if en.global_position.distance_to(leader.global_position) > 12.0 and en.state == Enemy.State.IDLE:
 					en.follow_route(PackedVector3Array([leader.global_position]), false, 0.8)
 			if bool(g["prey"]):
 				_prey_watch(en, ppos, sneaking, wind)
+			_mood(en, g)  # 1.24: grazing by day, drinking at the water
 
 
 # A deer notices you further off upwind of it, less when you sneak; and a predator near it
@@ -327,3 +333,59 @@ func _den_quiet(at: Vector3) -> bool:
 		if today - int(rec.get("day", today)) < DEN_QUIET_DAYS:
 			return true
 	return false
+
+
+# ---------------------------------------------------------------- moods and scavengers (1.24.10)
+
+## A calm animal grazes now and then by day; a herd drinks at the water if it is close
+func _mood(e: Enemy, g: Dictionary) -> void:
+	if e.body == null or e.state != Enemy.State.IDLE or e.get_fight_target() != null:
+		if e.body != null and e.body.pose == &"graze" and e.state != Enemy.State.IDLE:
+			e.body.pose = &""
+		return
+	var night := world.clock != null and world.clock.is_night()
+	var k := absi(("%d|%d" % [e.get_instance_id(), int(Time.get_ticks_msec() / 8000)]).hash())
+	e.body.pose = &"graze" if not night and k % 3 != 0 else &""
+	# the lead animal takes the herd down to drink, once in a while
+	if e == g["leader"] and not g.has("drank") and k % 11 == 0 and world.map != null:
+		g["drank"] = true
+		for i in 8:
+			var a := float(i) / 8.0 * TAU
+			var at := e.global_position + Vector3(cos(a), 0, sin(a)) * 18.0
+			if world.get_height_at(at.x, at.z) < world.map.get_water_level(at.x, at.z):
+				var shore := e.global_position.lerp(at, 0.75)
+				shore.y = world.get_height_at(shore.x, shore.z)
+				e.follow_route(PackedVector3Array([shore]), false, 0.5)
+				break
+
+
+var _scav_t := 10.0
+
+## Crows come first (AmbientLife); a little later a fox, or a wolf after dark, comes for a body left out
+func _scavengers(p: Node3D) -> void:
+	if not enabled or (world.dungeons != null and world.dungeons.is_inside()):
+		return
+	_scav_t -= SPAWN_EVERY
+	if _scav_t > 0.0:
+		return
+	_scav_t = 20.0
+	var now := Time.get_ticks_msec() / 1000.0
+	for n in get_tree().get_nodes_in_group("persistent"):
+		var e := n as Enemy
+		if e == null or not e.is_dead() or not e.is_inside_tree() or e.has_meta("scavenged") or e.has_meta("wild_scavenger"):
+			continue
+		if now - float(e.get_meta("died_at", now)) < 60.0:
+			continue
+		var d := e.global_position.distance_to(p.global_position)
+		if d < 35.0 or d > 140.0:
+			continue
+		e.set_meta("scavenged", true)
+		var night := world.clock != null and world.clock.is_night()
+		var kind := "wolf" if night else "fox"
+		var from := e.global_position + Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)).normalized() * 30.0
+		from.y = world.get_height_at(from.x, from.z)
+		var grp := spawn({"kind": kind, "group": [1, 1]}, from)
+		for s in grp.get("members", []):
+			(s as Enemy).set_meta("wild_scavenger", true)
+			(s as Enemy).set_meta("scavenge_to", e.global_position)
+		return

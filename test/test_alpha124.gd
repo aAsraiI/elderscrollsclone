@@ -51,6 +51,7 @@ func _run() -> void:
 	await t_surfaces()
 	await t_takedowns()
 	await t_chaos()
+	await t_wild_more()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -773,3 +774,49 @@ func t_chaos() -> void:
 		e.combat.take_damage(hot)
 		await frames(1)
 	check("a kill by fire is counted", e.is_dead() and Takedowns.tally("burned") == burned + 1)
+
+
+func t_wild_more() -> void:
+	print("-- moods, scavengers, blood trails")
+	var wm := get_first_node_in_group("world_manager") as WorldManager
+	var p := get_first_node_in_group("player") as CharacterBody3D
+	var wl := get_first_node_in_group("wild_life") as WildLife
+	var marks := get_first_node_in_group("world_marks") as WorldMarks
+	check("wild beasts go for townsfolk (and guards fight them)", CreatureFactions.relation("beasts", "town") == CreatureFactions.Rel.HOSTILE)
+	wm.clock.set_time(11.0)
+	var at := p.global_position + Vector3(60, 0, 0)
+	at.y = wm.get_height_at(at.x, at.z)
+	var herd := wl.spawn({"kind": "deer", "group": [4, 4], "herd": true}, at)
+	SpawnQueue.flush()
+	await frames(5)
+	var grazing := 0
+	for k in 12:
+		wl._tend(p)
+		for e in herd["members"]:
+			if is_instance_valid(e) and e.body != null and e.body.pose == &"graze":
+				grazing += 1
+		if grazing > 0:
+			break
+		await secs(1.0)
+	check("by day a herd grazes", grazing > 0)
+	# a body left out draws a scavenger
+	var groups_before := wl.groups.size()
+	var corpse := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 3, wm, p.global_position + Vector3(0, 0, 60), RandomNumberGenerator.new())
+	await frames(3)
+	corpse.combat.take_damage(DamageInfo.new(999999.0, p, &"melee"))
+	await frames(3)
+	corpse.set_meta("died_at", -1000.0)
+	wl._scav_t = 0.0
+	wl.enabled = true
+	wl._scavengers(p)
+	wl.enabled = false
+	check("a body left out draws a scavenger", wl.groups.size() > groups_before and corpse.has_meta("scavenged"))
+	# a wounded deer leaves a trail
+	var d: Enemy = herd["members"][0]
+	d.stats.modify_vital("health", -d.stats.get_stat("max_health") * 0.5)
+	d.flee_from(p, 10.0)
+	p.global_position = d.global_position + Vector3(-20, 1, 0)
+	for k in 5:
+		marks._blood_trails()
+		await secs(0.6)
+	check("a wounded animal running away leaves a blood trail", marks._drops != null)

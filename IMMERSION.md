@@ -184,3 +184,14 @@ comes running). A blade just bites the wood. Gates still need their lever.
 - **Kills by the world**: anything that dies to a fire, a shock through water or a fall (with you behind
   it) is counted (burned / shocked / other) and gives a little experience: a kill without a blade.
 - Not yet: the sandbox dungeon (one or two hand-made open levels).
+
+## More wildlife (1.24.10)
+
+- **Moods**: calm animals graze now and then by day and stand quiet at night; a herd's lead animal takes it
+  down to drink when there is water close by.
+- **Scavengers**: crows come down to a body left out first; a minute or more later a fox (a wolf after
+  dark) comes for it.
+- **Animals and people**: wild beasts and townsfolk are now at war: wolves go for villagers and travellers
+  on the road, and guards fight them off (and towns sound the horn when they get in).
+- **Blood trails**: a wounded animal running away leaves drops of blood to follow (they fade in three
+  minutes).

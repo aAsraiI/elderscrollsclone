@@ -56,6 +56,7 @@ func _process(delta: float) -> void:
 		_fade_t = 1.0
 		_fade_prints()
 		_blood()
+		_blood_trails()
 	_sound_t -= delta
 	if _sound_t <= 0.0:
 		_sound_t = 1.5
@@ -294,3 +295,67 @@ func _sounds(inside: bool) -> void:
 		_howled[key] = world.clock.day
 		SoundFX.at(get_tree(), lead.global_position + Vector3.UP, "howl", 260.0, randf_range(0.9, 1.1))
 		return
+
+
+# ---------------------------------------------------------------- blood trails (1.24.10)
+
+const DROPS := 60
+var _drops: MultiMeshInstance3D
+var _drop_i := 0
+var _drop_born := PackedFloat32Array()
+var _drop_last := {}  # animal id -> where it last bled
+
+
+## A wounded animal running away leaves drops of blood to follow
+func _blood_trails() -> void:
+	if world.dungeons != null and world.dungeons.is_inside():
+		return
+	for e in ActorRegistry.near(_player.global_position, 90.0):
+		if not e.has_meta("wild") or e.is_dead() or e.state != Enemy.State.FLEE:
+			continue
+		if e.stats.health > e.stats.get_stat("max_health") * 0.85:
+			continue
+		var id := e.get_instance_id()
+		var last: Vector3 = _drop_last.get(id, Vector3.INF)
+		if last.is_finite() and last.distance_to(e.global_position) < 1.5:
+			continue
+		_drop_last[id] = e.global_position
+		_drop(e.global_position)
+	if _drops != null:
+		for i in DROPS:
+			var age := _clock - _drop_born[i]
+			if age >= 0.0 and age < 182.0:
+				_drops.multimesh.set_instance_color(i, Color(0.35, 0.02, 0.02, clampf(0.9 * (1.0 - age / 180.0), 0.0, 0.9)))
+
+
+func _drop(at: Vector3) -> void:
+	if _drops == null:
+		_drop_born.resize(DROPS)
+		_drop_born.fill(-1000.0)
+		var quad := QuadMesh.new()
+		quad.size = Vector2(0.16, 0.16)
+		quad.orientation = PlaneMesh.FACE_Y
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.vertex_color_use_as_albedo = true
+		quad.material = mat
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = true
+		mm.mesh = quad
+		mm.instance_count = DROPS
+		for i in DROPS:
+			mm.set_instance_transform(i, Transform3D(Basis(), Vector3(0, -10000, 0)))
+			mm.set_instance_color(i, Color(0, 0, 0, 0))
+		_drops = MultiMeshInstance3D.new()
+		_drops.name = "BloodTrail"
+		_drops.multimesh = mm
+		_drops.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_drops.custom_aabb = AABB(Vector3(-100000, -1000, -100000), Vector3(200000, 2000, 200000))
+		world.add_child(_drops)
+	var g := Vector3(at.x + randf_range(-0.2, 0.2), world.get_height_at(at.x, at.z) + 0.03, at.z + randf_range(-0.2, 0.2))
+	_drops.multimesh.set_instance_transform(_drop_i, Transform3D(Basis(Vector3.UP, randf() * TAU).scaled(Vector3.ONE * randf_range(0.6, 1.3)), g))
+	_drops.multimesh.set_instance_color(_drop_i, Color(0.35, 0.02, 0.02, 0.9))
+	_drop_born[_drop_i] = _clock
+	_drop_i = (_drop_i + 1) % DROPS

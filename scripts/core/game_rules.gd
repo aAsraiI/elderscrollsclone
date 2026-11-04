@@ -17,6 +17,8 @@ const DEFAULTS := {
 	"fast_travel": true,
 	## Fast travel reaches only towns and wayside inns (1.26), and long trips may be waylaid
 	"fast_travel_towns": false,
+	## 1.27: weapons and armour wear down with use and need repair (Durability)
+	"durability": true,
 	## Where the story starts (1.26): "gate" (outside a town), "inn" (a wayside inn), "shipwreck" (washed up on a shore), "wilds" (alone, far from the roads)
 	"start": "gate",
 	## Quest targets on the map and compass
@@ -48,10 +50,10 @@ static var _rules: Dictionary = {}
 
 ## World Creation presets (1.26): a set of the rules above, then fine-tune
 const PRESETS := {
-	"Story": {"survival": false, "afflictions": false, "ironman": false, "difficulty": 1, "death": "reload", "quest_markers": true, "fast_travel": true, "fast_travel_towns": false, "spawn_density": 0.7, "raid_rate": 0.0, "enemy_toughness": 0.8, "encounter_rate": 0.6},
-	"Adventurer": {"survival": false, "afflictions": true, "ironman": false, "difficulty": 2, "death": "reload", "quest_markers": true, "fast_travel": true, "fast_travel_towns": false, "spawn_density": 1.0, "raid_rate": 1.0, "enemy_toughness": 1.0, "encounter_rate": 1.0},
-	"Survivor": {"survival": true, "afflictions": true, "ironman": false, "difficulty": 2, "death": "grave", "quest_markers": true, "fast_travel": true, "fast_travel_towns": true, "spawn_density": 1.2, "raid_rate": 1.2, "enemy_toughness": 1.1, "encounter_rate": 1.2},
-	"Hardcore": {"survival": true, "afflictions": true, "ironman": true, "difficulty": 3, "death": "grave", "quest_markers": false, "fast_travel": false, "fast_travel_towns": true, "spawn_density": 1.5, "raid_rate": 1.5, "enemy_toughness": 1.25, "encounter_rate": 1.5},
+	"Story": {"durability": false, "survival": false, "afflictions": false, "ironman": false, "difficulty": 1, "death": "reload", "quest_markers": true, "fast_travel": true, "fast_travel_towns": false, "spawn_density": 0.7, "raid_rate": 0.0, "enemy_toughness": 0.8, "encounter_rate": 0.6},
+	"Adventurer": {"durability": true, "survival": false, "afflictions": true, "ironman": false, "difficulty": 2, "death": "reload", "quest_markers": true, "fast_travel": true, "fast_travel_towns": false, "spawn_density": 1.0, "raid_rate": 1.0, "enemy_toughness": 1.0, "encounter_rate": 1.0},
+	"Survivor": {"durability": true, "survival": true, "afflictions": true, "ironman": false, "difficulty": 2, "death": "grave", "quest_markers": true, "fast_travel": true, "fast_travel_towns": true, "spawn_density": 1.2, "raid_rate": 1.2, "enemy_toughness": 1.1, "encounter_rate": 1.2},
+	"Hardcore": {"durability": true, "survival": true, "afflictions": true, "ironman": true, "difficulty": 3, "death": "grave", "quest_markers": false, "fast_travel": false, "fast_travel_towns": true, "spawn_density": 1.5, "raid_rate": 1.5, "enemy_toughness": 1.25, "encounter_rate": 1.5},
 }
 
 

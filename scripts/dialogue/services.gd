@@ -73,8 +73,9 @@ static func why_not(id: String, s: DialogueEngine.Speaker, world: WorldManager, 
 			if not Factions.is_member(leader):
 				return "members only"
 		"repair":
-			if inv != null and Currency.get_gold(inv) < REPAIR_FEE:
-				return "%d gold" % REPAIR_FEE
+			var fee := repair_fee(player)
+			if inv != null and Currency.get_gold(inv) < fee:
+				return "%d gold" % fee
 		"enchant":
 			if not Factions.is_member("mages"):
 				return "members only"
@@ -184,8 +185,22 @@ static func travel(s: DialogueEngine.Speaker, world: WorldManager, player: Node)
 
 
 ## The smith mends your gear at the forge (Smithing improves it)
+## 1.27: with gear that wears, a smith mends everything you have on (priced by the wear); otherwise
+## (or with nothing worn) you rent the forge
+static func repair_fee(player: Node) -> int:
+	var price := Durability.smith_price(player) if Durability.enabled() and player != null else 0
+	return price if price > 0 else REPAIR_FEE
+
+
 static func repair(player: Node) -> String:
 	var inv := player.get_node("Inventory") as Inventory
+	var price := Durability.smith_price(player) if Durability.enabled() else 0
+	if price > 0:
+		if not Currency.spend_gold(inv, price):
+			return "Mending all that is %d gold." % price
+		var n := Durability.mend_worn(player, 100.0)
+		Achievements.note("repair")
+		return "There. Good as new, all %d of them. %d gold." % [n, price]
 	if not Currency.spend_gold(inv, REPAIR_FEE):
 		return "That's %d gold for the forge." % REPAIR_FEE
 	var ui := player.get_tree().get_first_node_in_group("crafting_ui") as CraftingUI

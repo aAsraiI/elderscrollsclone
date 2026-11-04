@@ -609,6 +609,9 @@ func take_damage(info: DamageInfo) -> float:
 			amount *= Weather.WET_MULT.get(info.element, 1.0)
 	else:
 		var armor := stats.get_stat("armor")
+		if body != null and body.is_in_group("player") and Durability.enabled():
+			armor *= Durability.armor_mult(body)  # 1.27: worn armour stops less, and takes the blow
+			Durability.wear_armor(body)
 		if info.weapon != null:
 			armor *= 1.0 - info.weapon.armor_pierce  # maces crush through part of it
 		armor *= 1.0 - BuildHooks.armor_pen(info.source)  # perks and skills that break armor

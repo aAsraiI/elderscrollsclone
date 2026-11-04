@@ -203,6 +203,7 @@ func _world_page() -> void:
 	_choice(g, "Difficulty", Difficulty.NAMES, int(rules["difficulty"]), func(i: int) -> void: rules["difficulty"] = i)
 	_check(g, "Survival mode", "survival", "Hunger, fatigue and cold")
 	_check(g, "Afflictions", "afflictions", "Diseases, vampirism and lycanthropy")
+	_check(g, "Gear wears down", "durability", "Weapons and armour wear with use and need repair")
 	_check(g, "Ironman", "ironman", "One life: death deletes the save")
 	_choice(g, "When you die", DeathRules.NAMES.slice(0, 3), maxi(DeathRules.KINDS.find(String(rules.get("death", "reload"))), 0), func(i: int) -> void: rules["death"] = DeathRules.KINDS[i])
 	_check(g, "Fast travel", "fast_travel", "Click the map twice to travel (carriages always work)")

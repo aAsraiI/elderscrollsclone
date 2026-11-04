@@ -47,6 +47,7 @@ func _run() -> void:
 		await t_guide()
 		await t_journal()
 		await t_ranged()
+		await t_durability()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -220,3 +221,37 @@ func t_ranged() -> void:
 	var am := ActiveMagic.of(foe)
 	check("a leg hit slows them", is_equal_approx(leg.amount, 10.0) and am != null and am.has_effect(&"slow"))
 	foe.queue_free()
+
+
+func t_durability() -> void:
+	print("-- gear wears down")
+	var inv := p.get_node("Inventory") as Inventory
+	var eq := p.get_node("Equipment") as Equipment
+	var sword := load("res://data/weapons/iron_sword.tres") as ItemData
+	inv.add_item(sword, 1)
+	eq.equip(sword)
+	check("gear wear is on by default", Durability.enabled())
+	check("new gear is at 100", Durability.condition(sword) == 100.0 and Durability.weapon_mult(sword) == 1.0)
+	var info := DamageInfo.new(10.0, p, &"melee")
+	info.weapon = sword
+	BuildHooks.outgoing_mult(p, null, info)
+	check("a hit wears the weapon", Durability.condition(sword) < 100.0)
+	WorldState.set_record(Durability.RECORD, {"iron_sword": 10.0})
+	check("a worn weapon hits softer", Durability.weapon_mult(sword) < 0.7, str(Durability.weapon_mult(sword)))
+	check("the inventory shows it", Durability.text(sword).begins_with("Condition 10%"))
+	var price := Durability.smith_price(p)
+	check("a smith asks for gold by the wear", price > 0 and Services.repair_fee(p) == price)
+	Currency.add_gold(inv, price + 10)
+	var said := Services.repair(p)
+	check("and mends it", Durability.condition(sword) == 100.0, said)
+	WorldState.set_record(Durability.RECORD, {"iron_sword": 30.0})
+	var hammer := load("res://data/misc/repair_hammer.tres") as ItemData
+	inv.add_item(hammer, 1)
+	check("a hammer has a use", ItemUse.verb(p, hammer) == "Mend your gear")
+	ItemUse.use(p, hammer)
+	check("a hammer mends what you wear, and is used up", Durability.condition(sword) > 30.0 and inv.get_count(hammer) == 0)
+	GameRules._rules["durability"] = false
+	WorldState.set_record(Durability.RECORD, {"iron_sword": 0.0})
+	check("with it off nothing wears", Durability.weapon_mult(sword) == 1.0 and Durability.text(sword) == "")
+	GameRules._rules["durability"] = true
+	WorldState.erase_record(Durability.RECORD)

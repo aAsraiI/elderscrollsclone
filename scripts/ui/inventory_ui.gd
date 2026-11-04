@@ -452,6 +452,8 @@ func _update_details() -> void:
 	t += "\n"
 	if item.description != "":
 		t += item.description + "\n\n"
+	if Durability.text(item) != "":
+		t += Durability.text(item) + "\n"  # 1.27
 	var combat_text := item.get_combat_description()
 	if combat_text != "":
 		t += combat_text + "\n"

@@ -74,7 +74,9 @@ Where you hit matters: a head shot does half again as much, a leg hit slows them
 	["crafting", "Crafting", "Workstations and Recipes",
 		"Press E on a workstation to craft: forges and anvils (smithing), workbenches, tanning racks, cooking pots and fires, alchemy labs, arcane enchanters. A recipe shows once you have held everything it needs. Your skill sets what you can make and how good it is."],
 	["smithing", "Crafting", "Smithing",
-		"At a forge, make weapons and armour from ingots and leather; smelt ore into ingots; repair worn gear; and break old gear down for parts on the Salvage tab. Better metals need a higher Smithing skill."],
+		"At a forge, make weapons and armour from ingots and leather; smelt ore into ingots; and break old gear down for parts on the Salvage tab. Better metals need a higher Smithing skill.
+
+Gear wears down as you use it (World settings: Gear wears down). Below half its condition a weapon hits softer and armour stops less; the inventory shows the condition. A smith's Repair button mends everything you have on for gold, and a Repair Hammer (workbench) mends it anywhere: more with Smithing."],
 	["alchemy", "Crafting", "Alchemy",
 		"At an alchemy lab, mix ingredients that share an effect into a potion. Eating an ingredient teaches you its first effect. Plants and parts are gathered in the wild and sold by apothecaries."],
 	["cooking", "Crafting", "Cooking",

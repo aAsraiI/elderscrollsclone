@@ -110,6 +110,7 @@ static func _ensure() -> void:
 				_add_path("forge", path, made[1], made[2], TIER_LEVEL[tier], "smithing")
 	# ---- workbench (tinkering)
 	_add("workbench", "res://data/misc/lockpick.tres", 5, [["iron_ingot", 1]], 1, "tinkering")
+	_add("workbench", "res://data/misc/repair_hammer.tres", 2, [["iron_ingot", 1], ["firewood", 1]], 1, "smithing")  # 1.27
 	_add("workbench", MAT + "pickaxe.tres", 1, [["iron_ingot", 2], ["leather_strips", 1]], 1, "tinkering")
 	for metal in ["silver", "gold"]:
 		for kind in ["ring", "amulet"]:

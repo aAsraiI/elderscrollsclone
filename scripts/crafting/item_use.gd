@@ -18,6 +18,8 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Build a raft"
 	if String(item.id) == "air_bladder":
 		return "Breathe from the bladder"
+	if String(item.id) == "repair_hammer":
+		return "Mend your gear"  # 1.27
 	if String(item.id) == "horse_deed":
 		return "Call your horse"
 	if String(item.id) == "sellsword_contract":
@@ -74,6 +76,8 @@ static func use(player: Node, item: ItemData) -> void:
 					Locks.toast(tree, "A sellsword joins you")
 				else:
 					Locks.toast(tree, why, true)
+		"Mend your gear":
+			Locks.toast(tree, Durability.use_hammer(player, item))
 		"Call your horse":
 			var rider := player.get_node_or_null("Rider") as Rider
 			if rider != null:

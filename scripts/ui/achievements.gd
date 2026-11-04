@@ -58,6 +58,7 @@ const LIST := [
 	["purse", 1, "A Full Purse", "Carry 1,000 gold.", "trading", "gold", 1000],
 	["job", 1, "Odd Jobs", "Finish a job from a notice board or bounty board.", "quests", "jobs_done", 1],
 	["headshot", 1, "Between the Eyes", "Hit someone in the head with an arrow, bolt or thrown weapon.", "archery", "n:headshot", 1],
+	["repair", 1, "Good as New", "Mend worn gear: a Repair Hammer from the inventory, or a smith's Repair button.", "smithing", "n:repair", 1],
 	["arena", 1, "Blood on the Sand", "Win a bout at an arena (strike the gong in a Fighters Guild hall).", "arena", "arena", 1],
 	["museum", 1, "For Posterity", "Donate an artifact to an Antiquarian Museum.", "museum", "museum", 1],
 	["spells5", 1, "Spell Collector", "Know 5 spells. Spell tomes are sold by mages and found in dungeons.", "magic", "spells", 5],

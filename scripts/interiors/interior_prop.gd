@@ -25,6 +25,11 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		_preview()
 		return
+	add_to_group("interior_props")  # 1.25: furnishings make a bed comfortable
+	for t in tags:
+		if String(t) in ["campfire", "fire", "hearth", "fireplace", "brazier", "forge", "stove", "oven"]:
+			add_to_group("heat_sources")  # 1.25: warms you and dries you off (Survival)
+			break
 	dress()
 
 

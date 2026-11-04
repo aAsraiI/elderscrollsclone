@@ -184,7 +184,9 @@ func _wait() -> void:
 		var magic := ActiveMagic.of(get_parent())
 		if magic != null and hours >= 4.0 and (aff == null or not aff.werewolf):
 			magic.remove_effect(&"well_rested")
-			magic.apply_list([{"id": &"well_rested", "mag": 10, "dur": 480.0}], null, "Well Rested", "potion")
+			var comfy := surv.comfort((get_parent() as Node3D).global_position) if surv != null else 1
+			magic.apply_list([{"id": &"well_rested", "mag": 10 + comfy * 2, "dur": Survival.rest_minutes(comfy)}], null, "Well Rested", "potion")  # 1.25: longer and better in comfort
+			Locks.toast(get_tree(), "Comfort %d of 4: rested for %d hours." % [comfy, int(Survival.rest_minutes(comfy) / 60.0)])
 		Locks.toast(get_tree(), "You slept %d hours and feel rested." % int(hours))
 		_bed = null
 		var sm := SaveManager.of(get_tree())

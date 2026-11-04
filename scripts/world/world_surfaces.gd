@@ -90,6 +90,7 @@ func _disc(kind: int, radius: float) -> Node3D:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(mi)
 	if kind == Kind.FIRE:
+		root.add_to_group("heat_sources")  # 1.25: warms you (Survival)
 		var l := OmniLight3D.new()
 		l.light_color = Color(1.0, 0.55, 0.2)
 		l.light_energy = 1.6

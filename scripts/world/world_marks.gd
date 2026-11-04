@@ -253,6 +253,8 @@ func _make_breath() -> GPUParticles3D:
 # ---------------------------------------------------------------- sounds you can read
 
 func _sounds(inside: bool) -> void:
+	if inside:
+		StoryScenes.tick_lost(get_tree())  # 1.26: a lost adventurer follows you out
 	var p := _player.global_position
 	# a fight out of sight: steel on steel
 	var clashes := 0

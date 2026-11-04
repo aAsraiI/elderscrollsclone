@@ -75,6 +75,7 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 	if not plan.links.is_empty():
 		features = InteriorFeatures.apply(plan, root, data, dungeon_id, level_max, dungeon_seed)
 	StoryScenes.add(root, dungeon_id, dungeon_seed)  # 1.24: what happened here, in bones and a note
+	StoryScenes.add_event(root, dungeon_id, dungeon_seed, int(ctx["level_max"]))  # 1.26: someone else down here
 	if int(occ["gen"]) > 0:
 		_newcomers_note(root, dungeon_id, int(occ["gen"]))  # 1.24: why new folk moved into a place you cleared
 	var start := Vector3(0, 0.2, 0)

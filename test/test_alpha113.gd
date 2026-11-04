@@ -465,6 +465,7 @@ func t_house_in_game(wm: WorldManager, p: CharacterBody3D) -> void:
 			p.velocity = Vector3(to.normalized().x * 4.0, p.velocity.y, to.normalized().z * 4.0)
 			p.move_and_slide()
 			await physics_frame
+		print("DBG waypoint ", pt, " player ", root.to_local(p.global_position))
 	var at_bed := p.global_position.distance_to(root.to_global(bed))
 	check("you can walk up the stairs to a guest bed", at_bed < 2.2 and p.global_position.y > root.global_position.y + 4.0, "%.1f m away, at %.1f" % [at_bed, p.global_position.y - root.global_position.y])
 	await wm.dungeons.exit()

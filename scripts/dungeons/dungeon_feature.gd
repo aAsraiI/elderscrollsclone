@@ -126,3 +126,54 @@ func _fire(target_body: Node) -> void:
 	var hud := target_body.get_node_or_null("CompassHUD") as CompassHUD
 	if hud != null:
 		hud.show_banner("A trap!", "Darts fly from the walls")
+
+
+# ---------------------------------------------------------------- 1.26: tells
+
+const TELL_RANGE := 5.0
+var _tell: MeshInstance3D
+var _tell_t := 0.0
+var _hinted := false
+
+
+func _process(delta: float) -> void:
+	if kind == Kind.LEVER:
+		set_process(false)
+		return
+	_tell_t -= delta
+	if _tell_t > 0.0:
+		return
+	_tell_t = 0.5
+	var p := get_tree().get_first_node_in_group("player") as Node3D
+	if p == null or global_position.distance_to(p.global_position) > TELL_RANGE + 2.0:
+		if _tell != null:
+			_tell.visible = false
+		return
+	var skills := p.get_node_or_null("Skills") as Skills
+	var security := skills.get_level(&"security") if skills != null else 0
+	var lore := skills.get_level(&"lore") if skills != null else 0
+	var st: Variant = p.get_meta("stealth") if p.has_meta("stealth") else null
+	var sneaking := st != null and is_instance_valid(st) and bool(st.get("sneaking"))
+	var close := global_position.distance_to(p.global_position) <= TELL_RANGE
+	match kind:
+		Kind.TRAP:
+			var see := _armed and close and (sneaking or security >= 25)
+			if see and _tell == null:
+				_tell = MeshInstance3D.new()
+				var bm := BoxMesh.new()
+				bm.size = Vector3(1.06, 0.02, 1.06)
+				_tell.mesh = bm
+				var mat := StandardMaterial3D.new()
+				mat.albedo_color = Color(0.8, 0.2, 0.15, 0.45)
+				mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				mat.emission_enabled = true
+				mat.emission = Color(0.5, 0.08, 0.05)
+				_tell.material_override = mat
+				_tell.position.y = 0.07
+				add_child(_tell)
+			if _tell != null:
+				_tell.visible = see  # a plate that sits a little proud of the floor
+		Kind.SECRET:
+			if close and not _hinted and not is_done(save_id) and (security >= 25 or lore >= 25 or sneaking):
+				_hinted = true
+				Locks.toast(get_tree(), "The stonework here doesn't look right. One stone sits loose.")

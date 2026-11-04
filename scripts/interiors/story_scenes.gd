@@ -69,3 +69,75 @@ static func _prop(parent: Node3D, path: String, at: Vector3, rng: RandomNumberGe
 	parent.add_child(n)
 	n.position = at
 	n.rotation.y = rng.randf() * TAU
+
+
+# ---------------------------------------------------------------- 1.26: rare events in a dungeon
+
+const EVENT_CHANCE := 0.12
+
+
+## Now and then a dungeon holds someone else: a lost adventurer to lead out (they reward you at the
+## door), a rival party of delvers who got here first, or a pedlar camped in a quiet room
+static func add_event(root: Node3D, dungeon_id: String, dungeon_seed: int, level: int) -> String:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = ("%d|event|%s|%d" % [dungeon_seed, dungeon_id, Rumors._day() / 7]).hash()  # a new roll each week
+	if rng.randf() > EVENT_CHANCE:
+		return ""
+	var rooms: Array[RoomModule] = []
+	for c in root.get_children():
+		if c is RoomModule:
+			rooms.append(c)
+	if rooms.size() < 3:
+		return ""
+	var room: RoomModule = rooms[rng.randi_range(1, rooms.size() - 1)]
+	var spot := RoomFiller.free_spot(RoomFiller.furniture_in(room), room, Vector3.ZERO)
+	if not spot.is_finite():
+		return ""
+	var kind: String = ["lost", "rivals", "pedlar"][rng.randi() % 3]
+	match kind:
+		"lost":
+			var e := Population.spawn_enemy(load("res://data/npcs/townsfolk.tres"), level, room, spot, rng, {"persist_mode": Enemy.PersistMode.NEVER})
+			e.display_name = "Lost Adventurer"
+			e.talk_name = e.display_name
+			e.disposition = Enemy.Disposition.FRIENDLY
+			e.talk_lines = PackedStringArray(["Thank the gods. My torch went out two days ago. Get me out of here and I'll make it worth your while."])
+			e.set_meta("lost_adventurer", true)
+			e.set_meta("lod_keep", true)
+		"rivals":
+			var data := load("res://data/enemies/cutthroat.tres") as EnemyData
+			for i in 3:
+				var r := Population.spawn_enemy(data, level, room, spot + Vector3(rng.randf_range(-2, 2), 0, rng.randf_range(-2, 2)), rng, {"persist_mode": Enemy.PersistMode.NEVER})
+				r.display_name = "Rival Delver"
+				r.faction = "bandits"
+		"pedlar":
+			var m := Population.spawn_enemy(load("res://data/npcs/townsfolk.tres"), level, room, spot, rng, {"persist_mode": Enemy.PersistMode.NEVER})
+			m.display_name = "Grubb, a Pedlar"
+			m.talk_name = m.display_name
+			m.disposition = Enemy.Disposition.FRIENDLY
+			m.set_meta("merchant", "peddler")
+			m.set_meta("shop_id", "dungeon/%s" % dungeon_id)
+			m.talk_lines = PackedStringArray(["Down here, nobody asks where the goods came from. Have a look."])
+	return kind
+
+
+## A lost adventurer you came near follows you out, and pays you at the door
+static func tick_lost(tree: SceneTree) -> void:
+	var p := tree.get_first_node_in_group("player") as Node3D
+	if p == null:
+		return
+	for e in ActorRegistry.near(p.global_position, 4.0):
+		if e.has_meta("lost_adventurer") and not e.has_meta("player_ally") and not e.is_dead():
+			var f := p.get_node_or_null("Followers") as Followers
+			if f == null:
+				return
+			f._make_follower(e)
+			Locks.toast(tree, "The lost adventurer stays close behind you.")
+			var dm := tree.get_first_node_in_group("dungeon_manager") as DungeonManager
+			if dm != null:
+				dm.exited.connect(func(_id: String) -> void:
+					if is_instance_valid(e) and not e.is_dead():
+						var inv := p.get_node("Inventory") as Inventory
+						var gold := 60 + e.level * 15 if "level" in e else 120
+						Currency.add_gold(inv, gold)
+						Locks.toast(tree, "\"Daylight! Here, take this. %d gold, all I have.\"" % gold)
+						f.dismiss(e), CONNECT_ONE_SHOT)

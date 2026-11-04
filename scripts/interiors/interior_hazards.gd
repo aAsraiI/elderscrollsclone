@@ -56,6 +56,10 @@ class GasCloud extends Area3D:
 	var _inside: Node3D
 
 	func _ready() -> void:
+		add_to_group("gas_clouds")  # 1.26: fire sets it off (WorldSurfaces)
+		if save_id != "" and WorldState.has_record(save_id):
+			queue_free()  # it went up on an earlier visit
+			return
 		collision_layer = 0
 		collision_mask = 1 | 2
 		var shape := CollisionShape3D.new()
@@ -154,3 +158,31 @@ class PuzzleLever extends StaticBody3D:
 	func interact(_actor: Inventory) -> void:
 		if puzzle != null:
 			puzzle.lever_pulled(index)
+
+
+## 1.26: fire in a gas cloud: it goes up all at once, hurting everyone in it, and is gone for good
+static func ignite_gas(tree: SceneTree, at: Vector3, source: Node) -> bool:
+	for g in tree.get_nodes_in_group("gas_clouds"):
+		var cloud := g as GasCloud
+		if cloud == null or not cloud.is_inside_tree():
+			continue
+		var local := cloud.to_local(at)
+		if absf(local.x) > cloud.size.x * 0.5 + 1.0 or absf(local.z) > cloud.size.z * 0.5 + 1.0 or local.y < -1.0 or local.y > cloud.size.y + 1.0:
+			continue
+		var mid := cloud.global_position + Vector3.UP * cloud.size.y * 0.5
+		SpellFX.burst(cloud, mid, maxf(cloud.size.x, cloud.size.z) * 0.6, Color(1.0, 0.55, 0.15))
+		SoundFX.at(tree, mid, "boom", 80.0, 0.6)
+		var hit := func(n: Node) -> void:
+			var m := ActiveMagic.of(n)
+			if m != null:
+				m.apply_list([{"id": &"fire_damage", "mag": 45.0, "dur": 0.0}], source, "Gas explosion", "spell", 1.0)
+		for e in ActorRegistry.near(mid, maxf(cloud.size.x, cloud.size.z) * 0.6):
+			hit.call(e)
+		var p := tree.get_first_node_in_group("player") as Node3D
+		if p != null and p.global_position.distance_to(mid) < maxf(cloud.size.x, cloud.size.z) * 0.6:
+			hit.call(p)
+		if cloud.save_id != "":
+			WorldState.set_record(cloud.save_id, {"gone": true})
+		cloud.queue_free()
+		return true
+	return false

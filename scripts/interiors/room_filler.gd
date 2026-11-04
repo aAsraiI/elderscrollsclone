@@ -96,6 +96,7 @@ static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 				var boss := Population.spawn_enemy(data.boss, lmax + 3, room, s.position + Vector3(0, 0.2, 0), rng, {"key": bkey, "persist_mode": Enemy.PersistMode.CORPSE_ONLY})
 				var did := String(ctx.get("dungeon_id", ""))
 				boss.died.connect(func(_e: Enemy) -> void: DungeonBuilder._on_boss_died(did, lmax + 3))
+				BossMechanics.attach(boss)  # 1.26: a trick of its own (raises the dead, regrows, brood, rage)
 				out["enemies"] += 1
 			SpawnSocket.Kind.NPC:
 				# a prisoner in a dungeon's cells, now and then (not in a lord's cells: those are the law's)

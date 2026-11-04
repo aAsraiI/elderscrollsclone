@@ -160,6 +160,8 @@ func react(p: Vector3, element: StringName, power: float = 1.0, source: Node = n
 	match element:
 		&"fire":
 			var lit := false
+			if InteriorHazards.ignite_gas(get_tree(), p, source):
+				lit = true  # 1.26: a gas cloud goes up
 			for s in here:
 				if s.kind == Kind.OIL:
 					_ignite(s, true)

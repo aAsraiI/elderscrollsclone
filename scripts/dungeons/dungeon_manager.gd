@@ -304,6 +304,8 @@ func _clear_entities_inside() -> void:
 
 # Switches the sky and sun off so the dungeon is as dark as its lamps make it
 func _set_dark(dark: bool, ambient: Color = Color(0.03, 0.03, 0.04)) -> void:
+	if dark and not is_in_building() and current_floor > 0:
+		ambient = ambient * pow(0.8, float(current_floor))  # 1.26: the deeper, the darker
 	if dark and bool(GameSettings.get_value("dark_nights")) and not is_in_building():
 		ambient = ambient * 0.35  # 1.24: real darkness in caves and dungeons: bring a torch
 	var we := _find_first("WorldEnvironment") as WorldEnvironment

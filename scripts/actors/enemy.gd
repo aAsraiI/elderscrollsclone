@@ -1615,6 +1615,8 @@ func _on_damaged(info: DamageInfo, amount: float) -> void:
 	_alerted = true
 	_last_env = info.source == null or not is_instance_valid(info.source)  # 1.24: killed by the world (fire, a fall)?
 	_last_element = info.element
+	if info.element == &"fire":
+		set_meta("burned_at", Time.get_ticks_msec() / 1000.0)  # 1.26: fire stops a troll regrowing
 	if _by_player(info.source):
 		_hurt_by_player = true
 		_provoked = true

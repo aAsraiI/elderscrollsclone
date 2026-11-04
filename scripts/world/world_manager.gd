@@ -145,6 +145,9 @@ func _ready() -> void:
 	wild.name = "WildLife"
 	wild.enabled = encounters_enabled
 	add_child(wild)
+	var marks_w := WorldMarks.new()  # 1.24: footprints, blood, breath, sounds you can read
+	marks_w.name = "WorldMarks"
+	add_child(marks_w)
 	var small := AmbientLife.new()  # 1.24: rabbits, birds, frogs, bats, crows, fireflies
 	small.name = "AmbientLife"
 	small.enabled = encounters_enabled

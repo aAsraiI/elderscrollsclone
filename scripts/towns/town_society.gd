@@ -36,11 +36,16 @@ var _brawl: Dictionary = {}  # {"a": Enemy, "b": Enemy, "until": float}
 var _panic := {}  # town id -> seconds left
 var _clock := 0.0
 var _day_done := -1
+var _boards := {}  # town id -> Readable
+var _horned := {}  # town id -> seconds
 
 
 func _ready() -> void:
 	add_to_group("town_society")
 	world = get_parent() as WorldManager
+	if world != null:
+		world.poi_spawned.connect(_on_poi_spawned)
+		_catch_up.call_deferred()
 
 
 static func of(tree: SceneTree) -> TownSociety:
@@ -58,6 +63,7 @@ func _process(delta: float) -> void:
 		return
 	_daily()
 	_gossip()
+	_bodies_found()
 	_grief()
 	_revenge(p)
 	_tick_brawl(p)
@@ -309,6 +315,9 @@ func _crowds() -> void:
 				break
 		if not threat:
 			continue
+		if _clock - float(_horned.get(t.id, -999.0)) > 90.0:
+			_horned[t.id] = _clock
+			SoundFX.at(get_tree(), t.position + Vector3.UP * 12.0, "horn", 450.0)  # the town sounds the alarm
 		for r: TownLife.Resident in world.life.get_town_residents(t.id):
 			if r.dead or r.node_inside or not is_instance_valid(r.node) or r.node.is_dead() or r.data.role == NpcData.Role.GUARD:
 				continue
@@ -337,6 +346,8 @@ func _grief() -> void:
 		if WorldState.has_record("grieved/" + r.data.id):
 			continue  # an old death (loaded game)
 		WorldState.set_record("grieved/" + r.data.id, {"day": day})
+		var killed := bool(WorldState.get_record("npc_killer/" + r.data.id).get("player", false))
+		TownBoards.add_grave(world, r, "slain" if killed or WorldState.has_record("kill/" + r.data.id) else "taken before their time", day)
 		var known := known_by(r.data.id)
 		var family := ""
 		for other in known:
@@ -594,3 +605,41 @@ func _gossip() -> void:
 				DialogueState.change_disposition(r.data.id, r.data.base_disposition, -5)
 	if left.size() != (rec.get("list", []) as Array).size():
 		WorldState.set_record("gossip", {"list": left})
+
+
+# ---------------------------------------------------------------- boards, graves, bodies (1.24.5)
+
+func _on_poi_spawned(placed: PlacedPOI, node: Node3D) -> void:
+	if not (placed.poi is TownData) or placed.town == null or node == null:
+		return
+	_boards[placed.id] = true  # (the town's own notice board shows its posters: NoticeBoard)
+	TownBoards.build_graves(world, placed, node)
+
+
+# A body lying in town is found by the first passer-by: a scream, the news, people keep away
+func _bodies_found() -> void:
+	for r: TownLife.Resident in world.life.residents:
+		if not r.dead or WorldState.has_record("body_found/" + r.data.id):
+			continue
+		var body := r.node
+		if body == null or not is_instance_valid(body) or not body.is_inside_tree() or r.node_inside:
+			continue
+		for o in ActorRegistry.near(body.global_position, 7.0):
+			if o == body or o.is_dead() or not o.has_meta("npc_id"):
+				continue
+			WorldState.set_record("body_found/" + r.data.id, {"by": o.display_name})
+			_say(o, ["Gods! Someone help!", "Guards! Guards, there's a body!", "No... no, no."][absi(r.data.id.hash()) % 3])
+			SoundFX.at(get_tree(), o.global_position + Vector3.UP * 1.5, "scream", 90.0)
+			Rumors.add("body", "%s was found dead in %s. Nobody knows who did it." % [r.data.display_name, r.town.town.display_name], body.global_position, Rumors._day())
+			for n in ActorRegistry.near(body.global_position, 15.0):
+				if n.has_meta("npc_id") and n.disposition == Enemy.Disposition.FRIENDLY and not n.is_dead():
+					n.flee_from(body, 6.0)
+			break
+
+
+# Towns that loaded before this node existed get their boards and graves too
+func _catch_up() -> void:
+	for t in world.towns:
+		var node := world.get_poi_node(t.id)
+		if node != null and not _boards.has(t.id):
+			_on_poi_spawned(t, node)

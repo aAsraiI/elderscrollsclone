@@ -112,3 +112,21 @@ drink, lists "hungry times" in its prices, and its people beg; an unsafe one tal
   and think less of you.
 - **Weddings**: sweethearts marry after a couple of weeks (about one day in twenty-five); a rumour says so.
 - **Roads**: couriers and minstrels travel between the towns too.
+
+## The world remembers (1.24.5)
+
+- **Footprints**: you leave prints in snow, sand and swamp mud; they fade in under two minutes
+  (`WorldMarks`, one multimesh).
+- **Blood**: a body leaves a dark stain that fades over a game day.
+- **Bodies are found**: someone dead in a town's street is found by the first passer-by, who screams;
+  the town talks of it and people keep away.
+- **Graves**: everyone named who dies in town gets a stone by the temple with their name, the day and how
+  they died (`graves/<town id>`).
+- **Notice boards** now show what the town has put up, above the jobs: a wanted poster when you have a
+  bounty there, the dangerous places nearby, this month's festival, council orders when food is short or
+  the roads are unsafe, and the last person laid to rest.
+- **Breath**: your breath fogs in cold lands, on winter nights and up high; faster when you are winded.
+- **Sounds you can read**: steel on steel from a fight you can't see, a scream when someone runs, the
+  town horn when something hostile gets in, wolves howling at dusk and before dawn.
+- **Settings**: Video > Real darkness (nights four times darker, caves and dungeons three times: bring a
+  torch); Interface > Quest targets on the compass and map (off: find your way from the journal).

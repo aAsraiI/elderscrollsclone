@@ -117,6 +117,16 @@ func _open_menu() -> void:
 	v.add_theme_constant_override("separation", 8)
 	panel.add_child(v)
 	v.add_child(UITheme.heading("Notice Board"))
+	# 1.24: what the town has put up: wanted posters, dangers nearby, the month's festival, council orders
+	var town := wm.get_poi(town_id)
+	if town != null and town.town != null:
+		var posted := Label.new()
+		posted.text = TownBoards.board_text(wm, town)
+		posted.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		posted.custom_minimum_size = Vector2(540, 0)
+		posted.add_theme_font_size_override("font_size", 13)
+		v.add_child(posted)
+		v.add_child(HSeparator.new())
 	var current := wm.quests.bounty_of(board_id())
 	if not current.is_empty():
 		v.add_child(UITheme.hint("You took: %s. %s" % [current["name"], current["objective"]]))

@@ -46,6 +46,7 @@ func _run() -> void:
 	await t_wildlife()
 	await t_society()
 	await t_needs()
+	await t_marks()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -484,3 +485,56 @@ func t_needs() -> void:
 	var after := DialogueState.get_disposition(friend_id, fr.data.base_disposition)
 	check("their friend hears of it and thinks less of you", after < before, "%d -> %d" % [before, after])
 	check("road folk include couriers and minstrels", RoadLife.KINDS.has("courier") and RoadLife.KINDS.has("minstrel"))
+
+
+func t_marks() -> void:
+	print("-- the world remembers")
+	var wm := get_first_node_in_group("world_manager") as WorldManager
+	var p := get_first_node_in_group("player") as CharacterBody3D
+	var soc := TownSociety.of(self)
+	var marks := get_first_node_in_group("world_marks") as WorldMarks
+	check("WorldMarks runs", marks != null)
+	var city: PlacedPOI = null
+	for t in wm.towns:
+		if (t.poi as TownData).kind == TownData.Kind.CITY:
+			city = t
+			break
+	var node := wm.get_poi_node(city.id)
+	check("the city is loaded", node != null)
+	if node == null:
+		return
+	soc._catch_up()
+	check("the city has a notice board", node.find_children("*", "NoticeBoard", true, false).size() > 0)
+	CrimeManager.set_bounty_raw(city.id, 60)
+	check("with a wanted poster when you have a bounty", TownBoards.board_text(wm, city).contains("WANTED"))
+	CrimeManager.set_bounty_raw(city.id, 0)
+	check("and this month's festival", TownBoards.board_text(wm, city).contains("THIS MONTH"))
+	var folk: Array = wm.life.get_town_residents(city.id)
+	var gone: TownLife.Resident = folk[1]
+	TownBoards.add_grave(wm, gone, "slain", 4)
+	check("the dead get a grave stone", node.find_child("Grave_%s" % gone.data.id.replace("/", "_"), true, false) != null)
+	check("which the board remembers", TownBoards.board_text(wm, city).contains(gone.data.display_name))
+	# blood under a body, near you
+	var e := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 3, wm, p.global_position + Vector3(3, 0, 0), RandomNumberGenerator.new())
+	await frames(3)
+	var kill := DamageInfo.new(999999.0, p, &"melee")
+	e.combat.take_damage(kill)
+	await frames(3)
+	marks._blood()
+	check("a body leaves a stain", not marks._stains.is_empty())
+	# a body in the street is found
+	var bodies: Array = folk.filter(func(r: TownLife.Resident): return not r.dead and is_instance_valid(r.node) and not r.node_inside)
+	if bodies.size() >= 2:
+		var victim: TownLife.Resident = bodies[0]
+		var finder: TownLife.Resident = bodies[1]
+		finder.node.global_position = victim.node.global_position + Vector3(2, 0, 0)
+		victim.node.combat.take_damage(DamageInfo.new(999999.0, null, &"melee"))
+		await frames(5)
+		soc._bodies_found()
+		check("a body in the street is found, and the town talks of it", WorldState.has_record("body_found/" + victim.data.id))
+	# no-markers mode
+	GameSettings._ensure_loaded()
+	var before = GameSettings._values.get("quest_targets", true)
+	GameSettings._values["quest_targets"] = false
+	check("quest targets can be switched off", QuestManager.compass_targets().is_empty())
+	GameSettings._values["quest_targets"] = before

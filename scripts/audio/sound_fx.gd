@@ -253,3 +253,22 @@ func _switch_to(stream: AudioStream) -> void:
 func _exit_tree() -> void:
 	if _task >= 0:
 		WorkerThreadPool.wait_for_task_completion(_task)
+
+
+## 1.24: a sound out in the world, heard from where it happens (a howl, a scream, a horn, a fight)
+static func at(tree: SceneTree, pos: Vector3, sound: String, reach: float = 120.0, pitch: float = 1.0) -> void:
+	if tree == null or tree.current_scene == null or DisplayServer.get_name() == "headless":
+		return
+	var s := Synth.get_sound(sound)
+	if s == null:
+		return
+	var p := AudioStreamPlayer3D.new()
+	p.stream = s
+	p.unit_size = reach * 0.12
+	p.max_distance = reach
+	p.volume_db = linear_to_db(clampf(float(GameSettings.get_value("sfx_volume")), 0.0001, 1.0))
+	p.pitch_scale = pitch * randf_range(0.93, 1.07)
+	tree.current_scene.add_child(p)
+	p.global_position = pos
+	p.play()
+	p.finished.connect(p.queue_free)

@@ -82,6 +82,15 @@ static func _make(name: String) -> AudioStreamWAV:
 			return _growl(1.0, 95.0, 80.0, 0.5, 0.5)
 		"shout":
 			return _growl(0.45, 220.0, 170.0, 0.35, 0.45)
+		# 1.24: sounds of the world you can read
+		"howl":
+			return _mix([_sweep(2.2, 380.0, 620.0, 0.22), _sweep(2.2, 390.0, 600.0, 0.12)])
+		"scream":
+			return _growl(0.9, 820.0, 560.0, 0.25, 0.4)
+		"horn":
+			return _mix([_tone(2.4, 147.0, 0.0, 0.6, 0.35), _tone(2.4, 294.0, 0.0, 0.7, 0.18), _tone(2.4, 441.0, 0.0, 0.9, 0.08)])
+		"clang":
+			return _mix([_tone(0.4, 1250.0, 0.0, 9.0, 0.25), _tone(0.4, 1870.0, 0.0, 12.0, 0.15), _noise(0.08, 0.2, 0.0, 40.0, 0.2)])
 		"level_up":
 			return _mix([_tone(0.6, 523.0, 0.0, 3.0, 0.3), _tone(0.6, 659.0, 0.1, 3.0, 0.3), _tone(0.7, 784.0, 0.2, 3.0, 0.3)])
 	return _tone(0.05, 440.0, 0.0, 30.0, 0.1)

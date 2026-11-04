@@ -186,7 +186,8 @@ func apply_now() -> void:
 		if _sky_mat != null:
 			_env.background_energy_multiplier = lerpf(0.6, 1.0, day_factor) * float(w.get("sky", 1.0))  # the shader darkens the night itself
 			_update_sky(elevation, day_factor, w)
-		_env.ambient_light_energy = lerpf(NIGHT_AMBIENT, DAY_AMBIENT, day_factor) * float(w.get("ambient", 1.0)) + float(w.get("flash", 0.0))
+		var night_amb := NIGHT_AMBIENT * (0.25 if bool(GameSettings.get_value("dark_nights")) else 1.0)  # 1.24: real darkness
+		_env.ambient_light_energy = lerpf(night_amb, DAY_AMBIENT, day_factor) * float(w.get("ambient", 1.0)) + float(w.get("flash", 0.0))
 		if _base_fog < 0.0:
 			_base_fog = _env.fog_density
 		if _env.fog_enabled:

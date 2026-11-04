@@ -144,6 +144,8 @@ static func toggle_tracked(id: String) -> void:
 
 ## What the compass shows: the tracked quest's targets if it has any right now, else all of them
 static func compass_targets() -> Array:
+	if not bool(GameSettings.get_value("quest_targets")):
+		return []  # 1.24: no markers: the journal says where to go
 	var all := active_targets()
 	var ids := QuestTracker.tracked()
 	if ids.is_empty():

@@ -366,7 +366,7 @@ func draw_map(canvas: Control) -> void:
 			canvas.draw_string_outline(font, at + Vector2(half + 4.0, 5.0), t.town.display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 4, Color.BLACK)
 			canvas.draw_string(font, at + Vector2(half + 4.0, 5.0), t.town.display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color.WHITE)
 	# quest targets
-	for target in QuestManager.active_targets():
+	for target in (QuestManager.active_targets() if bool(GameSettings.get_value("quest_targets")) else []):  # 1.24: no-markers mode
 		var qat := world_to_screen(target["pos"] as Vector2)
 		var pulse := 1.0 + 0.15 * sin(_time * 4.0)
 		var diamond := PackedVector2Array([qat + Vector2(0, -8) * pulse, qat + Vector2(8, 0) * pulse, qat + Vector2(0, 8) * pulse, qat + Vector2(-8, 0) * pulse])
@@ -566,7 +566,7 @@ func hover_name(at: Vector2) -> String:
 		if md < best_d:
 			best_d = md
 			best = "%s\nright click to remove" % m["name"]
-	for target in QuestManager.active_targets():
+	for target in (QuestManager.active_targets() if bool(GameSettings.get_value("quest_targets")) else []):  # 1.24: no-markers mode
 		var d := world_to_screen(target["pos"] as Vector2).distance_to(at)
 		if d < best_d:
 			best_d = d

@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_u7bfd"]
+
+[resource]
+script = ExtResource("1_u7bfd")
+id = &"sunsteel_crossbow"
+display_name = "Sunsteel Crossbow"
+description = "Left click shoots at full power; then it must be wound again. Bolts pierce half of any armour. Uses the best bolts you carry. Right click zooms."
+item_type = 1
+equip_slot = 6
+weight = 14.0
+value = 35100
+governing_skill = "archery"
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_bow = true
+draw_time = 1.3900000000000001
+arrow_speed = 87.5
+is_crossbow = true
+ingredient_effects = PackedStringArray()
+weapon_damage = 117.5
+reach = 1.6
+attack_cooldown = 0.8
+armor_pierce = 0.5
+poise_damage = 6.0
+two_handed = true
+animation_set = &"bow"

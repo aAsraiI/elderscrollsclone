@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_mc5f0"]
+
+[resource]
+script = ExtResource("1_mc5f0")
+id = &"primordial_bolt"
+display_name = "Primordial Bolt"
+description = "Shot from a crossbow. Better bolts hit harder."
+value = 4501
+stackable = true
+max_stack = 999
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_arrow = true
+arrow_damage = 127.0
+is_bolt = true
+ingredient_effects = PackedStringArray()

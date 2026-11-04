@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_fkacy"]
+
+[resource]
+script = ExtResource("1_fkacy")
+id = &"sunsteel_bolt"
+display_name = "Sunsteel Bolt"
+description = "Shot from a crossbow. Better bolts hit harder."
+value = 901
+stackable = true
+max_stack = 999
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_arrow = true
+arrow_damage = 85.5
+is_bolt = true
+ingredient_effects = PackedStringArray()

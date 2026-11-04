@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_2t7y2"]
+
+[resource]
+script = ExtResource("1_2t7y2")
+id = &"silver_bolt"
+display_name = "Silver Bolt"
+description = "Shot from a crossbow. Better bolts hit harder."
+value = 7
+stackable = true
+max_stack = 999
+tier = 3
+min_level = 17
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_arrow = true
+arrow_damage = 14.5
+is_bolt = true
+ingredient_effects = PackedStringArray()

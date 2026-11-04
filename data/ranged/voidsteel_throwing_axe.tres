@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_hr6gv"]
+
+[resource]
+script = ExtResource("1_hr6gv")
+id = &"voidsteel_throwing_axe"
+display_name = "Voidsteel Throwing Axe"
+description = "Equip the stack: left click throws one. It can often be picked up again where it lands. Trains Archery."
+item_type = 1
+equip_slot = 6
+weight = 1.5
+value = 3200
+stackable = true
+max_stack = 99
+governing_skill = "archery"
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+arrow_speed = 28.0
+is_thrown = true
+ingredient_effects = PackedStringArray()
+weapon_damage = 127.5
+attack_cooldown = 0.7
+poise_damage = 14.0
+animation_set = &"waraxe"

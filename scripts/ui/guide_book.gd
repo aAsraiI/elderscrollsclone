@@ -24,8 +24,12 @@ const PAGES := [
 
 	["combat", "Fighting", "Melee Combat",
 		"Left click attacks; hold it for a heavy blow that staggers. Chain light attacks for a combo. A foe that glows is about to strike.\n\nRight click raises your shield or guard. Raise it just before a hit lands to parry: the attacker staggers and is open. Blocking and attacking use stamina."],
-	["archery", "Fighting", "Bows",
-		"Equip a bow and hold left click to draw, let go to shoot: a full draw does the most. Arrows are taken from your pack (and can be picked out of bodies).\n\nSneaking archers do extra damage to anyone who hasn't seen them."],
+	["archery", "Fighting", "Bows, Crossbows and Throwing",
+		"Equip a bow and hold left click to draw, let go to shoot: a full draw does the most. Arrows are taken from your pack (and can be picked out of bodies).
+
+A crossbow shoots at full power with one click, then has to be wound again; its bolts pierce half of any armour. Throwing knives, axes and javelins: equip the stack and left click throws one. They can often be picked up again.
+
+Where you hit matters: a head shot does half again as much, a leg hit slows them for a few seconds. All of these train Archery and are made at a forge.\n\nSneaking archers do extra damage to anyone who hasn't seen them."],
 	["foes", "Fighting", "Foes and Factions",
 		"Every creature belongs to a side. Wolves hunt deer, bandits fight the dead, and some sides leave each other be. Battles happen without you: wait for the winner, or join in.\n\nKilling a side's enemies raises your standing with it; at 25 it stops attacking you. Only what you kill stays dead: creatures killed by others come back.\n\nBosses have tricks: necromancers raise the dead, trolls heal unless burned, queens bring out their young."],
 	["dungeons", "Fighting", "Dungeons",

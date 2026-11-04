@@ -78,6 +78,12 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 ## An arrow: added to the bow's damage
 @export var is_arrow := false
 @export var arrow_damage := 0.0
+## 1.27: a crossbow (is_bow too): no draw, a full-power shot, then draw_time seconds to wind it again; shoots bolts
+@export var is_crossbow := false
+## 1.27: a bolt (is_arrow too): only crossbows shoot them
+@export var is_bolt := false
+## 1.27: a thrown weapon (knife, axe, javelin): equip the stack, left click throws one (RangedCombat)
+@export var is_thrown := false
 
 @export_group("Magic and crafting")
 ## Magic effects when eaten or drunk (alchemy potions, cooked food), or on a poison:
@@ -268,5 +274,5 @@ func get_combat_description() -> String:
 
 ## Can go in either hand (1.18: every one-handed weapon; two of the same need two copies)
 func is_one_handed_weapon() -> bool:
-	return item_type == ItemType.WEAPON and not two_handed and not is_bow \
+	return item_type == ItemType.WEAPON and not two_handed and not is_bow and not is_thrown \
 			and equip_slot == EquipSlot.MAIN_HAND

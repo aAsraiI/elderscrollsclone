@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_yy8a6"]
+
+[resource]
+script = ExtResource("1_yy8a6")
+id = &"voidsteel_throwing_knife"
+display_name = "Voidsteel Throwing Knife"
+description = "Equip the stack: left click throws one. It can often be picked up again where it lands. Trains Archery."
+item_type = 1
+equip_slot = 6
+weight = 0.5
+value = 1600
+stackable = true
+max_stack = 99
+governing_skill = "archery"
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+arrow_speed = 34.0
+is_thrown = true
+ingredient_effects = PackedStringArray()
+weapon_damage = 95.5
+attack_cooldown = 0.4
+poise_damage = 6.0
+animation_set = &"dagger"

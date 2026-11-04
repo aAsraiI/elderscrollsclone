@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_se1d2"]
+
+[resource]
+script = ExtResource("1_se1d2")
+id = &"primordial_javelin"
+display_name = "Primordial Javelin"
+description = "Equip the stack: left click throws one. It can often be picked up again where it lands. Trains Archery."
+item_type = 1
+equip_slot = 6
+weight = 2.5
+value = 54000
+stackable = true
+max_stack = 99
+governing_skill = "archery"
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+arrow_speed = 32.0
+is_thrown = true
+ingredient_effects = PackedStringArray()
+weapon_damage = 311.5
+attack_cooldown = 0.95
+poise_damage = 18.0
+animation_set = &"spear"

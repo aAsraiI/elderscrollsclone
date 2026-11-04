@@ -7,6 +7,9 @@ extends Node3D
 const GRAVITY := 7.0
 const LIFETIME := 6.0
 const RECOVER_CHANCE := 0.5
+## 1.27: thrown weapons are found again more often (and sometimes after a hit)
+const THROWN_RECOVER := 0.85
+const THROWN_RECOVER_HIT := 0.6
 
 var shooter: RangedCombat
 var item: ItemData
@@ -34,9 +37,12 @@ static func launch(from: RangedCombat, p_item: ItemData, origin: Vector3, vel: V
 
 
 func _build() -> void:
+	if item != null and item.is_thrown:
+		_build_thrown()
+		return
 	var shaft := MeshInstance3D.new()
 	var bm := BoxMesh.new()
-	bm.size = Vector3(0.02, 0.02, 0.7)
+	bm.size = Vector3(0.025, 0.025, 0.42) if item != null and item.is_bolt else Vector3(0.02, 0.02, 0.7)  # 1.27: bolts are short and thick
 	shaft.mesh = bm
 	var wood := StandardMaterial3D.new()
 	wood.albedo_color = Color(0.5, 0.38, 0.22)
@@ -91,6 +97,7 @@ func _hit(collider: Object, at: Vector3) -> void:
 	if target != null:
 		if shooter != null and is_instance_valid(shooter):
 			shooter.on_arrow_hit(self, target, at)
+		_drop_thrown(at, THROWN_RECOVER_HIT)  # 1.27: a knife or axe falls where it struck
 		queue_free()
 		return
 	# Stuck in the world
@@ -98,7 +105,7 @@ func _hit(collider: Object, at: Vector3) -> void:
 	_stuck = true
 	_age = 0.0
 	if shooter != null and is_instance_valid(shooter) and shooter.host != null and shooter.host.is_in_group("player") \
-			and shooter.npc_arrow == null and randf() < RECOVER_CHANCE:
+			and shooter.npc_arrow == null and randf() < (THROWN_RECOVER if item.is_thrown else RECOVER_CHANCE):
 		var w := WorldItem.spawn(item, 1, get_tree().current_scene, at + Vector3.UP * 0.1)
 		if w != null:
 			w.freeze = true
@@ -119,3 +126,53 @@ func _world_react(at: Vector3) -> void:
 				ws.react(at, &"frost", 1.0, null, 0.8)
 			"shock_damage":
 				ws.react(at, &"shock", 1.0, null, 0.8)
+
+
+# 1.27: a throwing knife, a hand axe or a javelin, spinning (knives and axes) or point first
+func _build_thrown() -> void:
+	var metal := StandardMaterial3D.new()
+	metal.albedo_color = Color(0.62, 0.62, 0.66)
+	metal.metallic = 0.6
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color = Color(0.42, 0.3, 0.18)
+	var spin := Node3D.new()
+	spin.name = "Spin"
+	add_child(spin)
+	match String(item.animation_set):
+		"spear":
+			_part(spin, Vector3(0.03, 0.03, 1.5), Vector3.ZERO, wood)
+			_part(spin, Vector3(0.05, 0.02, 0.18), Vector3(0, 0, -0.82), metal)
+		"waraxe":
+			_part(spin, Vector3(0.03, 0.03, 0.45), Vector3.ZERO, wood)
+			_part(spin, Vector3(0.02, 0.16, 0.12), Vector3(0, 0.06, -0.2), metal)
+		_:
+			_part(spin, Vector3(0.012, 0.03, 0.18), Vector3(0, 0, -0.05), metal)
+			_part(spin, Vector3(0.02, 0.03, 0.09), Vector3(0, 0, 0.09), wood)
+	_face()
+
+
+func _part(parent: Node3D, size: Vector3, at: Vector3, mat: Material) -> void:
+	var m := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = size
+	m.mesh = bm
+	m.material_override = mat
+	m.position = at
+	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(m)
+
+
+func _process(delta: float) -> void:
+	if _stuck or item == null or not item.is_thrown or String(item.animation_set) == "spear":
+		set_process(false)
+		return
+	var spin := get_node_or_null("Spin") as Node3D
+	if spin != null:
+		spin.rotate_x(-delta * 18.0)
+
+
+func _drop_thrown(at: Vector3, chance: float) -> void:
+	if item == null or not item.is_thrown or shooter == null or not is_instance_valid(shooter) or shooter.host == null \
+			or not shooter.host.is_in_group("player") or shooter.npc_arrow != null or randf() >= chance:
+		return
+	WorldItem.spawn(item, 1, get_tree().current_scene, at + Vector3.UP * 0.2)

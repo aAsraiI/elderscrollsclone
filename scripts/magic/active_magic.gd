@@ -221,6 +221,16 @@ func _hurt(amount: float, element: StringName, caster: Node, dot: bool) -> float
 	return final
 
 
+## 1.27: a leg wound (RangedCombat): slower for a few seconds
+func limp(seconds: float) -> void:
+	for fx in effects:
+		if fx["id"] == &"slow" and fx["source"] == "_leg":
+			fx["left"] = seconds
+			return
+	var fx := _add_fx(&"slow", 30.0, seconds, "spell", "_leg", null)
+	stats.add_modifiers(SOURCE_PREFIX + str(fx["uid"]), {"move_speed_mult": -0.3})
+
+
 func _frost_slow() -> void:
 	for fx in effects:
 		if fx["id"] == &"slow" and fx["source"] == "_frost":

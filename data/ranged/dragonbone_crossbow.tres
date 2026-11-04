@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_i6sht"]
+
+[resource]
+script = ExtResource("1_i6sht")
+id = &"dragonbone_crossbow"
+display_name = "Dragonbone Crossbow"
+description = "Left click shoots at full power; then it must be wound again. Bolts pierce half of any armour. Uses the best bolts you carry. Right click zooms."
+item_type = 1
+equip_slot = 6
+weight = 12.0
+value = 2925
+governing_skill = "archery"
+tier = 6
+min_level = 56
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_bow = true
+draw_time = 1.6500000000000001
+arrow_speed = 76.5
+is_crossbow = true
+ingredient_effects = PackedStringArray()
+weapon_damage = 49.5
+reach = 1.6
+attack_cooldown = 0.8
+armor_pierce = 0.5
+poise_damage = 6.0
+two_handed = true
+animation_set = &"bow"

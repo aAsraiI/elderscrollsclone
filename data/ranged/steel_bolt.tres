@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ex6bb"]
+
+[resource]
+script = ExtResource("1_ex6bb")
+id = &"steel_bolt"
+display_name = "Steel Bolt"
+description = "Shot from a crossbow. Better bolts hit harder."
+value = 4
+stackable = true
+max_stack = 999
+tier = 2
+min_level = 8
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_arrow = true
+arrow_damage = 10.5
+is_bolt = true
+ingredient_effects = PackedStringArray()

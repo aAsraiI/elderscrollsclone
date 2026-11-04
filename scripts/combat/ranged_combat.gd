@@ -41,7 +41,7 @@ func _ready() -> void:
 
 func get_bow() -> ItemData:
 	var w := equipment.get_main_hand() if equipment != null else null
-	return w if w != null and w.is_bow else null
+	return w if w != null and (w.is_bow or w.is_thrown) else null  # 1.27: crossbows and thrown weapons too
 
 
 func has_bow() -> bool:
@@ -52,11 +52,15 @@ func has_bow() -> bool:
 func best_arrow() -> ItemData:
 	if npc_arrow != null:
 		return npc_arrow
+	var bow := get_bow()
+	if bow != null and bow.is_thrown:
+		return bow if inventory == null or inventory.get_count(bow) > 0 else null  # 1.27: it is its own ammunition
+	var bolts := bow != null and bow.is_crossbow
 	var best: ItemData = null
 	if inventory != null:
 		for s in inventory.stacks:
 			var it: ItemData = s.item
-			if it.is_arrow and (best == null or it.arrow_damage > best.arrow_damage):
+			if it.is_arrow and it.is_bolt == bolts and (best == null or it.arrow_damage > best.arrow_damage):
 				best = it
 	return best
 
@@ -69,11 +73,25 @@ func begin_draw() -> bool:
 		return false
 	if best_arrow() == null:
 		if host.is_in_group("player"):
-			Locks.toast(host.get_tree(), "You have no arrows", true)
+			Locks.toast(host.get_tree(), "You have no bolts" if get_bow().is_crossbow else "You have no arrows", true)
+		return false
+	var w := get_bow()
+	if w.is_crossbow or w.is_thrown:
+		# 1.27: no draw. A crossbow shoots at full power, then winds again (draw_time); a throw is quick
+		_shoot(1.0 if w.is_crossbow else 0.85)
+		_cooldown = w.draw_time if w.is_crossbow else w.attack_cooldown
 		return false
 	_drawing = true
 	_draw = 0.0
 	return true
+
+
+## 1.27: 0..1 how far a crossbow is wound again (1 = ready)
+func reload_ratio() -> float:
+	var w := get_bow()
+	if w == null or not w.is_crossbow:
+		return 1.0
+	return 1.0 - clampf(_cooldown / maxf(w.draw_time, 0.1), 0.0, 1.0)
 
 
 func cancel() -> void:
@@ -154,6 +172,7 @@ func on_arrow_hit(arrow: Arrow, target: Node, point: Vector3) -> void:
 	info.parryable = false
 	var victim := (target.get("body") as Node3D) if "body" in target else target as Node3D
 	var e := victim as Enemy
+	_locational(e, point, info)  # 1.27: head and legs
 	if host != null and is_instance_valid(host) and host.is_in_group("player") and e != null:
 		var stealth: Variant = host.get_meta("stealth", null)
 		if stealth != null and is_instance_valid(stealth):
@@ -174,3 +193,30 @@ func on_arrow_hit(arrow: Arrow, target: Node, point: Vector3) -> void:
 		var fb := host.get_node_or_null("MeleeCombat") as MeleeCombat
 		if fb != null:
 			fb.hit_dealt.emit(target, info, final)
+
+
+## 1.27: where it struck. The head (the top fifth of the body) takes half again; a leg (the bottom
+## third) slows them for a few seconds. Shown as a word over the head for the player's shots.
+const HEAD_MULT := 1.5
+const LIMP_SECONDS := 4.0
+
+
+func _locational(e: Enemy, point: Vector3, info: DamageInfo) -> void:
+	if e == null or not is_instance_valid(e):
+		return
+	var tall := 1.8 * maxf(e.body_scale, 0.3)
+	var rel := (point.y - e.global_position.y) / tall
+	var mine := host != null and is_instance_valid(host) and host.is_in_group("player")
+	if rel >= 0.8:
+		info.amount *= HEAD_MULT
+		info.set_meta("where", "head")
+		if mine:
+			Achievements.note("headshot")
+			var am := ActiveMagic.of(e)
+			if am != null:
+				am.notice.emit("Head shot", Color(1.0, 0.8, 0.4))
+	elif rel <= 0.33:
+		info.set_meta("where", "leg")
+		var m := ActiveMagic.of(e)
+		if m != null:
+			m.limp(LIMP_SECONDS)

@@ -46,6 +46,7 @@ func _run() -> void:
 		await t_achievements()
 		await t_guide()
 		await t_journal()
+		await t_ranged()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -170,3 +171,52 @@ func t_journal() -> void:
 	await process_frame
 	check("the other tabs still work", j._tabs.current_tab == JournalUI.TAB_ALL)
 	j.close()
+
+
+func t_ranged() -> void:
+	print("-- crossbows, thrown weapons, where it hits")
+	var inv := p.get_node("Inventory") as Inventory
+	var eq := p.get_node("Equipment") as Equipment
+	var rc := p.get_node("RangedCombat") as RangedCombat
+	var cb := load("res://data/ranged/steel_crossbow.tres") as ItemData
+	var bolt := load("res://data/ranged/steel_bolt.tres") as ItemData
+	var arrow := load("res://data/ranged/steel_arrow.tres") as ItemData
+	check("crossbows and bolts exist for every tier", LevelCurve.TIER_KEYS.all(func(k: String) -> bool:
+		return ResourceLoader.exists("res://data/ranged/%s_crossbow.tres" % k) and ResourceLoader.exists("res://data/ranged/%s_bolt.tres" % k) and ResourceLoader.exists("res://data/ranged/%s_javelin.tres" % k)))
+	inv.add_item(cb, 1)
+	inv.add_item(arrow, 10)
+	eq.equip(cb)
+	check("a crossbow is a ranged weapon", rc.has_bow() and cb.is_crossbow and cb.armor_pierce >= 0.5)
+	check("it will not shoot arrows", rc.best_arrow() == null)
+	inv.add_item(bolt, 10)
+	check("it shoots bolts", rc.best_arrow() == bolt)
+	var shots := Achievements.count("shot")
+	rc.begin_draw()
+	check("one click shoots at full power", inv.get_count(bolt) == 9 and Achievements.count("shot") == shots + 1)
+	check("then it has to be wound again", rc.reload_ratio() < 0.2 and not rc.begin_draw() and inv.get_count(bolt) == 9)
+	await secs(cb.draw_time + 0.2)
+	check("and is ready after its reload time", rc.reload_ratio() >= 1.0)
+	var knife := load("res://data/ranged/iron_throwing_knife.tres") as ItemData
+	inv.add_item(knife, 3)
+	eq.equip(knife)
+	await frames(2)
+	check("throwing knives go in the hand as a stack", eq.get_main_hand() == knife and rc.best_arrow() == knife)
+	rc.begin_draw()
+	await frames(2)
+	check("left click throws one", inv.get_count(knife) == 2)
+	var flying := root.find_children("*", "Arrow", true, false)
+	check("it flies as a knife", flying.any(func(a: Node) -> bool: return (a as Arrow).item == knife and a.get_node_or_null("Spin") != null))
+	check("the forge makes them", Recipes.all().any(func(r: Dictionary) -> bool: return String(r["result"]).ends_with("iron_throwing_knife.tres")) and Recipes.all().any(func(r: Dictionary) -> bool: return String(r["result"]).ends_with("iron_crossbow.tres")))
+	# where it hits
+	var at := p.global_position + Vector3(0, 0, 6)
+	at.y = wm.get_height_at(at.x, at.z) + 0.5
+	var foe := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 5, wm, at, RandomNumberGenerator.new())
+	await frames(3)
+	var info := DamageInfo.new(10.0, p, &"arrow")
+	rc._locational(foe, foe.global_position + Vector3.UP * 1.7, info)
+	check("a head shot does half again", is_equal_approx(info.amount, 15.0) and Achievements.count("headshot") >= 1)
+	var leg := DamageInfo.new(10.0, p, &"arrow")
+	rc._locational(foe, foe.global_position + Vector3.UP * 0.3, leg)
+	var am := ActiveMagic.of(foe)
+	check("a leg hit slows them", is_equal_approx(leg.amount, 10.0) and am != null and am.has_effect(&"slow"))
+	foe.queue_free()

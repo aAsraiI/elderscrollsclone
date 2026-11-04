@@ -61,7 +61,7 @@ func mark_for(s: DialogueEngine.Speaker) -> String:
 			return "ready"
 		if hooks.has(t):
 			offer = true
-		elif not QuestManager.TOPICS.has(t) and not Marriage.topics_for(s).has(t) and not Homestead.topics_for(s).has(t) and t != TownSociety.TOPIC:
+		elif not QuestManager.TOPICS.has(t) and not Marriage.topics_for(s).has(t) and not Homestead.topics_for(s).has(t) and t != TownSociety.TOPIC and t != Settlers.TOPIC and t != Settlers.GOODS_TOPIC:
 			return "ready"  # the next step of a quest is to talk to them
 	return "offer" if offer else ""
 

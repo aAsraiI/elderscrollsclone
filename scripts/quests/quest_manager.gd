@@ -765,6 +765,9 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 	var society := TownSociety.of(get_tree())
 	if society != null:
 		out.append_array(society.topics_for(s))  # 1.24: "people you know"
+	var settlers := Settlers.of(get_tree())
+	if settlers != null:
+		out.append_array(settlers.topics_for(s))  # 1.25: a place to live, the settlers' goods
 	return out
 
 
@@ -800,6 +803,11 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 		var told_soc := soc.respond(s, topic)
 		if not told_soc.is_empty():
 			return told_soc
+	var stl := Settlers.of(get_tree())
+	if stl != null:
+		var told_stl := stl.respond(s, topic)
+		if not told_stl.is_empty():
+			return told_stl
 	var wed := Marriage.respond(s, topic, _player(), world.clock.day if world != null and world.clock != null else 1)
 	if not wed.is_empty():
 		return wed

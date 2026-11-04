@@ -59,7 +59,10 @@ func interact(_actor: Inventory) -> void:
 	if not is_instance_valid(person) or WorldState.has_record("freed/" + key):
 		return
 	WorldState.set_record("freed/" + key, {"name": person.display_name})
-	Locks.toast(get_tree(), "%s: \"Thank you! I'll find my own way out.\"" % person.display_name)
+	if Homestead.owns() and Settlers.has_room() and Settlers.invite(person.display_name) == "":
+		Locks.toast(get_tree(), "%s: \"Thank you! I have nowhere to go... your homestead? I'll make my way there.\"" % person.display_name)  # 1.25
+	else:
+		Locks.toast(get_tree(), "%s: \"Thank you! I'll find my own way out.\"" % person.display_name)
 	if person.body != null:
 		person.body.pose = &""
 	var p := get_tree().get_first_node_in_group("player") as Node3D

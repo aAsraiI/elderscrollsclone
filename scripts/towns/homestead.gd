@@ -328,6 +328,7 @@ func _steward(_world: WorldManager, at: Vector3) -> void:
 	var e := Population.spawn_enemy(data, 5, _house, _house.to_global(at), rng, {"persist_mode": Enemy.PersistMode.NEVER})
 	e.disposition = Enemy.Disposition.FRIENDLY
 	e.display_name = "Your Steward"
+	e.set_meta("homestead_steward", true)  # 1.25: hands you the settlers' goods (Settlers)
 	e.wander_radius = 0.0
 	e.set_meta("greeting", "Welcome home. The house is in good order, and the tenants paid on time.")
 

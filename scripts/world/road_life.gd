@@ -184,6 +184,7 @@ func _make(kind: String, at: Vector3, index: int) -> Enemy:
 			e.talk_name = e.display_name
 			e.talk_lines = PackedStringArray(["Long road. Good weather, at least.", "Heading to the next town. You?"])
 			e.placeholder_color = Color(0.4, 0.45, 0.35)
+			e.set_meta("traveller", true)  # 1.25: could settle at your homestead
 	e.position = at
 	world.add_child(e)
 	e.global_position = at

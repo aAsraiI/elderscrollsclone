@@ -33,3 +33,18 @@ cold, World Creation option). Test suite: `test/test_alpha125.gd`.
   strip of leather. Not what you are wearing, and not legendaries.
 - **Recipes you discover**: a crafting recipe shows once you have held everything it needs (whatever is
   in your pack counts the moment you open a station).
+
+## Settlers and taming (1.25.3)
+
+- **Settlers** (needs a homestead): free a prisoner from a dungeon's cells, or ask a traveller on the road
+  about **a place to live**, and they come to live there. Room: the hall sleeps one, a bedroom two, the
+  storeroom and the garden one each.
+- **Work**: farmer (vegetables), hunter (meat, hides), woodcutter (firewood), guard (fewer raids), smith
+  (now and then an ingot). Ask your steward for **the settlers' goods**.
+- **Needs and moods**: each day everyone eats; farmers, hunters and the garden feed the household. Short of
+  food, short of beds, or after a raid their mood falls; fed and housed it rises. Below 15 they pack up
+  and leave (the journal says why). Unhappy settlers do half the work.
+- You find them about the plot when you are near it.
+- **Taming**: walk up to a calm wolf, boar, fox, bear, hound, rat or stalker with raw meat and press E.
+  It eats from your hand, and sometimes (better with Hunting and Survival) it becomes yours: it follows you
+  like a companion and is saved with your game. Fail and it may turn on you. Two beasts at most.

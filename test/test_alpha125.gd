@@ -44,6 +44,7 @@ func _run() -> void:
 		wm.clock.set_time(12.0)
 		await t_body()
 		await t_gathering()
+		await t_settlers()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	GameRules.set_rule("survival", false)
@@ -160,3 +161,53 @@ func t_gathering() -> void:
 	empty.add_item(load("res://data/materials/plant_fibre.tres"), 1)
 	check("then it shows", Recipes.is_known(stone_pick, empty))
 	empty.free()
+
+
+func t_settlers() -> void:
+	print("-- settlers and taming")
+	var st := Settlers.of(self)
+	check("Settlers runs", st != null)
+	var home := p.global_position + Vector3(30, 0, 30)
+	home.y = wm.get_height_at(home.x, home.z)
+	WorldState.set_record("homestead", {"pos": [home.x, home.y, home.z], "yaw": 0.0, "built": ["hall"]})
+	check("with only a hall, room for one", Settlers.capacity() == 1)
+	check("a settler comes", Settlers.invite("Ada Thorn", "farmer") == "" and Settlers.all().size() == 1)
+	check("no room for a second", Settlers.invite("Bram Hale", "hunter") != "")
+	WorldState.set_record("homestead", {"pos": [home.x, home.y, home.z], "yaw": 0.0, "built": ["hall", "bedroom"]})
+	check("a bedroom makes room", Settlers.invite("Bram Hale", "hunter") == "" and Settlers.all().size() == 2)
+	st.daily()
+	var store := WorldState.get_record(Settlers.STORE)
+	check("they work: the farm and the hunt bring things in", store.size() >= 2, str(store))
+	check("fed and housed, they are content", Settlers.all().all(func(s): return int(s["mood"]) > 60))
+	# hungry and crowded, they leave in the end
+	WorldState.set_record(Settlers.RECORD, {"list": [{"id": "x|0", "name": "Cor", "job": "guard", "mood": 20, "joined": 1}, {"id": "y|1", "name": "Dun", "job": "guard", "mood": 20, "joined": 1}, {"id": "z|2", "name": "Eda", "job": "guard", "mood": 20, "joined": 1}, {"id": "w|3", "name": "Fyn", "job": "guard", "mood": 20, "joined": 1}]})
+	st.daily()
+	check("without food or beds, settlers leave", Settlers.all().size() < 4, str(Settlers.all().size()))
+	# their bodies stand about the plot
+	WorldState.set_record(Settlers.RECORD, {"list": [{"id": "a|0", "name": "Ada Thorn", "job": "farmer", "mood": 70, "joined": 1}]})
+	p.global_position = home + Vector3(0, 1.5, 0)
+	st._place_bodies()
+	await frames(5)
+	check("you find them at your homestead", st._bodies.size() == 1)
+	WorldState.erase_record("homestead")
+	WorldState.erase_record(Settlers.RECORD)
+	st._place_bodies()
+	# taming
+	var inv := p.get_node("Inventory") as Inventory
+	inv.add_item(load(Taming.MEAT), 5)
+	var wolf := Population.spawn_enemy(load("res://data/enemies/wolf.tres"), 3, wm, p.global_position + Vector3(1.5, 0, 0), RandomNumberGenerator.new())
+	wolf.set_physics_process(false)
+	await frames(3)
+	wolf.global_position = p.global_position + Vector3(1.5, -1.0, 0)
+	check("with meat, a calm wolf can be tamed", Taming.candidate(p) == wolf)
+	var tamed := false
+	for i in 30:
+		seed(i)
+		var said := Taming.tame(p, wolf)
+		if wolf.has_meta("pet"):
+			tamed = true
+			break
+		wolf._provoked = false
+		wolf.stop_fighting()
+		inv.add_item(load(Taming.MEAT), 1)
+	check("it eats from your hand and follows you", tamed and wolf.has_meta("player_ally") and Taming.pets(p) == 1)

@@ -127,6 +127,9 @@ func _ready() -> void:
 	dungeons = DungeonManager.new()
 	dungeons.name = "DungeonManager"
 	add_child(dungeons)
+	var settle := Settlers.new()  # 1.25: people living at your homestead
+	settle.name = "Settlers"
+	add_child(settle)
 	var sq := SpawnQueue.new()  # 1.23: a place's people join a few per frame
 	sq.name = "SpawnQueue"
 	add_child(sq)

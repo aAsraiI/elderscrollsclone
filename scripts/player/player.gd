@@ -416,6 +416,18 @@ func _on_died() -> void:
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	layer.add_child(label)
 	add_child(layer)
+	if DeathRules.wakes():  # 1.26: a death that costs gold or leaves a grave, then you wake in town
+		label.text = "YOU FELL"
+		await get_tree().create_timer(2.5).timeout
+		if not is_inside_tree():
+			return
+		var cost: String = await DeathRules.wake(self)
+		label.text = cost
+		_dead = false
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		await get_tree().create_timer(2.0).timeout
+		layer.queue_free()
+		return
 	# With a save to go back to: Load Last Save / Main Menu buttons. Without one: start over.
 	var sm := get_tree().get_first_node_in_group("save_manager") as SaveManager
 	var last := sm.latest_slot() if sm != null else ""

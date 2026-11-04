@@ -50,12 +50,12 @@ static func eligible() -> bool:
 
 
 func _raid_tick() -> void:
-	if not eligible():
+	if not eligible() or float(GameRules.get_rule("raid_rate")) <= 0.0:
 		return
 	var day := world.clock.day
 	var rec := WorldState.get_record("raid_next")
 	if rec.is_empty():
-		WorldState.set_record("raid_next", {"day": day + randi_range(RAID_EVERY[0], RAID_EVERY[1]), "warned": false})
+		WorldState.set_record("raid_next", {"day": day + _gap(), "warned": false})
 		return
 	var due := int(rec["day"])
 	if not bool(rec.get("warned", false)) and day >= due - 1:
@@ -69,7 +69,7 @@ func _raid_tick() -> void:
 		return
 	if day >= due and world.clock.hour >= RAID_HOUR:
 		var foe := String(rec.get("faction", "bandits"))
-		WorldState.set_record("raid_next", {"day": day + randi_range(RAID_EVERY[0], RAID_EVERY[1]), "warned": false})
+		WorldState.set_record("raid_next", {"day": day + _gap(), "warned": false})
 		var p := get_tree().get_first_node_in_group("player") as Node3D
 		var plot := Homestead.plot_position()
 		if p != null and Vector2(plot.x - p.global_position.x, plot.z - p.global_position.z).length() < 300.0:
@@ -198,7 +198,7 @@ func horde(at: Vector3) -> int:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	var dir := Vector3(1, 0, 0).rotated(Vector3.UP, rng.randf() * TAU)
-	var n := rng.randi_range(HORDE_SIZE[0], HORDE_SIZE[1])
+	var n := roundi(rng.randi_range(HORDE_SIZE[0], HORDE_SIZE[1]) * float(GameRules.get_rule("raid_rate")))  # 1.26: the Raids and hordes setting
 	var was := SpawnQueue.defer
 	SpawnQueue.defer = true
 	for i in n:
@@ -234,3 +234,9 @@ static func _walk_to(e: Enemy, to: Vector3, speed: float) -> void:
 		e.follow_route(PackedVector3Array([to]), false, speed)
 	else:
 		e.ready.connect(func() -> void: e.follow_route(PackedVector3Array([to]), false, speed), CONNECT_ONE_SHOT)
+
+
+# Days to the next raid, by the Raids and hordes setting (1.26)
+func _gap() -> int:
+	var rate := maxf(float(GameRules.get_rule("raid_rate")), 0.1)
+	return maxi(roundi(randi_range(RAID_EVERY[0], RAID_EVERY[1]) / rate), 2)

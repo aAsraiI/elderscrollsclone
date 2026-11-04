@@ -61,7 +61,7 @@ func _process(delta: float) -> void:
 	_spawn_t = SPAWN_EVERY
 	_let_go(p)
 	_scavengers(p)
-	if not enabled or inside or groups.size() >= MAX_GROUPS or _near_town(p.global_position):
+	if not enabled or inside or groups.size() >= maxi(roundi(MAX_GROUPS * float(GameRules.get_rule("spawn_density"))), 1) or _near_town(p.global_position):  # 1.26: the Creatures setting
 		return
 	_spawn_group(p)
 

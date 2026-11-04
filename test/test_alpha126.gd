@@ -45,6 +45,7 @@ func _run() -> void:
 		await t_dungeons()
 		await t_travel()
 		await t_dialogue()
+		await t_settings()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -359,3 +360,67 @@ func t_dialogue() -> void:
 	check("start at a wayside inn", inn.is_finite())
 	check("start shipwrecked on a shore", wreck.is_finite() and wm.map.get_height(wreck.x, wreck.z) < wm.map.settings.sea_level + 1.7)
 	check("start alone in the wilds", wild.is_finite())
+
+
+func t_settings() -> void:
+	print("-- world settings")
+	var r := GameRules.DEFAULTS.duplicate()
+	GameRules.apply_preset(r, "Hardcore")
+	check("a preset sets the rules", bool(r["ironman"]) and bool(r["survival"]) and not bool(r["quest_markers"]) and String(r["death"]) == "grave")
+	GameRules.apply_preset(r, "Story")
+	check("and another sets them back", not bool(r["ironman"]) and float(r["raid_rate"]) == 0.0)
+	var raids := get_first_node_in_group("raids") as Raids
+	GameRules._rules["raid_rate"] = 2.0
+	var often := 0
+	for i in 30:
+		often += raids._gap()
+	GameRules._rules["raid_rate"] = 0.5
+	var rare := 0
+	for i in 30:
+		rare += raids._gap()
+	check("raids come more often or less, by the setting", often < rare, "%d vs %d" % [often, rare])
+	GameRules._rules["raid_rate"] = 0.0
+	check("and a horde of none when they're off", raids.horde(p.global_position + Vector3(200, 0, 0)) == 0)
+	GameRules._rules.erase("raid_rate")
+	GameRules._rules["respawn_days"] = 3
+	check("dungeons fill again by the setting", int(GameRules.get_rule("respawn_days")) == 3)
+	GameRules._rules.erase("respawn_days")
+	# death: lose gold
+	var inv := p.get_node("Inventory") as Inventory
+	var stats := p.get_node("Stats") as Stats
+	Currency.spend_gold(inv, Currency.get_gold(inv))
+	Currency.add_gold(inv, 400)
+	GameRules._rules["death"] = "gold"
+	check("gold and grave deaths wake you", DeathRules.wakes())
+	var where := p.global_position
+	var said: String = await DeathRules.wake(p)
+	check("a gold death costs a quarter", Currency.get_gold(inv) == 300, "%d: %s" % [Currency.get_gold(inv), said])
+	check("and you wake alive, somewhere else", not stats.is_dead and p.global_position.distance_to(where) > 5.0)
+	# death: a grave
+	GameRules._rules["death"] = "grave"
+	var ore := load("res://data/materials/iron_ore.tres") as ItemData
+	inv.add_item(ore, 5)
+	var fell := p.global_position
+	said = await DeathRules.wake(p)
+	await frames(3)
+	check("a grave death leaves your pack behind", inv.get_count(ore) == 0 and said.contains("grave"), said)
+	var graves := get_nodes_in_group("graves")
+	check("in a grave where you fell", graves.size() == 1 and Vector2((graves[0] as Node3D).global_position.x - fell.x, (graves[0] as Node3D).global_position.z - fell.z).length() < 1.0)
+	var cc := (graves[0] as Node).get_node("ContainerComponent") as ContainerComponent
+	check("holding what you carried", cc.inventory.get_count(ore) == 5)
+	(graves[0] as Node).queue_free()
+	await frames(2)
+	DeathRules.restore(self)
+	await frames(2)
+	check("the grave is still there after a reload", get_nodes_in_group("graves").size() == 1)
+	cc = (get_nodes_in_group("graves")[0] as Node).get_node("ContainerComponent") as ContainerComponent
+	check("with your things in it", cc.inventory.get_count(ore) == 5)
+	while not cc.inventory.stacks.is_empty():
+		cc.inventory.remove_item(cc.inventory.stacks[0].item, cc.inventory.stacks[0].count)
+	(get_nodes_in_group("graves")[0] as Node).queue_free()
+	await frames(2)
+	DeathRules.restore(self)
+	await frames(2)
+	check("an emptied grave crumbles", get_nodes_in_group("graves").filter(func(n): return not n.is_queued_for_deletion()).is_empty())
+	GameRules._rules.erase("death")
+	check("the default is the death screen", not DeathRules.wakes())

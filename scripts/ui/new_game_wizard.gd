@@ -195,10 +195,16 @@ func _world_page() -> void:
 		edit.text = seed_text)
 	seed_row.add_child(rnd)
 	g.add_child(seed_row)
+	var presets: Array = ["Custom"] + GameRules.PRESETS.keys()
+	_choice(g, "Preset", presets, 0, func(i: int) -> void:
+		if i > 0:
+			GameRules.apply_preset(rules, String(presets[i]))
+			_go(0))  # 1.26: Story, Adventurer, Survivor, Hardcore; then fine-tune below
 	_choice(g, "Difficulty", Difficulty.NAMES, int(rules["difficulty"]), func(i: int) -> void: rules["difficulty"] = i)
 	_check(g, "Survival mode", "survival", "Hunger, fatigue and cold")
 	_check(g, "Afflictions", "afflictions", "Diseases, vampirism and lycanthropy")
 	_check(g, "Ironman", "ironman", "One life: death deletes the save")
+	_choice(g, "When you die", DeathRules.NAMES.slice(0, 3), maxi(DeathRules.KINDS.find(String(rules.get("death", "reload"))), 0), func(i: int) -> void: rules["death"] = DeathRules.KINDS[i])
 	_check(g, "Fast travel", "fast_travel", "Click the map twice to travel (carriages always work)")
 	_check(g, "Towns and inns only", "fast_travel_towns", "Fast travel reaches only towns and wayside inns")
 	_choice(g, "Start", ["Outside a town gate", "At a wayside inn", "Shipwrecked on a shore", "Alone in the wilds"], maxi(START_IDS.find(String(rules.get("start", "gate"))), 0), func(i: int) -> void: rules["start"] = START_IDS[i])
@@ -208,6 +214,9 @@ func _world_page() -> void:
 	_slider(g, "Loot and gold", "loot_rate", 0.25, 2.0, 0.05, "x%.2f")
 	_slider(g, "Random encounters", "encounter_rate", 0.0, 2.0, 0.1, "x%.1f")
 	_slider(g, "Enemy toughness", "enemy_toughness", 0.5, 2.5, 0.05, "x%.2f")
+	_slider(g, "Creatures", "spawn_density", 0.25, 2.0, 0.05, "x%.2f")
+	_slider(g, "Dungeons fill again after", "respawn_days", 3.0, 90.0, 1.0, "%d days")
+	_slider(g, "Raids and hordes", "raid_rate", 0.0, 2.0, 0.1, "x%.1f")
 	_slider(g, "Length of a day (real minutes)", "day_minutes", 6.0, 96.0, 1.0, "%d min")
 
 

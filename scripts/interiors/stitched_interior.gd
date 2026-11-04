@@ -55,6 +55,7 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 		plan = DungeonAssembler.plan(data.recipe, dungeon_seed, level_max)
 		root = plan.build(dungeon_id)
 	var density := data.recipe.density if data.recipe != null else 1.0
+	density *= float(GameRules.get_rule("spawn_density"))  # 1.26: the world setting
 	var occ := DungeonRefill.occupants(data, dungeon_id, Rumors._day())  # new folk in a long-cleared place
 	var ctx := {"data": occ["data"], "dungeon_id": dungeon_id, "level_min": level_min + data.level_offset, "level_max": level_max + data.level_offset,
 		"density": density, "seed": dungeon_seed, "occupants": int(occ["gen"])}

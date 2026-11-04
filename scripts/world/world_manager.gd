@@ -121,6 +121,7 @@ func _ready() -> void:
 		else:
 			_place_player_at_spawn()
 	_load_initial()
+	DeathRules.restore.call_deferred(get_tree())  # 1.26: graves left by the "grave" death rule
 	if auto_environment:
 		_setup_environment()
 	_make_water()

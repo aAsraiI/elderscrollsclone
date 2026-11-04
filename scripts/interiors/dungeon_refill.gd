@@ -17,7 +17,7 @@ static func occupants(data: DungeonData, dungeon_id: String, today: int) -> Dict
 	var gen := int(rec.get("gen", 0))
 	var found := WorldState.get_record("found/" + dungeon_id)
 	var story := WorldState.has_record("handmade/" + dungeon_id)  # the story's own place stays as it is
-	if not story and bool(found.get("cleared", false)) and today - int(found.get("cleared_day", today)) >= REFILL_DAYS:
+	if not story and bool(found.get("cleared", false)) and today - int(found.get("cleared_day", today)) >= int(GameRules.get_rule("respawn_days")):  # 1.26: a world setting (21 by default)
 		gen += 1
 		var newcomers := _pick(data, dungeon_id, gen)
 		rec = {"gen": gen, "data": newcomers}

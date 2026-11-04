@@ -48,3 +48,14 @@
 - Persuasion buttons already show their chance. Lie and Intimidate answers now show theirs too.
 
 Tests: `test/test_alpha126.gd`.
+
+## World settings (1.26.4)
+- **Presets** on World Creation: Story, Adventurer, Survivor and Hardcore. Each sets the options below, and you can still change any of them afterwards.
+- **When you die** (`scripts/core/death_rules.gd`):
+  - *Reload a save* (the old way).
+  - *Lose some gold:* a quarter of it, and you wake at the nearest town.
+  - *Leave a grave:* everything you carried but didn't wear stays in a marked grave where you fell (at the door if you fell in a dungeon), saved until you empty it. You wake at the nearest town.
+  - Ironman is still permadeath.
+- **Creatures** slider: scales dungeon rooms, wild animal groups and encounter caps.
+- **Dungeons fill again after** slider: 3–90 days (21 by default).
+- **Raids and hordes** slider: 0 turns them off. Higher values mean shorter gaps between raids and bigger blood-moon hordes.

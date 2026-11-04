@@ -100,7 +100,7 @@ func try_encounter(force: bool = false, only: EncounterData = null) -> Array[Nod
 	if biome == null:
 		return out
 	if not force:
-		if _rng.randf() > chance * float(GameRules.get_rule("encounter_rate")) or get_alive_count() >= max_alive:
+		if _rng.randf() > chance * float(GameRules.get_rule("encounter_rate")) or get_alive_count() >= maxi(roundi(max_alive * float(GameRules.get_rule("spawn_density"))), 1):
 			return out
 		if world.get_town_at(pos, TOWN_MARGIN) != null:
 			return out  # towns are safe

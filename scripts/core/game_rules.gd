@@ -33,9 +33,31 @@ const DEFAULTS := {
 	"enemy_toughness": 1.0,
 	## Long falls hurt (Acrobatics makes them hurt less)
 	"fall_damage": true,
+	## What dying costs (1.26, DeathRules): "reload", "gold", "grave" (permadeath is Ironman)
+	"death": "reload",
+	## How many creatures: dungeon rooms, the wild, encounters (1.0 = normal)
+	"spawn_density": 1.0,
+	## Days before a cleared dungeon has new occupants
+	"respawn_days": 21,
+	## Raids on your homestead and blood-moon hordes (0 = never, 1 = normal, 2 = often)
+	"raid_rate": 1.0,
 }
 
 static var _rules: Dictionary = {}
+
+
+## World Creation presets (1.26): a set of the rules above, then fine-tune
+const PRESETS := {
+	"Story": {"survival": false, "afflictions": false, "ironman": false, "difficulty": 1, "death": "reload", "quest_markers": true, "fast_travel": true, "fast_travel_towns": false, "spawn_density": 0.7, "raid_rate": 0.0, "enemy_toughness": 0.8, "encounter_rate": 0.6},
+	"Adventurer": {"survival": false, "afflictions": true, "ironman": false, "difficulty": 2, "death": "reload", "quest_markers": true, "fast_travel": true, "fast_travel_towns": false, "spawn_density": 1.0, "raid_rate": 1.0, "enemy_toughness": 1.0, "encounter_rate": 1.0},
+	"Survivor": {"survival": true, "afflictions": true, "ironman": false, "difficulty": 2, "death": "grave", "quest_markers": true, "fast_travel": true, "fast_travel_towns": true, "spawn_density": 1.2, "raid_rate": 1.2, "enemy_toughness": 1.1, "encounter_rate": 1.2},
+	"Hardcore": {"survival": true, "afflictions": true, "ironman": true, "difficulty": 3, "death": "grave", "quest_markers": false, "fast_travel": false, "fast_travel_towns": true, "spawn_density": 1.5, "raid_rate": 1.5, "enemy_toughness": 1.25, "encounter_rate": 1.5},
+}
+
+
+static func apply_preset(rules: Dictionary, name: String) -> void:
+	for k in PRESETS.get(name, {}):
+		rules[k] = PRESETS[name][k]
 
 
 static func get_rule(key: String) -> Variant:

@@ -14,6 +14,8 @@ const DRAFT := 0.6
 
 ## The town whose pier it came from ("" for one restored from a save)
 var from_town := ""
+## 1.25: a raft you built yourself (logs and rope): slower, no sail
+var is_raft := false
 var speed := 0.0
 var _player: CharacterBody3D
 var _sail: Node3D
@@ -23,8 +25,9 @@ var _aground_told := false
 var _save_timer := 0.0
 
 
-static func make(parent: Node3D, at: Vector3, yaw: float, town: String) -> Boat:
+static func make(parent: Node3D, at: Vector3, yaw: float, town: String, raft: bool = false) -> Boat:
 	var b := Boat.new()
+	b.is_raft = raft
 	b.name = "Boat"
 	b.from_town = town
 	b.position = at
@@ -40,7 +43,7 @@ static func restore(player: Node3D) -> void:
 		return
 	var scene := player.get_tree().current_scene
 	var pos := SaveUtil.array_to_vec3(rec.get("pos"), player.global_position)
-	make(scene, pos, float(rec.get("yaw", 0.0)), "")
+	var b := make(scene, pos, float(rec.get("yaw", 0.0)), "", bool(rec.get("raft", false)))
 
 
 ## Did the player take this town's boat away? (then its pier stays empty)
@@ -57,6 +60,9 @@ func _ready() -> void:
 	var wood := POIBuilder.get_material(Color(0.4, 0.28, 0.16))
 	var dark := POIBuilder.get_material(Color(0.24, 0.16, 0.09))
 	var cloth := POIBuilder.get_material(Color(0.78, 0.72, 0.6))
+	if is_raft:
+		_build_raft(wood, dark)
+		return
 	_box(Vector3(1.6, 0.3, 4.2), Vector3(0, 0.0, 0), dark)          # the hull's bottom
 	for side in [-1.0, 1.0]:
 		_box(Vector3(0.12, 0.55, 4.0), Vector3(side * 0.8, 0.25, 0), wood)  # the sides
@@ -94,7 +100,7 @@ func is_boarded() -> bool:
 
 
 func get_prompt() -> String:
-	return "Board the boat" if not is_boarded() else ""
+	return ("Board the raft" if is_raft else "Board the boat") if not is_boarded() else ""
 
 
 func interact(_inv: Inventory) -> void:
@@ -148,7 +154,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## player.gd calls this instead of walking while you are in the boat
 func steer(delta: float, input_dir: Vector2, sail: bool) -> void:
-	var want := -input_dir.y * (SAIL if sail and input_dir.y < 0.0 else ROW)
+	var want := -input_dir.y * (SAIL if sail and input_dir.y < 0.0 and not is_raft else ROW * (0.7 if is_raft else 1.0))
 	if want < 0.0:
 		want *= 0.4  # backing water is slow
 	speed = move_toward(speed, want, (2.5 if sail else 3.5) * delta)
@@ -180,4 +186,32 @@ func _process(delta: float) -> void:
 func _remember() -> void:
 	var rec := WorldState.get_record("boat")
 	var from := String(rec.get("from", from_town)) if from_town == "" else from_town
-	WorldState.set_record("boat", {"pos": SaveUtil.vec3_to_array(global_position), "yaw": rotation.y, "from": from})
+	WorldState.set_record("boat", {"pos": SaveUtil.vec3_to_array(global_position), "yaw": rotation.y, "from": from, "raft": is_raft})
+
+
+# 1.25: five logs lashed together, a pole to push with
+func _build_raft(wood: Material, dark: Material) -> void:
+	for i in 5:
+		var mi := MeshInstance3D.new()
+		var c := CylinderMesh.new()
+		c.top_radius = 0.17
+		c.bottom_radius = 0.19
+		c.height = 3.4
+		c.radial_segments = 8
+		mi.mesh = c
+		mi.material_override = wood if i % 2 == 0 else dark
+		mi.rotation = Vector3(PI * 0.5, 0, 0)
+		mi.position = Vector3(-0.72 + i * 0.36, 0.05, 0)
+		add_child(mi)
+	for z in [-1.2, 1.2]:
+		_box(Vector3(1.9, 0.08, 0.12), Vector3(0, 0.25, z), dark)  # the lashings
+	_box(Vector3(0.06, 2.6, 0.06), Vector3(0.6, 1.1, 1.0), dark, Vector3(0.3, 0, 0))  # the pole
+	_sail = Node3D.new()
+	add_child(_sail)
+	_sail.visible = false
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(1.9, 0.5, 3.4)
+	shape.shape = box
+	shape.position = Vector3(0, 0.1, 0)
+	add_child(shape)

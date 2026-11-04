@@ -48,3 +48,19 @@ cold, World Creation option). Test suite: `test/test_alpha125.gd`.
 - **Taming**: walk up to a calm wolf, boar, fox, bear, hound, rat or stalker with raw meat and press E.
   It eats from your hand, and sometimes (better with Hunting and Survival) it becomes yours: it follows you
   like a companion and is saved with your game. Fail and it may turn on you. Two beasts at most.
+
+## Raids and the blood moon (1.25.4)
+
+- **Raids**: a homestead with three parts or two settlers draws raiders every week or two: the hostile side
+  nearest it. Word comes a day ahead (the journal). Be there after dark and they come (your guards fight
+  with you); be away and your guards hold them off or not: a lost raid empties the settlers' store and
+  frightens them.
+- **The blood moon** (Interface > Blood moon, on by default): on the last night of every month the moon
+  rises red, and the dead come at the gates of the towns near you and at your homestead.
+
+## Rafts and breath (1.25.5)
+
+- **Raft Kit** (8 firewood and 2 rope at a workbench): use it facing open water at its edge and it
+  becomes a raft: slower than a rowboat and no sail, but yours and anywhere. It is your boat from then
+  on (saved like one).
+- **Air Bladder** (a hide and fibre at a tanning rack): use it under water for 20 more seconds of breath.

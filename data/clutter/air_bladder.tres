@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_o45as"]
+
+[resource]
+script = ExtResource("1_o45as")
+id = &"air_bladder"
+display_name = "Air Bladder"
+description = "A sealed animal bladder full of air. Use it under water for a long breath."
+item_type = 0
+weight = 0.3
+value = 15
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("general", "camp")
+ingredient_effects = PackedStringArray()

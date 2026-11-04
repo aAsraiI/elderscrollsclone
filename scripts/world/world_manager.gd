@@ -127,6 +127,10 @@ func _ready() -> void:
 	dungeons = DungeonManager.new()
 	dungeons.name = "DungeonManager"
 	add_child(dungeons)
+	var raids := Raids.new()  # 1.25: raids on your homestead; the blood moon
+	raids.name = "Raids"
+	raids.enabled = encounters_enabled
+	add_child(raids)
 	var settle := Settlers.new()  # 1.25: people living at your homestead
 	settle.name = "Settlers"
 	add_child(settle)

@@ -44,6 +44,7 @@ const DEFAULTS := {
 	"quest_npc_markers": true,  # a mark over someone you can hand a quest in to
 	"quest_targets": true,  # 1.24: quest targets on the compass and map (off: find your way from the journal, Morrowind style)
 	"dark_nights": false,  # 1.24: real darkness at night and in caves: torches, moonlight and Night Eye matter
+	"blood_moon": true,  # 1.25: the last night of every month the dead walk on walled places
 	"quest_offer_markers": false,  # a faint mark over people with a quest to offer
 	"quest_item_glow": true,  # quest items glow on the ground and are marked in containers
 	"dialogue_typewriter": false,  # answers appear letter by letter (click to skip)
@@ -84,6 +85,7 @@ const OPTIONS := [
 	{"tab": "Interface", "key": "quest_npc_markers", "label": "Mark people to hand quests in to", "kind": "check"},
 	{"tab": "Interface", "key": "quest_targets", "label": "Quest targets on the compass and map", "kind": "check"},
 	{"tab": "Video", "key": "dark_nights", "label": "Real darkness (nights and caves)", "kind": "check"},
+	{"tab": "Interface", "key": "blood_moon", "label": "Blood moon (undead hordes once a month)", "kind": "check"},
 	{"tab": "Interface", "key": "quest_offer_markers", "label": "Mark people with quests to offer", "kind": "check"},
 	{"tab": "Interface", "key": "quest_item_glow", "label": "Highlight quest items", "kind": "check"},
 	{"tab": "Interface", "key": "dialogue_typewriter", "label": "Dialogue appears letter by letter", "kind": "check"},

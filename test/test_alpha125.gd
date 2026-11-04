@@ -45,6 +45,8 @@ func _run() -> void:
 		await t_body()
 		await t_gathering()
 		await t_settlers()
+		await t_raids()
+		await t_sea()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	GameRules.set_rule("survival", false)
@@ -211,3 +213,82 @@ func t_settlers() -> void:
 		wolf.stop_fighting()
 		inv.add_item(load(Taming.MEAT), 1)
 	check("it eats from your hand and follows you", tamed and wolf.has_meta("player_ally") and Taming.pets(p) == 1)
+
+
+func t_raids() -> void:
+	print("-- raids and the blood moon")
+	var rd := get_first_node_in_group("raids") as Raids
+	check("Raids runs", rd != null)
+	if rd == null:
+		return
+	var home := p.global_position + Vector3(20, 0, 20)
+	home.y = wm.get_height_at(home.x, home.z)
+	WorldState.set_record("homestead", {"pos": [home.x, home.y, home.z], "yaw": 0.0, "built": ["hall", "bedroom", "workshop"]})
+	check("a homestead of three parts draws raiders", Raids.eligible())
+	var foe := rd.nearest_foe()
+	check("the nearest hostile side", CreatureFactions.relation(foe, "town") == CreatureFactions.Rel.HOSTILE, foe)
+	WorldState.set_record("raid_next", {"day": wm.clock.day + 1, "warned": false})
+	rd._raid_tick()
+	check("word comes a day ahead", bool(WorldState.get_record("raid_next").get("warned", false)))
+	var n := rd.start_raid(foe, home)
+	SpawnQueue.flush()
+	await frames(3)
+	check("they come for the homestead", n > 0 and rd._alive.size() >= n)
+	for e in rd._alive:
+		if is_instance_valid(e):
+			e.queue_free()
+	rd._alive.clear()
+	WorldState.set_record(Settlers.STORE, {"res://data/materials/firewood.tres": 4})
+	for i in 20:
+		rd._raid_while_away(foe)
+		if not WorldState.has_record(Settlers.STORE):
+			break
+	check("lose a raid while away and the store is gone", not WorldState.has_record(Settlers.STORE))
+	WorldState.erase_record("homestead")
+	WorldState.erase_record("raid_next")
+	# the blood moon
+	var d := wm.clock.day
+	while wm.clock.get_day_of_month() != WorldClock.DAYS_PER_MONTH or wm.clock.day <= 7:
+		d += 1
+		wm.clock.day = d
+	wm.clock.set_time(23.0)
+	check("the last night of the month is a blood moon", rd.is_blood_moon())
+	var before := rd._alive.size()
+	var n2 := rd.horde(p.global_position + Vector3(5, 0, 5))
+	SpawnQueue.flush()
+	check("the dead walk on walled places", n2 >= 5 and rd._alive.size() > before)
+	for e in rd._alive:
+		if is_instance_valid(e):
+			e.queue_free()
+
+
+func t_sea() -> void:
+	print("-- rafts and breath")
+	var inv := p.get_node("Inventory") as Inventory
+	var kit := load("res://data/clutter/raft_kit.tres") as ItemData
+	check("a raft kit is something you use", ItemUse.verb(p, kit) == "Build a raft")
+	check("an air bladder too", ItemUse.verb(p, load("res://data/clutter/air_bladder.tres")) == "Breathe from the bladder")
+	# find open water near you
+	var water := Vector3.INF
+	for r in range(20, 2400, 40):
+		for i in 32:
+			var a := float(i) / 32.0 * TAU
+			var at := p.global_position + Vector3(cos(a), 0, sin(a)) * float(r)
+			if wm.get_height_at(at.x, at.z) < wm.map.get_water_level(at.x, at.z) - 2.0:
+				water = at
+				break
+		if water.is_finite():
+			break
+	check("there is water to try it on", water.is_finite())
+	if not water.is_finite():
+		return
+	wm.ensure_area_loaded(water, 1)
+	p.global_position = Vector3(water.x, wm.map.get_water_level(water.x, water.z) + 1.0, water.z)
+	inv.add_item(kit, 1)
+	var why := ItemUse._build_raft(p, kit)
+	await frames(3)
+	var rafts := root.find_children("Boat", "", true, false).filter(func(b): return b is Boat and (b as Boat).is_raft)
+	check("at the water's edge the kit becomes a raft", why == "" and rafts.size() == 1, why)
+	check("and it is your boat now", bool(WorldState.get_record("boat").get("raft", false)))
+	if not rafts.is_empty():
+		check("a raft says so", (rafts[0] as Boat).get_prompt() == "Board the raft")

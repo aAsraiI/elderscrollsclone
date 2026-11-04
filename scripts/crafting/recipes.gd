@@ -64,6 +64,8 @@ static func _ensure() -> void:
 	# 1.25: tools from what you gather, and picks for harder ore
 	_add("workbench", MAT + "stone_pickaxe.tres", 1, [["stone", 2], ["firewood", 1], ["plant_fibre", 2]], 1)
 	_add("workbench", "res://data/clutter/rope.tres", 1, [["plant_fibre", 3]], 1, "tinkering")
+	_add("workbench", "res://data/clutter/raft_kit.tres", 1, [["firewood", 8], ["res://data/clutter/rope.tres", 2]], 1, "tinkering")
+	_add("tanning_rack", "res://data/clutter/air_bladder.tres", 1, [["animal_hide", 1], ["plant_fibre", 1]], 5)
 	_add("forge", MAT + "steel_pickaxe.tres", 1, [["steel_ingot", 2], ["firewood", 1]], 20)
 	_add("forge", MAT + "ebon_pickaxe.tres", 1, [["ebon_ingot", 2], ["firewood", 1]], 60)
 	_add("forge", MAT + "astral_pickaxe.tres", 1, [["astral_ingot", 2], ["firewood", 1]], 150)

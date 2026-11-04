@@ -14,6 +14,10 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Read book"
 	if Notes.is_note(item):
 		return "Read note"
+	if String(item.id) == "raft_kit":
+		return "Build a raft"
+	if String(item.id) == "air_bladder":
+		return "Breathe from the bladder"
 	if String(item.id) == "horse_deed":
 		return "Call your horse"
 	if String(item.id) == "sellsword_contract":
@@ -34,6 +38,19 @@ static func use(player: Node, item: ItemData) -> void:
 	match verb(player, item):
 		"Read book":
 			BookUI.open(tree, item.display_name, LoreBooks.read(player, item))
+		"Build a raft":
+			var why := _build_raft(player, item)
+			if why != "":
+				Locks.toast(tree, why, true)
+		"Breathe from the bladder":
+			var sw := player.get_node_or_null("Swimming")
+			var inv2 := player.get_node_or_null("Inventory") as Inventory
+			if sw == null or not bool(sw.get("_under")):
+				Locks.toast(tree, "Save it for under the water.", true)
+			elif inv2 != null:
+				sw.set("breath", float(sw.get("breath")) + 20.0)
+				inv2.remove_item(item, 1)
+				Locks.toast(tree, "A long breath of stale air.")
 		"Read note":
 			BookUI.open(tree, item.display_name, String(item.get_meta("note_text", "")))
 		"Read":
@@ -71,3 +88,29 @@ static func use(player: Node, item: ItemData) -> void:
 		"Recharge":
 			var why := WeaponMagic.recharge(player, item)
 			Locks.toast(tree, why if why != "" else "%s is recharged" % item.display_name, why != "")
+
+
+# 1.25: a raft at the water's edge in front of you (it is your boat from now on)
+static func _build_raft(player: Node, item: ItemData) -> String:
+	var p := player as Node3D
+	var world := player.get_tree().get_first_node_in_group("world_manager") as WorldManager
+	var inv := player.get_node_or_null("Inventory") as Inventory
+	if world == null or world.map == null or inv == null or (world.dungeons != null and world.dungeons.is_inside()):
+		return "There is no water here to float it on."
+	var fwd := -p.global_transform.basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	for d in [3.0, 5.0, 7.0, 9.0]:
+		var at: Vector3 = p.global_position + fwd * d
+		var sea := world.map.get_water_level(at.x, at.z)
+		if world.get_height_at(at.x, at.z) < sea - 0.8:
+			var old := player.get_tree().current_scene.find_children("Boat", "", true, false)
+			for b in old:
+				if b is Boat and not (b as Boat).is_boarded() and (b as Boat).from_town == "":
+					b.queue_free()  # your old raft or boat, left behind somewhere
+			var raft := Boat.make(player.get_tree().current_scene, Vector3(at.x, sea, at.z), atan2(-fwd.x, -fwd.z), "", true)
+			WorldState.set_record("boat", {"pos": SaveUtil.vec3_to_array(raft.global_position), "yaw": raft.rotation.y, "from": "", "raft": true})
+			inv.remove_item(item, 1)
+			Locks.toast(player.get_tree(), "You lash the logs together. Your raft floats.")
+			return ""
+	return "Face open water, at its edge, to build a raft."

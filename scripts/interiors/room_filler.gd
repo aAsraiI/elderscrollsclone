@@ -22,9 +22,21 @@ static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 	var lmin := int(ctx.get("level_min", 1))
 	var lmax := int(ctx.get("level_max", lmin + 3))
 	var density := float(ctx.get("density", 1.0))
-	for s in room.sockets():
+	var socks := room.sockets()
+	var furniture: Array[AABB] = []  # the room's own furniture, read before anything is spawned into it
+	for s in socks:
+		if s.kind in [SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT]:
+			furniture = furniture_in(room)
+			break
+	for s in socks:
 		if not s.kind in [SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT, SpawnSocket.Kind.ENEMY, SpawnSocket.Kind.BOSS, SpawnSocket.Kind.NPC, SpawnSocket.Kind.QUEST_ITEM]:
 			continue  # furniture, lights, traps and patrols: the room's own (or InteriorFeatures / InteriorNav)
+		var nudge := Vector3.ZERO  # a chest spot under a brazier or a table moves to the nearest free floor (1.23: the main quest's Codex was buried this way)
+		if s.kind in [SpawnSocket.Kind.CHEST, SpawnSocket.Kind.LOOT]:
+			var free := free_spot(furniture, room, s.position)
+			if not free.is_finite():
+				continue
+			nudge = s.transform.basis.inverse() * (free - s.position)
 		var key := "%s/%s" % [room_id, s.name]
 		var rng := RandomNumberGenerator.new()
 		rng.seed = ("%d|%s" % [int(ctx.get("seed", 0)), key]).hash()
@@ -49,7 +61,9 @@ static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 				var chest_name := "Boss Chest" if boss_chest else ("Satchel" if s.kind == SpawnSocket.Kind.LOOT else "Chest")
 				var chest := POIBuilder.make_chest(chest_name, loot, save_id, absi(key.hash()) | 1)
 				s.add_child(chest)
-				chest.position = Vector3(0, 0.35, 0)
+				chest.position = nudge + Vector3(0, 0.35, 0)
+				var stand := s.position + s.transform.basis * nudge
+				furniture.append(AABB(stand + Vector3(-0.5, 0.0, -0.35), Vector3(1.0, 0.8, 0.7)))  # the next chest does not land on this one
 				if s.kind == SpawnSocket.Kind.LOOT:
 					chest.scale = Vector3(0.5, 0.5, 0.5)
 				out["chests"] += 1
@@ -98,4 +112,60 @@ static func fill(room: RoomModule, ctx: Dictionary) -> Dictionary:
 					if item != null:
 						WorldItem.place(item, 1, room, s.position + Vector3(0, 0.4, 0), key, "")
 						out["quest_items"] = int(out.get("quest_items", 0)) + 1
+	return out
+
+
+## Footprints (room space) of the room's furniture: direct children that are not spawn points,
+## markers or the room's shell, and are the size of a piece of furniture (under 3 m across)
+static func furniture_in(room: RoomModule) -> Array[AABB]:
+	var out: Array[AABB] = []
+	for c in room.get_children():
+		if c is SpawnSocket:
+			for chest in (c as Node).get_children():  # a chest already standing at a spawn point
+				if chest is StaticBody3D:
+					out.append((c as Node3D).transform * ((chest as Node3D).transform * AABB(Vector3(-0.5, -0.35, -0.3), Vector3(1.0, 0.8, 0.6))))
+			continue
+		if not (c is Node3D) or c is Marker3D or c is CharacterBody3D or c is RigidBody3D or (c as Node).is_in_group("interior_geometry"):
+			continue
+		var b := ModelLibrary.bounds(c as Node3D)
+		if b.size == Vector3.ZERO:
+			b = _shape_bounds(c as Node3D)  # builder-kit pieces make their model in _ready (not yet in the tree)
+		if b.size == Vector3.ZERO or b.size.x > 3.0 or b.size.z > 3.0 or b.size.y < 0.3:
+			continue  # walls, floors, rugs and decals
+		out.append((c as Node3D).transform * b)
+	return out
+
+
+## Would a chest at this spot (room space) stand inside a piece of furniture?
+static func blocked(furniture: Array[AABB], at: Vector3) -> bool:
+	var chest := AABB(at + Vector3(-0.35, 0.1, -0.25), Vector3(0.7, 0.5, 0.5))
+	for f in furniture:
+		if f.intersects(chest):
+			return true
+	return false
+
+
+## Where a chest meant for this spot can stand: the spot itself if it is clear, else the nearest
+## clear floor within 2.5 m that is still inside the room (INF = nowhere)
+static func free_spot(furniture: Array[AABB], room: RoomModule, at: Vector3) -> Vector3:
+	if not blocked(furniture, at):
+		return at
+	var inner := room.bounds().grow(-0.8)
+	for r in [0.7, 1.1, 1.5, 2.0, 2.5]:
+		for i in 12:
+			var a := float(i) / 12.0 * TAU
+			var p := Vector3(at.x + cos(a) * r, 0.0 if at.y < 0.6 else at.y, at.z + sin(a) * r)
+			if inner.has_point(Vector3(p.x, inner.position.y + 0.1, p.z)) and not blocked(furniture, p):
+				return p
+	return Vector3.INF
+
+
+static func _shape_bounds(node: Node3D) -> AABB:
+	var out := AABB()
+	for cs in node.find_children("*", "CollisionShape3D", true, false):
+		var shape := (cs as CollisionShape3D).shape
+		if shape == null:
+			continue
+		var local := ModelLibrary.relative_transform(node, cs as Node3D) * shape.get_debug_mesh().get_aabb()
+		out = local if out.size == Vector3.ZERO else out.merge(local)
 	return out

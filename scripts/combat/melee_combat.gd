@@ -174,10 +174,17 @@ const ARC_PITCHES: Array[float] = [0.0, -10.0]
 @export var buffer_clicks := true
 ## Holding the charge long enough swings heavy by itself, without letting go (the player)
 @export var auto_power_attack := false
+## 1.23: how far through a swing's recovery (0..1) the next swing may cut in. The blade has followed
+## through by then, so chaining feels as quick as the animation looks (0 = wait for the whole recovery).
+@export_range(0.0, 1.0) var recovery_cancel := 0.0
+## 1.23: a click this many seconds before you can swing is still kept (the player; enemies buffer freely)
+@export var early_click := 0.0
 
 var body: Node3D
 ## Current poise (see max_poise)
 var poise := 40.0
+var _early_press := 0.0  # seconds left on a click made just before the next swing could start
+var _early_tap := false  # that click was already let go
 
 var _exclude: Array[RID] = []
 var _phase := Phase.IDLE
@@ -265,6 +272,14 @@ func _physics_process(delta: float) -> void:
 		_stun = maxf(_stun - delta, 0.0)
 		return  # a staggered fighter does nothing at all
 	_advance_phase(delta)
+	if _early_press > 0.0:
+		_early_press = maxf(_early_press - delta, 0.0)
+		if _can_start(MAIN) and not _blocking:
+			_early_press = 0.0
+			if _early_tap:
+				_request(Kind.LIGHT, MAIN, null, 0.0, true)
+			else:
+				begin_charge()  # still held: it charges as if pressed just now
 	_try_buffer(delta)
 
 
@@ -303,6 +318,10 @@ func begin_charge() -> bool:
 	if _charging:
 		return true
 	if not buffer_clicks and not _can_start(MAIN):
+		if early_click > 0.0 and _phase == Phase.RECOVERY:
+			_early_press = early_click  # a touch early: it starts the moment the blade has followed through (1.23)
+			_early_tap = false
+			return true
 		return false  # still swinging: the click does nothing, and the weapon stays where it is
 	_charging = true
 	_charge_time = 0.0
@@ -314,6 +333,8 @@ func begin_charge() -> bool:
 ## Left click released: a tap swings light, a long hold swings heavy.
 func release_charge() -> void:
 	if not _charging:
+		if _early_press > 0.0:
+			_early_tap = true  # let go before it could start: a light swing when it does
 		return
 	_charging = false
 	var held := _charge_time
@@ -700,6 +721,8 @@ func _can_start(hand: int) -> bool:
 		return false
 	if _phase == Phase.IDLE:
 		return true
+	if _phase == Phase.RECOVERY and recovery_cancel > 0.0 and not _act.is_empty() and _phase_left <= _phase_len * (1.0 - recovery_cancel):
+		return true  # the blade has followed through: the next swing may start now (1.23)
 	# Dual wielding: the other hand can swing once the first is half way through its recovery
 	return _phase == Phase.RECOVERY and not _act.is_empty() and hand != int(_act["hand"]) \
 			and _phase_left <= _phase_len * (1.0 - DUAL_SWITCH_AT)

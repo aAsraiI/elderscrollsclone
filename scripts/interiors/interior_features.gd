@@ -195,8 +195,8 @@ static func _put_in_chest(r: RoomModule, item: ItemData, save_id: String) -> voi
 	if r == null:
 		return
 	var chest := POIBuilder.make_chest("Strongbox", [], save_id, absi(save_id.hash()) | 1)
+	chest.position = _clear(r, Vector3(-r.bounds().size.x * 0.5 + 1.0, 0, r.bounds().size.z * 0.5 - 1.0)) + Vector3(0, 0.35, 0)
 	r.add_child(chest)
-	chest.position = Vector3(-r.bounds().size.x * 0.5 + 1.0, 0.35, r.bounds().size.z * 0.5 - 1.0)
 	var cc := chest.get_node("ContainerComponent") as ContainerComponent
 	chest.ready.connect(func() -> void:  # its inventory exists once it is in the world
 		if not WorldState.has_record(save_id + "/key_placed"):
@@ -209,8 +209,8 @@ static func _treasure(r: RoomModule, save_id: String, level: int) -> void:
 	loot.append_array(ItemCatalog.curve_loot(level, level + 3, 2.0))
 	loot.append(ItemCatalog.gold_loot(level + 3, 1.0))
 	var chest := POIBuilder.make_chest("Hidden Chest", loot, save_id, absi(save_id.hash()) | 1)
+	chest.position = _clear(r, Vector3.ZERO) + Vector3(0, 0.35, 0)
 	r.add_child(chest)
-	chest.position = Vector3(0, 0.35, 0)
 
 
 # Three levers along the walls and a caged chest in the middle; the order is carved on the cage
@@ -276,3 +276,9 @@ static func _clear_around(r: Node3D, local_at: Vector3, radius: float) -> void:
 		if Vector2(p.x - local_at.x, p.z - local_at.z).length() < radius + 0.4:
 			r.remove_child(c)
 			c.free()
+
+
+# A clear bit of floor at or near a spot (furniture never swallows a key or a chest; 1.23)
+static func _clear(r: RoomModule, at: Vector3) -> Vector3:
+	var p := RoomFiller.free_spot(RoomFiller.furniture_in(r), r, at)
+	return p if p.is_finite() else at

@@ -37,6 +37,10 @@ func _ready() -> void:
 	# Skyrim's way: a click only counts when you can swing, and holding long enough swings heavy by itself
 	combat.buffer_clicks = false
 	combat.auto_power_attack = true
+	# 1.23: the next swing may start once the blade has followed through (40% into the recovery), and a
+	# click up to 0.3 s before that is kept, so swings chain at the pace the arms move (no dead wait)
+	combat.recovery_cancel = 0.4
+	combat.early_click = 0.3
 
 
 func _spawn_helpers() -> void:

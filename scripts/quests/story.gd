@@ -88,8 +88,15 @@ func _place_codex(dungeon_id: String, codex: ItemData) -> void:
 	if dm == null or dm.current_entrance_id != dungeon_id or not dm.is_inside():
 		return
 	var inside := dm.get_interior_root()
-	if inside == null or inside.find_child("StoryCodex", true, false) != null:
+	if inside == null:
 		return
+	# 1.23: the Codex lies INSIDE the boss chest (it used to be set on the lid, where furniture could
+	# bury it and the quest stalled). A copy from an older save, lying loose, is moved into the chest.
+	var old := inside.find_child("StoryCodex", true, false)
+	if old != null:
+		old.queue_free()
+	if bool(state().get("codex_placed", false)) and _codex_somewhere(inside, codex):
+		return  # it is in a chest or on the floor where you dropped it
 	var chests := inside.find_children("Chest*", "StaticBody3D", true, false)
 	if chests.is_empty():
 		return
@@ -102,9 +109,25 @@ func _place_codex(dungeon_id: String, codex: ItemData) -> void:
 			break
 		if best == null or c.global_position.distance_to(start) > best.global_position.distance_to(start):
 			best = c
-	var top := best.global_transform * ModelLibrary.bounds(best)
-	var w := WorldItem.place(codex, 1, inside, inside.to_local(Vector3(top.get_center().x, top.end.y, top.get_center().z)), "", "")
-	w.name = "StoryCodex"
+	var box := best.get_node_or_null("ContainerComponent") as ContainerComponent
+	if box == null or box.inventory == null:
+		return
+	box.roll_contents()
+	box.inventory.add_item(codex, 1)
+	var s := state().duplicate()
+	s["codex_placed"] = true
+	_store(s)
+
+
+# Is the Codex in one of this dungeon's chests, or lying loose in it?
+func _codex_somewhere(inside: Node3D, codex: ItemData) -> bool:
+	for cc in inside.find_children("*", "ContainerComponent", true, false):
+		if (cc as ContainerComponent).inventory != null and (cc as ContainerComponent).inventory.has_item(codex):
+			return true
+	for w in get_tree().get_nodes_in_group("world_items"):
+		if (w as WorldItem).item == codex:
+			return true
+	return false
 
 
 ## The Mages Guild hall nearest a point (where the Codex is taken to be read)

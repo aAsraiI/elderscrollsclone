@@ -12,6 +12,8 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Read"
 	if LoreBooks.is_book(item):
 		return "Read book"
+	if Notes.is_note(item):
+		return "Read note"
 	if String(item.id) == "horse_deed":
 		return "Call your horse"
 	if String(item.id) == "sellsword_contract":
@@ -32,6 +34,8 @@ static func use(player: Node, item: ItemData) -> void:
 	match verb(player, item):
 		"Read book":
 			BookUI.open(tree, item.display_name, LoreBooks.read(player, item))
+		"Read note":
+			BookUI.open(tree, item.display_name, String(item.get_meta("note_text", "")))
 		"Read":
 			var book := player.get_node_or_null("Spellbook") as Spellbook
 			var spell := SpellCatalog.get_spell(item.teaches_spell)

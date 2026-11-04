@@ -1712,6 +1712,9 @@ func _on_died() -> void:
 		if spawn_key != "":
 			WorldState.set_record("kill/" + spawn_key, {"dead": true})
 		CreatureFactions.on_player_kill(get_tree(), self)
+	var note_rng := RandomNumberGenerator.new()
+	note_rng.seed = (spawn_key if spawn_key != "" else str(get_instance_id())).hash()
+	Notes.maybe_carry(self, note_rng)  # 1.24: a letter, orders, a debt...
 	QuestEvents.kill(self)
 	if enemy_id == "dragon":
 		var slain := int(WorldState.get_record("dragons_slain").get("n", 0)) + 1

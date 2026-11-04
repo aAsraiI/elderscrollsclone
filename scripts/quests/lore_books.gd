@@ -159,6 +159,7 @@ static func read(player: Node, item: ItemData) -> String:
 		var lore_sk := player.get_node_or_null("Skills") as Skills if player != null else null
 		if lore_sk != null:
 			lore_sk.add_xp(&"lore", 12.0)  # every new book teaches you something
+		_maybe_map(player, e)  # 1.24: some books are useful: a map of places near their town
 		var skill := String(e[4])
 		var skills := player.get_node_or_null("Skills") as Skills if player != null else null
 		if skill != "" and skills != null and SkillDatabase.get_skill(StringName(skill)) != null:
@@ -166,3 +167,32 @@ static func read(player: Node, item: ItemData) -> String:
 			var def := SkillDatabase.get_skill(StringName(skill))
 			Locks.toast(player.get_tree(), "Reading %s improves your %s" % [e[1], def.display_name])
 	return String(e[5])
+
+
+## 1.24: about one book in four has a map in it: the three places nearest its town that you have not
+## found yet go on your map the first time you read it
+static func _maybe_map(player: Node, e: Array) -> void:
+	if player == null or absi(String(e[0]).hash()) % 4 != 0:
+		return
+	var tree := player.get_tree()
+	var world := tree.get_first_node_in_group("world_manager") as WorldManager
+	var disc := world.get_node_or_null("Discovery") if world != null else null
+	if world == null or disc == null or not disc.has_method("mark_found"):
+		return
+	var town: PlacedPOI = null
+	for t in world.towns:
+		if t.town != null and t.town.display_name == String(e[3]):
+			town = t
+	var from := town.position if town != null else (player as Node3D).global_position
+	var near: Array = []
+	for p in world.pois:
+		if p.poi is TownData or Discovery.is_found(p.id):
+			continue
+		near.append([p.position.distance_to(from), p])
+	near.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var marked := 0
+	for n in near.slice(0, 3):
+		if disc.mark_found(n[1]):
+			marked += 1
+	if marked > 0:
+		Locks.toast(tree, "A map in the margins: %d places near %s are on your map now." % [marked, String(e[3]) if town != null else "here"])

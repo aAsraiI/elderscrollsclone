@@ -74,6 +74,9 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 	var features := {}
 	if not plan.links.is_empty():
 		features = InteriorFeatures.apply(plan, root, data, dungeon_id, level_max, dungeon_seed)
+	StoryScenes.add(root, dungeon_id, dungeon_seed)  # 1.24: what happened here, in bones and a note
+	if int(occ["gen"]) > 0:
+		_newcomers_note(root, dungeon_id, int(occ["gen"]))  # 1.24: why new folk moved into a place you cleared
 	var start := Vector3(0, 0.2, 0)
 	var start_yaw := 0.0
 	var first: RoomModule = null
@@ -113,3 +116,22 @@ static func build(data: DungeonData, dungeon_seed: int, dungeon_id: String, leve
 		"chests": totals["chests"], "enemies": totals["enemies"], "boss": totals["boss"], "floor": 0, "floors": 1,
 		"props": totals["props"], "features": features, "signature": plan.summary(), "plan": plan, "handmade": scene,
 		"theme": String(first.themes[0]) if first != null and not first.themes.is_empty() else "fort"}
+
+
+const NEWCOMER_NOTES := [
+	["A Scrawled Note", "Whoever cleared this place did us a favour. Dry, deep, and nobody comes looking. Tell the others: this is ours now."],
+	["Orders to the New Crew", "Last lot got careless and got themselves killed. You won't. Lookouts at the door, no fires near the entrance, and nobody goes out alone."],
+	["A Claim, Chalked on the Wall", "THIS HOLE IS SPOKEN FOR. (Underneath, in another hand: 'So was the last one.')"],
+]
+
+
+# By the way in: a note from the ones who moved in after you cleared it
+static func _newcomers_note(root: Node3D, dungeon_id: String, gen: int) -> void:
+	for c in root.get_children():
+		if c is RoomModule:
+			var n: Array = NEWCOMER_NOTES[absi(("%s|%d" % [dungeon_id, gen]).hash()) % NEWCOMER_NOTES.size()]
+			var spot := RoomFiller.free_spot(RoomFiller.furniture_in(c), c, Vector3(1.2, 0, 1.2))
+			if spot.is_finite():
+				var r := Readable.make(c, spot, 0.4, String(n[0]), String(n[1]), "note")
+				r.name = "NewcomersNote"
+			return

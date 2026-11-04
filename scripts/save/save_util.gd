@@ -31,6 +31,8 @@ static func path_to_item(path: String) -> ItemData:
 		return QuestItems.from_path(path)
 	if LoreBooks.is_path(path):
 		return LoreBooks.from_path(path)
+	if Notes.is_path(path):
+		return Notes.from_path(path)
 	if CraftedItems.is_path(path):
 		return CraftedItems.from_path(path)
 	if path == "" or not ResourceLoader.exists(path):

@@ -47,6 +47,7 @@ func _run() -> void:
 	await t_society()
 	await t_needs()
 	await t_marks()
+	await t_stories()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -538,3 +539,64 @@ func t_marks() -> void:
 	GameSettings._values["quest_targets"] = false
 	check("quest targets can be switched off", QuestManager.compass_targets().is_empty())
 	GameSettings._values["quest_targets"] = before
+
+
+func t_stories() -> void:
+	print("-- notes, stories and useful books")
+	var wm := get_first_node_in_group("world_manager") as WorldManager
+	var p := get_first_node_in_group("player") as CharacterBody3D
+	var n := Notes.get_item(3)
+	check("a note is an item you can read", Notes.is_note(n) and ItemUse.verb(p, n) == "Read note")
+	check("and it is saved and loaded", SaveUtil.path_to_item(SaveUtil.item_to_path(n)) == n)
+	var bandit := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 3, wm, p.global_position + Vector3(5, 0, 5), RandomNumberGenerator.new())
+	await frames(3)
+	var got := false
+	for s in 60:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = s
+		Notes.maybe_carry(bandit, rng)
+		for st in bandit.inventory.stacks:
+			if Notes.is_note(st.item):
+				got = true
+		if got:
+			break
+	check("the dead sometimes carry one", got)
+	bandit.queue_free()
+	var long := ""
+	for i in 30:
+		long += "This is a sentence of a long book, and it goes on for a while. " + ("\n" if i % 5 == 4 else "")
+	check("a long book is several pages", BookUI.pages_of(long).size() >= 2, str(BookUI.pages_of(long).size()))
+	check("a short note is one", BookUI.pages_of("Burn this.").size() == 1)
+	# a scene in a dungeon
+	var dungeon: PlacedPOI = null
+	for poi in wm.pois:
+		if poi.poi is DungeonEntrancePOIData:
+			dungeon = poi
+			break
+	var ok: bool = await wm.dungeons.enter(dungeon.id, dungeon.position, 0.0)
+	await frames(10)
+	var root := wm.dungeons.get_interior_root()
+	var made := root.find_children("StoryScene_*", "", true, false).size() > 0
+	for s in 30:
+		if made:
+			break
+		made = StoryScenes.add(root, dungeon.id, s * 7919)
+	check("a dungeon can hold a story scene with its note", ok and made and root.find_children("StoryNote", "", true, false).size() > 0)
+	await wm.dungeons.exit()
+	await frames(10)
+	# a useful book
+	var useful: Array = []
+	for e in LoreBooks.LIST:
+		if absi(String(e[0]).hash()) % 4 == 0:
+			useful = e
+			break
+	var before := 0
+	for poi in wm.pois:
+		if Discovery.is_found(poi.id):
+			before += 1
+	LoreBooks._maybe_map(p, useful)
+	var after := 0
+	for poi in wm.pois:
+		if Discovery.is_found(poi.id):
+			after += 1
+	check("some books put places on your map", not useful.is_empty() and after > before, "%d -> %d" % [before, after])

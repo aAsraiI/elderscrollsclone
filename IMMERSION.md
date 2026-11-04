@@ -130,3 +130,14 @@ drink, lists "hungry times" in its prices, and its people beg; an unsafe one tal
   town horn when something hostile gets in, wolves howling at dusk and before dawn.
 - **Settings**: Video > Real darkness (nights four times darker, caves and dungeons three times: bring a
   torch); Interface > Quest targets on the compass and map (off: find your way from the journal).
+
+## Notes, stories and books (1.24.6)
+
+- **Notes on the dead**: about one person in six carries a note (orders, a letter home, a debt, half a
+  love letter, a map fragment...). Read it from your pack; it is saved like any item (`note://`).
+- **Story scenes**: about two dungeons in three hold a small scene past the first rooms that tells what
+  happened there, in bones, candles and a note: a last stand, two lovers, a failed ritual, a lost
+  expedition, a forgotten prisoner.
+- **New tenants**: a place you cleared that has been taken over again has a note by the door saying why.
+- **Books** are pages you turn (Back / Next, or the arrow keys), and about one lore book in four has a
+  map in its margins: the first time you read it, the three places nearest its town go on your map.

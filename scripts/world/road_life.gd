@@ -23,8 +23,8 @@ signal group_spawned(kind: String, members: Array)
 ## Only roads this close to the player count (m)
 @export var road_reach := 250.0
 
-const KINDS := ["wardens", "merchant", "traveller"]
-const WEIGHTS := [0.4, 0.35, 0.25]
+const KINDS := ["wardens", "merchant", "traveller", "courier", "minstrel"]  # 1.24: couriers and minstrels too
+const WEIGHTS := [0.34, 0.28, 0.2, 0.1, 0.08]
 const GUARD_BODY := "res://data/npcs/town_guard.tres"
 const FOLK_BODY := "res://data/npcs/townsfolk.tres"
 const WALK := 0.42
@@ -166,6 +166,17 @@ func _make(kind: String, at: Vector3, index: int) -> Enemy:
 			e.placeholder_color = Color(0.55, 0.4, 0.2)
 			e.set_meta("merchant", "peddler")
 			e.set_meta("shop_id", "road/%d" % _rng.randi())
+		"courier":
+			e.display_name = "%s, Courier" % NameGen.first_name(who)
+			e.talk_name = e.display_name
+			var dest := _next_town_name(at)
+			e.talk_lines = PackedStringArray(["Letters for %s, and I'm late." % dest, "Can't stop. The roads don't get safer after dark.", "Sealed, every one of them. Don't ask."])
+			e.placeholder_color = Color(0.3, 0.35, 0.5)
+		"minstrel":
+			e.display_name = "%s the Minstrel" % NameGen.first_name(who)
+			e.talk_name = e.display_name
+			e.talk_lines = PackedStringArray(["I play the inns between here and %s. Come and hear me some night." % _next_town_name(at), "A song for a coin? No? Then a song for nothing.", "I'm writing one about a hero. Could be about you, for the right price."])
+			e.placeholder_color = Color(0.55, 0.3, 0.45)
 		_:
 			e.display_name = who if index == 0 else "Pilgrim"
 			e.talk_name = e.display_name
@@ -246,3 +257,15 @@ func _fade_out(e: Enemy, waited: int) -> void:
 			e.queue_free()
 		return
 	get_tree().create_timer(1.0).timeout.connect(_fade_out.bind(e, waited + 1))
+
+
+## The town nearest a spot (a courier's or minstrel's next stop)
+func _next_town_name(at: Vector3) -> String:
+	var best := "the next town"
+	var best_d := INF
+	for t in world.towns:
+		var d := t.position.distance_to(at)
+		if d < best_d and t.town != null:
+			best_d = d
+			best = t.town.display_name
+	return best

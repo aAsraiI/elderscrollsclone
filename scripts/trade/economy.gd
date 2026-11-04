@@ -51,6 +51,8 @@ static func buy_factor(item: ItemData, town_id: String, biome: String, festival:
 		f *= minf(1.0 + SCARCITY * -v, CEILING)
 	if festival and k == "consumable":
 		f *= FESTIVAL_FOOD
+	if k == "consumable":
+		f *= TownNeeds.food_price(town_id)  # 1.24: a hungry town asks more for food
 	return f
 
 
@@ -63,6 +65,8 @@ static func sell_factor(item: ItemData, town_id: String, biome: String, festival
 		f *= maxf(1.0 - GLUT * v, FLOOR)
 	if festival and k == "consumable":
 		f *= 1.1
+	if k == "consumable":
+		f *= TownNeeds.food_price(town_id)  # and pays more for it
 	return f
 
 
@@ -108,4 +112,6 @@ static func note(town_id: String, biome: String, festival: bool, today: int) -> 
 		parts.append("too much on the market: " + ", ".join(glutted))
 	if festival:
 		parts.append("festival prices on food and drink")
+	if TownNeeds.is_hungry(town_id):
+		parts.append("hungry times: food is dear")
 	return ("Prices: " + ";  ".join(parts) + ".") if not parts.is_empty() else ""

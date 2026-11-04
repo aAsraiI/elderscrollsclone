@@ -199,6 +199,13 @@ func report(kind: String, value: int = 0, victim: Enemy = null) -> Dictionary:
 				DialogueState.change_disposition(npc_id, r.data.base_disposition, -30 if kind == "murder" else -10)
 		if (kind == "assault" or kind == "murder") and w != victim and w.disposition == Enemy.Disposition.FRIENDLY and p != null:
 			w.flee_from(p, 10.0)
+	var soc := TownSociety.of(get_tree())
+	if soc != null:
+		var ids: Array = []
+		for w in list:
+			if w.has_meta("npc_id"):
+				ids.append(String(w.get_meta("npc_id")))
+		soc.spread_gossip(ids, kind, town_name)  # 1.24: they tell their friends
 	var where := " in %s" % town.town.display_name if town != null and town.town != null else ""
 	Locks.toast(get_tree(), "%s was seen! Bounty%s: %d" % [String(kind).capitalize(), where, get_bounty(town_id) if town_id != "" else amount], true)
 	crime_reported.emit(kind, town_id, amount, true)

@@ -35,6 +35,7 @@ var _dead_seen := {}  # npc id -> true (grief already handled)
 var _brawl: Dictionary = {}  # {"a": Enemy, "b": Enemy, "until": float}
 var _panic := {}  # town id -> seconds left
 var _clock := 0.0
+var _day_done := -1
 
 
 func _ready() -> void:
@@ -55,6 +56,8 @@ func _process(delta: float) -> void:
 	var p := get_tree().get_first_node_in_group("player") as Node3D
 	if p == null:
 		return
+	_daily()
+	_gossip()
 	_grief()
 	_revenge(p)
 	_tick_brawl(p)
@@ -515,3 +518,79 @@ func has_family(npc_id: String) -> bool:
 		if k == "family":
 			return true
 	return false
+
+
+# ---------------------------------------------------------------- the day's round (1.24.4)
+
+## Once a day: how each town is doing (TownNeeds), and sweethearts who have waited long enough marry
+func _daily() -> void:
+	var day := world.clock.day if world.clock != null else 1
+	if day == _day_done:
+		return
+	_day_done = day
+	for t in world.towns:
+		if t.town != null and t.poi is TownData:
+			var needs := TownNeeds.get_needs(t.id)
+			if needs.is_empty() or int(needs.get("day", -1)) != day:
+				TownNeeds.update(world, t, day)
+	_weddings(day)
+
+
+func _weddings(day: int) -> void:
+	if day < 15:
+		return  # give it a couple of weeks
+	for t in world.towns:
+		if t.town == null or not (t.poi is TownData):
+			continue
+		var web := _web(t.id)
+		for a in web:
+			for b in web[a]:
+				if String(web[a][b]) != "sweetheart" or String(a) > String(b):
+					continue
+				var key := "married/%s|%s" % [a, b]
+				if WorldState.has_record(key):
+					continue
+				if absi(("%s|%d" % [key, day]).hash()) % 100 >= 4:
+					continue  # about one in twenty-five days
+				var ra := world.life.get_resident(String(a))
+				var rb := world.life.get_resident(String(b))
+				if ra == null or rb == null or ra.dead or rb.dead:
+					continue
+				WorldState.set_record(key, {"day": day})
+				set_relation(String(a), String(b), "family")
+				Rumors.add("wedding", "%s and %s were married at the temple in %s. The whole town came." % [ra.data.display_name, rb.data.display_name, t.town.display_name], t.position, day)
+
+
+# ---------------------------------------------------------------- gossip about your crimes
+
+## Witnesses of a crime tell their friends and family within the hour (CrimeManager calls this)
+func spread_gossip(witness_ids: Array, kind: String, town_name: String) -> void:
+	if witness_ids.is_empty() or world.clock == null:
+		return
+	var list: Array = WorldState.get_record("gossip").get("list", []).duplicate()
+	list.append({"ids": witness_ids, "kind": kind, "town": town_name, "at": float(world.clock.day) * 24.0 + world.clock.hour})
+	WorldState.set_record("gossip", {"list": list})
+
+
+func _gossip() -> void:
+	var rec := WorldState.get_record("gossip")
+	if rec.is_empty() or world.clock == null:
+		return
+	var now := float(world.clock.day) * 24.0 + world.clock.hour
+	var left: Array = []
+	for g: Dictionary in rec.get("list", []):
+		if now - float(g["at"]) < 1.0:
+			left.append(g)
+			continue
+		for id in g["ids"]:
+			var known := known_by(String(id))
+			for other in known:
+				if not (String(known[other]) in ["friend", "family", "sweetheart"]):
+					continue
+				var r := world.life.get_resident(String(other))
+				if r == null or r.dead:
+					continue
+				NpcMemory.remember(r.data.display_name, String(g["town"]), String(g["kind"]), "heard it from %s" % _first(String(id)), world.clock.day)
+				DialogueState.change_disposition(r.data.id, r.data.base_disposition, -5)
+	if left.size() != (rec.get("list", []) as Array).size():
+		WorldState.set_record("gossip", {"list": left})

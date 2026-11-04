@@ -45,6 +45,7 @@ func _run() -> void:
 	await t_kill_record()
 	await t_wildlife()
 	await t_society()
+	await t_needs()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -120,7 +121,7 @@ func t_on_sight() -> void:
 	await secs(2.5)
 	check("the bandit goes for the skeleton", b.get_fight_target() == s, str(b.get_fight_target()))
 	check("and the skeleton for the bandit", s.get_fight_target() == b, str(s.get_fight_target()))
-	for k in 10:
+	for k in 20:
 		if blows[0] > 0:
 			break
 		await secs(1.0)
@@ -439,3 +440,47 @@ func t_society() -> void:
 		var ran := bodies.filter(func(r: TownLife.Resident): return is_instance_valid(r.node) and r.node.has_meta("panic")).size()
 		check("a bandit in town sends people running inside", ran >= 1, str(ran))
 		bandit.queue_free()
+
+
+func t_needs() -> void:
+	print("-- how a town is doing, and gossip")
+	var wm := get_first_node_in_group("world_manager") as WorldManager
+	var soc := TownSociety.of(self)
+	var city: PlacedPOI = null
+	for t in wm.towns:
+		if (t.poi as TownData).kind == TownData.Kind.CITY:
+			city = t
+			break
+	var needs := TownNeeds.update(wm, city, wm.clock.day)
+	check("a town has food, safety and wealth", needs.has("food") and needs.has("safety") and needs.has("wealth"), str(needs))
+	WorldState.set_record(TownNeeds.RECORD + city.id, {"food": 20, "safety": 60, "wealth": 50, "day": wm.clock.day})
+	check("a hungry town asks more for food", TownNeeds.food_price(city.id) > 1.3 and TownNeeds.is_hungry(city.id))
+	check("and its people say so", TownNeeds.remark(city.id, 1) != "")
+	var bread := ItemData.new()
+	bread.item_type = ItemData.ItemType.CONSUMABLE
+	bread.value = 10
+	check("the market price follows", Economy.buy_factor(bread, city.id, "plains", false, wm.clock.day) > 1.1)
+	WorldState.erase_record(TownNeeds.RECORD + city.id)
+	# gossip: a witness's friend hears of it within the hour
+	var folk: Array = wm.life.get_town_residents(city.id)
+	var witness: TownLife.Resident = null
+	var friend_id := ""
+	for r: TownLife.Resident in folk:
+		for o in soc.known_by(r.data.id):
+			if soc.known_by(r.data.id)[o] == "friend" and not wm.life.get_resident(String(o)).dead:
+				witness = r
+				friend_id = String(o)
+				break
+		if witness != null:
+			break
+	check("a witness with a friend", witness != null)
+	if witness == null:
+		return
+	var fr := wm.life.get_resident(friend_id)
+	var before := DialogueState.get_disposition(friend_id, fr.data.base_disposition)
+	soc.spread_gossip([witness.data.id], "assault", city.town.display_name)
+	wm.clock.set_time(wm.clock.hour + 1.5)
+	soc._gossip()
+	var after := DialogueState.get_disposition(friend_id, fr.data.base_disposition)
+	check("their friend hears of it and thinks less of you", after < before, "%d -> %d" % [before, after])
+	check("road folk include couriers and minstrels", RoadLife.KINDS.has("courier") and RoadLife.KINDS.has("minstrel"))

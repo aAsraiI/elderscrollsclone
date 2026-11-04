@@ -99,3 +99,16 @@ wolf for foxes, the rat for boars and rabbits, the spider for crabs and beetles,
 - **Brawls**: of an evening at the inn, two drinkers (rivals first) come to blows now and then; no one
   dies of it, and afterwards they are rivals.
 - **A rescue makes friends**: a guard who answers a townsperson's cry for help becomes their friend.
+
+## How a town is doing (1.24.4)
+
+**TownNeeds** works out each town's food, safety and wealth once a day (`town_needs/<id>`):
+food follows the season (lean in winter, plenty after harvest) and now and then a harvest fails
+(a rumour goes round); safety drops for every hostile place still held within 650 m (cleared ones
+help); wealth follows what the town thinks of you. A hungry town asks (and pays) more for food and
+drink, lists "hungry times" in its prices, and its people beg; an unsafe one talks of bandits.
+
+- **Gossip**: the witnesses of a crime tell their friends and family within the hour, who remember it
+  and think less of you.
+- **Weddings**: sweethearts marry after a couple of weeks (about one day in twenty-five); a rumour says so.
+- **Roads**: couriers and minstrels travel between the towns too.

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_2bnxk"]
+
+[resource]
+script = ExtResource("1_2bnxk")
+id = &"voidsteel_shield"
+display_name = "Voidsteel Shield"
+description = "Black steel from the void-touched isles, that drinks the light. Hold right click to block. Raise it just before a hit lands to parry. Left click while blocking to bash."
+item_type = 2
+equip_slot = 7
+weight = 10.0
+value = 12000
+governing_skill = "block"
+stat_modifiers = {
+"armor": 43.0
+}
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("armor", "smithy")
+ingredient_effects = PackedStringArray()
+secondary_action = 1
+block_reduction = 0.74
+bash_damage = 29.400000000000002
+bash_poise = 51.0
+animation_set = &"shield"

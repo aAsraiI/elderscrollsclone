@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_tplbn"]
+
+[resource]
+script = ExtResource("1_tplbn")
+id = &"voidweave_boots"
+display_name = "Voidweave Boots"
+description = "Shadow-dark cloth from the void isles, light as breath. Light armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 2.0
+value = 2880
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 5.6000000000000005
+}
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"voidsteel_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"boots"

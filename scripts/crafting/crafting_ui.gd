@@ -272,7 +272,7 @@ func _list_recipes() -> void:
 
 func _recipe_group(res: ItemData) -> String:
 	if station == "forge":
-		var t := clampi(res.tier - 1, 0, 6)
+		var t := clampi(res.tier - 1, 0, LevelCurve.MAX_TIER)
 		if res.governing_skill == "light_armor":
 			return LevelCurve.LIGHT_NAMES[t]
 		return LevelCurve.TIER_NAMES[t]

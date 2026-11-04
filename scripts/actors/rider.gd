@@ -11,6 +11,7 @@ const GALLOP := 13.0
 var horse: Horse
 var _player: CharacterBody3D
 var _save_timer := 0.0
+var _ride_xp := 0.0
 
 
 func _ready() -> void:
@@ -84,10 +85,13 @@ func ride(delta: float, input_dir: Vector2, gallop: bool) -> void:
 	h.rotation.y = lerp_angle(h.rotation.y, yaw, clampf(delta * 6.0, 0.0, 1.0))
 	var fwd := -h.global_transform.basis.z
 	var right := h.global_transform.basis.x
-	var speed := WALK
+	var st := _player.get_node_or_null("Stats") as Stats
+	var speed_mult := clampf(st.get_stat("horse_speed_mult"), 0.3, 4.0) if st != null else 1.0
+	var tire := 1.0 / clampf(st.get_stat("horse_stamina_mult"), 0.25, 10.0) if st != null else 1.0
+	var speed := WALK * speed_mult
 	if gallop and h.stamina > 1.0 and input_dir.y < 0.0:
-		speed = GALLOP
-		h.stamina -= 12.0 * delta
+		speed = GALLOP * speed_mult
+		h.stamina -= 12.0 * delta * tire
 	else:
 		h.stamina = minf(h.stamina + 6.0 * delta, 100.0)
 	var want := (fwd * -input_dir.y + right * input_dir.x * 0.4) * speed
@@ -96,6 +100,13 @@ func ride(delta: float, input_dir: Vector2, gallop: bool) -> void:
 	if Input.is_action_just_pressed("jump") and h.is_on_floor():
 		h.velocity.y = 5.0
 	h.move_and_slide()
+	if input_dir != Vector2.ZERO:
+		_ride_xp += delta * (1.6 if speed > WALK * speed_mult else 1.0)
+		if _ride_xp >= 3.0:
+			_ride_xp = 0.0
+			var sk := _player.get_node_or_null("Skills") as Skills
+			if sk != null:
+				sk.add_xp(&"riding", 1.0)
 	_player.global_position = h.global_position + Vector3.UP * 1.25
 	_player.velocity = Vector3.ZERO
 

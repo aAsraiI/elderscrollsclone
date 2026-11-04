@@ -145,7 +145,7 @@ func get_current_spell() -> SpellData:
 
 func get_cost(spell: SpellData) -> float:
 	var level := skills.get_level(spell.get_school()) if skills != null else 0
-	return spell.get_cost(level) * (DUAL_COST if dual else 1.0)
+	return spell.get_cost(level) * (DUAL_COST if dual else 1.0) * BuildHooks.spell_cost_mult(stats, spell.get_school())
 
 
 ## Spell strength multiplier for this caster

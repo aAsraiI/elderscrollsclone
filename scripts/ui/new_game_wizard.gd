@@ -200,6 +200,7 @@ func _world_page() -> void:
 	_check(g, "Ironman", "ironman", "One life: death deletes the save")
 	_check(g, "Fast travel", "fast_travel", "Click the map twice to travel (carriages always work)")
 	_check(g, "Quest markers", "quest_markers", "Quest targets on the map and compass")
+	_check(g, "Falling damage", "fall_damage", "Long falls hurt (Acrobatics softens them)")
 	_slider(g, "Leveling speed", "xp_rate", 0.25, 3.0, 0.05, "x%.2f")
 	_slider(g, "Loot and gold", "loot_rate", 0.25, 2.0, 0.05, "x%.2f")
 	_slider(g, "Random encounters", "encounter_rate", 0.0, 2.0, 0.1, "x%.1f")
@@ -375,6 +376,12 @@ func _traits_page() -> void:
 	var signs := Classes.SIGNS.keys()
 	_choice(g, "Birthsign", signs.map(func(s: String) -> String: return "%s (%s)" % [Classes.SIGNS[s]["name"], Classes.SIGNS[s]["desc"]]),
 		signs.find(character["sign"]), func(i: int) -> void: character["sign"] = signs[i])
+	var specs := Classes.SPECIALIZATIONS.keys()
+	_choice(g, "Specialization", specs.map(func(s: String) -> String: return "%s (%s)" % [Classes.SPECIALIZATIONS[s]["name"], Classes.SPECIALIZATIONS[s]["desc"]]),
+		maxi(specs.find(String(character.get("specialization", ""))), 0), func(i: int) -> void: character["specialization"] = specs[i])
+	var bgs := Classes.BACKGROUNDS.keys()
+	_choice(g, "Background", bgs.map(func(s: String) -> String: return "%s (%s)" % [Classes.BACKGROUNDS[s]["name"], Classes.BACKGROUNDS[s]["desc"]]),
+		maxi(bgs.find(String(character.get("background", ""))), 0), func(i: int) -> void: character["background"] = bgs[i])
 	if bool(rules["afflictions"]):
 		var aff := ["", "vampire", "werewolf"]
 		_choice(g, "Begin cursed", ["No", "As a vampire", "As a werewolf"], aff.find(character["affliction"]), func(i: int) -> void: character["affliction"] = aff[i])
@@ -394,6 +401,10 @@ func _summary_page() -> void:
 		lines.append("Disadvantages: " + ", ".join(PackedStringArray((character["disadvantages"] as Array).map(func(a: String) -> String: return Classes.DISADVANTAGES[a]["name"]))))
 	if character["affliction"] != "":
 		lines.append("Cursed: %s." % String(character["affliction"]).capitalize())
+	if String(character.get("specialization", "")) != "":
+		lines.append("Specialization: %s (%s)" % [Classes.SPECIALIZATIONS[character["specialization"]]["name"], Classes.SPECIALIZATIONS[character["specialization"]]["desc"]])
+	if String(character.get("background", "")) != "":
+		lines.append("Background: %s (%s)" % [Classes.BACKGROUNDS[character["background"]]["name"], Classes.BACKGROUNDS[character["background"]]["desc"]])
 	lines.append("")
 	var w := PackedStringArray()
 	w.append("World: %s" % ("seed " + seed_text if seed_text.strip_edges() != "" else "the default world"))

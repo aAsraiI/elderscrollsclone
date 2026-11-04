@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_olcby"]
+
+[resource]
+script = ExtResource("1_olcby")
+id = &"astral_bow"
+display_name = "Astral Bow"
+description = "Astral metal from a falling sky, cold and singing. Hold left click to draw, let go to shoot. Right click zooms. Uses the best arrows you carry."
+item_type = 1
+equip_slot = 6
+weight = 10.5
+value = 60000
+governing_skill = "archery"
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_bow = true
+draw_time = 0.59
+arrow_speed = 73.0
+ingredient_effects = PackedStringArray()
+weapon_damage = 106.5
+reach = 1.6
+attack_cooldown = 0.8
+poise_damage = 6.0
+two_handed = true
+animation_set = &"bow"

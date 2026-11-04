@@ -8,10 +8,10 @@ extends Resource
 @export var weight := 1.0
 @export var count_min := 1
 @export var count_max := 1
-## Only used at levels min_level..max_level
+## Only used at levels min_level..max_level (max_level 100 or more = no top: the islands go to 200+)
 @export var min_level := 1
 @export var max_level := 100
 
 
 func allows(level: int) -> bool:
-	return not members.is_empty() and weight > 0.0 and level >= min_level and level <= max_level
+	return not members.is_empty() and weight > 0.0 and level >= min_level and (level <= max_level or max_level >= 100)

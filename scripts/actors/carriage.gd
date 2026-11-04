@@ -114,6 +114,9 @@ func _open_menu(actor: Inventory) -> void:
 		var cost := price_to(t)
 		var km := Vector2(t.position.x - global_position.x, t.position.z - global_position.z).length() / 1000.0
 		b.text = "%s   %.1f km, %d h   %d gold" % [t.town.display_name if t.town != null else t.id, km, ceili(km / _speed()), cost]
+		if w != null and w.map != null:
+			var band := w.map.get_level_band(t.position.x, t.position.z)
+			b.text += "   (lands of level %d-%d)" % [roundi(band.x), roundi(band.y)]  # the islands are 100-200
 		b.disabled = Currency.get_gold(actor) < cost
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.pressed.connect(func() -> void: _travel(t, actor))

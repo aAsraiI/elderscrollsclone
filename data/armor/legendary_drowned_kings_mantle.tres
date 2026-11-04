@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_o8uck"]
+
+[resource]
+script = ExtResource("1_o8uck")
+id = &"legendary_drowned_kings_mantle"
+display_name = "Mantle of the Drowned King"
+description = "Plate of a king who lived beneath the sea. Legendary: one of a kind."
+item_type = 2
+equip_slot = 2
+weight = 19.5
+value = 145800
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 52.900000000000006,
+"max_health": 80.0,
+"water_breathing": 1.0
+}
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("legendary", "vault")
+ingredient_effects = PackedStringArray()
+animation_set = &"cuirass"

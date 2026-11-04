@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_421wj"]
+
+[resource]
+script = ExtResource("1_421wj")
+id = &"voidweave_cuirass"
+display_name = "Voidweave Armor"
+description = "Shadow-dark cloth from the void isles, light as breath. Light armor for the chest."
+item_type = 2
+equip_slot = 2
+weight = 7.5
+value = 12960
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 25.200000000000003
+}
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"voidsteel_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"cuirass"

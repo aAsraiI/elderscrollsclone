@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_rn8xd"]
+
+[resource]
+script = ExtResource("1_rn8xd")
+id = &"astralweave_greaves"
+display_name = "Astralweave Leggings"
+description = "Thread spun from starlight. Light armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 4.2
+value = 28800
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 13.3
+}
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"astral_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"greaves"

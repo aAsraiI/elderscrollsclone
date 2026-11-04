@@ -99,10 +99,17 @@ func use_item(item: ItemData) -> bool:
 	if surv != null:
 		surv.on_eat(item)
 	inventory.remove_item(item, 1)
+	var pm := clampf(stats.get_stat("potion_mult"), 0.2, 5.0)  # Medicine, Alchemy and perks
 	if item.restore_stamina > 0.0:
-		stats.modify_vital("stamina", item.restore_stamina)
+		stats.modify_vital("stamina", item.restore_stamina * pm)
 	if item.restore_magicka > 0.0:
-		stats.modify_vital("magicka", item.restore_magicka)
+		stats.modify_vital("magicka", item.restore_magicka * pm)
+	# Healing yourself when hurt trains Medicine
+	var missing := stats.get_stat("max_health") - stats.health
+	if item.heal_amount > 0.0 and missing > 1.0:
+		var sk := get_parent().get_node_or_null("Skills") as Skills
+		if sk != null:
+			sk.add_xp(&"medicine", minf(item.heal_amount * pm, missing) * 0.06 + 1.0)
 	if item.heal_amount > 0.0 or item.stamina_regen_bonus > 0.0:
 		apply_effect(item)
 	if not item.magic_effects.is_empty():
@@ -112,7 +119,8 @@ func use_item(item: ItemData) -> bool:
 			var power := 1.0
 			var skills := get_parent().get_node_or_null("Skills") as Skills
 			if item.effect_group == "food" and skills != null:
-				power += float(skills.get_level(&"cooking")) * 0.006
+				power += float(mini(skills.get_level(&"cooking"), 150)) * 0.006 + stats.get_stat("cooking_potency")
+			power *= clampf(stats.get_stat("potion_mult"), 0.2, 5.0) if item.effect_group == "potion" else 1.0
 			magic.apply_list(item.magic_effects, null, item.display_name, item.effect_group, power)
 	_cooldown = use_cooldown
 	item_used.emit(item)
@@ -137,12 +145,20 @@ func apply_effect(item: ItemData, remaining: float = -1.0) -> void:
 		"group": item.effect_group,
 		"total": total,
 		"remaining": total if remaining <= 0.0 else minf(remaining, total),
-		"mods": item.get_effect_mods(),
+		"mods": _scaled_mods(item),
 	}
 	_next_id += 1
 	_effects.append(fx)
 	stats.add_modifiers(SOURCE_PREFIX + str(fx["id"]), fx["mods"])
 	effect_started.emit(fx)
+
+
+# The item's healing, made stronger by potion_mult (Medicine, Alchemy, perks)
+func _scaled_mods(item: ItemData) -> Dictionary:
+	var mods := item.get_effect_mods()
+	if mods.has("health_regen") and stats != null:
+		mods["health_regen"] = float(mods["health_regen"]) * clampf(stats.get_stat("potion_mult"), 0.2, 5.0)
+	return mods
 
 
 ## H key: drinks the smallest health potion that covers what you are missing, or the strongest

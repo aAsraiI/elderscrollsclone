@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_hhg5h"]
+
+[resource]
+script = ExtResource("1_hhg5h")
+id = &"voidsteel_sword"
+display_name = "Voidsteel Sword"
+description = "Black steel from the void-touched isles, that drinks the light. A balanced blade. Swings in an arc and can hit several enemies. Tap to chain a combo, hold to charge a heavy attack."
+item_type = 1
+equip_slot = 6
+weight = 6.25
+value = 10000
+governing_skill = "one_handed"
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 98.0
+reach = 2.2
+attack_style = 1
+arc_degrees = 100.0
+attack_cooldown = 0.7
+attack_windup = 0.12
+stamina_cost = 7.8
+knockback = 3.38
+poise_damage = 25.5
+animation_set = &"sword"

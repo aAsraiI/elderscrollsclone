@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_tlpxp"]
+
+[resource]
+script = ExtResource("1_tlpxp")
+id = &"cinder_crown"
+display_name = "Cinder Crown of the Fire Lords"
+description = "A relic of the outer islands. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 2.0
+value = 6800
+min_level = 140
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("ashen", "vault")
+ingredient_effects = PackedStringArray()

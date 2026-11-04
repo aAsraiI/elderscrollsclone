@@ -25,6 +25,8 @@ give <item> [count]       an item by its id or file name (iron_sword, health_pot
 gold <amount>             add gold (negative takes it)
 skill <skill> [levels]    raise a skill (one_handed, destruction, sneak...)
 level [levels]            raise every skill (default 1 level)
+setskill <skill> <level>   put a skill straight at a level (no cap; milestones apply)
+perkpoints [n]            give extra perk points (default 5)
 spawn <enemy> [count] [level]   a creature in front of you (wolf, bandit, vampire...)
 heal                      full health, magicka and stamina
 god                       nothing can hurt you (again: off)
@@ -284,9 +286,19 @@ func run(text: String) -> String:
 					ids.append(s.id)
 				times = int(args[0]) if not args.is_empty() else 1
 			for id in ids:
-				for i in clampi(times, 1, 100):
+				for i in clampi(times, 1, 500):
 					skills.debug_level_up(id)
 			return "Level %d." % skills.get_player_level()
+		"setskill":
+			var sk2 := p.get_node("Skills") as Skills
+			if args.size() < 2 or SkillDatabase.get_skill(StringName(args[0])) == null:
+				return "setskill <skill> <level>"
+			sk2.set_level(StringName(args[0]), int(args[1]))
+			return "%s is level %d. You are level %d." % [args[0], sk2.get_level(StringName(args[0])), sk2.get_player_level()]
+		"perkpoints":
+			var sk3 := p.get_node("Skills") as Skills
+			sk3.build.bonus_perk_points += int(args[0]) if not args.is_empty() else 5
+			return "Perk points: %d" % sk3.build.perk_points()
 		"spawn":
 			return _spawn(args, p, world)
 		"heal":

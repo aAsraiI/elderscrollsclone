@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_fwdun"]
+
+[resource]
+script = ExtResource("1_fwdun")
+id = &"sunsteel_gauntlets"
+display_name = "Sunsteel Gauntlets"
+description = "Sunsteel from the burning south, warm and bright as noon. Heavy armor for the hands."
+item_type = 2
+equip_slot = 3
+weight = 3.9000000000000004
+value = 8100
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 9.4
+}
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"sunsteel_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"gauntlets"

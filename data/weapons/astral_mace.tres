@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_uuhlf"]
+
+[resource]
+script = ExtResource("1_uuhlf")
+id = &"astral_mace"
+display_name = "Astral Mace"
+description = "Astral metal from a falling sky, cold and singing. A one-handed club of metal. Slow, but it crushes through armor and staggers hard."
+item_type = 1
+equip_slot = 6
+weight = 13.0
+value = 70000
+governing_skill = "one_handed"
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 182.4
+attack_cooldown = 0.85
+attack_windup = 0.18
+stamina_cost = 10.8
+knockback = 5.08
+armor_pierce = 0.25
+poise_damage = 53.2
+combo_length = 2
+heavy_charge_time = 0.5
+heavy_windup = 0.2
+heavy_damage_mult = 1.8
+heavy_reach_bonus = 0.2
+animation_set = &"mace"

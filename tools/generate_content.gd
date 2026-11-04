@@ -23,14 +23,14 @@ const TIER_NAMES := LevelCurve.TIER_NAMES
 const LIGHT_KEYS := LevelCurve.LIGHT_KEYS
 const LIGHT_NAMES := LevelCurve.LIGHT_NAMES
 const TIER_MIN_LEVEL := LevelCurve.TIER_MIN_LEVEL
-const DAMAGE_MULT := [1.0, 1.5, 2.1, 2.9, 3.9, 5.2, 7.4]
-const VALUE_MULT := [1.0, 2.5, 6.0, 14.0, 32.0, 75.0, 170.0]
-const WEIGHT_MULT := [1.0, 1.0, 1.05, 1.1, 1.15, 1.2, 1.25]
-const POISE_MULT := [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]
-const STAMINA_MULT := [1.0, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3]
-const SHIELD_ARMOR := [10, 13, 17, 21, 26, 31, 37]
+const DAMAGE_MULT := [1.0, 1.5, 2.1, 2.9, 3.9, 5.2, 7.4, 9.8, 12.4, 15.2, 18.4]
+const VALUE_MULT := [1.0, 2.5, 6.0, 14.0, 32.0, 75.0, 170.0, 400.0, 900.0, 2000.0, 4500.0]
+const WEIGHT_MULT := [1.0, 1.0, 1.05, 1.1, 1.15, 1.2, 1.25, 1.25, 1.3, 1.3, 1.35]
+const POISE_MULT := [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+const STAMINA_MULT := [1.0, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.3, 1.35, 1.35, 1.4]
+const SHIELD_ARMOR := [10, 13, 17, 21, 26, 31, 37, 43, 49, 55, 62]
 ## Armor of a full HEAVY set per tier; light is LIGHT_ARMOR of that. Shield armor comes on top.
-const SET_ARMOR := [30, 38, 46, 54, 62, 70, 78]
+const SET_ARMOR := [30, 38, 46, 54, 62, 70, 78, 86, 94, 102, 110]
 const LIGHT_ARMOR := 0.65
 const LIGHT_WEIGHT := 0.4
 const TIER_FLAVOR := [
@@ -41,6 +41,10 @@ const TIER_FLAVOR := [
 	"Blackened ebon steel, cold to the touch.",
 	"Carved from the bones of great wyrms.",
 	"Forged from fallen star-metal that hums faintly.",
+	"Black steel from the void-touched isles, that drinks the light.",
+	"Sunsteel from the burning south, warm and bright as noon.",
+	"Astral metal from a falling sky, cold and singing.",
+	"Primordial metal older than the world, red as its first fire.",
 ]
 const LIGHT_FLAVOR := [
 	"Stitched animal hide.",
@@ -50,6 +54,10 @@ const LIGHT_FLAVOR := [
 	"Ebon rings woven fine as cloth.",
 	"Shed scales of a dragon, still warm.",
 	"Star-metal spun into thread.",
+	"Shadow-dark cloth from the void isles, light as breath.",
+	"Golden silk of the sun isles, that turns heat and blades.",
+	"Thread spun from starlight.",
+	"The hide of a creature from before the world.",
 ]
 
 # Iron-tier numbers. heavy = [charge, windup, damage x, stamina x, poise x, reach bonus]

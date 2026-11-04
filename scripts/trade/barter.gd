@@ -51,7 +51,8 @@ static func deal_for(player: Node, disposition: int) -> Deal:
 	var skills := player.get_node_or_null("Skills") as Skills if player != null else null
 	var stats := player.get_node_or_null("Stats") as Stats if player != null else null
 	if skills != null:
-		d.speech = skills.get_level(&"speech")
+		# Mercantile sets the prices (Speech still helps a little); held under 150 so prices stay sane
+		d.speech = mini(maxi(skills.get_level(&"mercantile"), skills.get_level(&"speech") / 2), 150)
 	if stats != null:
 		d.buy_mult = maxf(stats.get_stat("buy_price_mult"), 0.1)
 		d.sell_mult = maxf(stats.get_stat("sell_price_mult"), 0.1)

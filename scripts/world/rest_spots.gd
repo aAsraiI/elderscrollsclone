@@ -108,5 +108,7 @@ func _pray(actor: Inventory) -> void:
 	var n := aff.cure_diseases() if aff != null else 0
 	var m := ActiveMagic.of(p)
 	if m != null:
-		m.apply_list([{"id": &"fortify_health", "mag": 15, "dur": 600}], null, "Blessing", "spell")
+		var bless := maxf(BuildHooks.player_stat(get_tree(), "blessing_mult", 1.0), 0.5)  # Devotion
+		m.apply_list([{"id": &"fortify_health", "mag": roundi(15 * bless), "dur": roundi(600 * bless)}], null, "Blessing", "spell")
+	BuildHooks.train(get_tree(), &"devotion", 15.0)
 	Locks.toast(get_tree(), "You pray. %s You feel blessed." % ("Your sickness is gone." if n > 0 else ""))

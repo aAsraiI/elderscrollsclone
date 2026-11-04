@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_356vt"]
+
+[resource]
+script = ExtResource("1_356vt")
+id = &"primordial_sword"
+display_name = "Primordial Sword"
+description = "Primordial metal older than the world, red as its first fire. A balanced blade. Swings in an arc and can hit several enemies. Tap to chain a combo, hold to charge a heavy attack."
+item_type = 1
+equip_slot = 6
+weight = 6.75
+value = 112500
+governing_skill = "one_handed"
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 184.0
+reach = 2.2
+attack_style = 1
+arc_degrees = 100.0
+attack_cooldown = 0.7
+attack_windup = 0.12
+stamina_cost = 8.4
+knockback = 3.75
+poise_damage = 30.0
+animation_set = &"sword"

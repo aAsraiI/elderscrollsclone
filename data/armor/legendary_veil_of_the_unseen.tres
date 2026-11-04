@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_0lb5w"]
+
+[resource]
+script = ExtResource("1_0lb5w")
+id = &"legendary_veil_of_the_unseen"
+display_name = "Veil of the Unseen"
+description = "Wearers are never seen again, unless they wish it. Legendary: one of a kind."
+item_type = 2
+equip_slot = 1
+weight = 2.6
+value = 86400
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 12.4,
+"noise_mult": -0.25,
+"sneak_attack_bonus": 0.5
+}
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("legendary", "vault")
+ingredient_effects = PackedStringArray()
+animation_set = &"helmet"

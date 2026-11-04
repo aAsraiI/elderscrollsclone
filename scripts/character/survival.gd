@@ -57,8 +57,8 @@ func _process(delta: float) -> void:
 	_last_hours = t
 	if hours > 0.0:
 		if aff == null or not aff.vampire:
-			hunger = minf(hunger + HUNGER_PER_HOUR * hours, 100.0)
-		fatigue = minf(fatigue + FATIGUE_PER_HOUR * hours, 100.0)
+			hunger = minf(hunger + HUNGER_PER_HOUR * hours * _need_mult(), 100.0)
+		fatigue = minf(fatigue + FATIGUE_PER_HOUR * hours * _need_mult(), 100.0)
 		var target := cold_target()
 		cold = move_toward(cold, target, COLD_RATE * hours * (2.0 if target < cold else 1.0))
 	_update_stages()
@@ -177,3 +177,8 @@ func from_dict(d: Dictionary) -> void:
 	for k in _stages:
 		_stages[k] = -1
 	_update_stages()
+
+
+# Survival skill and perks slow hunger and tiredness (never below a fifth)
+func _need_mult() -> float:
+	return clampf(_stats.get_stat("hunger_mult"), 0.2, 2.0) if _stats != null else 1.0

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_j26br"]
+
+[resource]
+script = ExtResource("1_j26br")
+id = &"frost_heart"
+display_name = "Heart of the Frozen Throne"
+description = "A relic of the outer islands. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 2.0
+value = 9600
+min_level = 165
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("ice", "vault")
+ingredient_effects = PackedStringArray()

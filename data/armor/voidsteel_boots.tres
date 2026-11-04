@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_2i3dm"]
+
+[resource]
+script = ExtResource("1_2i3dm")
+id = &"voidsteel_boots"
+display_name = "Voidsteel Boots"
+description = "Black steel from the void-touched isles, that drinks the light. Heavy armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 5.0
+value = 3600
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 8.6
+}
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"voidsteel_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"boots"

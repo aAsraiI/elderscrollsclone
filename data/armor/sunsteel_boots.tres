@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_1iu02"]
+
+[resource]
+script = ExtResource("1_1iu02")
+id = &"sunsteel_boots"
+display_name = "Sunsteel Boots"
+description = "Sunsteel from the burning south, warm and bright as noon. Heavy armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 5.2
+value = 8100
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 9.4
+}
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"sunsteel_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"boots"

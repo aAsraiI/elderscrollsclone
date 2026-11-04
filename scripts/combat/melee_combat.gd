@@ -556,7 +556,7 @@ func take_damage(info: DamageInfo) -> float:
 	if _blocking and _block_item != null and not info.ignores_block and _block_covers(info):
 		var reduction := clampf(_block_item.block_reduction + stats.get_stat("block_strength"), 0.0, MAX_BLOCK_REDUCTION)
 		var absorbed := amount * reduction
-		var cost := absorbed * BLOCK_STAMINA_PER_DAMAGE
+		var cost := BuildHooks.block_cost(stats, absorbed * BLOCK_STAMINA_PER_DAMAGE)
 		if stats.stamina >= cost:
 			stats.modify_vital("stamina", -cost)
 			amount -= absorbed
@@ -588,8 +588,10 @@ func take_damage(info: DamageInfo) -> float:
 		var armor := stats.get_stat("armor")
 		if info.weapon != null:
 			armor *= 1.0 - info.weapon.armor_pierce  # maces crush through part of it
+		armor *= 1.0 - BuildHooks.armor_pen(info.source)  # perks and skills that break armor
 		amount *= 1.0 - clampf(armor * ARMOR_REDUCTION_PER_POINT, 0.0, MAX_ARMOR_REDUCTION)
 	amount *= Difficulty.damage_mult(info.source, body)
+	amount = BuildHooks.reduce(stats, amount)
 	var final := maxf(amount, 0.0)
 	if final > 0.0:
 		_train_armor(final)
@@ -803,10 +805,10 @@ func _start(kind: int, hand: int, item: ItemData, pre: float) -> bool:
 
 	var weapon := _weapon_in(hand)
 	var heavy := kind == Kind.HEAVY
-	var base_cost := weapon.stamina_cost if weapon != null else 0.0
+	var base_cost := BuildHooks.attack_cost(stats, weapon.stamina_cost if weapon != null else 0.0)
 	var cost := base_cost
 	if heavy:
-		var heavy_cost := base_cost * weapon.heavy_stamina_mult if weapon != null else UNARMED_HEAVY_COST
+		var heavy_cost := base_cost * weapon.heavy_stamina_mult if weapon != null else BuildHooks.attack_cost(stats, UNARMED_HEAVY_COST)
 		if stats.stamina >= heavy_cost:
 			cost = heavy_cost
 		else:
@@ -1104,6 +1106,7 @@ func _deal(act: Dictionary, target: Node, pos: Vector3, from: Vector3, dmg: floa
 		if wronged:
 			victim.set_meta("wronged_by_player", true)
 	info.amount *= _bane_mult(target, weapon)
+	info.amount *= BuildHooks.outgoing_mult(body, victim_body_of(target), info)  # crits, executes, followers
 	var final: float = target.take_damage(info)
 	if final > 0.0 or info.result == &"blocked":
 		WeaponMagic.on_hit(body, victim_body_of(target), weapon, info)
@@ -1112,6 +1115,7 @@ func _deal(act: Dictionary, target: Node, pos: Vector3, from: Vector3, dmg: floa
 		if crime != null:
 			crime.on_player_hurt(victim, info.killed)
 	hit_dealt.emit(target, info, final)
+	BuildHooks.after_hit(body, victim_body_of(target), info, final, weapon)
 	if skills != null and weapon != null and weapon.governing_skill != "none" and final > 0.0:
 		skills.add_xp(StringName(weapon.governing_skill), final * WEAPON_XP_PER_DAMAGE)
 
@@ -1151,6 +1155,8 @@ func _act_damage(act: Dictionary) -> float:
 	var w: ItemData = act["weapon"]
 	var mult := float(act["dmg_mult"])
 	mult *= _charge_mult()
+	if bool(act.get("heavy", false)):
+		mult *= 1.0 + maxf(stats.get_stat("power_attack_pct"), 0.0)  # perks and skill milestones
 	match int(act["kind"]):
 		Kind.BASH:
 			return _damage_for(w.bash_damage if w != null else 0.0, BASH_DAMAGE_MULT * mult)
@@ -1305,6 +1311,8 @@ func _train_armor(final: float) -> void:
 			continue
 		trained[skill] = true
 		skills.add_xp(StringName(skill), final * ARMOR_XP_PER_DAMAGE)
+	if trained.is_empty():
+		skills.add_xp(&"unarmored", final * ARMOR_XP_PER_DAMAGE)  # no armor on at all
 
 
 func _draw_debug(lines: Array) -> void:
@@ -1364,4 +1372,4 @@ func _charge_mult() -> float:
 	if h == null or not is_instance_valid(h):
 		return 1.0
 	var speed := Vector2(h.velocity.x, h.velocity.z).length()
-	return 1.0 + CHARGE_BONUS * clampf(speed / Rider.GALLOP, 0.0, 1.0)
+	return (1.0 + CHARGE_BONUS * clampf(speed / Rider.GALLOP, 0.0, 1.0)) * (1.0 + maxf(stats.get_stat("mounted_damage"), 0.0))

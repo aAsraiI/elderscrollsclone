@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_jpbsk"]
+
+[resource]
+script = ExtResource("1_jpbsk")
+id = &"astral_helmet"
+display_name = "Astral Helmet"
+description = "Astral metal from a falling sky, cold and singing. Heavy armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 6.5
+value = 27000
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 15.3
+}
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"astral_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"helmet"

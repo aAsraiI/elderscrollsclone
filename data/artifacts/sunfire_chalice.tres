@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_abpbd"]
+
+[resource]
+script = ExtResource("1_abpbd")
+id = &"sunfire_chalice"
+display_name = "Sunfire Chalice"
+description = "A relic of the outer islands. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 1.5
+value = 5600
+min_level = 125
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("vault", "desert", "temple")
+ingredient_effects = PackedStringArray()

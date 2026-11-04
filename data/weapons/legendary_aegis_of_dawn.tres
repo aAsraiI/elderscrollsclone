@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_7xcsp"]
+
+[resource]
+script = ExtResource("1_7xcsp")
+id = &"legendary_aegis_of_dawn"
+display_name = "Aegis of Dawn"
+description = "The first light of the world, held in steel. Legendary: one of a kind."
+item_type = 2
+equip_slot = 7
+weight = 10.8
+value = 540000
+governing_skill = "block"
+stat_modifiers = {
+"armor": 77.5,
+"block_strength": 0.15,
+"damage_reduction": 0.08
+}
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("legendary", "vault")
+ingredient_effects = PackedStringArray()
+secondary_action = 1
+block_reduction = 0.8
+bash_damage = 55.2
+bash_poise = 60.0
+animation_set = &"shield"

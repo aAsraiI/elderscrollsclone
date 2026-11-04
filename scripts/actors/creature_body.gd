@@ -378,15 +378,17 @@ func dress(equipment: Equipment) -> void:
 
 
 const HEAVY_TINTS: Array[Color] = [Color(0.45, 0.45, 0.48), Color(0.62, 0.64, 0.68), Color(0.82, 0.84, 0.88),
-	Color(0.16, 0.13, 0.22), Color(0.11, 0.11, 0.13), Color(0.86, 0.82, 0.7), Color(0.5, 0.6, 0.92)]
+	Color(0.16, 0.13, 0.22), Color(0.11, 0.11, 0.13), Color(0.86, 0.82, 0.7), Color(0.5, 0.6, 0.92),
+	Color(0.2, 0.12, 0.32), Color(0.95, 0.72, 0.3), Color(0.55, 0.85, 0.95), Color(0.75, 0.25, 0.2)]
 const LIGHT_TINTS: Array[Color] = [Color(0.48, 0.35, 0.22), Color(0.35, 0.22, 0.12), Color(0.7, 0.7, 0.76),
-	Color(0.2, 0.26, 0.22), Color(0.15, 0.15, 0.2), Color(0.55, 0.32, 0.22), Color(0.4, 0.45, 0.72)]
+	Color(0.2, 0.26, 0.22), Color(0.15, 0.15, 0.2), Color(0.55, 0.32, 0.22), Color(0.4, 0.45, 0.72),
+	Color(0.22, 0.16, 0.3), Color(0.85, 0.65, 0.35), Color(0.45, 0.7, 0.8), Color(0.6, 0.3, 0.22)]
 var _armor_mats := {}
 
 
 func _armor_mat(item: ItemData) -> StandardMaterial3D:
 	var heavy := item.governing_skill == "heavy_armor"
-	var t := clampi(item.tier - 1, 0, 6)
+	var t := clampi(item.tier - 1, 0, LevelCurve.MAX_TIER)
 	var key := "%s%d" % ["h" if heavy else "l", t]
 	if not _armor_mats.has(key):
 		var c: Color = HEAVY_TINTS[t] if heavy else LIGHT_TINTS[t]
@@ -435,7 +437,7 @@ func set_weapons(main: ItemData, off: ItemData) -> void:
 func _metal_for(item: ItemData) -> StandardMaterial3D:
 	var key := "w%d" % item.tier
 	if not _armor_mats.has(key):
-		_armor_mats[key] = _mat(HEAVY_TINTS[clampi(item.tier - 1, 0, 6)], 0.35, 0.7)
+		_armor_mats[key] = _mat(HEAVY_TINTS[clampi(item.tier - 1, 0, LevelCurve.MAX_TIER)], 0.35, 0.7)
 	return _armor_mats[key]
 
 

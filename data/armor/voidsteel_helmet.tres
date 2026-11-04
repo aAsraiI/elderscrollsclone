@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_gaqfw"]
+
+[resource]
+script = ExtResource("1_gaqfw")
+id = &"voidsteel_helmet"
+display_name = "Voidsteel Helmet"
+description = "Black steel from the void-touched isles, that drinks the light. Heavy armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 6.300000000000001
+value = 5400
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 12.9
+}
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"voidsteel_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"helmet"

@@ -77,6 +77,7 @@ func _growth() -> float:
 	var days := float(c.day - int(rec.get("day", c.day)))
 	if c.get_season() == 0:
 		days = minf(days, float(rec.get("grown", 0.0)))  # nothing grows in winter
+	days *= 1.0 + maxf(BuildHooks.player_stat(get_tree(), "crop_growth"), 0.0)  # Farming makes crops grow faster
 	return clampf(days / float(GROW_DAYS), 0.0, 1.0)
 
 
@@ -107,13 +108,16 @@ func interact(actor: Inventory) -> void:
 				actor.remove_item(it, 1)
 				WorldState.set_record(key, {"crop": path, "day": _clock().day if _clock() != null else 1})
 				Locks.toast(get_tree(), "You plant %s" % it.display_name)
+				BuildHooks.train(get_tree(), &"farming", 3.0)
 				_refresh()
 				return
 		Locks.toast(get_tree(), "You have nothing to plant (vegetables or herbs)", true)
 		return
 	if _growth() >= 1.0:
 		var item := load(String(rec["crop"])) as ItemData
-		actor.add_item(item, HARVEST)
+		var count := BuildHooks.bonus_count(HARVEST, BuildHooks.player_stat(get_tree(), "farming_bonus"))
+		actor.add_item(item, count)
+		BuildHooks.train(get_tree(), &"farming", 10.0)
 		WorldState.erase_record(key)
-		Locks.toast(get_tree(), "You harvest %s x%d" % [item.display_name, HARVEST])
+		Locks.toast(get_tree(), "You harvest %s x%d" % [item.display_name, count])
 		_refresh()

@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_7hqyb"]
+
+[resource]
+script = ExtResource("1_7hqyb")
+id = &"primordial_greatsword"
+display_name = "Primordial Greatsword"
+description = "Primordial metal older than the world, red as its first fire. Two-handed. Slow, with a long reach and a wide swing. One clean hit staggers most foes."
+item_type = 1
+equip_slot = 6
+weight = 18.900000000000002
+value = 315000
+governing_skill = "two_handed"
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 331.2
+reach = 3.2
+attack_style = 1
+arc_degrees = 130.0
+attack_cooldown = 1.4
+attack_windup = 0.35
+attack_active = 0.22
+stamina_cost = 19.6
+knockback = 6.0
+poise_damage = 80.0
+combo_length = 2
+two_handed = true
+heavy_charge_time = 0.6
+heavy_windup = 0.25
+heavy_poise_mult = 1.6
+heavy_reach_bonus = 0.4
+animation_set = &"greatsword"

@@ -102,9 +102,9 @@ func t_files() -> void:
 	var spear := ItemCatalog.get_weapon(ItemCatalog.Weapon.SPEAR, 0)
 	var sword := ItemCatalog.get_weapon(ItemCatalog.Weapon.SWORD, 0)
 	check("spears reach furthest and are two-handed", spear.reach > sword.reach and spear.two_handed and ItemCatalog.get_weapon(ItemCatalog.Weapon.BATTLEAXE, 0).two_handed)
-	check("there are 40 rings and amulets", ItemCatalog.tagged("jewelry").size() == 40, str(ItemCatalog.tagged("jewelry").size()))
+	check("there are 60 rings and amulets (20 island grades, Alpha 1.22)", ItemCatalog.tagged("jewelry").size() == 60, str(ItemCatalog.tagged("jewelry").size()))
 	var arts := ItemCatalog.all_items().filter(func(i: ItemData) -> bool: return i.artifact)
-	check("24 artifacts, all treasure", arts.size() == 24 and arts.all(func(i: ItemData) -> bool: return i.treasure and i.min_level >= 1), str(arts.size()))
+	check("32 artifacts, all treasure (8 island relics)", arts.size() == 32 and arts.all(func(i: ItemData) -> bool: return i.treasure and i.min_level >= 1), str(arts.size()))
 	var ingr := ItemCatalog.all_items().filter(func(i: ItemData) -> bool: return i.item_type == ItemData.ItemType.INGREDIENT)
 	check("20 ingredients fill the Ingredients tab", ingr.size() >= 20, str(ingr.size()))
 	check("kitchens and smithies have things to put on their shelves", ItemCatalog.tagged("kitchen").size() >= 6 and ItemCatalog.tagged("smithy").size() >= 10)
@@ -134,12 +134,14 @@ func t_curve() -> void:
 	check("a tier shows up as a rare find just before it starts", before[3] > 0.0 and before[3] < 0.2, str(before))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
-	var counts := [0, 0, 0, 0, 0, 0, 0]
+	var counts := []
+	counts.resize(LevelCurve.TIER_KEYS.size())
+	counts.fill(0)
 	for i in 1000:
 		counts[LevelCurve.roll_tier(30, rng)] += 1
 	check("rolls at level 30 follow the weights (obsidian and silver)", counts[3] > 420 and counts[2] > 350 and counts[0] == 0, str(counts))
 	check("gold grows with level", LevelCurve.gold_range(60).x > LevelCurve.gold_range(10).y)
-	check("level cap is 100", LevelCurve.MAX_LEVEL == 100)
+	check("no level cap: level 300 still exists", SkillDatabase.player_xp_to_reach(300) > SkillDatabase.player_xp_to_reach(299))
 	check("skill levels get slower the higher they are", SkillDatabase.xp_to_next_level(90) / SkillDatabase.xp_to_next_level(50) > SkillDatabase.xp_to_next_level(50) / SkillDatabase.xp_to_next_level(10) * 0.35 and SkillDatabase.xp_to_next_level(90) > 700.0)
 	var costs_rise := true
 	for level in range(2, 100):
@@ -177,9 +179,9 @@ func t_player() -> void:
 	for id in sk.levels:
 		sk.levels[id] = 100
 	var by_skills := sk.get_player_level()
-	check("all skills at 100 alone do not reach the cap", by_skills < 100 and by_skills > 70, str(by_skills))
+	check("all skills at 100 alone land near level 100 (no cap)", by_skills < 130 and by_skills > 80, str(by_skills))
 	sk.add_deed_xp(10000000)
-	check("deeds carry you to level 100 and never past it", sk.get_player_level() == 100)
+	check("deeds carry you past level 100 (Alpha 1.22: no cap)", sk.get_player_level() > 100)
 	var saved := sk.to_dict()
 	sk.deed_xp = 0
 	sk.from_dict(saved)

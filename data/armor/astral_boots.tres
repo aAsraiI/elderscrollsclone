@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_87fdd"]
+
+[resource]
+script = ExtResource("1_87fdd")
+id = &"astral_boots"
+display_name = "Astral Boots"
+description = "Astral metal from a falling sky, cold and singing. Heavy armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 5.2
+value = 18000
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 10.200000000000001
+}
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"astral_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"boots"

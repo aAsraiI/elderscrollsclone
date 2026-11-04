@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_usak2"]
+
+[resource]
+script = ExtResource("1_usak2")
+id = &"sunsteel_greaves"
+display_name = "Sunsteel Greaves"
+description = "Sunsteel from the burning south, warm and bright as noon. Heavy armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 10.4
+value = 16200
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 18.8
+}
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"sunsteel_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"greaves"

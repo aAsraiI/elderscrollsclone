@@ -19,6 +19,7 @@ var _tint: CanvasLayer
 var _sea := 0.0  # the water surface where you are (the sea, a lake or a river)
 var _world: WorldManager
 var _water := false
+var _swim_xp := 0.0
 
 
 func _ready() -> void:
@@ -63,7 +64,7 @@ func _physics_process(delta: float) -> void:
 				stats.modify_vital("health", -6.0)
 				Locks.toast(get_tree(), "You are drowning!", true)
 	else:
-		breath = minf(breath + delta * 6.0, BREATH)
+		breath = minf(breath + delta * 6.0, max_breath())
 	_show_tint(_under)
 
 
@@ -74,13 +75,22 @@ func swim_move(delta: float, input_dir: Vector2, sprint: bool) -> void:
 	var dir := (basis * Vector3(input_dir.x, 0.0, input_dir.y))
 	if dir.length() > 0.01:
 		dir = dir.normalized()
-	var speed := SPRINT_SWIM if sprint else SWIM_SPEED
+	var speed := (SPRINT_SWIM if sprint else SWIM_SPEED)
 	var stats := _player.get_node_or_null("Stats") as Stats
 	if sprint and stats != null:
 		if stats.stamina <= 1.0:
 			speed = SWIM_SPEED
 		else:
 			stats.modify_vital("stamina", -6.0 * delta)
+	if stats != null:
+		speed *= clampf(stats.get_stat("swim_speed_mult"), 0.3, 4.0)
+		if input_dir != Vector2.ZERO:
+			_swim_xp += delta
+			if _swim_xp >= 2.0:
+				_swim_xp = 0.0
+				var sk := _player.get_node_or_null("Skills") as Skills
+				if sk != null:
+					sk.add_xp(&"swimming", 1.6 if sprint else 1.0)
 	var want := dir * speed
 	if Input.is_action_pressed("jump"):
 		want.y += 2.5
@@ -108,3 +118,9 @@ func _show_tint(on: bool) -> void:
 	elif not on and _tint != null:
 		_tint.queue_free()
 		_tint = null
+
+
+## Seconds of breath under water (Swimming and perks make it longer)
+func max_breath() -> float:
+	var stats := _player.get_node_or_null("Stats") as Stats if _player != null else null
+	return BREATH * (clampf(stats.get_stat("breath_mult"), 0.3, 20.0) if stats != null else 1.0)

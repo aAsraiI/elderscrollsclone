@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_tuhxe"]
+
+[resource]
+script = ExtResource("1_tuhxe")
+id = &"astral_greaves"
+display_name = "Astral Greaves"
+description = "Astral metal from a falling sky, cold and singing. Heavy armor for the legs."
+item_type = 2
+equip_slot = 4
+weight = 10.4
+value = 36000
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 20.400000000000002
+}
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"astral_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"greaves"

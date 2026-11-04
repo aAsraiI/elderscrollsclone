@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_bq54b"]
+
+[resource]
+script = ExtResource("1_bq54b")
+id = &"first_tablet"
+display_name = "Tablet of the First Words"
+description = "A relic of the outer islands. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 8.0
+value = 15000
+min_level = 190
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("ruin", "vault", "library")
+ingredient_effects = PackedStringArray()

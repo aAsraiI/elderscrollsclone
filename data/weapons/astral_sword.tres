@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_h6560"]
+
+[resource]
+script = ExtResource("1_h6560")
+id = &"astral_sword"
+display_name = "Astral Sword"
+description = "Astral metal from a falling sky, cold and singing. A balanced blade. Swings in an arc and can hit several enemies. Tap to chain a combo, hold to charge a heavy attack."
+item_type = 1
+equip_slot = 6
+weight = 6.5
+value = 50000
+governing_skill = "one_handed"
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 152.0
+reach = 2.2
+attack_style = 1
+arc_degrees = 100.0
+attack_cooldown = 0.7
+attack_windup = 0.12
+stamina_cost = 8.1
+knockback = 3.63
+poise_damage = 28.5
+animation_set = &"sword"

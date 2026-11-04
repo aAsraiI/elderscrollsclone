@@ -66,6 +66,12 @@ var display_name := "You"
 var body_scale := 1.0
 var placeholder_color := Color(0.35, 0.3, 0.42)
 var _sprint_timer := 0.0
+## Falling damage (Alpha 1.22): the speed you were falling at last frame, and a grace time after a
+## load or teleport (terrain may still be appearing under you)
+var _last_vy := 0.0
+var _fall_grace := 8.0
+var _last_pos := Vector3.ZERO
+var _wild_timer := 0.0
 var _dead := false
 ## Set from Settings (GameSettings): mouse_sensitivity, invert_y and the camera's field of view
 var invert_y := false
@@ -193,7 +199,7 @@ func _physics_process(delta: float) -> void:
 	elif Input.is_action_just_pressed("jump") and not _is_paralyzed():
 		velocity.y = jump_velocity * sqrt(maxf(_stats.get_stat("jump_mult"), 0.2) if _stats != null else 1.0)
 		if _skills != null:
-			_skills.add_xp(&"athletics", jump_xp)
+			_skills.add_xp(&"acrobatics", jump_xp)
 
 	# Horizontal movement relative to where the player is facing
 	var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
@@ -223,7 +229,11 @@ func _physics_process(delta: float) -> void:
 	velocity.x = lerpf(velocity.x, direction.x * speed, accel * delta)
 	velocity.z = lerpf(velocity.z, direction.z * speed, accel * delta)
 
+	var was_in_air := not is_on_floor()
+	var falling_speed := -velocity.y
 	move_and_slide()
+	_check_landing(delta, was_in_air, falling_speed)
+	_train_survival(delta)
 
 	# Sprinting trains Athletics. XP is handed over once per second instead of every frame.
 	if _skills != null and sprinting and input_dir != Vector2.ZERO and is_on_floor():
@@ -231,6 +241,44 @@ func _physics_process(delta: float) -> void:
 		if _sprint_timer >= 1.0:
 			_sprint_timer -= 1.0
 			_skills.add_xp(&"athletics", sprint_xp_per_second)
+
+
+# Landing after a fall: Acrobatics XP, and falling damage past BuildHooks.SAFE_FALL meters (less with
+# fall_resist). The fall height comes from the landing speed, so feather and slow fall count, and a
+# teleport (which sets the position, not the speed) never hurts. No damage for a few seconds after a
+# load or a long jump in position, while the ground may still be appearing.
+func _check_landing(delta: float, was_in_air: bool, falling_speed: float) -> void:
+	_fall_grace = maxf(_fall_grace - delta, 0.0)
+	if _last_pos.distance_to(global_position) > 25.0:
+		_fall_grace = maxf(_fall_grace, 3.0)
+	_last_pos = global_position
+	if not was_in_air or not is_on_floor() or falling_speed <= 4.0:
+		return
+	var meters := falling_speed * falling_speed / (2.0 * maxf(gravity, 0.1))
+	if _skills != null and meters >= 3.0:
+		_skills.add_xp(&"acrobatics", minf(meters * 0.4, 20.0))
+	if _fall_grace > 0.0 or _stats == null or _stats.invulnerable or not bool(GameRules.get_rule("fall_damage")):
+		return
+	var dmg := BuildHooks.fall_damage(meters, _stats.get_stat("fall_resist"))
+	if dmg > 0.0:
+		_stats.modify_vital("health", -dmg)
+		if _skills != null:
+			_skills.add_xp(&"acrobatics", minf(dmg * 0.3, 25.0))
+
+
+# Time out in the wild (far from any town, not inside) trains Survival
+func _train_survival(delta: float) -> void:
+	_wild_timer += delta
+	if _wild_timer < 10.0 or _skills == null:
+		return
+	_wild_timer = 0.0
+	var dm := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
+	if dm != null and dm.is_inside():
+		return
+	var world := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if world == null or world.map == null or world.map.get_town_distance(global_position.x, global_position.z) < 180.0:
+		return
+	_skills.add_xp(&"survival", 0.6)
 
 
 ## Starts or stops flying (only while can_fly; noclip keeps you flying)

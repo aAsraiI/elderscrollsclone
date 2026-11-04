@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_b8esr"]
+
+[resource]
+script = ExtResource("1_b8esr")
+id = &"legendary_amulet_of_ages"
+display_name = "Amulet of Ages"
+description = "It has seen every age of the world. Legendary: one of a kind."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 39200
+stat_modifiers = {
+"health_regen": 2.0,
+"max_health": 210.0,
+"skill_xp_pct": 0.15
+}
+tier = 11
+min_level = 185
+loot_tags = PackedStringArray("legendary", "vault")
+ingredient_effects = PackedStringArray()

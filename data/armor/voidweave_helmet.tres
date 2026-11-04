@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_xaan2"]
+
+[resource]
+script = ExtResource("1_xaan2")
+id = &"voidweave_helmet"
+display_name = "Voidweave Hood"
+description = "Shadow-dark cloth from the void isles, light as breath. Light armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 2.5
+value = 4320
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 8.4
+}
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"voidsteel_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"helmet"

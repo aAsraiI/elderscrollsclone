@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_vvq73"]
+
+[resource]
+script = ExtResource("1_vvq73")
+id = &"starstone_amulet_vigor"
+display_name = "Starstone Amulet of Vigor"
+description = "+210 maximum health while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 9800
+stat_modifiers = {
+"max_health": 210.0
+}
+tier = 11
+min_level = 150
+loot_tags = PackedStringArray("jewelry", "jeweler", "vault")
+ingredient_effects = PackedStringArray()

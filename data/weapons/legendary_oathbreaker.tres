@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_u5f1g"]
+
+[resource]
+script = ExtResource("1_u5f1g")
+id = &"legendary_oathbreaker"
+display_name = "Oathbreaker"
+description = "The greatsword of a king who broke every vow. Legendary: one of a kind."
+item_type = 1
+equip_slot = 6
+weight = 17.5
+value = 112000
+governing_skill = "two_handed"
+stat_modifiers = {
+"damage_pct": 0.05,
+"power_attack_pct": 0.3
+}
+tier = 8
+min_level = 110
+loot_tags = PackedStringArray("legendary", "vault")
+ingredient_effects = PackedStringArray()
+weapon_damage = 211.68
+reach = 3.2
+attack_style = 1
+arc_degrees = 130.0
+attack_cooldown = 1.4
+attack_windup = 0.35
+attack_active = 0.22
+stamina_cost = 18.2
+knockback = 5.4
+poise_damage = 68.0
+combo_length = 2
+two_handed = true
+heavy_charge_time = 0.6
+heavy_windup = 0.25
+heavy_poise_mult = 1.6
+heavy_reach_bonus = 0.4
+animation_set = &"greatsword"

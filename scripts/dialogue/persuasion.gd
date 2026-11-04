@@ -51,7 +51,8 @@ static func chance_for(kind: Kind, s: DialogueEngine.Speaker, player: Node) -> f
 	var attr := 10.0
 	if stats != null:
 		attr = stats.get_stat(STAT_OF.get(kind, "charisma"))
-	return clampf(chance(kind, speech, DialogueEngine.get_disposition(s), s.personality, s.role, gap) + (attr - 10.0) * 0.01, 0.05, 0.95)
+	var bonus := stats.get_stat("persuade_bonus") if stats != null else 0.0  # Speech milestones and perks
+	return clampf(chance(kind, mini(speech, 150), DialogueEngine.get_disposition(s), s.personality, s.role, gap) + (attr - 10.0) * 0.01 + bonus, 0.05, 0.95)
 
 
 ## Can the player try this on this person now? A failed try locks that approach for LOCK_HOURS.

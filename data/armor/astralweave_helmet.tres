@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_1qoi7"]
+
+[resource]
+script = ExtResource("1_1qoi7")
+id = &"astralweave_helmet"
+display_name = "Astralweave Hood"
+description = "Thread spun from starlight. Light armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 2.6
+value = 21600
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 9.9
+}
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"astral_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"helmet"

@@ -18,6 +18,8 @@ static func attach(e: Enemy, p_leader: Node3D) -> AllyBrain:
 	b.name = "AllyBrain"
 	b.leader = p_leader
 	e.add_child(b)
+	if p_leader != null and p_leader.is_in_group("player"):
+		BuildHooks.buff_ally(e, p_leader)  # Leadership, Conjuration and perks
 	return b
 
 

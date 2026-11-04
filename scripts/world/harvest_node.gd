@@ -25,7 +25,8 @@ const HERB_COLORS := {
 }
 ## Ore by the area's level: [min level, ore id, weight]
 const ORES := [[1, "iron_ore", 10.0], [6, "corundum_ore", 5.0], [12, "silver_ore", 4.0], [18, "gold_ore", 2.0],
-	[26, "obsidian_ore", 3.0], [38, "ebony_ore", 2.5], [55, "dragonstone_ore", 1.5], [70, "star_ore", 1.0]]
+	[26, "obsidian_ore", 3.0], [38, "ebony_ore", 2.5], [55, "dragonstone_ore", 1.5], [70, "star_ore", 1.0],
+	[100, "void_ore", 1.2], [125, "sun_ore", 1.0], [150, "astral_ore", 0.9], [175, "primordial_ore", 0.8]]
 
 var kind := "herb"
 var item_id := ""
@@ -154,13 +155,18 @@ func _pick_ore() -> String:
 	for o in ORES:
 		if level >= int(o[0]):
 			options.append(o)
-			total += float(o[2])
+			total += _ore_weight(o, level)
 	var roll := float(int(get_meta("pick", 0)) % 10000) / 10000.0 * total
 	for o in options:
-		roll -= float(o[2])
+		roll -= _ore_weight(o, level)
 		if roll <= 0.0:
 			return String(o[1])
 	return "iron_ore"
+
+
+# Common ores get rare far above their level, so the islands are rich in the island metals
+static func _ore_weight(o: Array, level: int) -> float:
+	return float(o[2]) * (0.15 if level >= int(o[0]) + 60 else 1.0)
 
 
 ## How far away herbs and ore stop being drawn (they are small; past this they are a few pixels)
@@ -237,7 +243,7 @@ func _build_visual() -> void:
 			var a := rng.randf() * TAU
 			var at := Vector3(cos(a) * 0.6, rng.randf_range(0.3, 0.8), sin(a) * 0.55)
 			veins.append_from(nug, 0, Transform3D(Basis.from_euler(Vector3(rng.randf(), rng.randf(), rng.randf())), at))
-		var glow := item_id == "star_ore" or item_id == "dragonstone_ore"
+		var glow := item_id in ["star_ore", "dragonstone_ore", "void_ore", "sun_ore", "astral_ore", "primordial_ore"]
 		_add_part(veins.commit(), _material(ORE_COLORS.get(item_id, Color(0.7, 0.5, 0.4)), glow, true), Transform3D.IDENTITY)
 
 
@@ -252,7 +258,8 @@ func _add_part(mesh: Mesh, mat: Material, xf: Transform3D) -> void:
 
 const ORE_COLORS := {"iron_ore": Color(0.55, 0.35, 0.28), "corundum_ore": Color(0.75, 0.5, 0.3), "silver_ore": Color(0.85, 0.87, 0.9),
 	"gold_ore": Color(1.0, 0.8, 0.3), "obsidian_ore": Color(0.12, 0.08, 0.15), "ebony_ore": Color(0.08, 0.08, 0.1),
-	"dragonstone_ore": Color(0.7, 0.2, 0.15), "star_ore": Color(0.55, 0.65, 1.0)}
+	"dragonstone_ore": Color(0.7, 0.2, 0.15), "star_ore": Color(0.55, 0.65, 1.0), "void_ore": Color(0.35, 0.15, 0.55),
+	"sun_ore": Color(1.0, 0.75, 0.3), "astral_ore": Color(0.6, 0.95, 1.0), "primordial_ore": Color(0.85, 0.25, 0.25)}
 
 
 func _today() -> int:
@@ -312,10 +319,26 @@ func interact(actor: Inventory) -> void:
 			return
 		count = 2 + int(get_meta("pick", 0)) % 2
 		var skills := actor.get_parent().get_node_or_null("Skills") as Skills
+		var st := actor.get_parent().get_node_or_null("Stats") as Stats
 		if skills != null:
-			skills.add_xp(&"smithing", 4.0)
+			skills.add_xp(&"mining", 6.0)
+			skills.add_xp(&"smithing", 2.0)
+		if st != null:
+			count = BuildHooks.bonus_count(count, st.get_stat("mining_bonus"))
+			if randf() < st.get_stat("gem_find"):
+				var gems := ItemCatalog.get_treasures().filter(func(t: ItemData) -> bool: return t.loot_tags.has("mine"))
+				if not gems.is_empty():
+					var gem: ItemData = gems[randi() % mini(gems.size(), 8)]
+					actor.add_item(gem, 1)
+					Locks.toast(get_tree(), "You found %s in the rock!" % gem.display_name)
 	else:
 		count = 1 + (1 if randf() < 0.3 else 0)
+		var skills := actor.get_parent().get_node_or_null("Skills") as Skills
+		var st := actor.get_parent().get_node_or_null("Stats") as Stats
+		if skills != null:
+			skills.add_xp(&"herbalism", 3.0)
+		if st != null:
+			count = BuildHooks.bonus_count(count, st.get_stat("harvest_bonus"))
 	actor.add_item(item, count)
 	WorldState.set_record(key, {"day": _today()})
 	Locks.toast(get_tree(), "%s x%d" % [item.display_name, count])

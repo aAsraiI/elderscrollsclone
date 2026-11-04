@@ -52,6 +52,68 @@ const LIST := {
 	"crafter": {"name": "Artisan", "desc": "A smith, alchemist and cook who sells what they make.",
 		"major": ["smithing", "alchemy", "enchanting", "cooking", "tinkering"], "minor": ["speech", "one_handed", "light_armor", "security"],
 		"gear": [[W + "iron_mace.tres", 1], ["res://data/materials/pickaxe.tres", 1], ["res://data/materials/iron_ingot.tres", 6], ["res://data/materials/leather_strips.tres", 4]], "spells": []},
+	# Alpha 1.22: classes built on the new skills
+	"monk": {"name": "Monk", "desc": "A wandering ascetic who fights with bare hands and no armor.",
+		"major": ["hand_to_hand", "unarmored", "acrobatics", "athletics", "restoration"], "minor": ["devotion", "alteration", "sneak", "medicine"],
+		"gear": [[C + "health_potion.tres", 2], [C + "minor_stamina_potion.tres", 2]], "spells": ["healing_hands"]},
+	"scout": {"name": "Scout", "desc": "Eyes of the army: fast, light, a bow and a long road.",
+		"major": ["archery", "athletics", "acrobatics", "light_armor", "survival"], "minor": ["sneak", "riding", "swimming", "hunting"],
+		"gear": [[B + "hunting_bow.tres", 1], [B + "iron_arrow.tres", 40], [A + "hide_cuirass.tres", 1], [A + "hide_boots.tres", 1], [C + "jerky.tres", 4]], "spells": []},
+	"crusader": {"name": "Crusader", "desc": "A holy warrior who leads others against the dead.",
+		"major": ["one_handed", "heavy_armor", "devotion", "block", "restoration"], "minor": ["leadership", "speech", "riding", "medicine"],
+		"gear": [[W + "iron_mace.tres", 1], [R + "weapons/iron_shield.tres", 1], [R + "weapons/iron_chestplate.tres", 1], [C + "health_potion.tres", 1]], "spells": ["healing_hands"]},
+	"trader": {"name": "Trader", "desc": "A merchant adventurer with a quick tongue and a heavy purse.",
+		"major": ["mercantile", "speech", "lore", "tinkering", "security"], "minor": ["one_handed", "riding", "light_armor", "alchemy"],
+		"gear": [[R + "weapons/iron_dagger.tres", 1], [A + "leather_cuirass.tres", 1], [R + "misc/lockpick.tres", 5]], "spells": []},
+	"druid": {"name": "Druid", "desc": "A keeper of the wild who heals, grows and calls on beasts.",
+		"major": ["restoration", "alteration", "herbalism", "survival", "conjuration"], "minor": ["alchemy", "hunting", "farming", "medicine"],
+		"gear": [[W + "iron_mace.tres", 1], ["res://data/ingredients/lavender.tres", 4], ["res://data/ingredients/blue_mountain_flower.tres", 4]],
+		"spells": ["healing_hands", "summon_wolf_spell", "oakflesh"]},
+	"duelist": {"name": "Duelist", "desc": "A blade in each hand and the footwork of a dancer.",
+		"major": ["dual_wielding", "one_handed", "light_armor", "acrobatics", "athletics"], "minor": ["sneak", "speech", "block", "medicine"],
+		"gear": [[R + "weapons/iron_dagger.tres", 2], [A + "leather_cuirass.tres", 1], [A + "leather_boots.tres", 1]], "spells": []},
+}
+
+## Specialization (Morrowind style): skills of this group learn 15% faster (Skills.favored_bonus)
+const SPECIALIZATIONS := {
+	"": {"name": "None", "group": "", "desc": "No specialization."},
+	"weapons": {"name": "Combat", "group": "Weapons", "desc": "Weapon skills learn faster."},
+	"defense": {"name": "Defense", "group": "Defense", "desc": "Armor and blocking learn faster."},
+	"magic": {"name": "Magic", "group": "Magic", "desc": "The six schools of magic learn faster."},
+	"stealth": {"name": "Stealth", "group": "Stealth", "desc": "Sneak and security learn faster."},
+	"movement": {"name": "Movement", "group": "Movement", "desc": "Athletics, acrobatics, swimming and riding learn faster."},
+	"social": {"name": "Social", "group": "Social", "desc": "Speech, mercantile, leadership, devotion and lore learn faster."},
+	"crafting": {"name": "Crafting", "group": "Crafting", "desc": "Smithing, alchemy, enchanting, tinkering and cooking learn faster."},
+	"wilderness": {"name": "Wilderness", "group": "Wilderness", "desc": "Survival, hunting, herbalism, mining, farming and medicine learn faster."},
+}
+
+## Background (where you come from): a few skill levels, a lasting trait, gold and things to carry
+const BACKGROUNDS := {
+	"": {"name": "None", "desc": "No particular past.", "skills": {}, "stats": {}, "gold": 0, "items": []},
+	"soldier": {"name": "Former Soldier", "desc": "+5 One-Handed and Block, +10 max health", "skills": {"one_handed": 5, "block": 5},
+		"stats": {"max_health": 10.0}, "gold": 20, "items": [[C + "health_potion.tres", 2]]},
+	"scholar": {"name": "Scholar", "desc": "+5 Lore and Enchanting, +15 max magicka", "skills": {"lore": 5, "enchanting": 5},
+		"stats": {"max_magicka": 15.0}, "gold": 40, "items": [[C + "minor_magicka_potion.tres", 2]]},
+	"urchin": {"name": "Street Urchin", "desc": "+5 Sneak and Security, +3 stealth, lockpicks", "skills": {"sneak": 5, "security": 5},
+		"stats": {"stealth": 3.0}, "gold": 5, "items": [[R + "misc/lockpick.tres", 8]]},
+	"farmhand": {"name": "Farmhand", "desc": "+5 Farming and Cooking, +20 carry weight, food", "skills": {"farming": 5, "cooking": 5},
+		"stats": {"carry_capacity": 20.0}, "gold": 10, "items": [[C + "bread.tres", 3], [C + "apple.tres", 3]]},
+	"noble": {"name": "Noble Born", "desc": "+5 Speech and Mercantile, +3 charisma, 250 gold", "skills": {"speech": 5, "mercantile": 5},
+		"stats": {"charisma": 3.0}, "gold": 250, "items": []},
+	"sailor": {"name": "Sailor", "desc": "+10 Swimming, +5 Athletics, hold your breath longer", "skills": {"swimming": 10, "athletics": 5},
+		"stats": {"breath_mult": 0.25}, "gold": 30, "items": [[C + "smoked_fish.tres", 3]]},
+	"hermit": {"name": "Hermit", "desc": "+5 Herbalism, Survival and Alchemy, herbs", "skills": {"herbalism": 5, "survival": 5, "alchemy": 5},
+		"stats": {"resist_disease": 0.2}, "gold": 0, "items": [["res://data/ingredients/lavender.tres", 3], ["res://data/ingredients/thistle.tres", 3]]},
+	"acolyte": {"name": "Temple Acolyte", "desc": "+5 Devotion, Restoration and Medicine, resist disease", "skills": {"devotion": 5, "restoration": 5, "medicine": 5},
+		"stats": {"resist_disease": 0.25}, "gold": 15, "items": [[C + "minor_health_potion.tres", 3]]},
+	"hunter": {"name": "Hunter's Child", "desc": "+5 Hunting, Archery and Survival, arrows", "skills": {"hunting": 5, "archery": 5, "survival": 5},
+		"stats": {"bane_beast": 0.05}, "gold": 10, "items": [[B + "iron_arrow.tres", 20], [C + "jerky.tres", 3]]},
+	"miner": {"name": "Miner", "desc": "+5 Mining and Smithing, +3 strength, a pickaxe", "skills": {"mining": 5, "smithing": 5},
+		"stats": {"strength": 3.0}, "gold": 15, "items": [["res://data/materials/pickaxe.tres", 1]]},
+	"performer": {"name": "Performer", "desc": "+5 Speech, Acrobatics and Athletics, +3 charisma", "skills": {"speech": 5, "acrobatics": 5, "athletics": 5},
+		"stats": {"charisma": 3.0}, "gold": 30, "items": [["res://data/clutter/lute.tres", 1]]},
+	"squire": {"name": "Squire", "desc": "+5 Riding, Heavy Armor and Leadership", "skills": {"riding": 5, "heavy_armor": 5, "leadership": 5},
+		"stats": {"max_stamina": 10.0}, "gold": 25, "items": []},
 }
 
 ## The quiz. Each answer leans warrior (w), mage (m) or thief (t). The two strongest leanings pick the class.

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_mblxp"]
+
+[resource]
+script = ExtResource("1_mblxp")
+id = &"primeweave_gauntlets"
+display_name = "Primeweave Bracers"
+description = "The hide of a creature from before the world. Light armor for the hands."
+item_type = 2
+equip_slot = 3
+weight = 1.6
+value = 32400
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 7.2
+}
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"primordial_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"gauntlets"

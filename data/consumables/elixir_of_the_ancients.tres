@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_bwjgl"]
+
+[resource]
+script = ExtResource("1_bwjgl")
+id = &"elixir_of_the_ancients"
+display_name = "Elixir of the Ancients"
+item_type = 3
+weight = 0.5
+value = 1800
+stackable = true
+max_stack = 99
+min_level = 150
+loot_tags = PackedStringArray("vault")
+use_verb = "Drink"
+effect_group = "potion"
+heal_amount = 450.0
+restore_stamina = 400.0
+restore_magicka = 400.0
+ingredient_effects = PackedStringArray()

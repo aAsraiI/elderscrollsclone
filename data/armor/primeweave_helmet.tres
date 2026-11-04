@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ded5k"]
+
+[resource]
+script = ExtResource("1_ded5k")
+id = &"primeweave_helmet"
+display_name = "Primeweave Hood"
+description = "The hide of a creature from before the world. Light armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 2.7
+value = 48600
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 10.700000000000001
+}
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"primordial_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"helmet"

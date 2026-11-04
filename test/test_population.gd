@@ -181,7 +181,7 @@ func t_items() -> void:
 func t_curve() -> void:
 	print("-- level curve")
 	check("level 1 is tier 0, level 7 still 0, level 8 is steel", LevelCurve.tier_for_level(1) == 0 and LevelCurve.tier_for_level(7) == 0 and LevelCurve.tier_for_level(8) == 1)
-	check("level 73 is dragonbone, 74 starforged, 100 stays starforged", LevelCurve.tier_for_level(73) == 5 and LevelCurve.tier_for_level(74) == 6 and LevelCurve.tier_for_level(100) == 6)
+	check("level 73 is dragonbone, 74 starforged, 100 voidsteel, 175+ primordial", LevelCurve.tier_for_level(73) == 5 and LevelCurve.tier_for_level(74) == 6 and LevelCurve.tier_for_level(100) == 7 and LevelCurve.tier_for_level(300) == LevelCurve.MAX_TIER)
 	check("enemy health grows with level", LevelCurve.enemy_health(1) < LevelCurve.enemy_health(20) and LevelCurve.enemy_health(60) > 400.0)
 	check("scaling a level keeps it inside the zone", LevelCurve.scale_level(1, 6, 18) == 6 and LevelCurve.scale_level(40, 6, 18) == 18 and LevelCurve.scale_level(10, 6, 18) == 10)
 	# a fair fight: hits an enemy of the right level takes with the matching tier of sword

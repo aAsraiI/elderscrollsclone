@@ -325,10 +325,10 @@ func t_world() -> void:
 	check("it shows their stock", barter._left.get_root().get_child_count() > 2)
 	var first := barter.shop.inventory.stacks[0].item
 	Currency.add_gold(inv, 20000)
-	var xp_before := skills.get_xp(&"speech") + skills.get_level(&"speech") * 1000.0
+	var xp_before := skills.get_xp(&"mercantile") + skills.get_level(&"mercantile") * 1000.0
 	var res := barter.buy(first)
 	check("buying in the window", res["error"] == "" and inv.has_item(first))
-	check("trading trains Speech", skills.get_xp(&"speech") + skills.get_level(&"speech") * 1000.0 > xp_before)
+	check("trading trains Mercantile (Alpha 1.22)", skills.get_xp(&"mercantile") + skills.get_level(&"mercantile") * 1000.0 > xp_before)
 	var bread := load(R + "consumables/bread.tres") as ItemData
 	inv.add_item(bread, 2)
 	check("a smith won't buy bread", barter.sell(bread)["error"] != "" and inv.get_count(bread) == 2)

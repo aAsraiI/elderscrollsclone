@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_f431i"]
+
+[resource]
+script = ExtResource("1_f431i")
+id = &"sunsteel_bow"
+display_name = "Sunsteel Bow"
+description = "Sunsteel from the burning south, warm and bright as noon. Hold left click to draw, let go to shoot. Right click zooms. Uses the best arrows you carry."
+item_type = 1
+equip_slot = 6
+weight = 10.0
+value = 27000
+governing_skill = "archery"
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_bow = true
+draw_time = 0.6299999999999999
+arrow_speed = 70.0
+ingredient_effects = PackedStringArray()
+weapon_damage = 87.0
+reach = 1.6
+attack_cooldown = 0.8
+poise_damage = 6.0
+two_handed = true
+animation_set = &"bow"

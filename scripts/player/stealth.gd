@@ -107,7 +107,10 @@ func set_sneaking(on: bool) -> void:
 
 ## Movement speed multiplier (player.gd uses it)
 func get_speed_mult() -> float:
-	return SNEAK_SPEED if sneaking else 1.0
+	if not sneaking:
+		return 1.0
+	var st := _stats
+	return minf(SNEAK_SPEED * (maxf(st.get_stat("sneak_speed_mult"), 0.5) if st != null else 1.0), 1.0)
 
 
 ## Something loud happened (a swing): heard for a moment
@@ -143,7 +146,7 @@ func visibility() -> float:
 	var speed := Vector2(_player.velocity.x, _player.velocity.z).length() if _player != null else 0.0
 	if sneaking:
 		var skill := _skills.get_level(&"sneak") if _skills != null else 1
-		v *= 0.45 * (1.0 - float(skill) / 200.0)
+		v *= 0.45 * (1.0 - minf(float(skill), 160.0) / 200.0)
 		if speed < 0.2:
 			v *= 0.8
 	elif speed > 6.0:

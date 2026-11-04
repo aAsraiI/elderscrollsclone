@@ -131,7 +131,7 @@ func _shoot(ratio: float) -> void:
 		at += tv * t * 0.6 + Vector3.UP * 0.5 * Arrow.GRAVITY * t * t  # lead the target and aim over the drop
 		dir = (at - origin).normalized()
 		dir = dir.rotated(Vector3.UP, randf_range(-0.03, 0.03))
-	var dmg := stats.get_stat_plus("damage", bow.weapon_damage + arrow_item.arrow_damage) * (0.35 + 0.65 * ratio) if stats != null else 10.0
+	var dmg := stats.get_stat_plus("damage", bow.weapon_damage + arrow_item.arrow_damage) * (0.35 + 0.65 * ratio) * (1.0 + maxf(stats.get_stat("bow_damage"), -0.9)) if stats != null else 10.0
 	var a := Arrow.launch(self, arrow_item, origin + dir * 0.6, dir * bow.arrow_speed * (0.55 + 0.45 * ratio), dmg, bow)
 	_cooldown = 0.25
 	var stealth: Variant = host.get_meta("stealth", null)
@@ -162,10 +162,13 @@ func on_arrow_hit(arrow: Arrow, target: Node, point: Vector3) -> void:
 				info.amount *= mult
 				info.sneak = true
 				stealth.sneak_attack.emit(e, mult)
+	if host != null and is_instance_valid(host):
+		info.amount *= BuildHooks.outgoing_mult(host, victim, info)  # crits, executes
 	var final: float = target.take_damage(info)
 	if host != null and is_instance_valid(host):
 		MagicHit.after_hit(host, victim, info)
 		WeaponMagic.on_hit(host, victim, arrow.bow, info)
+		BuildHooks.after_hit(host, victim, info, final, arrow.bow)
 		if skills != null and final > 0.0:
 			skills.add_xp(&"archery", final * XP_PER_DAMAGE)
 		var fb := host.get_node_or_null("MeleeCombat") as MeleeCombat

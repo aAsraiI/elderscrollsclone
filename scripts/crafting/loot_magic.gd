@@ -12,7 +12,9 @@ static func maybe_enchant(item: ItemData, rng: RandomNumberGenerator) -> ItemDat
 	if item == null or not Enchanting.can_enchant(item) or CraftedItems.is_crafted(item):
 		return item
 	var jewelry := item.equip_slot == ItemData.EquipSlot.RING or item.equip_slot == ItemData.EquipSlot.AMULET
-	if rng.randf() > (JEWELRY_CHANCE if jewelry else CHANCE):
+	# Island gear (Voidsteel and up) is enchanted far more often
+	var chance := (JEWELRY_CHANCE if jewelry else CHANCE) * (2.0 if item.tier >= 8 else 1.0)
+	if item.loot_tags.has("legendary") or rng.randf() > chance:
 		return item
 	var on_weapon := item.item_type == ItemData.ItemType.WEAPON
 	var keys: Array = Enchanting.WEAPON.keys() if on_weapon else Enchanting.WORN.keys()

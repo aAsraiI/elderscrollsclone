@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_dsut6"]
+
+[resource]
+script = ExtResource("1_dsut6")
+id = &"primordial_arrow"
+display_name = "Primordial Arrow"
+description = "Shot from a bow. Better arrows hit harder."
+value = 4500
+stackable = true
+max_stack = 999
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_arrow = true
+arrow_damage = 110.5
+ingredient_effects = PackedStringArray()

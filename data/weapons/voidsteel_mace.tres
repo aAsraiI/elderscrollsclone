@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_n7eoj"]
+
+[resource]
+script = ExtResource("1_n7eoj")
+id = &"voidsteel_mace"
+display_name = "Voidsteel Mace"
+description = "Black steel from the void-touched isles, that drinks the light. A one-handed club of metal. Slow, but it crushes through armor and staggers hard."
+item_type = 1
+equip_slot = 6
+weight = 12.5
+value = 14000
+governing_skill = "one_handed"
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 117.60000000000001
+attack_cooldown = 0.85
+attack_windup = 0.18
+stamina_cost = 10.4
+knockback = 4.73
+armor_pierce = 0.25
+poise_damage = 47.6
+combo_length = 2
+heavy_charge_time = 0.5
+heavy_windup = 0.2
+heavy_damage_mult = 1.8
+heavy_reach_bonus = 0.2
+animation_set = &"mace"

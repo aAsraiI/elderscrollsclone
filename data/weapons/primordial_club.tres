@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_8wla2"]
+
+[resource]
+script = ExtResource("1_8wla2")
+id = &"primordial_club"
+display_name = "Primordial Club"
+description = "Primordial metal older than the world, red as its first fire. A heavy cudgel bound with metal. Cheap and brutal: it staggers well, but bites shallow."
+item_type = 1
+equip_slot = 6
+weight = 9.450000000000001
+value = 54000
+governing_skill = "one_handed"
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 165.6
+reach = 1.9
+attack_cooldown = 0.75
+attack_windup = 0.15
+attack_active = 0.13
+stamina_cost = 8.4
+knockback = 4.5
+poise_damage = 44.0
+combo_length = 2
+heavy_charge_time = 0.48
+heavy_windup = 0.2
+heavy_damage_mult = 1.8
+heavy_reach_bonus = 0.2
+animation_set = &"mace"

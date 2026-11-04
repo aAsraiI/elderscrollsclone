@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_y421u"]
+
+[resource]
+script = ExtResource("1_y421u")
+id = &"primordial_gauntlets"
+display_name = "Primordial Gauntlets"
+description = "Primordial metal older than the world, red as its first fire. Heavy armor for the hands."
+item_type = 2
+equip_slot = 3
+weight = 4.1000000000000005
+value = 40500
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 11.0
+}
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("armor", "smithy")
+armor_set = &"primordial_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"gauntlets"

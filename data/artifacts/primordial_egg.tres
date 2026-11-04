@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_dampi"]
+
+[resource]
+script = ExtResource("1_dampi")
+id = &"primordial_egg"
+display_name = "Primordial Egg"
+description = "A relic of the outer islands. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 5.0
+value = 12000
+min_level = 180
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("vault", "ashen")
+ingredient_effects = PackedStringArray()

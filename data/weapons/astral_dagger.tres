@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_i62l3"]
+
+[resource]
+script = ExtResource("1_i62l3")
+id = &"astral_dagger"
+display_name = "Astral Dagger"
+description = "Astral metal from a falling sky, cold and singing. Quick and light. Carry two and wield one in each hand. Low stagger, but long combos."
+item_type = 1
+equip_slot = 6
+weight = 1.95
+value = 30000
+governing_skill = "one_handed"
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 91.2
+reach = 1.6
+attack_cooldown = 0.35
+attack_windup = 0.05
+attack_active = 0.12
+stamina_cost = 4.05
+knockback = 1.45
+poise_damage = 15.200000000000001
+combo_length = 4
+can_dual_wield = true
+heavy_charge_time = 0.4
+heavy_windup = 0.12
+heavy_damage_mult = 1.5
+heavy_poise_mult = 1.5
+heavy_reach_bonus = 0.2
+animation_set = &"dagger"

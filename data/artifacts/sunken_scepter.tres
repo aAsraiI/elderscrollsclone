@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_eu48q"]
+
+[resource]
+script = ExtResource("1_eu48q")
+id = &"sunken_scepter"
+display_name = "Sunken Scepter of the Tide Kings"
+description = "A relic of the outer islands. Ordinary merchants pay little for it; the Antiquarian Society pays its full worth."
+weight = 3.0
+value = 4800
+min_level = 110
+treasure = true
+artifact = true
+loot_tags = PackedStringArray("vault", "coast")
+ingredient_effects = PackedStringArray()

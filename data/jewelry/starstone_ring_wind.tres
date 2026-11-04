@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_5ltwo"]
+
+[resource]
+script = ExtResource("1_5ltwo")
+id = &"starstone_ring_wind"
+display_name = "Starstone Ring of Second Wind"
+description = "+90% stamina regen while worn."
+item_type = 2
+equip_slot = 8
+weight = 0.1
+value = 7000
+stat_modifiers = {
+"stamina_regen_mult": 0.9
+}
+tier = 11
+min_level = 150
+loot_tags = PackedStringArray("jewelry", "jeweler", "vault")
+ingredient_effects = PackedStringArray()

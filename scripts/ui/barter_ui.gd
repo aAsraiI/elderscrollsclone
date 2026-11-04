@@ -137,7 +137,7 @@ func sell_junk() -> Dictionary:
 		_message.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
 		var skills := _player.get_node_or_null("Skills") as Skills
 		if skills != null:
-			skills.add_xp(&"speech", maxf(float(gold) / 40.0, 0.5))
+			skills.add_xp(&"mercantile", maxf(float(gold) / 40.0, 0.5))
 	else:
 		_message.text = "Nothing they want to buy."
 		_message.add_theme_color_override("font_color", Color(1.0, 0.45, 0.4))
@@ -154,7 +154,7 @@ func _after_trade(r: Dictionary, bought: bool, item: ItemData) -> void:
 		_message.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
 		var skills := _player.get_node_or_null("Skills") as Skills
 		if skills != null:
-			skills.add_xp(&"speech", maxf(float(r["gold"]) / 40.0, 0.5))
+			skills.add_xp(&"mercantile", maxf(float(r["gold"]) / 40.0, 0.5))
 		traded.emit(bought, item, r["count"], r["gold"])
 	_refresh()
 

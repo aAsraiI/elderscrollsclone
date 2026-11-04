@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_44i66"]
+
+[resource]
+script = ExtResource("1_44i66")
+id = &"sunsteel_sword"
+display_name = "Sunsteel Sword"
+description = "Sunsteel from the burning south, warm and bright as noon. A balanced blade. Swings in an arc and can hit several enemies. Tap to chain a combo, hold to charge a heavy attack."
+item_type = 1
+equip_slot = 6
+weight = 6.5
+value = 22500
+governing_skill = "one_handed"
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 124.0
+reach = 2.2
+attack_style = 1
+arc_degrees = 100.0
+attack_cooldown = 0.7
+attack_windup = 0.12
+stamina_cost = 8.1
+knockback = 3.5
+poise_damage = 27.0
+animation_set = &"sword"

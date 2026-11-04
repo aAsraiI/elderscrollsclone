@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_6nj4t"]
+
+[resource]
+script = ExtResource("1_6nj4t")
+id = &"sunsilk_boots"
+display_name = "Sunsilk Boots"
+description = "Golden silk of the sun isles, that turns heat and blades. Light armor for the feet."
+item_type = 2
+equip_slot = 5
+weight = 2.1
+value = 6480
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 6.1000000000000005
+}
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"sunsteel_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"boots"

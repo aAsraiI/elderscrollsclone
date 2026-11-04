@@ -156,6 +156,9 @@ static func read(player: Node, item: ItemData) -> String:
 		return ""
 	if not WorldState.has_record(READ + id):
 		WorldState.set_record(READ + id, {"read": true})
+		var lore_sk := player.get_node_or_null("Skills") as Skills if player != null else null
+		if lore_sk != null:
+			lore_sk.add_xp(&"lore", 12.0)  # every new book teaches you something
 		var skill := String(e[4])
 		var skills := player.get_node_or_null("Skills") as Skills if player != null else null
 		if skill != "" and skills != null and SkillDatabase.get_skill(StringName(skill)) != null:

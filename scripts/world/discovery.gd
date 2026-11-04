@@ -60,6 +60,7 @@ func mark_found(poi: PlacedPOI) -> bool:
 		if skills != null:
 			var lvl := LevelCurve.place_level(_manager.map, poi.position)
 			skills.add_deed_xp(SkillDatabase.deed_xp(lvl, 1.0))
+			skills.add_xp(&"lore", 6.0)
 		var hud := p.get_node_or_null("CompassHUD") as CompassHUD
 		if hud != null and poi.town == null:
 			hud.show_banner("Discovered: %s" % place_name(_manager, poi), "Level %d" % LevelCurve.place_level(_manager.map, poi.position))

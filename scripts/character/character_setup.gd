@@ -6,7 +6,7 @@ extends RefCounted
 ## lasting parts (traits, forbidden gear, leveling speed) are applied again on every load.
 ##
 ## data: {"name", "race", "sex", "skin", "hair", "height", "class", "advantages": [], "disadvantages": [],
-##        "sign", "affliction": "" | "vampire" | "werewolf"}
+##        "sign", "affliction": "" | "vampire" | "werewolf", "specialization", "background"}
 
 static var pending: Dictionary = {}
 
@@ -17,7 +17,7 @@ static func has_pending() -> bool:
 
 static func default_data() -> Dictionary:
 	return {"name": "Traveler", "race": "heartlander", "sex": 0, "skin": 0, "hair": 0, "height": 1.0, "class": "warrior",
-		"advantages": [], "disadvantages": [], "sign": "sword", "affliction": ""}
+		"advantages": [], "disadvantages": [], "sign": "sword", "affliction": "", "specialization": "", "background": ""}
 
 
 ## fresh = a brand new character (skills, gear and spells too); otherwise only the lasting traits
@@ -45,6 +45,8 @@ static func apply(player: Node, data: Dictionary, fresh: bool) -> void:
 			if dd.get("sun_sick", false):
 				sun_sick = true
 		stats.add_modifiers("traits", traits)
+		var bg: Dictionary = Classes.BACKGROUNDS.get(String(data.get("background", "")), {})
+		stats.add_modifiers("background", bg.get("stats", {}))
 		player.set_meta("forbid", forbid)
 		player.set_meta("sun_sick", sun_sick)
 	if skills != null:
@@ -64,6 +66,9 @@ static func apply(player: Node, data: Dictionary, fresh: bool) -> void:
 			bonus[s] = int(bonus.get(s, 0)) + 5
 		for s in race.get("skills", {}):
 			bonus[s] = int(bonus.get(s, 0)) + int(race["skills"][s])
+		var bg_skills: Dictionary = Classes.BACKGROUNDS.get(String(data.get("background", "")), {}).get("skills", {})
+		for s in bg_skills:
+			bonus[s] = int(bonus.get(s, 0)) + int(bg_skills[s])
 		skills.set_starting_levels(bonus)
 	var inv := player.get_node_or_null("Inventory") as Inventory
 	var eq := player.get_node_or_null("Equipment") as Equipment
@@ -85,6 +90,13 @@ static func apply(player: Node, data: Dictionary, fresh: bool) -> void:
 			var food := load("res://data/consumables/%s.tres" % f) as ItemData
 			if food != null:
 				inv.add_item(food, 2)
+		var bg: Dictionary = Classes.BACKGROUNDS.get(String(data.get("background", "")), {})
+		if int(bg.get("gold", 0)) > 0:
+			Currency.add_gold(inv, int(bg["gold"]))
+		for g in bg.get("items", []):
+			var it := load(String(g[0])) as ItemData if ResourceLoader.exists(String(g[0])) else null
+			if it != null:
+				inv.add_item(it, int(g[1]))
 	var book := player.get_node_or_null("Spellbook") as Spellbook
 	if book != null:
 		for id in cls["spells"]:

@@ -18,9 +18,10 @@ const STATIONS := {
 	"enchanter": "Arcane Enchanter", "spell_altar": "Altar of Spellmaking",
 }
 ## The ingot each gear tier is forged from (heavy armor and weapons)
-const TIER_INGOT: Array[String] = ["iron_ingot", "steel_ingot", "silver_ingot", "obsidian_shard", "ebon_ingot", "dragonbone_plate", "starmetal_ingot"]
+const TIER_INGOT: Array[String] = ["iron_ingot", "steel_ingot", "silver_ingot", "obsidian_shard", "ebon_ingot", "dragonbone_plate", "starmetal_ingot",
+	"voidsteel_ingot", "sunsteel_ingot", "astral_ingot", "primordial_ingot"]
 ## Smithing level needed for each tier
-const TIER_LEVEL: Array[int] = [1, 15, 30, 45, 60, 75, 90]
+const TIER_LEVEL: Array[int] = [1, 15, 30, 45, 60, 75, 90, 110, 130, 155, 180]
 
 static var _all: Array[Dictionary] = []
 
@@ -55,6 +56,11 @@ static func _ensure() -> void:
 	_add("smelter", MAT + "ebon_ingot.tres", 1, [["ebony_ore", 2]], 55)
 	_add("smelter", MAT + "dragonbone_plate.tres", 1, [["dragonstone_ore", 2]], 70)
 	_add("smelter", MAT + "starmetal_ingot.tres", 1, [["star_ore", 2]], 85)
+	# Alpha 1.22: the island metals
+	_add("smelter", MAT + "voidsteel_ingot.tres", 1, [["void_ore", 2]], 105)
+	_add("smelter", MAT + "sunsteel_ingot.tres", 1, [["sun_ore", 2]], 125)
+	_add("smelter", MAT + "astral_ingot.tres", 1, [["astral_ore", 2]], 150)
+	_add("smelter", MAT + "primordial_ingot.tres", 1, [["primordial_ore", 2]], 175)
 	# ---- tanning rack
 	_add("tanning_rack", MAT + "leather.tres", 1, [["animal_hide", 1]], 1)
 	_add("tanning_rack", MAT + "leather.tres", 1, [["wolf_pelt", 1]], 1)
@@ -218,7 +224,7 @@ static func max_quality(player: Node) -> int:
 
 ## What one more quality level costs: [[ingot path, n]]
 static func improve_cost(item: ItemData) -> Array:
-	var tier := clampi(item.tier - 1, 0, 6)
+	var tier := clampi(item.tier - 1, 0, LevelCurve.MAX_TIER)
 	var light := item.governing_skill == "light_armor"
 	var mat := (MAT + "leather.tres") if light and tier <= 1 else (MAT + TIER_INGOT[tier] + ".tres")
 	return [[mat, 1 + item.quality / 2]]

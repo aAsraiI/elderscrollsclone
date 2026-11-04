@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ng5wr"]
+
+[resource]
+script = ExtResource("1_ng5wr")
+id = &"voidstone_amulet_mule"
+display_name = "Voidstone Amulet of the Mule"
+description = "+180 carry capacity while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 4480
+stat_modifiers = {
+"carry_capacity": 180.0
+}
+tier = 9
+min_level = 100
+loot_tags = PackedStringArray("jewelry", "jeweler", "vault")
+ingredient_effects = PackedStringArray()

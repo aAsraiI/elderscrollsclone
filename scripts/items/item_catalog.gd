@@ -130,6 +130,18 @@ static func curve_loot(level_min: int, level_max: int, quality: float = 1.0) -> 
 			_add(out, get_armor(t, piece, true), 0.055 * w * quality)
 			_add(out, get_armor(t, piece, false), 0.055 * w * quality)
 	out.append_array(jewelry_loot(hi, 0.5 * quality))
+	out.append_array(legendary_loot(hi, quality))
+	return out
+
+
+## Legendary uniques (Alpha 1.22): very rare, only in chests near or past their level
+static func legendary_loot(level: int, quality: float = 1.0) -> Array[LootEntry]:
+	var out: Array[LootEntry] = []
+	for item in tagged("legendary"):
+		var it := item as ItemData
+		if it.min_level > level + 5:
+			continue
+		_add(out, it, 0.012 * quality)
 	return out
 
 
@@ -183,7 +195,11 @@ static func tag_loot(tags: PackedStringArray, level: int, quality: float = 1.0) 
 				continue
 			seen[it] = true
 			var chance := 0.12
-			if it.item_type == ItemData.ItemType.WEAPON or (it.item_type == ItemData.ItemType.ARMOR and it.tier > 0 and it.armor_set != &""):
+			if it.loot_tags.has("legendary"):
+				if it.min_level > level + 5:
+					continue
+				chance = 0.01
+			elif it.item_type == ItemData.ItemType.WEAPON or (it.item_type == ItemData.ItemType.ARMOR and it.tier > 0 and it.armor_set != &""):
 				chance *= weights[clampi(it.tier - 1, 0, LevelCurve.MAX_TIER)] * 0.5
 			elif it.min_level > level:
 				continue
@@ -202,6 +218,8 @@ static func rarity_color(item: ItemData, player_level: int) -> Color:
 		return Color.WHITE
 	if item.artifact:
 		return Color(0.95, 0.78, 0.35)
+	if item.loot_tags.has("legendary"):
+		return Color(1.0, 0.55, 0.2)  # legendary uniques: orange
 	if item.tier > 0 and (item.item_type == ItemData.ItemType.WEAPON or item.item_type == ItemData.ItemType.ARMOR):
 		var ahead := (item.tier - 1) - LevelCurve.tier_for_level(player_level)
 		if ahead >= 2:

@@ -29,6 +29,13 @@ var _vital_rows: Dictionary = {}
 var _tabs: TabBar
 var _attr_page: Control
 var _skills_page: Control
+var _perks_page: Control
+var _build_page: Control
+var _perk_tree: Tree
+var _perk_details: RichTextLabel
+var _perk_button: Button
+var _build_box: VBoxContainer
+var _points_label: Label
 var _tree: Tree
 var _skill_tree: Tree
 var _skill_details: RichTextLabel
@@ -107,7 +114,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif _is_key(event, KEY_Q) or _is_key(event, KEY_E):
 		if skills == null:
 			return
-		_tabs.current_tab = 1 - _tabs.current_tab
+		_tabs.current_tab = posmod(_tabs.current_tab + (1 if _is_key(event, KEY_E) else -1), _tabs.tab_count)
 	elif _is_key(event, KEY_X):
 		# Debug training: X = +XP, Shift+X = +1 level for the selected skill
 		if skills == null or _tabs.current_tab != 1 or not skills.is_debug_enabled():
@@ -170,6 +177,8 @@ func _build_ui() -> void:
 	_tabs.focus_mode = Control.FOCUS_NONE
 	_tabs.add_tab("Attributes")
 	_tabs.add_tab("Skills")
+	_tabs.add_tab("Perks")
+	_tabs.add_tab("Level Up")
 	_tabs.tab_changed.connect(_on_tab_changed)
 	_tabs.visible = skills != null
 	vbox.add_child(_tabs)
@@ -180,6 +189,14 @@ func _build_ui() -> void:
 	_skills_page = _build_skills_page()
 	_skills_page.visible = false
 	vbox.add_child(_skills_page)
+
+	_perks_page = _build_perks_page()
+	_perks_page.visible = false
+	vbox.add_child(_perks_page)
+
+	_build_page = _build_level_page()
+	_build_page.visible = false
+	vbox.add_child(_build_page)
 
 	_hint_label = UITheme.hint("")
 	vbox.add_child(_hint_label)
@@ -337,24 +354,80 @@ func _build_skills_page() -> Control:
 	return page
 
 
+## Perks tab: every perk tree and the feats, what you have and what it needs (Alpha 1.22)
+func _build_perks_page() -> Control:
+	var page := HBoxContainer.new()
+	page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_theme_constant_override("separation", 14)
+	_perk_tree = Tree.new()
+	_perk_tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_perk_tree.size_flags_stretch_ratio = 1.3
+	_perk_tree.columns = 3
+	_perk_tree.hide_root = true
+	_perk_tree.column_titles_visible = true
+	_perk_tree.select_mode = Tree.SELECT_ROW
+	_perk_tree.allow_search = false
+	_perk_tree.set_column_title(0, "Perk")
+	_perk_tree.set_column_title(1, "Rank")
+	_perk_tree.set_column_title(2, "Needs")
+	_perk_tree.set_column_expand(1, false)
+	_perk_tree.set_column_expand(2, false)
+	_perk_tree.set_column_custom_minimum_width(1, 55)
+	_perk_tree.set_column_custom_minimum_width(2, 90)
+	_perk_tree.item_selected.connect(_update_perk_details)
+	_perk_tree.item_activated.connect(_take_selected_perk)
+	page.add_child(_perk_tree)
+	var side := VBoxContainer.new()
+	side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page.add_child(side)
+	_perk_details = RichTextLabel.new()
+	_perk_details.bbcode_enabled = true
+	_perk_details.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	side.add_child(_perk_details)
+	_perk_button = Button.new()
+	_perk_button.text = "Take perk"
+	_perk_button.focus_mode = Control.FOCUS_NONE
+	_perk_button.pressed.connect(_take_selected_perk)
+	side.add_child(_perk_button)
+	return page
+
+
+## Level Up tab: attribute and vital points, your build at a glance, and starting over
+func _build_level_page() -> Control:
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_build_box = VBoxContainer.new()
+	_build_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_build_box.add_theme_constant_override("separation", 8)
+	scroll.add_child(_build_box)
+	return scroll
+
+
 func _update_hint() -> void:
 	var t := "[C / Tab / Esc] Close"
 	if skills != null:
 		t += "   [Q / E] Switch tab"
 		if _tabs.current_tab == 1 and skills.is_debug_enabled():
 			t += "   [X] Debug: +%d XP   [Shift+X] Debug: +1 level" % int(skills.debug_xp_amount)
+		if _tabs.current_tab == 2:
+			t += "   [Enter / double click] Take perk"
 	_hint_label.text = t
 
 
 func _on_tab_changed(_index: int) -> void:
 	_attr_page.visible = _tabs.current_tab == 0
 	_skills_page.visible = _tabs.current_tab == 1
+	_perks_page.visible = _tabs.current_tab == 2
+	_build_page.visible = _tabs.current_tab == 3
 	_update_hint()
 	if not _is_open:
 		return
 	_refresh()
 	if _tabs.current_tab == 1:
 		_skill_tree.grab_focus()
+	elif _tabs.current_tab == 2:
+		_perk_tree.grab_focus()
 
 
 # ---------------------------------------------------------------- refreshing
@@ -365,6 +438,10 @@ func _refresh() -> void:
 	_refresh_header()
 	if skills != null and _tabs.current_tab == 1:
 		_refresh_skills()
+	elif skills != null and _tabs.current_tab == 2:
+		_refresh_perks()
+	elif skills != null and _tabs.current_tab == 3:
+		_refresh_build()
 	else:
 		_refresh_attributes()
 
@@ -374,7 +451,10 @@ func _refresh_header() -> void:
 		return
 	var current := skills.get_player_xp_in_level()
 	var needed := skills.get_player_xp_for_next()
-	_level_label.text = "Level %d" % skills.get_player_level()
+	_level_label.text = "Level %d  %s%s" % [skills.get_player_level(), CharacterBuild.archetype(skills),
+		"  (points to spend)" if skills.build != null and skills.build.has_unspent() else ""]
+	if _tabs != null and skills.build != null:
+		_tabs.set_tab_title(3, "Level Up (!)" if skills.build.has_unspent() else "Level Up")
 	_xp_bar.max_value = maxf(needed, 1.0)
 	_xp_bar.value = current
 	_xp_label.text = "XP %d / %d" % [current, needed]
@@ -500,16 +580,15 @@ func _refresh_skills() -> void:
 			if def.group != group:
 				continue
 			var level := skills.get_level(def.id)
-			var next_level := skills.get_next_milestone_level(def.id)
+			var next_level := skills.get_next_major_level(def.id)
 			var row := _skill_tree.create_item(root)
 			row.set_metadata(0, def.id)
 			row.set_text(0, def.display_name)
 			row.set_text(1, str(level))
-			if level >= SkillDatabase.MAX_LEVEL:
-				row.set_text(2, "MAX")
-			else:
-				row.set_text(2, "%d / %d" % [int(skills.get_xp(def.id)), int(skills.get_xp_to_next(def.id))])
-			row.set_text(3, "Lv %d" % next_level if next_level > 0 else "-")
+			row.set_text(2, "%d / %d" % [int(skills.get_xp(def.id)), int(skills.get_xp_to_next(def.id))])
+			row.set_text(3, "Lv %d" % next_level)
+			if not skills.condition_met(def):
+				row.set_custom_color(0, Color(1, 1, 1, 0.55))
 			for col in [1, 2, 3]:
 				row.set_text_alignment(col, HORIZONTAL_ALIGNMENT_RIGHT)
 			if first_row == null:
@@ -543,20 +622,34 @@ func _update_skill_details() -> void:
 		return
 
 	var level := skills.get_level(def.id)
-	var tier := skills.get_tier(def.id)
+	var tiers := SkillDatabase.effective_tiers(level)
 	var t := "[b][font_size=22]%s[/font_size][/b]\n" % def.display_name
-	t += "[color=gray]%s  ·  Level %d / %d[/color]\n\n" % [def.group, level, SkillDatabase.MAX_LEVEL]
+	t += "[color=gray]%s  ·  Level %d  ·  %s[/color]\n\n" % [def.group, level, SkillDatabase.rank_name(level)]
 	t += def.description + "\n\n"
+	const WHEN_TEXT := {SkillData.When.WEAPON: "Its bonuses count while you wield this type of weapon.",
+		SkillData.When.UNARMED: "Its bonuses count while your hands are empty.",
+		SkillData.When.UNARMORED: "Its bonuses count while you wear no armor.",
+		SkillData.When.DUAL_WIELD: "Its bonuses count while you hold a weapon in each hand."}
+	if WHEN_TEXT.has(def.condition):
+		t += "[color=%s]%s[/color]\n\n" % ["light_green" if skills.condition_met(def) else "gray", WHEN_TEXT[def.condition]]
 
 	if not def.tier_effects.is_empty():
-		t += "[b]Current bonus[/b]  [color=gray](%d of %d milestones)[/color]\n" % [tier, SkillDatabase.MAX_TIER]
-		t += (def.describe_effects(tier) if tier > 0 else "None yet") + "\n"
-		if def.weapon_conditional:
-			t += "[color=gray]Applies while you wield this type of weapon.[/color]\n"
-		var next_level := skills.get_next_milestone_level(def.id)
-		if next_level > 0:
-			t += "\n[b]At level %d[/b]\n%s\n" % [next_level, def.describe_effects(tier + 1)]
-		t += "\n[color=gray]Every 5 levels: %s[/color]\n" % def.describe_effects(1)
+		t += "[b]Passive bonus[/b]\n"
+		t += (def.describe_effects(tiers) if tiers > 0.0 else "None yet") + "\n"
+		t += "[color=gray]Every 5 levels: %s (half as much past level 100)[/color]\n" % def.describe_effects(1)
+
+	# The big upgrades
+	t += "\n[b]Milestones[/b]\n"
+	for m in def.milestone_levels():
+		var ms: Dictionary = def.milestones[m]
+		var got: bool = level >= int(m)
+		t += "[color=%s]%s %d  %s[/color]: %s  [color=gray]%s[/color]\n" % ["gold" if got else "gray", "✔" if got else "·", int(m), ms["name"],
+			SkillData.describe_stats(ms["stats"]), ms["desc"]]
+	if not def.mastery.is_empty():
+		var n := SkillDatabase.mastery_count(level)
+		t += "[color=%s]Mastery[/color]: %s every %d levels past %d  [color=gray](you have %d)[/color]\n" % ["gold" if n > 0 else "gray",
+			SkillData.describe_stats(def.mastery), SkillDatabase.MASTERY_STEP, SkillDatabase.MASTERY_START, n]
+	t += "[color=gray]Next big upgrade at level %d. There is no level cap.[/color]\n" % skills.get_next_major_level(def.id)
 
 	if not def.attributes.is_empty():
 		t += "\n[b]Raises[/b]\n"
@@ -566,4 +659,218 @@ func _update_skill_details() -> void:
 			t += "%s +%d  [color=gray](%s per level)[/color]\n" % [String(attr).capitalize(), points, String.num(per_level).trim_suffix(".0")]
 
 	t += "\n[b]Trains by[/b]\n%s\n" % def.trains_by
+	var fav := skills.favored_bonus(def)
+	if fav > 0.0:
+		t += "[color=light_green]Learns %d%% faster (your class or specialization)[/color]\n" % roundi(fav * 100.0)
 	_skill_details.text = t
+
+
+# ---------------------------------------------------------------- perks tab (Alpha 1.22)
+
+func _selected_perk_id() -> String:
+	if _perk_tree == null:
+		return ""
+	var row := _perk_tree.get_selected()
+	if row == null:
+		return ""
+	var meta: Variant = row.get_metadata(0)
+	return String(meta) if meta is String else ""
+
+
+func _refresh_perks() -> void:
+	var b := skills.build
+	if b == null:
+		return
+	var keep := _selected_perk_id()
+	_perk_tree.clear()
+	var root := _perk_tree.create_item()
+	var first_row: TreeItem = null
+	var keep_row: TreeItem = null
+	var fp := b.feat_points()
+	var sections: Array = [["Feats  (%d feat point%s)" % [fp, "" if fp == 1 else "s"], PerkDatabase.feats()]]
+	for tree_name in PerkDatabase.TREES:
+		sections.append([tree_name, PerkDatabase.perks_in(tree_name)])
+	for s in sections:
+		var header := _perk_tree.create_item(root)
+		header.set_text(0, String(s[0]))
+		header.set_custom_color(0, GOLD)
+		for col in 3:
+			header.set_selectable(col, false)
+		for p in s[1]:
+			var row := _perk_tree.create_item(header)
+			var id := String(p["id"])
+			var rank := b.rank_of(id)
+			var max_ranks := int(p["ranks"])
+			row.set_metadata(0, id)
+			row.set_text(0, String(p["name"]))
+			row.set_text(1, ("%d" % rank) if max_ranks == PerkDatabase.UNLIMITED else ("%d/%d" % [rank, max_ranks]))
+			var why := b.why_not(id)
+			var done := max_ranks != PerkDatabase.UNLIMITED and rank >= max_ranks
+			row.set_text(2, "taken" if done else ("Lv %d" % PerkDatabase.level_for_rank(p, rank + 1)))
+			if done:
+				row.set_custom_color(0, GOLD)
+			elif why == "":
+				row.set_custom_color(0, Color.LIGHT_GREEN)
+			elif rank <= 0:
+				row.set_custom_color(0, Color(1, 1, 1, 0.5))
+			row.set_text_alignment(1, HORIZONTAL_ALIGNMENT_RIGHT)
+			row.set_text_alignment(2, HORIZONTAL_ALIGNMENT_RIGHT)
+			if first_row == null:
+				first_row = row
+			if id == keep:
+				keep_row = row
+	var target: TreeItem = keep_row if keep_row != null else first_row
+	if target != null:
+		target.select(0)
+		_perk_tree.scroll_to_item(target)
+	_update_perk_details()
+
+
+func _update_perk_details() -> void:
+	if _perk_details == null or skills == null or skills.build == null:
+		return
+	var b := skills.build
+	var p := PerkDatabase.get_perk(_selected_perk_id())
+	var head := "[color=gray]Perk points %d  ·  Feat points %d[/color]\n\n" % [b.perk_points(), b.feat_points()]
+	if p.is_empty():
+		_perk_details.text = head + "Pick a perk on the left."
+		_perk_button.disabled = true
+		return
+	var id := String(p["id"])
+	var rank := b.rank_of(id)
+	var max_ranks := int(p["ranks"])
+	var t := head + "[b][font_size=20]%s[/font_size][/b]\n" % p["name"]
+	var kind_text := "Feat" if bool(p["feat"]) else String(p["tree"]) + " perk"
+	var rank_text := ("rank %d (no limit)" % rank) if max_ranks == PerkDatabase.UNLIMITED else ("rank %d of %d" % [rank, max_ranks])
+	t += "[color=gray]%s  ·  %s[/color]\n\n" % [kind_text, rank_text]
+	t += String(p["desc"]) + "\n\n"
+	t += "[b]Each rank[/b]\n%s\n" % PerkDatabase.describe(p, 1)
+	if rank > 0:
+		t += "\n[b]You have[/b]\n%s\n" % PerkDatabase.describe(p, rank)
+	var needs := PackedStringArray()
+	needs.append("player level %d" % PerkDatabase.level_for_rank(p, rank + 1))
+	if String(p["skill"]) != "":
+		var def := SkillDatabase.get_skill(StringName(p["skill"]))
+		needs.append("%s %d" % [def.display_name if def != null else String(p["skill"]), int(p["skill_level"])])
+	for r in p["requires"]:
+		needs.append(String(PerkDatabase.get_perk(String(r)).get("name", r)))
+	t += "\n[b]Needs[/b]\n%s\n" % ", ".join(needs)
+	var why := b.why_not(id)
+	if why != "":
+		t += "\n[color=indian_red]%s[/color]\n" % why
+	_perk_details.text = t
+	_perk_button.disabled = why != ""
+	_perk_button.text = "Take feat (1 feat point)" if bool(p["feat"]) else "Take perk (1 perk point)"
+
+
+func _take_selected_perk() -> void:
+	if skills == null or skills.build == null:
+		return
+	if skills.build.take(_selected_perk_id()):
+		_refresh()
+
+
+# ---------------------------------------------------------------- level up tab (Alpha 1.22)
+
+func _refresh_build() -> void:
+	var b := skills.build
+	if b == null or _build_box == null:
+		return
+	for c in _build_box.get_children():
+		c.queue_free()
+	var top := CharacterBuild.top_skills(skills, 3)
+	var info := RichTextLabel.new()
+	info.bbcode_enabled = true
+	info.fit_content = true
+	var t := "[b][font_size=20]%s[/font_size][/b]   [color=gray]level %d[/color]\n" % [CharacterBuild.archetype(skills), skills.get_player_level()]
+	var best := PackedStringArray()
+	for e in top:
+		best.append("%s %d (%s)" % [(e[0] as SkillData).display_name, int(e[1]), SkillDatabase.rank_name(int(e[1]))])
+	t += "Best skills: %s\n" % ", ".join(best)
+	var player := get_parent()
+	if player != null and player.has_meta("character"):
+		var data: Dictionary = player.get_meta("character")
+		var spec := String(data.get("specialization", ""))
+		var bg := String(data.get("background", ""))
+		var line := CharacterSetup.title_of(data)
+		if spec != "" and Classes.SPECIALIZATIONS.has(spec):
+			line += "  ·  Specialization: " + String(Classes.SPECIALIZATIONS[spec]["name"])
+		if bg != "" and Classes.BACKGROUNDS.has(bg):
+			line += "  ·  " + String(Classes.BACKGROUNDS[bg]["name"])
+		t += "[color=gray]%s[/color]\n" % line
+	t += "\nEvery level gives a perk point, an attribute point (+%d) and a vital point (+%d). Levels 10, 25, 50, 75, 100 and every 25 after give a feat point. There is no level cap." % [int(CharacterBuild.ATTR_PER_POINT), int(CharacterBuild.VITAL_PER_POINT)]
+	info.text = t
+	_build_box.add_child(info)
+
+	_points_label = Label.new()
+	_points_label.add_theme_color_override("font_color", GOLD)
+	_points_label.text = "Perk points %d   Feat points %d   Attribute points %d   Vital points %d" % [b.perk_points(), b.feat_points(), b.attribute_points(), b.vital_points()]
+	_build_box.add_child(_points_label)
+
+	_build_box.add_child(UITheme.heading("Attributes", 14))
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 16)
+	_build_box.add_child(grid)
+	for attr in SkillDatabase.ATTRIBUTES:
+		var l := Label.new()
+		l.text = String(attr).capitalize()
+		l.custom_minimum_size = Vector2(110, 0)
+		grid.add_child(l)
+		var v := Label.new()
+		v.text = "%d" % roundi(stats.get_stat(attr))
+		v.custom_minimum_size = Vector2(50, 0)
+		grid.add_child(v)
+		var effect := Label.new()
+		effect.text = _attr_effect_text(attr)
+		effect.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
+		effect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(effect)
+		var plus := Button.new()
+		plus.text = "+%d" % int(CharacterBuild.ATTR_PER_POINT)
+		plus.focus_mode = Control.FOCUS_NONE
+		plus.disabled = b.attribute_points() <= 0
+		var a: String = attr
+		plus.pressed.connect(func() -> void:
+			if skills.build.spend_attribute(a):
+				_refresh())
+		grid.add_child(plus)
+
+	_build_box.add_child(UITheme.heading("Vitals", 14))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	_build_box.add_child(row)
+	for vit in CharacterBuild.VITALS:
+		var btn := Button.new()
+		btn.text = "+%d %s  (%d)" % [int(CharacterBuild.VITAL_PER_POINT), String(vit).capitalize(), roundi(stats.get_stat(CharacterBuild.VITALS[vit]))]
+		btn.focus_mode = Control.FOCUS_NONE
+		btn.disabled = b.vital_points() <= 0
+		var key: String = vit
+		btn.pressed.connect(func() -> void:
+			if skills.build.spend_vital(key):
+				_refresh())
+		row.add_child(btn)
+
+	_build_box.add_child(HSeparator.new())
+	var respec := Button.new()
+	respec.text = "Start over: undo every perk, feat and point (%d gold)" % b.respec_cost()
+	respec.focus_mode = Control.FOCUS_NONE
+	respec.disabled = b.owned.is_empty() and b.attr_spent.is_empty() and b.vitals.is_empty()
+	var msg := Label.new()
+	respec.pressed.connect(func() -> void:
+		var err := skills.build.respec(inventory)
+		if err != "":
+			msg.text = err
+			msg.add_theme_color_override("font_color", Color.INDIAN_RED)
+		else:
+			_refresh())
+	_build_box.add_child(respec)
+	_build_box.add_child(msg)
+
+
+func _attr_effect_text(attr: String) -> String:
+	var parts := PackedStringArray()
+	var fx: Dictionary = Stats.ATTRIBUTE_EFFECTS.get(attr, {})
+	for k in fx:
+		parts.append(SkillData.format_effect(k, fx[k], fx[k], SkillData.stat_label(k)))
+	return ("each point: " + ", ".join(parts)) if not parts.is_empty() else ""

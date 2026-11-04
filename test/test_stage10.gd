@@ -109,7 +109,7 @@ func t_crafting_data() -> void:
 	var tiers := {}
 	for r in Recipes.for_station("forge"):
 		tiers[Recipes.load_item(r["result"]).tier] = true
-	check("every tier can be forged", tiers.size() == 7, str(tiers.keys()))
+	check("every tier can be forged", tiers.size() == LevelCurve.TIER_KEYS.size(), str(tiers.keys()))
 	var weak := Enchanting.make_effect(&"fire_damage", 0, 1.0, true)
 	var strong := Enchanting.make_effect(&"fire_damage", 4, 1.0, true)
 	check("bigger soul gems make stronger enchantments", float(strong["mag"]) > float(weak["mag"]))

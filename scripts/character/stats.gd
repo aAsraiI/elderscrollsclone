@@ -60,15 +60,49 @@ const DEFAULT_BASE_STATS := {
 	"jump_mult": 1.0,
 	"fall_mult": 1.0,
 	"noise_mult": 1.0,
+	# Character build (Alpha 1.22): skill milestones, perks and feats. See BuildHooks for who reads them.
+	"crit_chance": 0.02,
+	## A critical hit does this many times the damage
+	"crit_mult": 1.5,
+	"power_attack_pct": 0.0,
+	"attack_cost_mult": 1.0,
+	"block_cost_mult": 1.0,
+	"armor_pen": 0.0,
+	"life_leech": 0.0,
+	"execute_bonus": 0.0,
+	"damage_reduction": 0.0,
+	"poise_bonus": 0.0,
+	"bow_damage": 0.0,
+	"fall_resist": 0.0,
+	"swim_speed_mult": 1.0,
+	"breath_mult": 1.0,
+	"horse_speed_mult": 1.0,
+	"horse_stamina_mult": 1.0,
+	"mounted_damage": 0.0,
+	"sneak_speed_mult": 1.0,
+	"magicka_cost_mult": 1.0,
+	"potion_mult": 1.0,
+	"hunger_mult": 1.0,
+	"harvest_bonus": 0.0,
+	"mining_bonus": 0.0,
+	"gem_find": 0.0,
+	"farming_bonus": 0.0,
+	"crop_growth": 0.0,
+	"follower_damage": 0.0,
+	"follower_health": 0.0,
+	"persuade_bonus": 0.0,
+	"blessing_mult": 1.0,
 }
 
 ## Every attribute point ABOVE its base value adds this much to another stat.
-## Endurance, wisdom, stealth and charisma are stored but have no effects yet
-## (stamina regen, magicka regen, detection and dialogue don't exist yet).
+## (Alpha 1.22: every attribute does something; persuasion also reads charisma and strength itself.)
 const ATTRIBUTE_EFFECTS := {
-	"strength": {"carry_capacity": 3.0},
-	"agility": {"move_speed_mult": 0.005},
-	"wisdom": {"magicka_regen": 0.05},
+	"strength": {"carry_capacity": 3.0, "damage": 0.05},
+	"agility": {"move_speed_mult": 0.004, "crit_chance": 0.0005},
+	"endurance": {"max_health": 1.0, "max_stamina": 1.0},
+	"wisdom": {"magicka_regen": 0.05, "max_magicka": 1.0},
+	"stealth": {"sneak_attack_bonus": 0.005, "noise_mult": -0.002},
+	"charisma": {"buy_price_mult": -0.001, "sell_price_mult": 0.001},
 }
 
 @export var base_stats: Dictionary = DEFAULT_BASE_STATS.duplicate()

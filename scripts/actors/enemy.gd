@@ -1485,7 +1485,10 @@ func _on_damaged(info: DamageInfo, amount: float) -> void:
 		size = 64
 	if info.punish:
 		color = Color(1.0, 0.3, 0.25)
-	_popup(str(roundi(amount)) + ("!" if info.punish else ""), info.hit_position, color, size)
+	if info.has_meta("crit"):
+		color = Color(1.0, 0.95, 0.4)
+		size = 72
+	_popup(str(roundi(amount)) + ("!" if info.punish else "") + (" CRIT" if info.has_meta("crit") else ""), info.hit_position, color, size)
 	if state != State.DEAD and info.kind != &"magic" or (info.kind == &"magic" and not info.dot):
 		if _casting != null and randf() > cunning * 0.6:
 			_cancel_cast()

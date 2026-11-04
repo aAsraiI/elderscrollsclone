@@ -4,7 +4,7 @@ extends RefCounted
 ## balancing difficulty, like SkillDatabase.gd is for skills.
 ##
 ## Two ideas:
-##  * TIERS: gear comes in 7 steps (Iron .. Starforged) spread over levels 1-100. Loot does not
+##  * TIERS: gear comes in 11 steps (Iron .. Primordial) spread over levels 1-175+. Loot does not
 ##    switch tier at once: roll_tier() / tier_weights() mix the tiers around a level, so a new tier
 ##    shows up as a rare find a little before its start level and the old one fades out slowly.
 ##  * ZONES: every biome has a level_min..level_max. Dungeons and point-of-interest garrisons are
@@ -12,20 +12,26 @@ extends RefCounted
 ##    to the player: the player's level, held inside the biome's range.
 ##
 ## What a tier is worth is in the item files themselves, made by tools/generate_content.gd:
-##   tier        iron  steel  silver  obsidian  ebon  dragonbone  starforged
-##   from level   1     8      17      28        41    56          74
-##   damage x     1.0   1.5    2.1     2.9       3.9   5.2         7.4
+##   tier        iron  steel  silver  obsidian  ebon  dragonbone  starforged  voidsteel  sunsteel  astral  primordial
+##   from level   1     8      17      28        41    56          74          100        125       150     175
+##   damage x     1.0   1.5    2.1     2.9       3.9   5.2         7.4         9.8        12.4      15.2    18.4
+## Alpha 1.22: there is no level cap. The last four tiers are the gear of the outer islands (100-200).
 
-## The highest player level (see SkillDatabase for how XP turns into levels)
+## The old player level cap. There is no cap any more (Alpha 1.22); this is where the main island's
+## levels end and the outer islands (100-200) begin.
 const MAX_LEVEL := 100
-const TIER_KEYS: Array[String] = ["iron", "steel", "silver", "obsidian", "ebon", "dragonbone", "starforged"]
-const TIER_NAMES: Array[String] = ["Iron", "Steel", "Silver", "Obsidian", "Ebon", "Dragonbone", "Starforged"]
+## The highest level the world is built for (the far islands). Players can go past it.
+const WORLD_TOP_LEVEL := 200
+const TIER_KEYS: Array[String] = ["iron", "steel", "silver", "obsidian", "ebon", "dragonbone", "starforged", "voidsteel", "sunsteel", "astral", "primordial"]
+const TIER_NAMES: Array[String] = ["Iron", "Steel", "Silver", "Obsidian", "Ebon", "Dragonbone", "Starforged", "Voidsteel", "Sunsteel", "Astral", "Primordial"]
 ## Light armor's material name for each tier
-const LIGHT_NAMES: Array[String] = ["Hide", "Leather", "Silverweave", "Shadowscale", "Ebonweave", "Dragonscale", "Starweave"]
-const LIGHT_KEYS: Array[String] = ["hide", "leather", "silverweave", "shadowscale", "ebonweave", "dragonscale", "starweave"]
+const LIGHT_NAMES: Array[String] = ["Hide", "Leather", "Silverweave", "Shadowscale", "Ebonweave", "Dragonscale", "Starweave", "Voidweave", "Sunsilk", "Astralweave", "Primeweave"]
+const LIGHT_KEYS: Array[String] = ["hide", "leather", "silverweave", "shadowscale", "ebonweave", "dragonscale", "starweave", "voidweave", "sunsilk", "astralweave", "primeweave"]
 ## The level at which each tier starts (it shows up as a rare find PREVIEW_LEVELS before this)
-const TIER_MIN_LEVEL: Array[int] = [1, 8, 17, 28, 41, 56, 74]
-const MAX_TIER := 6
+const TIER_MIN_LEVEL: Array[int] = [1, 8, 17, 28, 41, 56, 74, 100, 125, 150, 175]
+const MAX_TIER := 10
+## How many levels the last tier's band is treated as (it has no next tier to end at)
+const LAST_BAND := 30
 const PREVIEW_LEVELS := 2
 
 
@@ -46,10 +52,12 @@ static func tier_weights(level: int) -> PackedFloat32Array:
 	var total := 0.0
 	for i in TIER_MIN_LEVEL.size():
 		var start := TIER_MIN_LEVEL[i]
-		var finish := TIER_MIN_LEVEL[i + 1] if i < MAX_TIER else MAX_LEVEL + 1
+		var finish := TIER_MIN_LEVEL[i + 1] if i < MAX_TIER else start + LAST_BAND
 		var mid := (start + finish) * 0.5
 		var span := maxf(float(finish - start), 4.0)
 		var v := exp(-pow((float(level) - mid) / (span * 0.75), 2.0))
+		if i == MAX_TIER and float(level) >= mid:
+			v = 1.0  # the best tier stays forever: there is no level cap
 		# Fades in from PREVIEW_LEVELS + 1 levels before its start to 6 levels after (iron is there from the start)
 		if i > 0:
 			v *= smoothstep(float(start - PREVIEW_LEVELS - 1), float(start + 6), float(level))

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_6lnyt"]
+
+[resource]
+script = ExtResource("1_6lnyt")
+id = &"sunsilk_helmet"
+display_name = "Sunsilk Hood"
+description = "Golden silk of the sun isles, that turns heat and blades. Light armor for the head."
+item_type = 2
+equip_slot = 1
+weight = 2.6
+value = 9720
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 9.200000000000001
+}
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"sunsteel_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"helmet"

@@ -27,6 +27,8 @@ const DEFAULTS := {
 	"day_minutes": 24.0,
 	## Enemies hit harder and have more health as well as the difficulty (1.0 = normal)
 	"enemy_toughness": 1.0,
+	## Long falls hurt (Acrobatics makes them hurt less)
+	"fall_damage": true,
 }
 
 static var _rules: Dictionary = {}

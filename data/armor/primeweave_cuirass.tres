@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_gjqab"]
+
+[resource]
+script = ExtResource("1_gjqab")
+id = &"primeweave_cuirass"
+display_name = "Primeweave Armor"
+description = "The hide of a creature from before the world. Light armor for the chest."
+item_type = 2
+equip_slot = 2
+weight = 8.1
+value = 145800
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 32.2
+}
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("armor", "smithy", "hunter")
+armor_set = &"primordial_light"
+ingredient_effects = PackedStringArray()
+animation_set = &"cuirass"

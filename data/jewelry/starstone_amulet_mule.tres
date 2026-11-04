@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_fi0qs"]
+
+[resource]
+script = ExtResource("1_fi0qs")
+id = &"starstone_amulet_mule"
+display_name = "Starstone Amulet of the Mule"
+description = "+255 carry capacity while worn."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 9800
+stat_modifiers = {
+"carry_capacity": 255.0
+}
+tier = 11
+min_level = 150
+loot_tags = PackedStringArray("jewelry", "jeweler", "vault")
+ingredient_effects = PackedStringArray()

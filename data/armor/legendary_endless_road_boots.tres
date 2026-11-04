@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_kes4t"]
+
+[resource]
+script = ExtResource("1_kes4t")
+id = &"legendary_endless_road_boots"
+display_name = "Boots of the Endless Road"
+description = "Worn by a pilgrim who walked for a thousand years. Legendary: one of a kind."
+item_type = 2
+equip_slot = 5
+weight = 2.0
+value = 11520
+governing_skill = "light_armor"
+stat_modifiers = {
+"armor": 7.0,
+"fall_resist": 0.3,
+"jump_mult": 0.25,
+"move_speed_mult": 0.1
+}
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("legendary", "vault")
+ingredient_effects = PackedStringArray()
+animation_set = &"boots"

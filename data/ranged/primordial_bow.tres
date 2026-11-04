@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_1jxwm"]
+
+[resource]
+script = ExtResource("1_1jxwm")
+id = &"primordial_bow"
+display_name = "Primordial Bow"
+description = "Primordial metal older than the world, red as its first fire. Hold left click to draw, let go to shoot. Right click zooms. Uses the best arrows you carry."
+item_type = 1
+equip_slot = 6
+weight = 11.0
+value = 135000
+governing_skill = "archery"
+tier = 11
+min_level = 175
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_bow = true
+draw_time = 0.5499999999999999
+arrow_speed = 76.0
+ingredient_effects = PackedStringArray()
+weapon_damage = 129.0
+reach = 1.6
+attack_cooldown = 0.8
+poise_damage = 6.0
+two_handed = true
+animation_set = &"bow"

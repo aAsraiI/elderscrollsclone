@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_dhob4"]
+
+[resource]
+script = ExtResource("1_dhob4")
+id = &"voidsteel_battleaxe"
+display_name = "Voidsteel Battleaxe"
+description = "Black steel from the void-touched isles, that drinks the light. Two-handed. The heaviest hits and the widest swing, at the slowest speed."
+item_type = 1
+equip_slot = 6
+weight = 25.0
+value = 30000
+governing_skill = "two_handed"
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("weapon", "smithy")
+ingredient_effects = PackedStringArray()
+weapon_damage = 196.0
+reach = 2.8
+attack_style = 1
+arc_degrees = 140.0
+attack_cooldown = 1.5
+attack_windup = 0.38
+attack_active = 0.24
+stamina_cost = 20.8
+knockback = 6.08
+poise_damage = 71.4
+combo_length = 2
+two_handed = true
+heavy_charge_time = 0.65
+heavy_windup = 0.26
+heavy_poise_mult = 1.6
+animation_set = &"battleaxe"

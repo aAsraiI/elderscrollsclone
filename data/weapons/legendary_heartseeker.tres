@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_p5cg5"]
+
+[resource]
+script = ExtResource("1_p5cg5")
+id = &"legendary_heartseeker"
+display_name = "Heartseeker"
+description = "Its arrows never miss the heart. Legendary: one of a kind."
+item_type = 1
+equip_slot = 6
+weight = 10.5
+value = 240000
+governing_skill = "archery"
+stat_modifiers = {
+"bow_damage": 0.3,
+"crit_chance": 0.06
+}
+tier = 10
+min_level = 155
+loot_tags = PackedStringArray("legendary", "vault")
+is_bow = true
+draw_time = 0.59
+arrow_speed = 73.0
+ingredient_effects = PackedStringArray()
+weapon_damage = 127.8
+reach = 1.6
+attack_cooldown = 0.8
+poise_damage = 6.0
+two_handed = true
+animation_set = &"bow"

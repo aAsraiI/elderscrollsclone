@@ -128,7 +128,7 @@ func _theme_for() -> String:
 func _pool(theme: String, role: int) -> Array:
 	var out: Array = []
 	for e in ModuleLibrary.of(theme, role):
-		if level < e.level_min or level > e.level_max:
+		if level < e.level_min or (level > e.level_max and e.level_max < 100):  # 100 = no top (Alpha 1.22)
 			continue
 		if e.max_per > 0 and int(counts.get(e.path, 0)) >= e.max_per:
 			continue

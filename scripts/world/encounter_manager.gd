@@ -128,7 +128,7 @@ func try_encounter(force: bool = false, only: EncounterData = null) -> Array[Nod
 		var x := spot.x + off.x
 		var z := spot.z + off.z
 		var y := world.get_height_at(x, z)
-		var level := clampi(zone_level + _rng.randi_range(-1, 1), 1, 99)
+		var level := maxi(zone_level + _rng.randi_range(-1, 1), 1)
 		var e := Population.spawn_enemy(m, level, host, Vector3(x, y + 0.6, z), _rng, {"persist_mode": Enemy.PersistMode.NEVER})
 		if data.aggro:
 			e.aggro(player)

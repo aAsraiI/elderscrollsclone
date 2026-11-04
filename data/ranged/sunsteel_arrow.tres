@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_6hq2b"]
+
+[resource]
+script = ExtResource("1_6hq2b")
+id = &"sunsteel_arrow"
+display_name = "Sunsteel Arrow"
+description = "Shot from a bow. Better arrows hit harder."
+value = 900
+stackable = true
+max_stack = 999
+tier = 9
+min_level = 125
+loot_tags = PackedStringArray("smithy", "hunter", "weapons")
+is_arrow = true
+arrow_damage = 74.5
+ingredient_effects = PackedStringArray()

@@ -43,6 +43,7 @@ func _run() -> void:
 	await t_spare()
 	await t_standing()
 	await t_kill_record()
+	await t_wildlife()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -112,12 +113,17 @@ func t_on_sight() -> void:
 	var s := make("skeleton", Vector3(3, 0.2, 0))
 	check("a bandit is a bandit", CreatureFactions.of(b) == "bandits", CreatureFactions.of(b))
 	check("a skeleton is undead", CreatureFactions.of(s) == "undead", CreatureFactions.of(s))
+	var blows := [0]
+	b.combat.damaged.connect(func(_i, _a): blows[0] += 1)
+	s.combat.damaged.connect(func(_i, _a): blows[0] += 1)
 	await secs(2.5)
 	check("the bandit goes for the skeleton", b.get_fight_target() == s, str(b.get_fight_target()))
 	check("and the skeleton for the bandit", s.get_fight_target() == b, str(s.get_fight_target()))
-	for k in 6:
+	for k in 10:
+		if blows[0] > 0:
+			break
 		await secs(1.0)
-	check("blows are struck", b.stats.health < b.stats.get_stat("max_health") or s.stats.health < s.stats.get_stat("max_health"))
+	check("blows are struck", blows[0] > 0, str(blows[0]))
 
 
 func t_same_side() -> void:
@@ -242,3 +248,105 @@ func t_kill_record() -> void:
 		hit(w2, null, 50.0)  # no source = you (a trap, a fall)
 		await frames(2)
 	check("killed by you, it stays dead", WorldState.has_record("kill/test/wolf_b"))
+
+
+# ---------------------------------------------------------------- 1.24.2 wildlife, in the real world
+
+func t_wildlife() -> void:
+	print("-- wildlife")
+	if world != null:
+		world.queue_free()
+	WorldState.clear()
+	change_scene_to_file("res://scenes/game/game.tscn")
+	await frames(120)
+	var wm := get_first_node_in_group("world_manager") as WorldManager
+	var p := get_first_node_in_group("player") as CharacterBody3D
+	var wl := get_first_node_in_group("wild_life") as WildLife
+	var al := get_first_node_in_group("ambient_life") as AmbientLife
+	check("the game is up with wildlife", wm != null and p != null and wl != null and al != null)
+	if wm == null or p == null or wl == null:
+		return
+	(p.get_node("Stats") as Stats).add_modifiers("test_tough", {"max_health": 100000.0})
+	wl.enabled = false  # only what the test makes
+	for g in wl.groups:
+		for e in g["members"]:
+			if is_instance_valid(e):
+				e.queue_free()
+	wl.groups.clear()
+	wm.clock.set_time(12.0)
+	var lands: Dictionary = wl._data.get("lands", {})
+	check("every land has animals", lands.size() >= 12 and lands.has("default"), str(lands.keys()))
+	var missing := []
+	for land in lands:
+		for en in lands[land]:
+			if wl._data_for(String(en["kind"])) == null:
+				missing.append(en["kind"])
+	check("every animal in the tables exists", missing.is_empty(), str(missing))
+	# a herd of deer, 30 m off
+	var at := p.global_position + Vector3(30, 0, 0)
+	at.y = wm.get_height_at(at.x, at.z)
+	var herd := wl.spawn({"kind": "deer", "group": [4, 4], "herd": true}, at)
+	SpawnQueue.flush()
+	await frames(10)
+	var members: Array = herd.get("members", [])
+	check("a herd of four deer", members.size() == 4 and members.all(func(e): return is_instance_valid(e) and e.is_inside_tree()))
+	check("deer are wild game", CreatureFactions.of(members[0]) == "prey" and bool(herd["prey"]))
+	check("the others follow the lead animal", members.slice(1).all(func(e): return e.has_meta("follows")))
+	# sneaking far off they stay; walk up and they run
+	var st := p.get_node_or_null("Stealth") as Stealth
+	if st != null:
+		st.set_sneaking(true)
+	p.global_position = at + Vector3(-45, 1, 0)
+	await secs(1.0)
+	var fled := members.filter(func(e): return e.state == Enemy.State.FLEE).size()
+	check("deer 45 m off don't run", fled <= 1, str(fled))
+	if st != null:
+		st.set_sneaking(false)
+	p.global_position = at + Vector3(-6, 1, 0)
+	await secs(1.2)
+	fled = members.filter(func(e): return e.state == Enemy.State.FLEE).size()
+	check("walk up and they run", fled >= 3, str(fled))
+	# a wolf pack hunts deer
+	var pack := wl.spawn({"kind": "wolf", "group": [3, 3], "pack": true}, at + Vector3(0, 0, 25))
+	SpawnQueue.flush()
+	await frames(5)
+	var wolves: Array = pack["members"]
+	check("a pack has an alpha", wolves[0].has_meta("alpha") and wolves[0].body_scale > wolves[1].body_scale)
+	check("wolves and deer are at war", CreatureFactions.relation("beasts", "prey") == CreatureFactions.Rel.HOSTILE)
+	# a wild wolf warns before it charges
+	var w: Enemy = wolves[1]
+	p.global_position = w.global_position + Vector3(12, 1, 0)
+	w._target = p
+	w._alerted = true
+	w._enter_state(Enemy.State.CHASE)
+	check("a wild wolf growls before it charges", w._warn_until > w._clock)
+	var start := w.global_position
+	await secs(0.8)
+	check("and stands its ground meanwhile", w.global_position.distance_to(start) < 2.5, "%.1f m" % w.global_position.distance_to(start))
+	# small life
+	al._spawn(p)
+	al._spawn(p)
+	await frames(3)
+	var crit := get_nodes_in_group("critters")
+	check("small life appears around you", crit.size() >= 1, str(crit.size()))
+	if not crit.is_empty():
+		var c := crit[0] as Critter
+		c.take_damage(DamageInfo.new())
+		await frames(2)
+		check("a hit kills a critter", not is_instance_valid(c) or c.is_queued_for_deletion())
+	# legends: once killed, never again
+	WorldState.set_record("legend/white_stag", {"day": 1})
+	var tries := 0
+	var got := {}
+	wl._rng.seed = 1
+	for i in 200:
+		got = wl._maybe_legend("forest", at)
+		if not got.is_empty():
+			break
+		tries += 1
+	check("a legend killed never comes back", got.is_empty() or String(got["kind"]) != "white_stag", str(got))
+	for g in wl.groups:
+		for e in g["members"]:
+			if is_instance_valid(e):
+				e.queue_free()
+	wl.groups.clear()

@@ -53,3 +53,27 @@ Debug console:
 
 Not yet: wearing a side's gear as a disguise (comes with the disguise system), and sides patrolling the
 land they hold.
+
+## Wildlife
+
+`data/world/wildlife.json` lists the animals of each land: weight, group size, day or night, the
+seasons they are about, herd (the others follow a lead animal) or pack (the lead is a bigger alpha;
+on the islands a named one). **WildLife** keeps up to 3 groups 90-170 m around you, out of sight,
+and lets them go 320 m behind you.
+
+- New animals: deer, elk, fox, boar, shore crab, ash beetle; the legends the White Stag, the Old
+  Tusker and the Ancient Bear (one of each in a game; hunters spread a rumour when one is about;
+  each drops a trophy worth a lot).
+- Deer and elk (side "prey") run from you when you come within their notice (22 m; less sneaking;
+  further when the wind carries your scent to them, and the wind turns through the day), and from
+  any predator near them. Wolves, bears and the undead hunt them.
+- Bears sleep through the winter. A den or nest you clear keeps predators off its land for a week.
+- A wild beast that spots you from a way off stands and growls for a moment first: back away and it
+  lets you go; come closer or hit it and it charges.
+
+**AmbientLife** keeps up to 8 small creatures near you: rabbits, squirrels, frogs (more in the rain,
+none in winter), birds by day, bats and owls at night, crows that come down to a body left out, and
+fireflies on warm clear nights. A hit kills one (a rabbit leaves meat or hide).
+
+The animals reuse the CC0 models in `assets/models/creatures` (a tinted horse for deer, a tinted
+wolf for foxes, the rat for boars and rabbits, the spider for crabs and beetles, the bat for birds).

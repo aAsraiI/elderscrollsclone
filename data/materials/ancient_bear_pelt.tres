@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_o45as"]
+
+[resource]
+script = ExtResource("1_o45as")
+id = &"ancient_bear_pelt"
+display_name = "Ancient Bear Pelt"
+description = "Grey at the muzzle, scarred, enormous. It would cover a bed twice over."
+item_type = 7
+weight = 8.0
+value = 450
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("hunter")
+ingredient_effects = PackedStringArray()

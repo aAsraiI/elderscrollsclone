@@ -27,6 +27,20 @@ static func creature_drops(key: String, level: int) -> Array[LootEntry]:
 			out = [_e(MAT + "bear_pelt.tres", 0.95, 1, 1), _e(MAT + "raw_meat.tres", 0.9, 2, 4)]
 		"giant_rat":
 			out = [_e(MAT + "animal_hide.tres", 0.5, 1, 1), _e(MAT + "raw_meat.tres", 0.4, 1, 1)]
+		"deer", "elk":  # 1.24 wildlife
+			out = [_e(MAT + "animal_hide.tres", 0.95, 1, 2), _e(MAT + "raw_meat.tres", 0.95, 2, 3), _e(MAT + "antlers.tres", 0.5, 1, 1)]
+		"white_stag":
+			out = [_e(MAT + "white_stag_antlers.tres", 1.0, 1, 1), _e(MAT + "animal_hide.tres", 1.0, 2, 2), _e(MAT + "raw_meat.tres", 1.0, 2, 3)]
+		"fox":
+			out = [_e(MAT + "animal_hide.tres", 0.8, 1, 1)]
+		"boar":
+			out = [_e(MAT + "animal_hide.tres", 0.8, 1, 1), _e(MAT + "raw_meat.tres", 0.95, 2, 3)]
+		"giant_boar":
+			out = [_e(MAT + "old_tusker_tusks.tres", 1.0, 1, 1), _e(MAT + "animal_hide.tres", 1.0, 2, 3), _e(MAT + "raw_meat.tres", 1.0, 3, 5)]
+		"ancient_bear":
+			out = [_e(MAT + "ancient_bear_pelt.tres", 1.0, 1, 1), _e(MAT + "raw_meat.tres", 1.0, 3, 5)]
+		"shore_crab", "ash_beetle":
+			out = [_e(MAT + "raw_meat.tres", 0.6, 1, 1)]
 		"dune_stalker":
 			out = [_e(MAT + "animal_hide.tres", 0.9, 1, 2), _e(MAT + "raw_meat.tres", 0.6, 1, 2)]
 		"deep_crawler", "crawler_queen":

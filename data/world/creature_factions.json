@@ -3,7 +3,7 @@
 	"factions": {
 		"bandits": "Bandits", "smugglers": "Smugglers", "undead": "Undead", "vampires": "Vampires",
 		"werewolves": "Werewolves", "cultists": "The Ash Cult", "beasts": "Beasts", "town": "Town guards",
-		"livestock": "Livestock", "spirits": "Spirits", "constructs": "Constructs", "giants": "Giants"
+		"livestock": "Livestock", "spirits": "Spirits", "constructs": "Constructs", "giants": "Giants", "prey": "Wild game"
 	},
 	"members": {
 		"bandit": "bandits", "bandit_brute": "bandits", "bandit_thug": "bandits", "cutthroat": "bandits",
@@ -21,7 +21,9 @@
 		"vault_guardian": "constructs", "vault_sentinel": "constructs",
 		"town_guard": "town", "caravan_guard": "town", "townsfolk": "town", "merchant": "town", "pilgrim": "town",
 		"hunter": "town", "trapper": "town", "prospector": "town", "wanderer": "town", "cave_dweller": "town",
-		"sheep": "livestock", "cow": "livestock", "hound": "livestock"
+		"sheep": "livestock", "cow": "livestock", "hound": "livestock",
+		"deer": "prey", "elk": "prey", "white_stag": "prey", "fox": "beasts", "boar": "beasts", "giant_boar": "beasts",
+		"ancient_bear": "beasts", "shore_crab": "beasts", "ash_beetle": "beasts"
 	},
 	"relations": {
 		"bandits|smugglers": "friendly", "bandits|undead": "hostile", "bandits|vampires": "hostile",
@@ -38,6 +40,7 @@
 		"cultists|beasts": "neutral", "cultists|town": "hostile", "cultists|spirits": "neutral",
 		"beasts|town": "neutral", "beasts|livestock": "hostile", "beasts|spirits": "hostile",
 		"town|livestock": "friendly", "town|spirits": "hostile", "town|giants": "neutral",
-		"livestock|spirits": "hostile"
+		"livestock|spirits": "hostile",
+		"beasts|prey": "hostile", "werewolves|prey": "hostile", "undead|prey": "hostile", "spirits|prey": "hostile"
 	}
 }

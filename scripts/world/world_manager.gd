@@ -141,6 +141,14 @@ func _ready() -> void:
 	battles.name = "CreatureBattles"
 	battles.enabled = encounters_enabled
 	add_child(battles)
+	var wild := WildLife.new()  # 1.24: herds, packs and the odd legend, by land, time and season
+	wild.name = "WildLife"
+	wild.enabled = encounters_enabled
+	add_child(wild)
+	var small := AmbientLife.new()  # 1.24: rabbits, birds, frogs, bats, crows, fireflies
+	small.name = "AmbientLife"
+	small.enabled = encounters_enabled
+	add_child(small)
 	clock = WorldClock.new()
 	clock.name = "WorldClock"
 	clock.control_environment = day_night_enabled

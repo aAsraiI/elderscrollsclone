@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_o45as"]
+
+[resource]
+script = ExtResource("1_o45as")
+id = &"white_stag_antlers"
+display_name = "White Stag Antlers"
+description = "Pale as frost. Hunters say only one white stag walks the land at a time. A trophy for the wall, or a fortune from a collector."
+item_type = 7
+weight = 3.0
+value = 600
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("hunter")
+ingredient_effects = PackedStringArray()

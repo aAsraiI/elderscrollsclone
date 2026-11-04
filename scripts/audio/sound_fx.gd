@@ -71,11 +71,11 @@ static func voice_of(e: Enemy) -> String:
 	match e.enemy_id:
 		"dragon":
 			return "roar"
-		"wolf", "ash_hound", "frost_bear", "werewolf", "bog_lurker", "cave_troll", "forest_troll", "frost_giant", "dune_stalker":
+		"wolf", "ash_hound", "frost_bear", "werewolf", "bog_lurker", "cave_troll", "forest_troll", "frost_giant", "dune_stalker", "fox", "boar", "giant_boar", "ancient_bear":
 			return "growl"
 		"harpy", "giant_rat":
 			return "screech"
-		"giant_spider", "sand_scorpion", "deep_crawler", "crawler_queen":
+		"giant_spider", "sand_scorpion", "deep_crawler", "crawler_queen", "shore_crab", "ash_beetle":
 			return "hiss"
 		"skeleton", "skeleton_knight", "barrow_wight", "wight_lord", "crypt_warden", "grave_ghoul", "drowned_sailor", "vampire":
 			return "groan"

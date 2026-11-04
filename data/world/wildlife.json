@@ -1,0 +1,82 @@
+{
+	"_about": "Alpha 1.24: the animals of each land (WildLife). kind = enemy data id; weight = how often; group = [fewest, most]; time = day, night or any; seasons = the seasons it is about in (0 winter, 1 spring, 2 summer, 3 autumn; none = all year); herd = the others follow a lead animal; pack = the lead is a bigger alpha. 'default' is used for a land not listed. legends: rare named animals, one of each in a game.",
+	"lands": {
+		"forest": [
+			{"kind": "deer", "weight": 5, "group": [2, 5], "time": "any", "herd": true},
+			{"kind": "elk", "weight": 2, "group": [2, 4], "time": "day", "herd": true},
+			{"kind": "wolf", "weight": 3, "group": [2, 4], "time": "any", "pack": true},
+			{"kind": "fox", "weight": 2, "group": [1, 1], "time": "any"},
+			{"kind": "boar", "weight": 3, "group": [1, 3], "time": "day"},
+			{"kind": "frost_bear", "weight": 1, "group": [1, 1], "time": "day", "seasons": [1, 2, 3]}
+		],
+		"plains": [
+			{"kind": "deer", "weight": 5, "group": [3, 7], "time": "any", "herd": true},
+			{"kind": "boar", "weight": 2, "group": [1, 3], "time": "day"},
+			{"kind": "wolf", "weight": 2, "group": [2, 5], "time": "night", "pack": true},
+			{"kind": "fox", "weight": 2, "group": [1, 1], "time": "any"}
+		],
+		"highlands": [
+			{"kind": "elk", "weight": 4, "group": [3, 6], "time": "any", "herd": true},
+			{"kind": "wolf", "weight": 3, "group": [3, 5], "time": "any", "pack": true},
+			{"kind": "boar", "weight": 2, "group": [1, 2], "time": "day"},
+			{"kind": "frost_bear", "weight": 2, "group": [1, 1], "time": "day", "seasons": [1, 2, 3]}
+		],
+		"tundra": [
+			{"kind": "elk", "weight": 4, "group": [3, 6], "time": "any", "herd": true},
+			{"kind": "wolf", "weight": 4, "group": [3, 6], "time": "any", "pack": true},
+			{"kind": "frost_bear", "weight": 2, "group": [1, 1], "time": "day", "seasons": [1, 2, 3]}
+		],
+		"snow_mountains": [
+			{"kind": "wolf", "weight": 3, "group": [3, 5], "time": "any", "pack": true},
+			{"kind": "frost_bear", "weight": 2, "group": [1, 1], "time": "day", "seasons": [1, 2, 3]},
+			{"kind": "elk", "weight": 2, "group": [2, 4], "time": "day", "herd": true}
+		],
+		"frozen_crown": [
+			{"kind": "wolf", "weight": 4, "group": [3, 6], "time": "any", "pack": true},
+			{"kind": "frost_bear", "weight": 2, "group": [1, 1], "time": "any", "seasons": [1, 2, 3]}
+		],
+		"lakeland": [
+			{"kind": "deer", "weight": 4, "group": [2, 5], "time": "any", "herd": true},
+			{"kind": "shore_crab", "weight": 3, "group": [1, 3], "time": "any"},
+			{"kind": "fox", "weight": 2, "group": [1, 1], "time": "any"},
+			{"kind": "boar", "weight": 2, "group": [1, 2], "time": "day"}
+		],
+		"coast": [
+			{"kind": "shore_crab", "weight": 5, "group": [2, 4], "time": "any"},
+			{"kind": "deer", "weight": 1, "group": [2, 3], "time": "day", "herd": true},
+			{"kind": "fox", "weight": 1, "group": [1, 1], "time": "night"}
+		],
+		"swamp": [
+			{"kind": "bog_lurker", "weight": 3, "group": [1, 2], "time": "any"},
+			{"kind": "giant_rat", "weight": 3, "group": [2, 4], "time": "night"},
+			{"kind": "boar", "weight": 2, "group": [1, 3], "time": "day"}
+		],
+		"ashlands": [
+			{"kind": "ash_beetle", "weight": 5, "group": [2, 4], "time": "any"},
+			{"kind": "ash_hound", "weight": 3, "group": [2, 3], "time": "any", "pack": true}
+		],
+		"badlands": [
+			{"kind": "dune_stalker", "weight": 2, "group": [1, 2], "time": "night"},
+			{"kind": "boar", "weight": 2, "group": [1, 2], "time": "day"},
+			{"kind": "wolf", "weight": 2, "group": [2, 4], "time": "night", "pack": true}
+		],
+		"desert": [
+			{"kind": "sand_scorpion", "weight": 4, "group": [1, 3], "time": "any"},
+			{"kind": "dune_stalker", "weight": 3, "group": [1, 2], "time": "night"}
+		],
+		"deadlands": [
+			{"kind": "giant_rat", "weight": 3, "group": [2, 4], "time": "any"},
+			{"kind": "wolf", "weight": 2, "group": [2, 4], "time": "night", "pack": true}
+		],
+		"default": [
+			{"kind": "deer", "weight": 3, "group": [2, 4], "time": "any", "herd": true},
+			{"kind": "wolf", "weight": 2, "group": [2, 4], "time": "any", "pack": true},
+			{"kind": "boar", "weight": 2, "group": [1, 2], "time": "day"}
+		]
+	},
+	"legends": [
+		{"kind": "white_stag", "lands": ["forest", "plains", "tundra", "lakeland"], "rumor": "Hunters say a white stag walks the land near %s. Bring down the beast nobody else could, and the antlers alone are worth a fortune."},
+		{"kind": "giant_boar", "lands": ["forest", "highlands", "plains", "swamp"], "rumor": "The Old Tusker is out again near %s. Three hunters have gone after that boar. Two came back."},
+		{"kind": "ancient_bear", "lands": ["highlands", "snow_mountains", "tundra", "forest"], "rumor": "Something huge has been raiding traplines near %s. The trappers call it the Ancient Bear, and they won't go out alone."}
+	]
+}

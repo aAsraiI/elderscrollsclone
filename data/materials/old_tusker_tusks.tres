@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_o45as"]
+
+[resource]
+script = ExtResource("1_o45as")
+id = &"old_tusker_tusks"
+display_name = "The Old Tusker's Tusks"
+description = "Yellowed, cracked, longer than your forearm. Every hunter in the region knew this boar."
+item_type = 7
+weight = 2.0
+value = 400
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("hunter")
+ingredient_effects = PackedStringArray()

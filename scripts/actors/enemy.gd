@@ -149,6 +149,7 @@ var _clock := 0.0
 var _next_attack_at := 0.0
 var _sight_until := 0.0  # 1.23: _can_see_target() is remembered until then
 var _scan_at := 0.0  # 1.24: next look round for creatures of a hostile faction
+var _warn_until := 0.0  # 1.24: a wild beast stands growling until then before it charges
 var _rally_at := 0.0
 ## 1.24: you (or yours) hurt it this fight: a faction that tolerates you fights you anyway
 var _provoked := false
@@ -793,6 +794,19 @@ func _tick_chase(delta: float) -> void:
 		_lose_target()
 		return
 	var to_target := _flat_to_target()
+	# 1.24: a wild beast that spots you from a way off warns first (a growl, standing its ground):
+	# back away and it lets you go; come closer, or hit it, and it charges
+	if _clock < _warn_until:
+		_slow_down(delta, acceleration)
+		_face(to_target, delta)
+		if to_target.length() > detection_range + 4.0:
+			_warn_until = 0.0
+			_lose_target()
+			return
+		if to_target.length() > 5.0:
+			move_and_slide()
+			return
+		_warn_until = 0.0  # too close: it goes for you
 	if to_target.length() > lose_range:
 		_lose_target()
 		return
@@ -956,6 +970,10 @@ func _enter_state(new_state: State) -> void:
 			animation.trigger(AnimationHooks.IDLE, animation_set)
 		State.CHASE:
 			animation.trigger(AnimationHooks.RUN, animation_set)
+			if has_meta("wild") and disposition == Disposition.HOSTILE and (old == State.IDLE or old == State.WANDER or old == State.PATROL) \
+					and _target != null and is_instance_valid(_target) and _target.is_in_group("player") and _flat_to_target().length() > 6.0 and not _provoked:
+				_warn_until = _clock + 1.6
+				animation.trigger(AnimationHooks.ALERT, animation_set)
 			if old != State.ATTACK and old != State.CHASE and disposition == Disposition.HOSTILE:
 				SoundFX.bark(self)  # it has seen you
 		State.ATTACK:
@@ -1573,6 +1591,7 @@ func _on_damaged(info: DamageInfo, amount: float) -> void:
 	if _by_player(info.source):
 		_hurt_by_player = true
 		_provoked = true
+		_warn_until = 0.0
 	# Hit by another creature (a guard, or a guard hit by a bandit): fight back against it. That
 	# doesn't make a guard or a townsperson hostile to the player.
 	var by_creature := info.source is Enemy and info.source != self and is_instance_valid(info.source)

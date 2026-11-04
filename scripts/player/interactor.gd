@@ -66,6 +66,10 @@ func _physics_process(delta: float) -> void:
 			if extra != "":
 				prompt = (prompt + "
 " + extra) if prompt != "" else extra
+	if prompt == "" and owner is Node3D:
+		var ko := Takedowns.candidate(owner as Node3D)  # 1.24: sneaking up behind someone
+		if ko != null:
+			prompt = "Knock out %s" % ko.display_name
 	# Telekinesis reaches far
 	var reach := 20.0 if owner != null and owner.has_meta("telekinesis") else 3.0
 	if not is_equal_approx(-target_position.z, reach):
@@ -92,6 +96,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var target := _get_target()
 	if target == null:
+		var ko := Takedowns.candidate(owner as Node3D) if owner is Node3D else null
+		if ko != null:
+			Takedowns.knock_out(ko)  # 1.24: a chokehold from behind
+			get_viewport().set_input_as_handled()
 		return
 	get_viewport().set_input_as_handled()
 	if _can_grab(target):

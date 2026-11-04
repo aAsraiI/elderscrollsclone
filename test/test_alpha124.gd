@@ -49,6 +49,7 @@ func _run() -> void:
 	await t_marks()
 	await t_stories()
 	await t_surfaces()
+	await t_takedowns()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -673,3 +674,54 @@ func t_surfaces() -> void:
 				break
 			door.take_damage(blow)
 		check("a mace breaks the lock in the end", not door.is_locked())
+
+
+func t_takedowns() -> void:
+	print("-- putting people down without killing them")
+	var wm := get_first_node_in_group("world_manager") as WorldManager
+	var p := get_first_node_in_group("player") as CharacterBody3D
+	var st := p.get_node("Stealth") as Stealth
+	var at := p.global_position + Vector3(0, 0, -10)
+	var b := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 3, wm, at, RandomNumberGenerator.new())
+	b.set_physics_process(false)
+	await frames(3)
+	b.global_position = Vector3(at.x, wm.get_height_at(at.x, at.z) + 0.1, at.z)
+	b.rotation.y = 0.0  # facing -z, away from you
+	p.global_position = b.global_position + Vector3(0, 0.2, 1.2)
+	st.sneaking = true
+	check("sneaking up behind someone, you can knock them out", Takedowns.candidate(p) == b)
+	p.global_position = b.global_position + Vector3(0, 0.2, -1.2)
+	check("not from in front", Takedowns.candidate(p) == null)
+	p.global_position = b.global_position + Vector3(0, 0.2, 1.2)
+	var ko0 := Takedowns.tally("knockouts")
+	Takedowns.knock_out(b)
+	check("knocked out: down, and counted", Takedowns.is_out(b) and b.asleep and Takedowns.tally("knockouts") == ko0 + 1)
+	b.set_physics_process(true)
+	await secs(1.0)
+	check("you standing over them doesn't wake them", Takedowns.is_out(b))
+	b.set_meta("knocked_out_until", 0.0)
+	await frames(3)
+	check("they come round alert", not Takedowns.is_out(b) and not b.asleep and b.is_alerted())
+	b.queue_free()
+	st.sneaking = false
+	# a cudgel from behind
+	var c := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 3, wm, at + Vector3(4, 0, 0), RandomNumberGenerator.new())
+	await frames(3)
+	var hp := c.stats.health
+	var blow := DamageInfo.new(10.0, p, &"melee")
+	blow.weapon = load("res://data/weapons/cudgel.tres")
+	blow.sneak = true
+	c.combat.take_damage(blow)
+	await frames(2)
+	check("a sneak attack with a cudgel knocks out instead of wounding", Takedowns.is_out(c) and absf(c.stats.health - hp) < 0.5, "%.0f -> %.0f" % [hp, c.stats.health])
+	c.queue_free()
+	# they go looking where they last saw you
+	var g := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 3, wm, at + Vector3(-6, 0, 0), RandomNumberGenerator.new())
+	await frames(3)
+	g._target = p
+	g._alerted = true
+	g._last_seen = g.global_position + Vector3(12, 0, 0)
+	g._enter_state(Enemy.State.CHASE)
+	g._lose_target()
+	check("losing you, they search where they last saw you", g.state == Enemy.State.PATROL and g.route.size() == 3)
+	g.queue_free()

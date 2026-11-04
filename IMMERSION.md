@@ -159,3 +159,16 @@ shock arcs on to anyone in heavy armour close by. Rain burns fires out three tim
 **Breakable doors**: a locked door hit with a mace, a hammer or a hammer's slam loses its lock and in the
 end gives way (loud, and a crime if a house door is seen being forced; in a dungeon everything near
 comes running). A blade just bites the wood. Gates still need their lever.
+
+## Many ways through (1.24.8)
+
+- **Knock-outs**: sneak up behind someone who hasn't noticed you (or find them asleep) and press E to
+  knock them out; or hit them from hiding with a **Cudgel** (a new weapon: a sneak attack with it knocks
+  out instead of wounding). They lie there two or three minutes (nothing wakes them early), then come
+  round alert and go looking for you. Knocking out a townsperson is still assault if anyone sees.
+- **The tally**: your kills of people, kills of beasts and knock-outs are counted (WorldState `tally`).
+- **Searching**: a hostile person who loses you goes to where they last saw you, looks about, and goes
+  back to their post.
+- **Hiding bodies**: a body in the water is never found; at night only someone right beside it notices.
+- (Already there before 1.24: keys, lockpicks, secret doors and levers into locked places; since 1.24.7 a
+  mace or hammer too.)

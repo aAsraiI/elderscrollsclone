@@ -150,6 +150,7 @@ var _next_attack_at := 0.0
 var _sight_until := 0.0  # 1.23: _can_see_target() is remembered until then
 var _scan_at := 0.0  # 1.24: next look round for creatures of a hostile faction
 var _warn_until := 0.0  # 1.24: a wild beast stands growling until then before it charges
+var _last_seen := Vector3.INF
 var _rally_at := 0.0
 ## 1.24: you (or yours) hurt it this fight: a faction that tolerates you fights you anyway
 var _provoked := false
@@ -540,6 +541,10 @@ func _refresh_weapon_visual() -> void:
 func _physics_process(delta: float) -> void:
 	if state == State.DEAD:
 		return
+	if Takedowns.is_out(self):
+		_clock += delta
+		if Takedowns.tick(self):
+			return  # 1.24: knocked out: lies where it fell
 	# Far from the player and calm: think a few times a second instead of every frame
 	if (state == State.IDLE or state == State.WANDER or state == State.PATROL) and not has_meta("player_ally"):
 		var p := get_tree().get_first_node_in_group("player") as Node3D
@@ -995,11 +1000,18 @@ func _enter_state(new_state: State) -> void:
 
 
 func _lose_target() -> void:
+	var search := _last_seen.is_finite() and disposition == Disposition.HOSTILE and body_kind == CreatureBody.Kind.HUMANOID \
+			and _target != null and is_instance_valid(_target) and _target.is_in_group("player") and not stats.is_dead
 	_alerted = false
 	if _target != null and not (is_instance_valid(_target) and _target.is_in_group("player")):
 		_target = null  # done with a creature: back to watching the player
 		combat.hit_mask = _default_hit_mask()
 	_enter_state(State.IDLE)
+	# 1.24: it goes to where it last saw you, looks about, and goes back to its post
+	if search and _last_seen.distance_to(global_position) > 2.0:
+		var back := _home if _home_set else global_position
+		follow_route(PackedVector3Array([_last_seen, _last_seen + Vector3(randf_range(-3, 3), 0, randf_range(-3, 3)), back]), false, 0.55)
+	_last_seen = Vector3.INF
 
 
 func _start_swing() -> void:
@@ -1446,6 +1458,8 @@ func _can_see_target() -> bool:
 	if _clock < _sight_until and _sight_target == _target:
 		return _sight_seen
 	_sight_seen = _can_see_target_now()
+	if _sight_seen and _target != null and _target.is_in_group("player"):
+		_last_seen = _target.global_position  # 1.24: where it last saw you (it searches there if it loses you)
 	_sight_target = _target
 	_sight_until = _clock + (0.1 if _alerted else 0.2) + randf() * 0.05
 	return _sight_seen
@@ -1453,6 +1467,8 @@ func _can_see_target() -> bool:
 
 func _can_see_target_now() -> bool:
 	if not _target_usable():
+		return false
+	if Takedowns.is_out(self):
 		return false
 	# 1.24: a side you have helped enough leaves you be, unless you start something
 	if not _provoked and disposition == Disposition.HOSTILE and _target.is_in_group("player") and CreatureFactions.tolerates_player(CreatureFactions.of(self)):
@@ -1560,6 +1576,13 @@ func _process(delta: float) -> void:
 # ---------------------------------------------------------------- getting hurt and dying
 
 func _on_damaged(info: DamageInfo, amount: float) -> void:
+	if info.sneak and info.weapon != null and String(info.weapon.id) == "cudgel" and not stats.is_dead and body_kind == CreatureBody.Kind.HUMANOID:
+		stats.modify_vital("health", amount)  # 1.24: a cudgel from behind knocks out, it doesn't wound
+		Takedowns.knock_out(self, _by_player(info.source))
+		return
+	if Takedowns.is_out(self):
+		remove_meta("knocked_out")
+		remove_meta("knocked_out_until")
 	_flash()
 	wake()
 	lurking = false
@@ -1712,6 +1735,8 @@ func _on_died() -> void:
 		if spawn_key != "":
 			WorldState.set_record("kill/" + spawn_key, {"dead": true})
 		CreatureFactions.on_player_kill(get_tree(), self)
+		if _hurt_by_player:
+			Takedowns.count("kills" if body_kind == CreatureBody.Kind.HUMANOID else "beasts")  # 1.24: the tally (Chaos)
 	var note_rng := RandomNumberGenerator.new()
 	note_rng.seed = (spawn_key if spawn_key != "" else str(get_instance_id())).hash()
 	Notes.maybe_carry(self, note_rng)  # 1.24: a letter, orders, a debt...

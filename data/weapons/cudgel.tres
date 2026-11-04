@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_jsq5x"]
+
+[resource]
+script = ExtResource("1_jsq5x")
+id = &"cudgel"
+display_name = "Cudgel"
+description = "A short, weighted club wrapped in leather. A sneak attack with it knocks someone out instead of wounding them. In a straight fight it does little."
+item_type = 1
+equip_slot = 6
+weight = 10.0
+value = 20
+governing_skill = "one_handed"
+loot_tags = PackedStringArray("weapon", "smithy", "thief", "camp")
+weapon_damage = 6.0
+attack_cooldown = 0.85
+attack_windup = 0.18
+stamina_cost = 8.0
+knockback = 3.5
+armor_pierce = 0.25
+poise_damage = 28.0
+combo_length = 2
+heavy_charge_time = 0.5
+heavy_windup = 0.2
+heavy_damage_mult = 1.8
+heavy_reach_bonus = 0.2
+animation_set = &"mace"

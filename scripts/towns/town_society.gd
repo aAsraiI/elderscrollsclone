@@ -624,8 +624,12 @@ func _bodies_found() -> void:
 		var body := r.node
 		if body == null or not is_instance_valid(body) or not body.is_inside_tree() or r.node_inside:
 			continue
-		for o in ActorRegistry.near(body.global_position, 7.0):
-			if o == body or o.is_dead() or not o.has_meta("npc_id"):
+		# 1.24: a body in the water is never found; at night only someone right beside it notices
+		if world.map != null and body.global_position.y < world.map.get_water_level(body.global_position.x, body.global_position.z) - 0.4:
+			continue
+		var notice := 3.0 if world.clock != null and world.clock.is_night() else 7.0
+		for o in ActorRegistry.near(body.global_position, notice):
+			if o == body or o.is_dead() or not o.has_meta("npc_id") or Takedowns.is_out(o):
 				continue
 			WorldState.set_record("body_found/" + r.data.id, {"by": o.display_name})
 			_say(o, ["Gods! Someone help!", "Guards! Guards, there's a body!", "No... no, no."][absi(r.data.id.hash()) % 3])

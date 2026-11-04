@@ -3,7 +3,7 @@ extends CanvasLayer
 ## The journal (J; Shift+J writes a new note from anywhere; also on the pause screen). Created by
 ## player.gd. The game pauses while it is open. It reopens on the tab and page you left.
 ##
-##   tabs       Quests, Topics, Places, People, Notes, All
+##   tabs       Quests, Topics, Places, People, Notes, All, Guide (the tutorial), Achievements
 ##   left       the tab's list in collapsible groups (Bookmarks first). Quests: Active, Completed,
 ##              Failed, Abandoned. A dot marks something new or updated (unread).
 ##   top        search (everything, notes too), a filter (guild, town or type) and the order
@@ -22,13 +22,15 @@ signal closed
 
 const ACTION := "journal"
 const GOLD := Color(1.0, 0.85, 0.35)
-const TABS := ["Quests", "Topics", "Places", "People", "Notes", "All"]
+const TABS := ["Quests", "Topics", "Places", "People", "Notes", "All", "Guide", "Achievements"]
 const TAB_QUESTS := 0
 const TAB_TOPICS := 1
 const TAB_PLACES := 2
 const TAB_PEOPLE := 3
 const TAB_NOTES := 4
 const TAB_ALL := 5
+const TAB_GUIDE := 6     # 1.27: the tutorial (GuideBook)
+const TAB_ACH := 7       # 1.27: achievements (Achievements)
 const SORTS := ["Newest", "Oldest", "A-Z"]
 ## Note colours: chosen to stay apart for colourblind eyes (blue, orange, yellow, purple, grey)
 const NOTE_COLORS := ["None", "Blue", "Orange", "Yellow", "Purple", "Grey"]
@@ -137,6 +139,24 @@ func show_topic(topic: String) -> void:
 func show_quest(id: String) -> void:
 	_tabs.current_tab = TAB_QUESTS
 	_filter_kind = "quest"
+	_filter_value = id
+	_rebuild_filter()
+	_refresh()
+
+
+## 1.27: opens a Guide page ("" = the Guide's contents)
+func show_guide(id: String) -> void:
+	_tabs.current_tab = TAB_GUIDE
+	_filter_kind = "guide" if id != "" else "all"
+	_filter_value = id
+	_rebuild_filter()
+	_refresh()
+
+
+## 1.27: opens an achievement ("" = the overview)
+func show_achievement(id: String) -> void:
+	_tabs.current_tab = TAB_ACH
+	_filter_kind = "ach" if id != "" else "all"
 	_filter_value = id
 	_rebuild_filter()
 	_refresh()
@@ -385,6 +405,12 @@ func _on_meta(meta: Variant) -> void:
 	if m.begins_with("quest:"):
 		show_quest(m.trim_prefix("quest:"))
 		return
+	if m.begins_with("guide:"):
+		show_guide(m.trim_prefix("guide:"))
+		return
+	if m.begins_with("ach:"):
+		show_achievement(m.trim_prefix("ach:"))
+		return
 	show_topic(m.uri_decode())
 
 
@@ -413,6 +439,8 @@ func _rebuild_filter() -> void:
 			for t in names:
 				_filter_values.append(t)
 				_filter_opt.add_item(t)
+		TAB_GUIDE, TAB_ACH:
+			_filter_opt.add_item("Everything")
 		TAB_ALL:
 			_filter_opt.add_item("Every type")
 			for t in DialogueState.ENTRY_TYPES:
@@ -465,7 +493,7 @@ func _fill_list(world: WorldManager, entries: Array) -> void:
 	var tab := _tabs.current_tab
 	var want := _wanted()
 	var tab_marks := DialogueState.bookmarks().filter(func(k: String) -> bool:
-		return (tab == TAB_QUESTS and k.begins_with("quest:")) or (tab != TAB_QUESTS and tab != TAB_NOTES and k.begins_with("topic:")))
+		return (tab == TAB_QUESTS and k.begins_with("quest:")) or (tab != TAB_QUESTS and tab != TAB_NOTES and tab < TAB_GUIDE and k.begins_with("topic:")))
 	if not tab_marks.is_empty():
 		var g := _add_group("Bookmarks")
 		for k: String in tab_marks:
@@ -503,6 +531,10 @@ func _fill_list(world: WorldManager, entries: Array) -> void:
 				_add_row(g, "All notes  (%d)" % notes.size(), "notes", "")
 			for n: Dictionary in notes:
 				_add_row(g, ("(pinned) " if bool(n.get("pinned", false)) else "") + String(n["title"]), "note", str(n["id"]))
+		TAB_GUIDE:
+			_fill_guide()
+		TAB_ACH:
+			_fill_achievements()
 		TAB_ALL:
 			var g := _add_group("Everything")
 			_add_row(g, "All entries  (%d)" % entries.size(), "all", "")
@@ -572,6 +604,12 @@ func _refresh() -> void:
 		_count.text = "%d of %d notes" % [list.size(), notes.size()]
 		_show_notes(list, q_text)
 		return
+	if tab == TAB_GUIDE:
+		_guide_page(_filter_value if _filter_kind == "guide" else "")
+		return
+	if tab == TAB_ACH:
+		_ach_page(_filter_value if _filter_kind == "ach" else "")
+		return
 	var shown := filter(entries, _search.text, _filter_kind, _filter_value)
 	_count.text = "%d of %d entries" % [shown.size(), entries.size()]
 	if _filter_kind == "topic" or _filter_kind == "quest":
@@ -618,6 +656,121 @@ func _refresh() -> void:
 	for e: Dictionary in shown:
 		if not bool(e.get("read", true)):
 			DialogueState.mark_read(int(e.get("id", -1)))
+
+
+# ---------------------------------------------------------------- 1.27: the Guide and achievements
+
+func _fill_guide() -> void:
+	var g0 := _add_group("Guide")
+	_add_row(g0, "Contents  (%d pages)" % GuideBook.PAGES.size(), "all", "")
+	var later := []
+	for group in GuideBook.groups():
+		var g: TreeItem = null
+		for p in GuideBook.PAGES:
+			if p[1] != group:
+				continue
+			if not GuideBook.has_come_up(p[0]):
+				later.append(p)
+				continue
+			if g == null:
+				g = _add_group(String(group))
+			_add_row(g, String(p[2]), "guide", String(p[0]), GuideBook.is_unread(p[0]))
+	if not later.is_empty():
+		var gl := _add_group("Not yet come across  (%d)" % later.size())
+		gl.collapsed = _filter_kind != "guide" or not later.any(func(p: Array) -> bool: return p[0] == _filter_value)
+		for p in later:
+			_add_row(gl, String(p[2]), "guide", String(p[0]))
+
+
+func _fill_achievements() -> void:
+	var g0 := _add_group("Achievements  (%d of %d)" % [Achievements.unlocked_count(), Achievements.LIST.size()])
+	_add_row(g0, "Overview and what to try next", "all", "")
+	for c in Achievements.CHAPTERS.size():
+		var these := Achievements.LIST.filter(func(a: Array) -> bool: return a[1] == c)
+		var done := these.filter(func(a: Array) -> bool: return Achievements.is_unlocked(a[0])).size()
+		var g := _add_group("%d. %s  (%d/%d)" % [c + 1, Achievements.CHAPTERS[c], done, these.size()])
+		g.collapsed = done == these.size() and not (_filter_kind == "ach" and these.any(func(a: Array) -> bool: return a[0] == _filter_value))
+		for a in these:
+			_add_row(g, ("✓ " if Achievements.is_unlocked(a[0]) else "") + String(a[2]), "ach", String(a[0]))
+
+
+func _guide_page(id: String) -> void:
+	_actions.visible = false
+	_count.text = "%d of %d pages come up" % [GuideBook.PAGES.filter(func(p: Array) -> bool: return GuideBook.has_come_up(p[0])).size(), GuideBook.PAGES.size()]
+	if id != "":
+		_text.append_text(GuideBook.text_of(id))
+		var tied := Achievements.LIST.filter(func(a: Array) -> bool: return a[4] == id)
+		if not tied.is_empty():
+			_text.append_text("[url=ach:%s][color=#7f9fbf]See the achievements[/color][/url]\n" % tied[0][0])
+		GuideBook.mark_read(id)
+		_fill_guide_dots()
+		return
+	_text.append_text("[color=#ffd95a][b][font_size=22]Guide[/font_size][/b][/color]\n")
+	_text.append_text("How to play, a page for each part of the game. A page comes up here the first time you need it (with a dot until you read it); the ones you haven't come across yet are at the bottom of the list, and you can read them any time.\n\n")
+	for group in GuideBook.groups():
+		_text.append_text("[b]%s[/b]\n" % group)
+		for p in GuideBook.PAGES:
+			if p[1] == group:
+				var dot := "  [color=#ffb347]NEW[/color]" if GuideBook.is_unread(p[0]) else ""
+				_text.append_text("   [url=guide:%s][color=#ffd95a]%s[/color][/url]%s\n" % [p[0], p[2], dot])
+		_text.append_text("\n")
+
+
+# The list's dots go when a page is read
+func _fill_guide_dots() -> void:
+	var it := _list.get_root().get_first_child() if _list.get_root() != null else null
+	while it != null:
+		var c := it.get_first_child()
+		while c != null:
+			var m: Variant = c.get_metadata(0)
+			if m is Array and m[0] == "guide" and not GuideBook.is_unread(m[1]):
+				c.set_text(0, String(GuideBook.page(m[1])[2]))
+			c = c.get_next()
+		it = it.get_next()
+
+
+func _ach_line(a: Array) -> String:
+	var tree := get_tree()
+	var done := Achievements.is_unlocked(a[0])
+	var tick := "[color=#8fd18f][lb]x][/color]" if done else "[lb] ]"
+	var prog := Achievements.progress_text(a, tree)
+	var tail := ("  [color=#b8a47a](%s)[/color]" % prog) if prog != "" and not done else ""
+	var label := DialogueUI._esc(String(a[2]))
+	var title := ("[color=#9a9a9a]%s[/color]" % label) if done else ("[url=ach:%s][color=#ffd95a]%s[/color][/url]" % [a[0], label])
+	return "%s %s%s\n      %s\n" % [tick, title, tail, DialogueUI._esc(String(a[3]))]
+
+
+func _ach_page(id: String) -> void:
+	_actions.visible = false
+	_count.text = "%d of %d done" % [Achievements.unlocked_count(), Achievements.LIST.size()]
+	if id != "":
+		var a := Achievements.get_def(id)
+		if a.is_empty():
+			return
+		var done := Achievements.is_unlocked(id)
+		_text.append_text("[color=#ffd95a][b][font_size=22]%s[/font_size][/b][/color]\n" % DialogueUI._esc(String(a[2])))
+		_text.append_text("[color=#b8a47a]Chapter %d: %s  ·  %s[/color]\n\n" % [int(a[1]) + 1, Achievements.CHAPTERS[a[1]],
+			("Done on " + WorldClock.short_date_of(int(WorldState.get_record("ach/" + id).get("day", 1)))) if done else "Not done yet"])
+		_text.append_text("%s\n" % DialogueUI._esc(String(a[3])))
+		var prog := Achievements.progress_text(a, get_tree())
+		if prog != "":
+			_text.append_text("\n[b]Progress:[/b] %s\n" % prog)
+		var p := GuideBook.page(String(a[4]))
+		if not p.is_empty():
+			_text.append_text("\n[url=guide:%s][color=#7f9fbf]Guide: %s[/color][/url]\n" % [p[0], p[2]])
+		return
+	_text.append_text("[color=#ffd95a][b][font_size=22]Achievements[/font_size][/b][/color]\n")
+	_text.append_text("Five chapters, from your first steps to the far islands. Do them all and you have seen almost all of the game.\n\n")
+	var next := Achievements.next_up(5)
+	if not next.is_empty():
+		_text.append_text("[b]Try next[/b]\n")
+		for a in next:
+			_text.append_text(_ach_line(a))
+		_text.append_text("\n")
+	for c in Achievements.CHAPTERS.size():
+		var these := Achievements.LIST.filter(func(x: Array) -> bool: return x[1] == c)
+		var done := these.filter(func(x: Array) -> bool: return Achievements.is_unlocked(x[0])).size()
+		_text.append_text("[b]%d. %s[/b]  [color=#b8a47a]%d of %d[/color]\n" % [c + 1, Achievements.CHAPTERS[c], done, these.size()])
 
 
 func _quest_page(world: WorldManager, id: String) -> void:

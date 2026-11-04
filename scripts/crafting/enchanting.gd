@@ -82,6 +82,7 @@ static func enchant(player: Node, item: ItemData, effect: StringName, gem: ItemD
 	var skills := player.get_node_or_null("Skills") as Skills
 	if skills != null:
 		skills.add_xp(&"enchanting", XP_PER_ENCHANT * (1.0 + size * 0.5))
+	Achievements.note("enchant")  # 1.27
 	return made
 
 

@@ -191,6 +191,7 @@ static func buy(s: Shop, player_inv: Inventory, item: ItemData, count: int, d: D
 	player_inv.add_item(item, count)
 	s.gold += total
 	Economy.record(d.town_id, item, -count, d.today)  # buys it up a little
+	Achievements.note("trade")  # 1.27
 	save_shop(s)
 	return {"error": "", "count": count, "gold": total}
 
@@ -222,5 +223,6 @@ static func sell(s: Shop, player_inv: Inventory, equipment: Equipment, item: Ite
 	Currency.add_gold(player_inv, total)
 	s.gold -= total
 	Economy.record(d.town_id, item, count, d.today)  # floods the town's market a little
+	Achievements.note("trade")  # 1.27
 	save_shop(s)
 	return {"error": "", "count": count, "gold": total}

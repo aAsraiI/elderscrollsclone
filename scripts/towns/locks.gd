@@ -61,6 +61,7 @@ static func try_pick(inventory: Inventory, lock_level: int, rng: RandomNumberGen
 	if roll < pick_chance(level, bonus, lock_level):
 		if skills != null:
 			skills.add_xp(&"security", 4.0 + float(lock_level) * 0.1)
+		Achievements.note("lockpick")  # 1.27
 		return PickResult.OPENED
 	inventory.remove_item(pick, 1)
 	if skills != null:

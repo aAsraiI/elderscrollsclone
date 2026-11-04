@@ -17,6 +17,7 @@ static var _log_events := false
 static func emit(tree: SceneTree, kind: String, data: Dictionary) -> void:
 	if tree == null:
 		return
+	Achievements.on_event(kind, data)  # 1.27
 	if _log_events:
 		print("[QuestEvent] %s %s" % [kind, data])
 	var runner := tree.get_first_node_in_group("quest_runner") as QuestRunner

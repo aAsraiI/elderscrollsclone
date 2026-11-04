@@ -208,6 +208,8 @@ func save_game(slot: String) -> bool:
 		return _save_fail(slot, problem)
 	if not _valid_slot(slot):
 		return _save_fail(slot, "Bad slot name.")
+	if not slot.begins_with("auto"):
+		Achievements.note("save")  # 1.27 (before the data is built, so this save has it)
 	var data := build_save_data()
 	var dir := _slot_dir(slot)
 	var err := DirAccess.make_dir_recursive_absolute(dir)

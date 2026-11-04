@@ -10,6 +10,7 @@ static func open(tree: SceneTree, title: String, text: String) -> BookUI:
 	var old := tree.get_first_node_in_group("book_ui")
 	if old != null:
 		old.queue_free()
+	Achievements.note("read")  # 1.27
 	var ui := BookUI.new()
 	ui._build(title, text)
 	tree.root.add_child(ui)

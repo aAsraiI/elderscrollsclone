@@ -175,6 +175,7 @@ func _wait() -> void:
 		stats.modify_vital("stamina", stats.get_stat("max_stamina"))
 	if _bed != null and is_instance_valid(_bed):
 		_bed.on_slept()
+		Achievements.note("sleep")  # 1.27
 		var surv := get_parent().get_node_or_null("Survival") as Survival
 		if surv != null:
 			surv.on_sleep(hours)

@@ -69,6 +69,7 @@ func _make_follower(e: Enemy) -> void:
 	cmd.name = "FollowerCommand"
 	e.add_child(cmd)
 	followers.append(e)
+	Achievements.note("hire")  # 1.27
 
 
 func dismiss(e: Enemy) -> void:

@@ -136,6 +136,7 @@ static func train(skill: String, s: DialogueEngine.Speaker, world: WorldManager,
 	if not Currency.spend_gold(inv, cost):
 		return "That's %d gold. Come back when you have it." % cost
 	sk.debug_level_up(StringName(skill))
+	Achievements.note("train")  # 1.27
 	var rec := WorldState.get_record("training")
 	var n := int(rec.get("n", 0)) if int(rec.get("level", -1)) == sk.get_player_level() else 0
 	WorldState.set_record("training", {"level": sk.get_player_level(), "n": n + 1})

@@ -355,6 +355,7 @@ func interact(actor: Inventory) -> void:
 		if st != null:
 			count = BuildHooks.bonus_count(count, st.get_stat("harvest_bonus"))
 	actor.add_item(item, count)
+	Achievements.note("harvest")  # 1.27
 	WorldState.set_record(key, {"day": _today()})
 	Locks.toast(get_tree(), "%s x%d" % [item.display_name, count])
 	_refresh()
@@ -402,6 +403,7 @@ func _gather(actor: Inventory) -> void:
 		return
 	var count := 1 + (1 if randf() < 0.4 else 0)
 	actor.add_item(item, count)
+	Achievements.note("harvest")  # 1.27
 	var got := "%s x%d" % [item.display_name, count]
 	if String(g[2]) != "" and randf() < float(g[3]):
 		var extra := load(MAT + String(g[2]) + ".tres") as ItemData

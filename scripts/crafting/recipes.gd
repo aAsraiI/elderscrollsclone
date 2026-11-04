@@ -206,6 +206,8 @@ static func make(r: Dictionary, player: Node) -> ItemData:
 	inv.add_item(result, count)
 	if skills != null:
 		skills.add_xp(StringName(r["skill"]), float(r["xp"]))
+	Achievements.note("craft")  # 1.27
+	Achievements.note("craft_" + String(r["skill"]))
 	return result
 
 

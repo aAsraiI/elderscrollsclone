@@ -77,7 +77,7 @@ const OPTIONS := [
 	{"tab": "Interface", "key": "hud_always", "label": "Always show the bars (no fading)", "kind": "check"},
 	{"tab": "Interface", "key": "show_compass", "label": "Compass", "kind": "check"},
 	{"tab": "Interface", "key": "show_date", "label": "Date and weather in the corner", "kind": "check"},
-	{"tab": "Interface", "key": "tutorial", "label": "Tutorial hints", "kind": "check"},
+	{"tab": "Interface", "key": "tutorial", "label": "Tutorial notices (the Guide is in the journal)", "kind": "check"},
 	{"tab": "Gameplay", "key": "controller_look", "label": "Controller look speed", "kind": "slider", "min": 1.0, "max": 6.0, "step": 0.25, "fmt": "%.2f"},
 	{"tab": "Interface", "key": "show_fps", "label": "FPS counter", "kind": "check"},
 	{"tab": "Interface", "key": "quest_popups", "label": "Quest notices", "kind": "check"},

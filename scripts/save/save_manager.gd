@@ -200,6 +200,7 @@ func get_last_error() -> String:
 
 
 func save_game(slot: String) -> bool:
+	SpawnQueue.flush()  # 1.23: anyone still on their way into the world is in it before saving
 	if GameRules.ironman() and SaveSession.current_slot.begins_with("ironman_"):
 		slot = SaveSession.current_slot  # ironman: always the one save of this character
 	var problem := can_save()

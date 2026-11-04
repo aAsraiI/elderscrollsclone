@@ -73,7 +73,7 @@ func _run() -> void:
 	await t_character_creation()
 	t_world()
 	t_gear()
-	print("\n%d passed, %d failed" % [passes, fails])
+	print("\nRESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
 
 

@@ -39,6 +39,12 @@ static func animal(parent: Node3D, kind: String, at: Vector3, key: String) -> En
 
 func _ready() -> void:
 	_settle.call_deferred()  # the people's bodies are made after this
+	# 1.23: people streaming in later (SpawnQueue) settle as they arrive
+	var site := get_parent()
+	if site != null:
+		site.child_entered_tree.connect(func(n: Node) -> void:
+			if n is Enemy:
+				_settle_one.call_deferred(n))
 
 
 func _settle() -> void:
@@ -50,23 +56,38 @@ func _settle() -> void:
 		if (p as InteriorProp).tags.has("campfire"):
 			fires.append((p as Node3D).position)
 	for n in site.find_children("*", "Enemy", true, false):
-		var e := n as Enemy
-		if e.has_meta("animal") or e.disposition != Enemy.Disposition.HOSTILE:
-			continue
-		var tags := _tags(site, e)
-		var near_fire := fires.any(func(f: Vector3) -> bool: return f.distance_to(e.position) < 4.5)
-		if tags.has("sleeper") and e.body_kind == CreatureBody.Kind.HUMANOID:
-			e.sleep()
-		elif near_fire and e.body != null:
-			e.body.pose = &"sit"  # cooking, eating, warming their hands
-			e.wander_radius = 0.0
-		elif tags.has("guard") or tags.has("archer"):
-			e.wander_radius = 0.0
-			var out := Vector3(e.position.x, 0, e.position.z)
-			if out.length() > 0.5:
-				e.rotation.y = atan2(-out.x, -out.z) + PI  # looking out from the middle
-		else:
-			e.wander_radius = 4.0
+		_settle_with(site, n as Enemy, fires)
+
+
+func _settle_one(e: Enemy) -> void:
+	var site := get_parent() as ExteriorSite
+	if site == null or not is_instance_valid(e):
+		return
+	var fires: Array[Vector3] = []
+	for p in site.find_children("*", "InteriorProp", true, false):
+		if (p as InteriorProp).tags.has("campfire"):
+			fires.append((p as Node3D).position)
+	_settle_with(site, e, fires)
+
+
+func _settle_with(site: ExteriorSite, e: Enemy, fires: Array[Vector3]) -> void:
+	if e.has_meta("animal") or e.disposition != Enemy.Disposition.HOSTILE or e.has_meta("settled"):
+		return
+	e.set_meta("settled", true)
+	var tags := _tags(site, e)
+	var near_fire := fires.any(func(f: Vector3) -> bool: return f.distance_to(e.position) < 4.5)
+	if tags.has("sleeper") and e.body_kind == CreatureBody.Kind.HUMANOID:
+		e.sleep()
+	elif near_fire and e.body != null:
+		e.body.pose = &"sit"  # cooking, eating, warming their hands
+		e.wander_radius = 0.0
+	elif tags.has("guard") or tags.has("archer"):
+		e.wander_radius = 0.0
+		var out := Vector3(e.position.x, 0, e.position.z)
+		if out.length() > 0.5:
+			e.rotation.y = atan2(-out.x, -out.z) + PI  # looking out from the middle
+	else:
+		e.wander_radius = 4.0
 
 
 # The tags of the spawn point a person came from ("<place>/<socket>/<n>")

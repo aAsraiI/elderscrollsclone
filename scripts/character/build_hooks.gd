@@ -180,6 +180,7 @@ static func buff_ally(e: Enemy, leader: Node) -> void:
 	e.max_health *= 1.0 + bonus
 	if e.stats != null:
 		e.stats.base_stats["max_health"] = float(e.stats.base_stats.get("max_health", e.max_health)) * (1.0 + bonus)
+		e.stats.invalidate()
 		e.stats.health = e.stats.get_stat("max_health")
 
 

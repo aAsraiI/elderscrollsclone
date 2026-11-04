@@ -218,6 +218,9 @@ static func _instantiate(path: String) -> Node3D:
 ##   "height"   as tall as the box, centred on its floor
 ##   "long"     its longest side as long as the box's longest side
 ## The model's bottom sits on the box's bottom, centred across.
+static var _fit_bounds := {}  # "key|turn" -> AABB of a fresh instance
+
+
 static func fitted(key: String, target: AABB, mode: String = "", turn: float = 0.0) -> Node3D:
 	var holder := instance(key)
 	if holder == null:
@@ -227,7 +230,10 @@ static func fitted(key: String, target: AABB, mode: String = "", turn: float = 0
 	var e := entry(key)
 	if mode == "":
 		mode = String(e.get("fit", "fill"))
-	var box := bounds(holder)
+	# 1.23 performance: a fresh copy of a model always measures the same, so it is measured once
+	var bk := "%s|%.3f" % [key, turn]
+	var box: AABB = _fit_bounds[bk] if _fit_bounds.has(bk) else bounds(holder)
+	_fit_bounds[bk] = box
 	if box.size.length() < 0.0001:
 		return holder
 	# Lying the other way round from the space it fills: turn it a quarter (props, not held items)
@@ -236,7 +242,9 @@ static func fitted(key: String, target: AABB, mode: String = "", turn: float = 0
 		var m_ratio := box.size.x / maxf(box.size.z, 0.0001)
 		if (t_ratio > 1.3 and m_ratio < 0.77) or (t_ratio < 0.77 and m_ratio > 1.3):
 			(holder.get_child(0) as Node3D).rotate_y(PI * 0.5)
-			box = bounds(holder)
+			var cp := (holder.get_child(0) as Node3D).position
+			var q := Basis(Vector3.UP, PI * 0.5)
+			box = Transform3D(q, cp - q * cp) * box  # a quarter turn about the model's own origin: exact
 	var s := 1.0
 	match mode:
 		"height":
@@ -258,7 +266,7 @@ static func fitted(key: String, target: AABB, mode: String = "", turn: float = 0
 	var child := holder.get_child(0) as Node3D
 	child.scale *= s
 	child.position *= s
-	box = bounds(holder)
+	box = AABB(box.position * s, box.size * s)  # scaled about the holder's origin: exact
 	var want_bottom := Vector3(target.get_center().x, target.position.y, target.get_center().z)
 	var have_bottom := Vector3(box.get_center().x, box.position.y, box.get_center().z)
 	if String(e.get("anchor", "")) == "center":

@@ -43,3 +43,26 @@ Run every gameplay suite, 4 at a time (about 20 minutes), or only some of them:
 Check that every script compiles:
 
     godot --headless --path . -s res://tools/check_scripts.gd
+
+## Performance (Alpha 1.23)
+
+`tools/perf_probe.gd` runs the real game with a window (vsync off) and prints frame times, draw calls,
+what is drawn, and which scripts cost the most, at the start, in a city and in a dungeon:
+
+    godot --path . -s res://tools/perf_probe.gd                     (about 2 minutes)
+    godot --path . -s res://tools/perf_probe.gd -- quick            (no per-script costs)
+    godot --path . -s res://tools/perf_probe.gd -- ride             (rides 450 m at horse speed: hitches)
+    godot --path . -s res://tools/perf_probe.gd -- quick set:view_distance=6   (a setting for this run only)
+
+What keeps the game fast, and what new code should follow:
+- **ActorLOD** (`scripts/core/actor_lod.gd`): people and creatures past 150 m (55 m inside), or on the
+  other side of a dungeon door, are hidden and stop processing; past 35 m they cast no shadow.
+- **SpawnQueue** (`scripts/core/spawn_queue.gd`): the people of a place streaming in join a few per frame
+  (3 ms), never all in one frame. Wrap streaming code in `SpawnQueue.defer = true / false`.
+- **Far trees** (`Flora._build_far`): past 230 m a tree is one cheap shape, all of a chunk's in one draw.
+- **Inside**, the outside world is not drawn (`WorldManager.set_outdoors_shown`).
+- **Stats** caches worked-out stats (call `stats.invalidate()` after editing `base_stats` by hand);
+  enemies only look for you a few times a second.
+- Merging boxes (`StaticBatch`) and fitting models (`ModelLibrary.fitted`) reuse their measurements.
+- New per-frame code: throttle it (a timer), look things up once, and never build meshes or spawn
+  several creatures in one frame while the world streams.

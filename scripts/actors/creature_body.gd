@@ -338,6 +338,8 @@ func dress(equipment: Equipment) -> void:
 	if kind != Kind.HUMANOID or equipment == null:
 		return
 	_try_model()
+	if model_body != null:
+		return  # 1.23: a real model wears its own look; the box armour would hang on hidden bones
 	for b in bones.values():
 		for c in (b as Node3D).get_children():
 			if c.has_meta("armor_piece"):

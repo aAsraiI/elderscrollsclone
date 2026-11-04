@@ -56,6 +56,7 @@ var _run_speed := 4.0
 
 ## Puts the model `key` on `body`, fitted to the space its boxes take up. null if it can't load.
 static func attach(p_body: CreatureBody, key: String) -> ModelBody:
+	var t0 := Time.get_ticks_usec()
 	var e := ModelLibrary.entry(key)
 	if e.is_empty():
 		return null
@@ -63,9 +64,11 @@ static func attach(p_body: CreatureBody, key: String) -> ModelBody:
 	var old := ModelLibrary.bounds(p_body)
 	if old.size.y < 0.05:
 		old = AABB(Vector3(-0.3, 0, -0.3), Vector3(0.6, 1.8, 0.6))
+	var ta := Time.get_ticks_usec()
 	var holder := ModelLibrary.instance(key)
 	if holder == null:
 		return null
+	var tb := Time.get_ticks_usec()
 	var mb := ModelBody.new()
 	mb.name = "ModelBody"
 	mb.body = p_body
@@ -83,7 +86,9 @@ static func attach(p_body: CreatureBody, key: String) -> ModelBody:
 		(gi as GeometryInstance3D).visibility_range_end = CreatureBody.DRAW_DISTANCE
 	mb.add_child(holder)
 	p_body.add_child(mb)
+	var tc := Time.get_ticks_usec()
 	mb._fit(old)
+	var td := Time.get_ticks_usec()
 	var players := holder.find_children("*", "AnimationPlayer", true, false)
 	if not players.is_empty():
 		mb.player = players[0]
@@ -93,6 +98,10 @@ static func attach(p_body: CreatureBody, key: String) -> ModelBody:
 	mb._hang_hands()
 	mb._play("idle")
 	mb._fit_hitbox()
+	if Enemy.profile_spawns:
+		Enemy._cost("model instance", tb - ta)
+		Enemy._cost("model fit", td - tc)
+		Enemy._cost("model total", Time.get_ticks_usec() - t0)
 	return mb
 
 
@@ -102,7 +111,7 @@ func _fit_hitbox() -> void:
 	var owner_body := body.enemy as Enemy
 	if owner_body == null:
 		return
-	var box := ModelLibrary.relative_transform(owner_body, self) * ModelLibrary.bounds(self)
+	var box := ModelLibrary.relative_transform(owner_body, self) * (model.transform * _raw_box())
 	if box.size.y < 0.05:
 		return
 	for c in owner_body.get_children():
@@ -126,8 +135,23 @@ func _fit_hitbox() -> void:
 		owner_body.head.position.y = box.position.y + box.size.y * 0.85
 
 
+## 1.23 performance: a model's own size at rest, per key. Measuring a skinned model means skinning
+## up to 2000 of its points on the CPU, and every spawn used to do it three times.
+static var _raw_bounds := {}
+
+
+func _raw_box() -> AABB:
+	var key := String(get_meta("model_key", ""))
+	if key != "" and _raw_bounds.has(key):
+		return _raw_bounds[key]
+	var b := ModelLibrary.bounds(model)
+	if key != "":
+		_raw_bounds[key] = b
+	return b
+
+
 func _fit(old: AABB) -> void:
-	var box := ModelLibrary.bounds(model)
+	var box := _raw_box()
 	if box.size.y < 0.0001:
 		return
 	var mode := String(entry.get("fit", "height"))
@@ -141,7 +165,7 @@ func _fit(old: AABB) -> void:
 			s = old.size.y / box.size.y
 	s *= float(entry.get("scale", 1.0))
 	model.scale = Vector3.ONE * s
-	box = ModelLibrary.bounds(self)
+	box = model.transform * _raw_box()  # = ModelLibrary.bounds(self), without measuring again
 	model.position += Vector3(old.get_center().x - box.get_center().x, old.position.y - box.position.y, old.get_center().z - box.get_center().z)
 	if entry.has("lift"):
 		model.position.y += float(entry["lift"]) * s

@@ -147,6 +147,9 @@ var _alerted := false
 var _state_time := 0.0
 var _clock := 0.0
 var _next_attack_at := 0.0
+var _sight_until := 0.0  # 1.23: _can_see_target() is remembered until then
+var _sight_seen := false
+var _sight_target: Node3D = null
 var _circle_dir := 1.0
 var _circle_timer := 0.0
 var _was_busy := false
@@ -265,6 +268,18 @@ func _exit_tree() -> void:
 	ActorRegistry.remove(self)
 
 
+## 1.23: tools that measure spawning set this; each spawn prints what it cost
+static var profile_spawns := false
+static var spawn_costs := {}  # part -> [total usec, count]
+
+
+static func _cost(part: String, usec: int) -> void:
+	var c: Array = spawn_costs.get(part, [0, 0])
+	c[0] += usec
+	c[1] += 1
+	spawn_costs[part] = c
+
+
 func _ready() -> void:
 	add_to_group("enemies")
 	ActorRegistry.add(self)
@@ -272,9 +287,18 @@ func _ready() -> void:
 		add_to_group("persistent")  # SaveManager saves everything in this group (corpses included)
 	collision_layer = ENEMY_LAYER
 	collision_mask = WORLD_LAYER | ENEMY_LAYER  # enemies also bump into each other instead of stacking
+	var t0 := Time.get_ticks_usec()
 	_build_body()
+	var t1 := Time.get_ticks_usec()
 	_build_systems()
+	var t2 := Time.get_ticks_usec()
 	_equip_starting_gear()
+	var t3 := Time.get_ticks_usec()
+	var t4 := Time.get_ticks_usec()
+	if profile_spawns:
+		_cost("body", t1 - t0)
+		_cost("systems", t2 - t1)
+		_cost("gear", t3 - t2)
 	stats.died.connect(_on_died)
 	combat.damaged.connect(_on_damaged)
 	combat.stunned.connect(_on_stunned)
@@ -282,6 +306,8 @@ func _ready() -> void:
 	equipment.equipped.connect(func(_slot, _item): _refresh_weapon_visual())
 	equipment.unequipped.connect(func(_slot, _item): _refresh_weapon_visual())
 	_refresh_weapon_visual()
+	if profile_spawns:
+		_cost("connect+visual", Time.get_ticks_usec() - t3)
 	_flank_angle = randf_range(-1.0, 1.0)
 	magic.notice.connect(func(text: String, color: Color) -> void: _popup(text, global_position + Vector3.UP * 2.2, color, 36))
 	_next_wander_at = randf_range(0.5, 4.0)
@@ -462,8 +488,13 @@ func _refresh_weapon_visual() -> void:
 	if body != null and equipment != null:
 		var main := equipment.get_main_hand()
 		var off: ItemData = equipment.get_equipped(ItemData.EquipSlot.OFF_HAND)
+		var tw := Time.get_ticks_usec()
 		body.set_weapons(main, off)
+		var tx := Time.get_ticks_usec()
 		body.dress(equipment)
+		if profile_spawns:
+			_cost("set_weapons", tx - tw)
+			_cost("dress", Time.get_ticks_usec() - tx)
 	if _weapon_pivot == null:
 		return
 	for c in _weapon_pivot.get_children():
@@ -558,6 +589,8 @@ func _physics_process(delta: float) -> void:
 		State.PATROL:
 			_tick_patrol(delta)
 	_aim_head()
+	if state == State.IDLE and is_on_floor() and velocity.length_squared() < 0.0004:
+		return  # 1.23: standing still on the ground: nothing to move (saves a physics query per idle actor per frame)
 	move_and_slide()
 
 
@@ -1370,6 +1403,16 @@ func _target_usable() -> bool:
 
 
 func _can_see_target() -> bool:
+	# 1.23 performance: looked for a few times a second, not every physics frame
+	if _clock < _sight_until and _sight_target == _target:
+		return _sight_seen
+	_sight_seen = _can_see_target_now()
+	_sight_target = _target
+	_sight_until = _clock + (0.1 if _alerted else 0.2) + randf() * 0.05
+	return _sight_seen
+
+
+func _can_see_target_now() -> bool:
 	if not _target_usable():
 		return false
 	if _calm_until > _clock:

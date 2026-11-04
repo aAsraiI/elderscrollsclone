@@ -177,6 +177,8 @@ func exit() -> void:
 	if world != null:
 		world.rescue_fallen_player = _saved_rescue
 		world.ensure_area_loaded(_return_position, 1)
+		if world.has_method("set_outdoors_shown"):
+			world.set_outdoors_shown(true)
 	if player != null:
 		player.global_position = _return_position
 		player.rotation.y = _return_yaw
@@ -271,6 +273,8 @@ func _open(entrance_id: String, return_position: Vector3, return_yaw: float, mov
 	_saved_rescue = world.rescue_fallen_player
 	world.rescue_fallen_player = false
 	_set_dark(true, ambient)
+	if world.has_method("set_outdoors_shown"):
+		world.set_outdoors_shown(false)  # 1.23: the outside is not drawn while you are in here
 	if atmosphere != null and building == null and float(atmosphere.preset["density"]) > 0.0:
 		_set_fog(atmosphere.preset["fog"], float(atmosphere.preset["density"]))
 	if result.has("sky"):

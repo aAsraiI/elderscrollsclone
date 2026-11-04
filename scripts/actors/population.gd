@@ -13,8 +13,10 @@ extends RefCounted
 ## (a dungeon being built), then it is a position inside that parent.
 ## opts: "key" (String, makes the kill be remembered), "persist_mode" (Enemy.PersistMode)
 static func spawn_enemy(data: EnemyData, level: int, parent: Node, pos: Vector3, rng: RandomNumberGenerator, opts: Dictionary = {}) -> Enemy:
+	var t0 := Time.get_ticks_usec()
 	var e := Enemy.create()
 	data.apply(e, level, rng)
+	var t1 := Time.get_ticks_usec()
 	e.persist_mode = int(opts.get("persist_mode", Enemy.PersistMode.CORPSE_ONLY)) as Enemy.PersistMode
 	e.spawn_key = String(opts.get("key", ""))
 	e.rotation.y = rng.randf() * TAU
@@ -23,7 +25,13 @@ static func spawn_enemy(data: EnemyData, level: int, parent: Node, pos: Vector3,
 		e.position = host.to_local(pos)  # set before entering the tree, see Enemy.spawn()
 	else:
 		e.position = pos
+	var t2 := Time.get_ticks_usec()
+	if SpawnQueue.defer:
+		SpawnQueue.hold(parent, e)  # 1.23: joins a few frames later, so a place streaming in never stalls the game
+		return e
 	parent.add_child(e)
+	if Enemy.profile_spawns:
+		Enemy._cost("create+apply", t1 - t0)
 	return e
 
 

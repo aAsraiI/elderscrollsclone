@@ -229,6 +229,7 @@ func t_poise_chain() -> void:
 	print("-- poise, stagger and punish")
 	await reset_world()
 	var p := make_player()
+	(p.get_node("Stats") as Stats).add_modifiers("test_no_crit", {"crit_chance": -1.0})  # exact numbers: no lucky crits
 	give(p, sword)
 	var pc := p.get_node("MeleeCombat") as MeleeCombat
 	var e := make_enemy(Vector3(0, 0.05, -1.8), false)
@@ -242,7 +243,7 @@ func t_poise_chain() -> void:
 		await secs(0.72)
 	check("three hits landed", hits.size() == 3, str(hits.size()))
 	check("third hit was the combo finisher", hits.size() == 3 and hits[2][0].combo_step == 2)
-	check("finisher damage = 15 x 1.25", hits.size() == 3 and absf(float(hits[2][1]) - 18.75) < 0.01, str(hits.size()))
+	check("finisher damage = 15 x 1.25", hits.size() == 3 and absf(float(hits[2][1]) - 18.75) < 0.01, str(hits.map(func(h): return h[1])))
 	check("third hit broke poise", hits.size() == 3 and hits[2][0].staggered)
 	check("enemy staggered once", staggers[0] == 1, str(staggers[0]))
 	check("enemy is stunned", e.combat.is_stunned())

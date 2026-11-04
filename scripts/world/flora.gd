@@ -10,6 +10,8 @@ extends RefCounted
 ## (with a random dither), so forests thin out into meadow instead of stopping at a line.
 
 const STRIDE := 12  # floats per transform
+## 1.23: real tree models are drawn this far; past it, one-surface stand-ins (_build_far)
+const NEAR_TREES := 230.0
 
 static var _defaults := {}  # biome -> Array[FloraLayer] made from Tree Style / Tree Density
 static var _defaults_mutex := Mutex.new()
@@ -190,6 +192,12 @@ static func _build(chunk: TerrainChunk, layer: FloraLayer, gr: Dictionary, cover
 			var m := planted_mesh(key, 0.0 if layer.real_size else layer.height)
 			meshes.append(m if m != null else shape_mesh(layer))
 	var count := meshes.size()
+	# 1.23 performance: far trees are one cheap shape each, all in ONE multimesh per chunk and layer
+	# (a real tree model is several surfaces, drawn once per surface; forests far off were most of
+	# the frame's draw calls)
+	var far_lod := layer.size == FloraLayer.Size.TREE and not cover and not models.is_empty() and layer.get_draw_distance() > NEAR_TREES
+	if far_lod:
+		_build_far(chunk, layer, meshes, xf, picks, n)
 	for mi in count:
 		var buf := PackedFloat32Array()
 		var c := 0
@@ -211,6 +219,8 @@ static func _build(chunk: TerrainChunk, layer: FloraLayer, gr: Dictionary, cover
 		mmi.name = "Flora_%s_%d" % [layer.name if layer.name != "" else "layer", mi]
 		mmi.multimesh = mm
 		var reach := layer.get_draw_distance()
+		if far_lod:
+			reach = NEAR_TREES  # past this the one-surface stand-ins below take over
 		mmi.visibility_range_end = reach
 		mmi.visibility_range_end_margin = reach * 0.12
 		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
@@ -459,3 +469,124 @@ static func _write(buf: PackedFloat32Array, n: int, b: Basis, o: Vector3) -> voi
 	buf[at + 9] = b.y.z
 	buf[at + 10] = b.z.z
 	buf[at + 11] = o.z
+
+
+# ---------------------------------------------------------------- far trees (1.23)
+
+static var _far_meshes := {}  # "layer key|model mesh id" -> ArrayMesh (one surface, vertex colours)
+static var _far_material: StandardMaterial3D
+
+
+## The chunk's trees of this layer, seen from far: the layer's plain shape fitted to each model's
+## size, every variant in one multimesh (variants scaled to their own model's box)
+static func _build_far(chunk: Node3D, layer: FloraLayer, meshes: Array[Mesh], xf: PackedFloat32Array, picks: PackedInt32Array, n: int) -> void:
+	var count := meshes.size()
+	var base := far_mesh(layer, meshes[0])
+	var box0 := meshes[0].get_aabb().size.max(Vector3(0.01, 0.01, 0.01))
+	var ratios: Array[Vector3] = []
+	for mi in count:
+		ratios.append(meshes[mi].get_aabb().size.max(Vector3(0.01, 0.01, 0.01)) / box0)
+	var buf := PackedFloat32Array()
+	buf.resize(n * STRIDE)
+	for k in n:
+		var at := k * STRIDE
+		var basis := Basis(Vector3(xf[at], xf[at + 4], xf[at + 8]), Vector3(xf[at + 1], xf[at + 5], xf[at + 9]), Vector3(xf[at + 2], xf[at + 6], xf[at + 10]))
+		basis = basis * Basis.from_scale(ratios[picks[k] % count])
+		_write(buf, k, basis, Vector3(xf[at + 3], xf[at + 7], xf[at + 11]))
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = base
+	mm.instance_count = n
+	mm.buffer = buf
+	var mmi := MultiMeshInstance3D.new()
+	mmi.name = "FarFlora_%s" % (layer.name if layer.name != "" else "layer")
+	mmi.multimesh = mm
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF  # past the sun's shadow distance anyway
+	mmi.visibility_range_begin = NEAR_TREES - 25.0
+	mmi.visibility_range_begin_margin = 25.0
+	mmi.visibility_range_end = layer.get_draw_distance()
+	mmi.visibility_range_end_margin = layer.get_draw_distance() * 0.12
+	mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	chunk.add_child(mmi)
+
+
+## The layer's plain shape as ONE surface (colours in the vertices), stretched to a model's box
+static func far_mesh(layer: FloraLayer, model: Mesh) -> ArrayMesh:
+	var key := "%d|%s|%.2f|%d" % [layer.shape, layer.color.to_html(), layer.height, model.get_instance_id()]
+	if _far_meshes.has(key):
+		return _far_meshes[key]
+	var shape := shape_mesh(layer)
+	var sb := shape.get_aabb()
+	var mb := model.get_aabb()
+	var s := mb.size / sb.size.max(Vector3(0.01, 0.01, 0.01))
+	s = Vector3(s.x if s.x > 0.05 else 1.0, s.y if s.y > 0.05 else 1.0, s.z if s.z > 0.05 else 1.0)
+	var fit := Transform3D(Basis.from_scale(s), Vector3(mb.get_center().x - sb.get_center().x * s.x, mb.position.y - sb.position.y * s.y, mb.get_center().z - sb.get_center().z * s.z))
+	var leaf := _leaf_color(model, layer.color)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for si in shape.get_surface_count():
+		var mat := shape.surface_get_material(si) as StandardMaterial3D
+		var col := mat.albedo_color if mat != null else layer.color
+		if col.is_equal_approx(layer.color) or col.g > col.r * 1.15:
+			col = leaf  # the canopy takes the model's own leaf colour, so near and far trees match
+		var arrays := shape.surface_get_arrays(si)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var norms: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		var order: PackedInt32Array = idx if not idx.is_empty() else PackedInt32Array(range(verts.size()))
+		for i in order:
+			st.set_color(col)
+			if i < norms.size():
+				st.set_normal((fit.basis.inverse().transposed() * norms[i]).normalized())
+			st.add_vertex(fit * verts[i])
+	var out := st.commit()
+	if _far_material == null:
+		_far_material = StandardMaterial3D.new()
+		_far_material.vertex_color_use_as_albedo = true
+		_far_material.roughness = 1.0
+		_far_material.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	out.surface_set_material(0, _far_material)
+	_far_meshes[key] = out
+	return out
+
+
+static var _leaf_colors := {}
+
+
+## The average colour of a tree model's leaves (its see-through surfaces, else its greenest one),
+## from the texture itself: what the canopy looks like from far
+static func _leaf_color(model: Mesh, fallback: Color) -> Color:
+	var id := model.get_instance_id()
+	if _leaf_colors.has(id):
+		return _leaf_colors[id]
+	var best := fallback
+	var best_score := -INF
+	for si in model.get_surface_count():
+		var mat := model.surface_get_material(si) as StandardMaterial3D
+		if mat == null:
+			continue
+		var col := mat.albedo_color
+		if mat.albedo_texture != null:
+			var img := mat.albedo_texture.get_image()
+			if img != null:
+				if img.is_compressed():
+					img.decompress()
+				img.resize(8, 8, Image.INTERPOLATE_BILINEAR)
+				var sum := Color(0, 0, 0, 0)
+				var k := 0
+				for y in 8:
+					for x in 8:
+						var px := img.get_pixel(x, y)
+						if px.a > 0.5:
+							sum += px
+							k += 1
+				if k > 0:
+					col = Color(sum.r / k, sum.g / k, sum.b / k) * mat.albedo_color
+		var leafy := mat.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED or mat.alpha_scissor_threshold > 0.0
+		var score := (10.0 if leafy else 0.0) + col.g - maxf(col.r, col.b)
+		if score > best_score:
+			best_score = score
+			best = col
+	best = best.darkened(0.12)  # a far canopy is all shade and no shine
+	_leaf_colors[id] = best
+	return best

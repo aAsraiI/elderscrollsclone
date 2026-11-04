@@ -121,6 +121,13 @@ var invulnerable := false
 var _modifiers: Dictionary = {}
 var _stamina_idle := 0.0
 var _magicka_idle := 0.0
+# 1.23 performance: worked-out stats, cleared whenever a modifier or base stat changes (and every
+# half second as a safety net for code that edits a modifier dictionary in place)
+var _cache := {}
+var _cache_frame := 0
+## Seconds between regeneration ticks (the player: every frame; everyone else a few times a second)
+var tick_interval := -1.0
+var _tick_accum := 0.0
 
 
 func _ready() -> void:
@@ -136,6 +143,14 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if is_dead:
 		return
+	if tick_interval < 0.0:
+		tick_interval = 0.0 if get_parent() != null and get_parent().is_in_group("player") else 0.25
+	if tick_interval > 0.0:
+		_tick_accum += delta
+		if _tick_accum < tick_interval:
+			return
+		delta = _tick_accum
+		_tick_accum = 0.0
 	var heal := get_stat("health_regen")
 	if heal > 0.0 and health < get_stat("max_health"):
 		modify_vital("health", heal * delta)
@@ -150,7 +165,21 @@ func _process(delta: float) -> void:
 
 
 func get_stat(stat: String) -> float:
-	return get_stat_plus(stat, 0.0)
+	var frame := Engine.get_process_frames()
+	if frame - _cache_frame > 30:
+		_cache.clear()
+		_cache_frame = frame
+	var got = _cache.get(stat)
+	if got != null:
+		return got
+	var v := get_stat_plus(stat, 0.0)
+	_cache[stat] = v
+	return v
+
+
+## Forget worked-out stats (call after editing base_stats directly)
+func invalidate() -> void:
+	_cache.clear()
 
 
 ## Same as get_stat, but with extra flat points added before the percentage bonuses.
@@ -181,6 +210,7 @@ func get_flat_from(prefix: String, stat: String) -> float:
 
 func add_modifiers(source: String, mods: Dictionary) -> void:
 	_modifiers[source] = mods
+	_cache.clear()
 	_emit_changed(mods)
 	_clamp_vitals()
 
@@ -190,6 +220,7 @@ func remove_modifiers(source: String) -> void:
 		return
 	var mods: Dictionary = _modifiers[source]
 	_modifiers.erase(source)
+	_cache.clear()
 	_emit_changed(mods)
 	_clamp_vitals()
 

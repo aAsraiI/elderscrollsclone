@@ -93,6 +93,7 @@ var _poi_root: Node3D
 var _garrisons := {}      # String -> Array[Enemy] (only while the POI's chunk is loaded)
 var _garrison_root: Node3D
 var _water: MeshInstance3D
+var _outdoors_shown := true
 
 
 func _ready() -> void:
@@ -126,6 +127,12 @@ func _ready() -> void:
 	dungeons = DungeonManager.new()
 	dungeons.name = "DungeonManager"
 	add_child(dungeons)
+	var sq := SpawnQueue.new()  # 1.23: a place's people join a few per frame
+	sq.name = "SpawnQueue"
+	add_child(sq)
+	var lod := ActorLOD.new()  # 1.23: far actors, and those outside while you are inside, cost nothing
+	lod.name = "ActorLOD"
+	add_child(lod)
 	encounters = EncounterManager.new()
 	encounters.name = "EncounterManager"
 	encounters.enabled = encounters_enabled
@@ -379,22 +386,35 @@ func _plan_pois() -> void:
 
 
 func _spawn_pois_for_chunk(c: Vector2i) -> void:
+	SpawnQueue.defer = true
+	_spawn_pois_for_chunk_now(c)
+	SpawnQueue.defer = false
+
+
+func _spawn_pois_for_chunk_now(c: Vector2i) -> void:
 	for p: PlacedPOI in _poi_by_chunk.get(c, []):
 		if _poi_nodes.has(p.id):
 			continue
+		var tp := Time.get_ticks_usec()
 		var node := p.poi.build(p, map)
 		if node == null:
 			continue
 		node.name = "POI_%s" % p.poi.get_key()
 		node.set_meta("poi_id", p.id)
+		var tb := Time.get_ticks_usec()
 		StaticBatch.merge_interior(node)  # the building parts and props (Alpha 1.14)
 		StaticBatch.merge(node)  # one draw call for all its plain boxes
+		var tm := Time.get_ticks_usec()
 		_poi_root.add_child(node)
 		node.position = p.position
 		node.rotation.y = p.yaw
 		_poi_nodes[p.id] = node
+		var ta := Time.get_ticks_usec()
 		poi_spawned.emit(p, node)
+		var ts := Time.get_ticks_usec()
 		_spawn_garrison(p)
+		if profile_hitches and Time.get_ticks_usec() - tp > 4000:
+			print("HITCH   place %s: %.1f ms = build %.1f, merge %.1f, add %.1f, poi_spawned %.1f, garrison %.1f" % [p.id, (Time.get_ticks_usec() - tp) / 1000.0, (tb - tp) / 1000.0, (tm - tb) / 1000.0, (ta - tm) / 1000.0, (ts - ta) / 1000.0, (Time.get_ticks_usec() - ts) / 1000.0])
 
 
 func _free_pois_for_chunk(c: Vector2i) -> void:
@@ -419,12 +439,17 @@ func _spawn_garrison(p: PlacedPOI) -> void:
 		add_child(_garrison_root)
 	_garrisons[p.id] = Population.spawn_garrison(p, map, _garrison_root) if p.poi.garrison != null else []
 	if p.poi is SitePOIData and _poi_nodes.has(p.id):  # a site's folk stand at its spawn points (Alpha 1.14)
-		for e in (_poi_nodes[p.id] as Node3D).find_children("*", "Enemy", true, false):
+		var folk: Array = (_poi_nodes[p.id] as Node3D).find_children("*", "Enemy", true, false)
+		folk.append_array(SpawnQueue.held_under(_poi_nodes[p.id]))  # 1.23: those still on their way in
+		for e in folk:
 			if not e.has_meta("animal") and (e as Enemy).disposition == Enemy.Disposition.HOSTILE:
 				_garrisons[p.id].append(e)
 	if quests != null:
+		var was := SpawnQueue.defer
+		SpawnQueue.defer = false  # quest chiefs are given their proof of the kill straight away: no waiting
 		for e in quests.on_garrison(p, _garrison_root):  # bandit chiefs wanted by guild jobs
 			_garrisons[p.id].append(e)
+		SpawnQueue.defer = was
 
 
 ## Adds a creature to a point of interest's garrison (it then comes and goes with its chunk)
@@ -611,6 +636,7 @@ func _process(_delta: float) -> void:
 		_refresh_wanted(center)
 		for c: Vector2i in _chunks:
 			(_chunks[c] as TerrainChunk).set_cover(_cover_wanted(c))
+			_chunk_shadow(_chunks[c], c)
 	_ensure_ground_under(center)
 	_dispatch_builds()
 	_finalize_chunks()
@@ -639,7 +665,7 @@ func apply_settings() -> void:
 	var shadows := int(GameSettings.get_value("shadows"))
 	var host: Node = get_parent() if get_parent() != null else self
 	for sun: DirectionalLight3D in host.find_children("*", "DirectionalLight3D", true, false):
-		sun.directional_shadow_max_distance = 200.0 if shadows >= 2 else 60.0
+		sun.directional_shadow_max_distance = 140.0 if shadows >= 2 else 60.0  # 1.23: was 200 m (each cascade redraws everything in reach)
 
 
 func _chunk_of(pos: Vector3) -> Vector2i:
@@ -756,7 +782,12 @@ func _finalize_chunks() -> void:
 			budget -= 1
 
 
+## 1.23: set by tools/perf_probe.gd: prints the parts of any chunk or place that took over 4 ms
+static var profile_hitches := false
+
+
 func _add_chunk(data: Dictionary) -> void:
+	var t0 := Time.get_ticks_usec()
 	var c: Vector2i = data["coord"]
 	var chunk := TerrainChunk.new()
 	chunk.name = "Chunk_%d_%d" % [c.x, c.y]
@@ -768,8 +799,15 @@ func _add_chunk(data: Dictionary) -> void:
 	chunk.apply(data, _material, map)
 	_chunks[c] = chunk
 	chunk.set_cover(_cover_wanted(c))
+	_chunk_shadow(chunk, c)
+	if not _outdoors_shown:
+		chunk.visible = false
+	var t1 := Time.get_ticks_usec()
 	chunk_loaded.emit(c)
+	var t2 := Time.get_ticks_usec()
 	_spawn_pois_for_chunk(c)
+	if profile_hitches and Time.get_ticks_usec() - t0 > 4000:
+		print("HITCH chunk %s: build %.1f ms, chunk_loaded %.1f ms, places %.1f ms" % [c, (t1 - t0) / 1000.0, (t2 - t1) / 1000.0, (Time.get_ticks_usec() - t2) / 1000.0])
 
 
 func _remove_chunk(c: Vector2i) -> void:
@@ -824,3 +862,27 @@ func _scene_has_save_manager() -> bool:
 		if n is SaveManager:
 			return true
 	return not get_tree().get_nodes_in_group("save_manager").is_empty()
+
+
+## 1.23 performance: while you are in a dungeon or a building the outside world is not drawn at all
+## (the land, places, garrisons, townsfolk, the distant land and the sea). DungeonManager calls it.
+func set_outdoors_shown(shown: bool) -> void:
+	_outdoors_shown = shown
+	for c in _chunks.values():
+		if is_instance_valid(c):
+			(c as Node3D).visible = shown
+	for n: Node3D in [_poi_root, _garrison_root, _far, _water]:
+		if n != null and is_instance_valid(n):
+			n.visible = shown
+	if life != null and life.get_node_or_null("Townsfolk") != null:
+		(life.get_node("Townsfolk") as Node3D).visible = shown
+
+
+## 1.23 performance: only the ground inside the sun's shadow reach casts shadows (hills further off
+## were drawn again into every shadow cascade for shadows too far away to see)
+func _chunk_shadow(chunk: TerrainChunk, c: Vector2i) -> void:
+	var m := chunk.get_node_or_null("Mesh") as GeometryInstance3D
+	if m == null:
+		return
+	var near := Vector2(c - _last_center).length() * settings.chunk_size <= 160.0 + settings.chunk_size
+	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if near else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

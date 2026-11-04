@@ -25,8 +25,10 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 	var ps := pick(placed)
 	if ps == null:
 		return super.build(placed, map)
+	var t0 := Time.get_ticks_usec()
 	var root := Node3D.new()
 	var site := ps.instantiate() as ExteriorSite
+	var t1 := Time.get_ticks_usec()
 	site.set_meta("room_id", placed.id)
 	root.add_child(site)
 	# spawn points on the ground follow the land (those placed up high, on a floor or a wall, stay)
@@ -48,7 +50,9 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 	var ctx := {"data": data, "dungeon_id": own_id, "level_min": zone.x + garrison_level_offset, "level_max": zone.y + garrison_level_offset,
 		"density": 1.0, "seed": placed.seed_value}
 	site.set_meta("loot_level", int(ctx["level_max"]))
+	var t2 := Time.get_ticks_usec()
 	RoomFiller.fill(site, ctx)
+	var t3 := Time.get_ticks_usec()
 	if dungeon != null:
 		for link in site.links():
 			link.make_door(placed.id)
@@ -63,9 +67,14 @@ func build(placed: PlacedPOI, map: WorldMap) -> Node3D:
 			if map != null:
 				a.y = POIBuilder.ground_y(placed, map, a.x, a.z)
 			SiteLife.animal(site, herd[i], a, "%s/animal%d" % [placed.id, i])
+	var t4 := Time.get_ticks_usec()
 	ModelLibrary.dress_structures(root)  # its walls and towers as Morrowind's (1.16)
+	var t5 := Time.get_ticks_usec()
 	ModelLibrary.batch_dressed(root)
+	var t6 := Time.get_ticks_usec()
 	StaticBatch.merge_interior(root)
+	if WorldManager.profile_hitches and Time.get_ticks_usec() - t0 > 20000:
+		print("HITCH     site %s: instantiate %.1f, ground %.1f, fill %.1f, markers+life %.1f, dress %.1f, batch %.1f, merge %.1f ms" % [placed.id, (t1 - t0) / 1000.0, (t2 - t1) / 1000.0, (t3 - t2) / 1000.0, (t4 - t3) / 1000.0, (t5 - t4) / 1000.0, (t6 - t5) / 1000.0, (Time.get_ticks_usec() - t6) / 1000.0])
 	return root
 
 

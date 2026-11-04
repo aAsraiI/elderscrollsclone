@@ -144,6 +144,7 @@ static func _water_arrays(map: WorldMap, verts: PackedVector3Array, water: Packe
 	var sea := map.settings.sea_level if map.settings.water_enabled else -INF
 	var pts := PackedVector3Array()
 	var uvs := PackedVector2Array()
+	var foam := PackedColorArray()  # r: how steeply the water falls here (rapids, falls) for white water
 	for j in quads:
 		for i in quads:
 			var ks := [j * vps + i, j * vps + i + 1, (j + 1) * vps + i, (j + 1) * vps + i + 1]
@@ -159,9 +160,14 @@ static func _water_arrays(map: WorldMap, verts: PackedVector3Array, water: Packe
 			for k: int in ks:
 				var w := water[k] if water[k] > -INF else top
 				corner.append(Vector3(verts[k].x, w, verts[k].z))
+			# the drop across this square of water: a steep one runs white
+			var lo := minf(minf(corner[0].y, corner[1].y), minf(corner[2].y, corner[3].y))
+			var hi := maxf(maxf(corner[0].y, corner[1].y), maxf(corner[2].y, corner[3].y))
+			var white := Color(clampf((hi - lo) / spacing * 3.0 - 0.15, 0.0, 1.0), 0.0, 0.0)
 			for idx in [0, 1, 2, 1, 3, 2]:
 				pts.append(corner[idx])
 				uvs.append(Vector2(corner[idx].x, corner[idx].z))
+				foam.append(white)
 	if pts.is_empty():
 		return []
 	var normals := PackedVector3Array()
@@ -172,6 +178,7 @@ static func _water_arrays(map: WorldMap, verts: PackedVector3Array, water: Packe
 	arrays[Mesh.ARRAY_VERTEX] = pts
 	arrays[Mesh.ARRAY_NORMAL] = normals
 	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	arrays[Mesh.ARRAY_COLOR] = foam
 	return arrays
 
 

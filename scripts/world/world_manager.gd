@@ -583,6 +583,7 @@ func _make_water() -> void:
 	# the same water as rivers and lakes, deeper and bluer
 	var mat := TerrainChunk.water_material().duplicate() as ShaderMaterial
 	mat.set_shader_parameter("depth_range", 14.0)
+	mat.set_shader_parameter("foam_from_color", false)
 	mat.set_shader_parameter("shallow", Color(0.2, 0.4, 0.42))
 	mat.set_shader_parameter("deep", Color(0.04, 0.12, 0.22))
 	_water.material_override = mat

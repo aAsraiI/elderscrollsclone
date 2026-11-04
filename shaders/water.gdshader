@@ -8,6 +8,9 @@ uniform vec3 deep : source_color = vec3(0.05, 0.13, 0.2);
 // Meters of water before it looks fully deep
 uniform float depth_range = 4.5;
 uniform float wetness = 0.0;
+// Rivers and lakes carry how steeply the water falls in their vertex colour (red): rapids and falls run
+// white. Off for the sea, which has no vertex colours.
+uniform bool foam_from_color = true;
 uniform sampler2D depth_tex : hint_depth_texture, filter_linear_mipmap;
 
 varying vec3 wpos;
@@ -47,9 +50,11 @@ void fragment() {
 	behind.xyz /= behind.w;
 	float thick = max(VERTEX.z - behind.z, 0.0);
 	float d = clamp(thick / depth_range, 0.0, 1.0);
-	ALBEDO = mix(shallow, deep, d);
-	ALPHA = clamp(0.35 + d * 0.6, 0.0, 0.93) * smoothstep(0.0, 0.35, thick);
-	ROUGHNESS = 0.06 + wetness * 0.1;
+	float white = foam_from_color ? COLOR.r : 0.0;
+	white *= 0.55 + 0.45 * noise(wpos.xz * 2.3 + vec2(0.0, -t * 2.5));
+	ALBEDO = mix(mix(shallow, deep, d), vec3(0.88, 0.92, 0.94), white);
+	ALPHA = clamp(0.35 + d * 0.6 + white * 0.5, 0.0, 0.95) * smoothstep(0.0, 0.35, thick);
+	ROUGHNESS = 0.06 + wetness * 0.1 + white * 0.6;
 	METALLIC = 0.1;
 	SPECULAR = 0.6;
 }

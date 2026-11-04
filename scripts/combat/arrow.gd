@@ -82,6 +82,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _hit(collider: Object, at: Vector3) -> void:
+	_world_react(at)  # 1.24: a fire arrow lights oil and dry grass; frost and shock arrows too
 	var target: Node = null
 	if collider != null and collider.has_meta("damageable"):
 		var d: Variant = collider.get_meta("damageable")
@@ -102,3 +103,19 @@ func _hit(collider: Object, at: Vector3) -> void:
 		if w != null:
 			w.freeze = true
 		queue_free()
+
+
+func _world_react(at: Vector3) -> void:
+	if item == null or not is_inside_tree():
+		return
+	var ws := WorldSurfaces.of(get_tree())
+	if ws == null:
+		return
+	for e in item.enchant_effects + item.magic_effects:
+		match String(e.get("id", "")):
+			"fire_damage":
+				ws.react(at, &"fire", 1.0, shooter.host if shooter != null and is_instance_valid(shooter) else null, 0.8)
+			"frost_damage":
+				ws.react(at, &"frost", 1.0, null, 0.8)
+			"shock_damage":
+				ws.react(at, &"shock", 1.0, null, 0.8)

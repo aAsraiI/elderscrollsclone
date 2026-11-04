@@ -141,3 +141,21 @@ drink, lists "hungry times" in its prices, and its people beg; an unsafe one tal
 - **New tenants**: a place you cleared that has been taken over again has a note by the door saying why.
 - **Books** are pages you turn (Back / Next, or the arrow keys), and about one lore book in four has a
   map in its margins: the first time you read it, the three places nearest its town go on your map.
+
+## The elements as world rules (1.24.7)
+
+**WorldSurfaces** keeps a few flat surfaces on the ground where things happened:
+
+| Surface | Where from | What happens |
+|---|---|---|
+| oil | a thrown **Flask of Oil** breaks into a pool | fire lights it: a big, hot fire |
+| water | puddles form around you in the rain | puts fires out; frost freezes it; shock runs through it |
+| fire | a fire spell or fire arrow on oil or dry grass | burns whoever stands in it; grass fires creep on with the wind (not in rain) |
+| ice | frost on a puddle, or on a river or lake | you can walk on it for about 25 s, then it melts back to water |
+
+Fire, frost and shock spells (and arrows enchanted with them) do these things where they land, and
+shock arcs on to anyone in heavy armour close by. Rain burns fires out three times faster.
+
+**Breakable doors**: a locked door hit with a mace, a hammer or a hammer's slam loses its lock and in the
+end gives way (loud, and a crime if a house door is seen being forced; in a dungeon everything near
+comes running). A blade just bites the wood. Gates still need their lever.

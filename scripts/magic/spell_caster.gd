@@ -258,6 +258,7 @@ func apply_at(spell: SpellData, power: float, collider: Object, point: Vector3) 
 	if spell.get_area() > 0.0 and not others_list.is_empty():
 		SpellFX.burst(host, point, spell.get_area(), spell.get_color())
 		apply_area(spell, power, point, spell.get_area(), direct, others_list)
+	_world_react(spell, power, point)  # 1.24: fire lights oil and grass, frost freezes water, shock runs through it
 
 
 ## Every creature in the burst: foes for a harmful spell, friends (and you) for a helpful one
@@ -521,3 +522,23 @@ func _set_spray_visual(on: bool) -> void:
 		_spray_fx.position = Vector3(0.2, -0.2, -0.5)
 	if _spray_fx != null:
 		_spray_fx.emitting = on
+
+
+## 1.24: what a spell's elements do to the ground where it lands (WorldSurfaces)
+func _world_react(spell: SpellData, power: float, point: Vector3) -> void:
+	var ws := WorldSurfaces.of(get_tree()) if is_inside_tree() else null
+	if ws == null:
+		return
+	var done := {}
+	for e in spell.effects:
+		var el: StringName = &""
+		match String(e["id"]):
+			"fire_damage":
+				el = &"fire"
+			"frost_damage":
+				el = &"frost"
+			"shock_damage":
+				el = &"shock"
+		if el != &"" and not done.has(el):
+			done[el] = true
+			ws.react(point, el, power, host, maxf(spell.get_area(), 1.0))

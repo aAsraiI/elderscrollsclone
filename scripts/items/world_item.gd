@@ -147,6 +147,23 @@ func on_thrown() -> void:
 func _on_thrown_hit(body: Node) -> void:
 	if body is WorldItem and body != self:
 		(body as WorldItem).wake(linear_velocity * 0.4)
+	if item != null and String(item.id) == "flask_of_oil" and not (body is WorldItem):
+		_break_flask()  # 1.24: it breaks into a pool of oil
+
+
+func _break_flask() -> void:
+	var ws := WorldSurfaces.of(get_tree())
+	if ws != null:
+		var at := global_position
+		var wm := get_tree().get_first_node_in_group("world_manager") as WorldManager
+		if wm != null and not (wm.dungeons != null and wm.dungeons.is_inside()):
+			at.y = wm.get_height_at(at.x, at.z)
+		else:
+			at.y -= size.y * 0.5
+		for i in count:
+			ws.add(WorldSurfaces.Kind.OIL, at + Vector3(randf_range(-0.4, 0.4), 0, randf_range(-0.4, 0.4)), 1.6, 120.0)
+	SoundFX.at(get_tree(), global_position, "click", 30.0, 0.6)
+	queue_free()
 
 
 # ---- Grabbing (hold interact). The Interactor / Grabber call these.

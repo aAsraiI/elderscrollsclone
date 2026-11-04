@@ -140,3 +140,38 @@ func _knock() -> bool:
 	set_locked(false)
 	Locks.toast(get_tree(), "You knock. %s opens the door: \"At this hour? Come in, quickly.\"" % r.data.display_name)
 	return true
+
+
+# ---------------------------------------------------------------- smashing the lock (1.24)
+
+const SMASH_KINDS := [&"hammer", &"mace"]
+var _lock_hp := -1.0
+
+
+## A locked door hit hard with a blunt weapon (or a hammer's slam) gives way in the end: loud, and a
+## crime if anyone sees it. Blades just bounce off.
+func take_damage(info: DamageInfo) -> float:
+	if not is_locked():
+		return 0.0
+	var blunt := info.kind == &"slam" or (info.weapon != null and info.weapon.animation_set in SMASH_KINDS)
+	if not blunt:
+		Locks.toast(get_tree(), "The blade bites the wood and holds. Something heavier would do it.", true)
+		return 0.0
+	if _lock_hp < 0.0:
+		_lock_hp = 40.0 + float(lock_level) * 2.0
+	_lock_hp -= info.amount
+	SoundFX.at(get_tree(), global_position + Vector3.UP, "hit", 60.0, 0.6)
+	var crime := get_tree().get_first_node_in_group("crime") as CrimeManager
+	if crime != null:
+		crime.on_lock_attempt(building_id)  # a crime if someone sees it, and loud
+	if _lock_hp <= 0.0:
+		set_locked(false)
+		_lock_hp = -1.0
+		Locks.toast(get_tree(), "The lock gives way with a crack.")
+	else:
+		Locks.toast(get_tree(), "The door shudders.")
+	return info.amount
+
+
+func is_alive() -> bool:
+	return is_locked()

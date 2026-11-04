@@ -145,6 +145,9 @@ func _ready() -> void:
 	wild.name = "WildLife"
 	wild.enabled = encounters_enabled
 	add_child(wild)
+	var surf := WorldSurfaces.new()  # 1.24: oil, water, fire, ice on the ground; the elements as world rules
+	surf.name = "WorldSurfaces"
+	add_child(surf)
 	var marks_w := WorldMarks.new()  # 1.24: footprints, blood, breath, sounds you can read
 	marks_w.name = "WorldMarks"
 	add_child(marks_w)

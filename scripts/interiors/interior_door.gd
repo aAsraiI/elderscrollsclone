@@ -84,3 +84,38 @@ func interact(actor: Inventory) -> void:
 func open() -> void:
 	WorldState.set_record("door/" + door_id, {"open": true})
 	queue_free()
+
+
+# ---------------------------------------------------------------- smashing it (1.24)
+
+var _door_hp := -1.0
+
+
+## A locked door (not a gate) beaten with a mace or hammer breaks in the end. Loud: everything near
+## comes to see what the noise was.
+func take_damage(info: DamageInfo) -> float:
+	if is_gate or is_open():
+		return 0.0
+	var blunt := info.kind == &"slam" or (info.weapon != null and info.weapon.animation_set in [&"hammer", &"mace"])
+	if not blunt:
+		Locks.toast(get_tree(), "The blade won't do it. Something heavier.", true)
+		return 0.0
+	if _door_hp < 0.0:
+		_door_hp = 50.0 + float(lock_level) * 12.0
+	_door_hp -= info.amount
+	SoundFX.at(get_tree(), global_position + Vector3.UP, "hit", 50.0, 0.55)
+	var p := get_tree().get_first_node_in_group("player") as Node3D
+	for e in ActorRegistry.near(global_position, 22.0):
+		if e.disposition == Enemy.Disposition.HOSTILE and not e.is_dead() and p != null:
+			e.wake()
+			e.aggro(p)  # they heard that
+	if _door_hp <= 0.0:
+		Locks.toast(get_tree(), "The door splinters and gives way.")
+		open()
+	else:
+		Locks.toast(get_tree(), "The door shudders on its hinges.")
+	return info.amount
+
+
+func is_alive() -> bool:
+	return not is_open()

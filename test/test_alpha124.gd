@@ -48,6 +48,7 @@ func _run() -> void:
 	await t_needs()
 	await t_marks()
 	await t_stories()
+	await t_surfaces()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -600,3 +601,75 @@ func t_stories() -> void:
 		if Discovery.is_found(poi.id):
 			after += 1
 	check("some books put places on your map", not useful.is_empty() and after > before, "%d -> %d" % [before, after])
+
+
+func t_surfaces() -> void:
+	print("-- the elements as world rules")
+	var wm := get_first_node_in_group("world_manager") as WorldManager
+	var p := get_first_node_in_group("player") as CharacterBody3D
+	var ws := WorldSurfaces.of(self)
+	check("WorldSurfaces runs", ws != null)
+	if ws == null:
+		return
+	wm.weather.current = Weather.Kind.CLEAR
+	var at := p.global_position + Vector3(8, 0, 0)
+	at.y = wm.get_height_at(at.x, at.z)
+	ws.add(WorldSurfaces.Kind.OIL, at, 1.6, 60.0)
+	ws.react(at, &"fire")
+	var fire := ws.at_point(at).filter(func(s): return s.kind == WorldSurfaces.Kind.FIRE)
+	check("fire lights a pool of oil", fire.size() == 1 and fire[0].oily)
+	var e := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 3, wm, at + Vector3(0, 0.6, 0), RandomNumberGenerator.new())
+	e.set_physics_process(false)
+	await frames(3)
+	e.global_position = at + Vector3(0, 0.1, 0)
+	var hp0 := e.stats.health
+	await secs(1.2)
+	check("whoever stands in it burns", e.stats.health < hp0, "%.0f -> %.0f" % [hp0, e.stats.health])
+	var at2 := at + Vector3(0, 0, 8)
+	at2.y = wm.get_height_at(at2.x, at2.z)
+	ws.add(WorldSurfaces.Kind.WATER, at2, 1.5, 60.0)
+	ws.react(at2, &"frost")
+	var ice := ws.at_point(at2).filter(func(s): return s.kind == WorldSurfaces.Kind.ICE)
+	check("frost freezes a puddle into ice you can stand on", ice.size() == 1 and ice[0].node.find_children("*", "StaticBody3D", true, false).size() == 1)
+	var at3 := at + Vector3(0, 0, -8)
+	at3.y = wm.get_height_at(at3.x, at3.z)
+	ws.add(WorldSurfaces.Kind.WATER, at3, 1.8, 60.0)
+	e.global_position = at3 + Vector3(0, 0.1, 0)
+	await frames(2)
+	var hp1 := e.stats.health
+	ws.react(at3, &"shock")
+	await frames(3)
+	check("shock runs through the water to whoever stands in it", e.stats.health < hp1, "%.0f -> %.0f" % [hp1, e.stats.health])
+	e.queue_free()
+	# a flask of oil breaks where it lands
+	var flask := load("res://data/clutter/flask_of_oil.tres") as ItemData
+	var before := ws.surfaces.filter(func(s): return s.kind == WorldSurfaces.Kind.OIL).size()
+	var w := WorldItem.spawn(flask, 1, wm, at + Vector3(4, 1, 4))
+	await frames(2)
+	w._break_flask()
+	await frames(2)
+	check("a thrown flask of oil breaks into a pool", ws.surfaces.filter(func(s): return s.kind == WorldSurfaces.Kind.OIL).size() > before)
+	# a locked house door gives way to a mace, not a sword
+	for t in wm.towns:
+		if (t.poi as TownData).kind == TownData.Kind.CITY:
+			wm.ensure_area_loaded(t.position, 2)
+			p.global_position = Vector3(t.position.x, wm.get_height_at(t.position.x, t.position.z) + 1.5, t.position.z)
+			break
+	await secs(3.0)
+	var doors := root.find_children("*", "BuildingDoor", true, false)
+	var door: BuildingDoor = doors[0] as BuildingDoor if not doors.is_empty() else null
+	if door != null:
+		door.set_locked(true)
+	check("a locked door to try", door != null and door.is_locked())
+	if door != null:
+		var cut := DamageInfo.new(30.0, p, &"melee")
+		cut.weapon = load("res://data/weapons/iron_sword.tres")
+		door.take_damage(cut)
+		check("a blade won't open it", door.is_locked())
+		var blow := DamageInfo.new(30.0, p, &"melee")
+		blow.weapon = load("res://data/weapons/iron_mace.tres")
+		for i in 12:
+			if not door.is_locked():
+				break
+			door.take_damage(blow)
+		check("a mace breaks the lock in the end", not door.is_locked())

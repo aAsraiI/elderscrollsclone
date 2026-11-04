@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_o45as"]
+
+[resource]
+script = ExtResource("1_o45as")
+id = &"flask_of_oil"
+display_name = "Flask of Oil"
+description = "Lamp oil in a clay flask. Drop it and throw it (hold E): it breaks into a pool that burns hot when fire touches it."
+item_type = 7
+weight = 0.5
+value = 6
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray("camp", "general", "house", "adventurer")
+ingredient_effects = PackedStringArray()

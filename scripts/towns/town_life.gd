@@ -291,6 +291,14 @@ func _leisure_goal(r: Resident, layout: TownLayout) -> Dictionary:
 	w["bench"] = 2.0 if not benches.is_empty() else 0.0
 	w["water"] = (1.6 if h < 11.0 else 0.5) if not wells.is_empty() else 0.0
 	w["stall"] = (2.5 if h >= 8.0 and h < 17.0 else 0.0) if not stalls.is_empty() else 0.0
+	# 1.24 (TownSociety): the bereaved go to the temple and stay home; families eat supper together
+	if TownSociety.is_mourning(d.id):
+		w["temple"] *= 5.0
+		w["home"] *= 2.0
+		w["inn"] *= 0.3
+	var soc := TownSociety.of(get_tree())
+	if h >= 18.0 and h < 20.5 and (home_family(r) or (soc != null and soc.has_family(d.id))):
+		w["home"] *= 4.0
 	if d.personality == NpcData.Personality.PIOUS:
 		w["temple"] *= 3.0
 	elif d.personality == NpcData.Personality.CHEERFUL or d.personality == NpcData.Personality.FRIENDLY:
@@ -406,6 +414,7 @@ func _change(r: Resident, act: int) -> void:
 		return
 	if r.inside != "":
 		var from := world.get_building(r.inside)
+		var shopping := from != null and from.kind in [BuildingPlot.Kind.SHOP, BuildingPlot.Kind.SMITHY] and r.inside != r.data.work_id and r.inside != r.data.home_id
 		if String(goal.get("inside", "")) == r.inside:
 			_populate_interior_one(r)  # stays in (the innkeeper going to bed): just move inside
 			return
@@ -414,6 +423,8 @@ func _change(r: Resident, act: int) -> void:
 		if from != null:
 			r.node = _make_body(r, _root, from.get_door_position() + Vector3.UP * 0.3)
 			r.node_inside = false
+			if shopping:
+				TownSociety.carry_sack(r.node)  # 1.24: back from the shops with a sack
 	if not _alive(r.node) or r.node_inside:
 		r.node = _make_body(r, _root, _outside_spot(r))
 		r.node_inside = false
@@ -604,6 +615,8 @@ func _make_body(r: Resident, parent: Node3D, pos: Vector3) -> Enemy:
 
 func _on_died(_e: Enemy, r: Resident) -> void:
 	r.dead = true
+	if _e != null and is_instance_valid(_e) and _e._hurt_by_player:
+		WorldState.set_record("npc_killer/" + r.data.id, {"player": true})  # 1.24: the family may want revenge (TownSociety)
 	Rumors.on_murder(r.data.display_name, r.town)
 	r.walking = false
 
@@ -815,3 +828,13 @@ func _wake(e: Enemy) -> void:
 	var r := get_resident(String(e.get_meta("npc_id", "")))
 	if talk != null and r != null:
 		talk.lines = r.data.talk_lines
+
+
+## 1.24: someone who shares a home with others (a family that eats together)
+func home_family(r: Resident) -> bool:
+	if r.data.home_id == "":
+		return false
+	for o: Resident in _by_town.get(r.town.id, []):
+		if o != r and o.data.home_id == r.data.home_id and not o.dead:
+			return true
+	return false

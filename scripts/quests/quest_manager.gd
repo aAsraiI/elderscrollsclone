@@ -760,6 +760,9 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 			out.append(REPORT)
 	out.append_array(Marriage.topics_for(s))
 	out.append_array(Homestead.topics_for(s))
+	var society := TownSociety.of(get_tree())
+	if society != null:
+		out.append_array(society.topics_for(s))  # 1.24: "people you know"
 	return out
 
 
@@ -790,6 +793,11 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 		var handmade := world.runner.respond(s, topic)
 		if not handmade.is_empty():
 			return handmade
+	var soc := TownSociety.of(get_tree())
+	if soc != null:
+		var told_soc := soc.respond(s, topic)
+		if not told_soc.is_empty():
+			return told_soc
 	var wed := Marriage.respond(s, topic, _player(), world.clock.day if world != null and world.clock != null else 1)
 	if not wed.is_empty():
 		return wed

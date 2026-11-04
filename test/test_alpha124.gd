@@ -44,6 +44,7 @@ func _run() -> void:
 	await t_standing()
 	await t_kill_record()
 	await t_wildlife()
+	await t_society()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -114,8 +115,8 @@ func t_on_sight() -> void:
 	check("a bandit is a bandit", CreatureFactions.of(b) == "bandits", CreatureFactions.of(b))
 	check("a skeleton is undead", CreatureFactions.of(s) == "undead", CreatureFactions.of(s))
 	var blows := [0]
-	b.combat.damaged.connect(func(_i, _a): blows[0] += 1)
-	s.combat.damaged.connect(func(_i, _a): blows[0] += 1)
+	b.combat.attack_started.connect(func(_h, _w): blows[0] += 1)
+	s.combat.attack_started.connect(func(_h, _w): blows[0] += 1)
 	await secs(2.5)
 	check("the bandit goes for the skeleton", b.get_fight_target() == s, str(b.get_fight_target()))
 	check("and the skeleton for the bandit", s.get_fight_target() == b, str(s.get_fight_target()))
@@ -123,7 +124,7 @@ func t_on_sight() -> void:
 		if blows[0] > 0:
 			break
 		await secs(1.0)
-	check("blows are struck", blows[0] > 0, str(blows[0]))
+	check("they swing at each other", blows[0] > 0, str(blows[0]))
 
 
 func t_same_side() -> void:
@@ -316,6 +317,9 @@ func t_wildlife() -> void:
 	# a wild wolf warns before it charges
 	var w: Enemy = wolves[1]
 	p.global_position = w.global_position + Vector3(12, 1, 0)
+	w.stop_fighting()
+	w._enter_state(Enemy.State.IDLE)
+	w._provoked = false
 	w._target = p
 	w._alerted = true
 	w._enter_state(Enemy.State.CHASE)
@@ -350,3 +354,88 @@ func t_wildlife() -> void:
 			if is_instance_valid(e):
 				e.queue_free()
 	wl.groups.clear()
+
+
+# ---------------------------------------------------------------- 1.24.3 townsfolk living together
+
+func t_society() -> void:
+	print("-- townsfolk living together")
+	var wm := get_first_node_in_group("world_manager") as WorldManager
+	var p := get_first_node_in_group("player") as CharacterBody3D
+	var soc := TownSociety.of(self)
+	check("TownSociety runs", soc != null and wm != null and wm.life != null)
+	if soc == null or wm == null:
+		return
+	var city: PlacedPOI = null
+	for t in wm.towns:
+		if (t.poi as TownData).kind == TownData.Kind.CITY:
+			city = t
+			break
+	var folk: Array = wm.life.get_town_residents(city.id)
+	var with_family: TownLife.Resident = null
+	var friends := 0
+	var rivals := 0
+	for r: TownLife.Resident in folk:
+		var k := soc.known_by(r.data.id)
+		for o in k:
+			if k[o] == "family" and with_family == null:
+				with_family = r
+			if k[o] == "friend":
+				friends += 1
+			if k[o] == "rival":
+				rivals += 1
+	check("households are families", with_family != null)
+	check("people have friends and rivals", friends > folk.size() and rivals > 0, "%d friends, %d rivals in %d" % [friends, rivals, folk.size()])
+	var a: TownLife.Resident = folk[0]
+	var b: TownLife.Resident = folk[folk.size() - 1]
+	soc.set_relation(a.data.id, b.data.id, "rival")
+	check("a change sticks, both ways", soc.relation(a.data.id, b.data.id) == "rival" and soc.relation(b.data.id, a.data.id) == "rival")
+	var s := DialogueEngine.Speaker.new()
+	s.id = with_family.data.id
+	s.name = with_family.data.display_name
+	s.data = with_family.data
+	s.town = city
+	check("they can tell you about the people they know", soc.topics_for(s).has(TownSociety.TOPIC))
+	var told := soc.respond(s, TownSociety.TOPIC)
+	check("and name them", String(told.get("text", "")).contains("My family"), str(told.get("text", "")))
+	Rumors.add("test", "A two-headed calf was born at the mill. Nobody will go near it.", city.position, 1)
+	var news := ""
+	for i in 40:
+		news = soc.news_for(s)
+		if news.contains("calf"):
+			break
+		await process_frame
+	check("news in passing comes from what is going on", news != "", news)
+	# a death: the family mourns
+	var family: Array = soc.known_by(with_family.data.id).keys().filter(func(o): return soc.known_by(with_family.data.id)[o] == "family")
+	with_family.dead = true
+	WorldState.set_record("npc_killer/" + with_family.data.id, {"player": true})
+	soc._grief()
+	check("the family mourns", not family.is_empty() and TownSociety.is_mourning(String(family[0])), str(family))
+	with_family.dead = false
+	# a brawl between two people with bodies
+	p.global_position = Vector3(city.position.x, wm.get_height_at(city.position.x, city.position.z) + 1.5, city.position.z)
+	wm.clock.set_time(13.0)
+	await secs(4.0)
+	var bodies: Array = folk.filter(func(r: TownLife.Resident): return not r.dead and is_instance_valid(r.node) and not r.node_inside and r.data.role != NpcData.Role.GUARD)
+	check("people are out in the city", bodies.size() >= 2, str(bodies.size()))
+	if bodies.size() >= 2:
+		var x: TownLife.Resident = bodies[0]
+		var y: TownLife.Resident = bodies[1]
+		soc.start_brawl(x, y)
+		await frames(3)
+		check("a brawl: they go at each other", x.node.get_fight_target() == y.node and y.node.get_fight_target() == x.node)
+		soc._brawl["until"] = 0.0
+		soc._tick_brawl(p)
+		await frames(3)
+		check("it ends with nobody dead", not x.node.is_dead() and not y.node.is_dead() and x.node.get_fight_target() == null)
+		check("and they are rivals now", soc.relation(x.data.id, y.data.id) == "rival")
+		TownSociety.carry_sack(x.node)
+		check("back from the shops with a sack", x.node.has_meta("sack"))
+		# something hostile walks in: people run for their doors
+		var bandit := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 5, wm, p.global_position + Vector3(4, 0, 0), RandomNumberGenerator.new())
+		await frames(3)
+		soc._crowds()
+		var ran := bodies.filter(func(r: TownLife.Resident): return is_instance_valid(r.node) and r.node.has_meta("panic")).size()
+		check("a bandit in town sends people running inside", ran >= 1, str(ran))
+		bandit.queue_free()

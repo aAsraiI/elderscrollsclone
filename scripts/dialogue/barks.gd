@@ -63,6 +63,11 @@ func bark_for(s: DialogueEngine.Speaker) -> String:
 			return "" if night else ["Fine wares, fair prices!", "Need anything? Come in, come in.", "Best goods in %s." % town][k % 3]
 		NpcData.Role.INNKEEPER:
 			return ["Warm beds and cold ale inside!", "Hungry? The stew's on."][k % 2]
+	var soc := TownSociety.of(get_tree())
+	if soc != null and k % 4 == 1:
+		var news := soc.news_for(s)  # 1.24: what is going on (rumours, a death in town, your bounty)
+		if news != "":
+			return news
 	if k % 3 != 0:
 		return ""  # most people just walk by
 	return (["Late to be about.", "Can't sleep either?"] if night else ["Fine day.", "Mind the mud.", "Have you heard the news?"])[k % (2 if night else 3)]

@@ -1643,6 +1643,9 @@ func _call_guards(attacker: Enemy) -> void:
 			best = e
 	if best != null:
 		best.fight(attacker)
+		var soc := TownSociety.of(get_tree())
+		if soc != null and best.has_meta("npc_id") and soc.relation(String(get_meta("npc_id")), String(best.get_meta("npc_id"))) == "":
+			soc.set_relation(String(get_meta("npc_id")), String(best.get_meta("npc_id")), "friend")  # 1.24: a rescue makes friends
 
 
 # Badly hurt, with no potion left to drink: a person (not a beast or a spirit) may break off and

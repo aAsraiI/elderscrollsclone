@@ -76,6 +76,7 @@ func make_player(extra_pc := false) -> CharacterBody3D:
 	var stats := Stats.new()
 	stats.name = "Stats"
 	stats.base_stats = Stats.DEFAULT_BASE_STATS.duplicate()
+	stats.base_stats["crit_chance"] = 0.0  # exact numbers: no lucky crits (1.22 added a 2% base chance)
 	stats.base_stats["max_health"] = 5000.0
 	p.add_child(stats)
 	var inv := Inventory.new()

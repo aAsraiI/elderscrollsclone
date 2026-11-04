@@ -77,3 +77,25 @@ fireflies on warm clear nights. A hit kills one (a rabbit leaves meat or hide).
 
 The animals reuse the CC0 models in `assets/models/creatures` (a tinted horse for deer, a tinted
 wolf for foxes, the rat for boars and rabbits, the spider for crabs and beetles, the bat for birds).
+
+## Townsfolk living together
+
+**TownSociety** (`scripts/towns/town_society.gd`) sits beside TownLife's day plan:
+
+- **Relationships**: everyone has friends, often a relative elsewhere in town, sometimes a rival or a
+  sweetheart; the same in every game, and changes are kept (`npc_rel/<id>`). Ask anyone about
+  **people you know**.
+- **Greetings**: friends passing say hello, rivals glare, sweethearts are glad, relatives nag, guards
+  changing watch have a word.
+- **News in passing**: remarks come from what is going on: recent rumours, a dead dragon, your bounty in
+  their town, a death in town.
+- **Supper**: people with family go home in the early evening.
+- **Errands**: someone back from the shops carries a sack home.
+- **Crowds**: anything hostile walking into a town sends everyone out on the streets running for their
+  own door.
+- **Grief**: when someone dies, their family, sweetheart and friends mourn for a week (dark clothes,
+  the temple, sad words). If you killed them, the family may pay two thugs to find you on the road a
+  day or three later (one carries their note).
+- **Brawls**: of an evening at the inn, two drinkers (rivals first) come to blows now and then; no one
+  dies of it, and afterwards they are rivals.
+- **A rescue makes friends**: a guard who answers a townsperson's cry for help becomes their friend.

@@ -162,6 +162,9 @@ func _ready() -> void:
 		life = TownLife.new()
 		life.name = "TownLife"
 		add_child(life)
+		var society := TownSociety.new()  # 1.24: relationships, greetings, grief, brawls, crowds
+		society.name = "TownSociety"
+		add_child(society)
 	quests = QuestManager.new()
 	quests.name = "QuestManager"
 	add_child(quests)

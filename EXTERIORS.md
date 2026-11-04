@@ -99,7 +99,9 @@ its spill point (deep, big hollows become lakes), lets rain (less in dry lands) 
 stream where enough has gathered, a river where much more has. Streams run to the sea, a lake or the
 river they join, never uphill. Their channels and banks are cut into the ground, the water surface is
 drawn on each chunk, and you swim in deep water. Roads cross on bridges (stone over rivers, timber
-over streams). Settings: **River Grid**, **Stream / River Catchment**, **Lake Min Depth**, **Lake Min / Max
+over streams); over shallow water too small for the planning grid (a swamp pool) a road runs on a
+causeway, and no road ever runs below the water line. Where the water falls steeply it runs white
+(rapids, falls). Settings: **River Grid**, **Stream / River Catchment**, **Lake Min Depth**, **Lake Min / Max
 Cells**, **Max Lakes**.
 
 ### Plants and herbs
@@ -122,7 +124,8 @@ A town's ground is levelled at the slope it stands on before its streets and bui
 every building gets a footprint of ground levelled to its floor (the ground meets the walls). The steeper
 the land round a town or a place, the wider the bank down to it. Every island has a port: the town
 nearest the sea, or a new village on the shore, with a long pier and a ship to every other port
-(**SeaPassage**, paid like the carriage). Coastal towns also keep a rowboat.
+(**SeaPassage**, paid like the carriage). A walled town by the water has a sea gate toward its pier.
+Coastal towns also keep a rowboat.
 
 ### Checking the world
 
@@ -130,3 +133,16 @@ nearest the sea, or a new village on the shore, with a long pier and a ship to e
   from above (lands, borders, water, roads, places) and a count of everything in it.
 - `tools/capture_world.gd -- out_dir "x,z,height,yaw,pitch,name" ...`: screenshots in the game.
 - The map (M) shows each land's tint and border, its name, the sea, lakes and rivers.
+
+### Places and dungeons of 1.21
+
+- **Places of one land** (sites, `tools/build_sites.gd`): oasis (desert), nomad camp (tundra, ashlands,
+  desert, badlands), hermit's hut, witch's hut on stilts (swamp, deadlands), gallows (by roads), plague pit,
+  fire altar (ashlands), frozen camp, smugglers' landing (by water), cairns (on heights) and druid grove.
+  Places that like the water (docks, mills, jetties) are only built by it and face it.
+- **Dungeon kinds** (`tools/build_dungeons_121.gd`): beast lair, witch's hollow, smugglers' cove, pirate
+  hold, forgotten catacombs, ruined monastery, frost tomb, dragon's roost, and four very large ones on
+  three or more floors, each under a whole site, once in every region of their land: the Black Citadel
+  (a fort, ashlands and frozen crown), the Sunken Necropolis (a graveyard, deadlands), the Deep Delve (a
+  mine, snowy mountains and badlands) and the Echoing Halls (a ruined keep, desert and badlands). A
+  dungeon's **Required** room kinds must be kinds its recipe's first theme has.

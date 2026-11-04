@@ -110,6 +110,8 @@ func _ready() -> void:
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_all = lines()
+	if not _all.is_empty():
+		_all.append(Chaos.epilogue_line())  # 1.24: how much blood you left behind
 	var bg := ColorRect.new()
 	bg.color = Color(0.03, 0.025, 0.02, 0.97)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

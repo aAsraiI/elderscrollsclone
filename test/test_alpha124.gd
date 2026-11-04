@@ -50,6 +50,7 @@ func _run() -> void:
 	await t_stories()
 	await t_surfaces()
 	await t_takedowns()
+	await t_chaos()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -725,3 +726,50 @@ func t_takedowns() -> void:
 	g._lose_target()
 	check("losing you, they search where they last saw you", g.state == Enemy.State.PATROL and g.route.size() == 3)
 	g.queue_free()
+
+
+func t_chaos() -> void:
+	print("-- consequences")
+	var wm := get_first_node_in_group("world_manager") as WorldManager
+	var p := get_first_node_in_group("player") as CharacterBody3D
+	var soc := TownSociety.of(self)
+	var tally := WorldState.get_record(Takedowns.TALLY).duplicate()
+	WorldState.set_record(Takedowns.TALLY, {"kills": 0})
+	check("no blood, no chaos", Chaos.level() == 0 and Chaos.remark(1) == "")
+	WorldState.set_record(Takedowns.TALLY, {"kills": 35})
+	check("killing raises it", Chaos.level() == 2 and Chaos.remark(1) != "" and Chaos.safety_cost() > 0)
+	check("and the epilogue remembers", Chaos.epilogue_line().contains("graveyards"))
+	WorldState.set_record(Takedowns.TALLY, tally)
+	# a job outlives the one who gave it
+	var city: PlacedPOI = null
+	for t in wm.towns:
+		if (t.poi as TownData).kind == TownData.Kind.CITY:
+			city = t
+			break
+	var giver: TownLife.Resident = null
+	for r: TownLife.Resident in wm.life.get_town_residents(city.id):
+		if not r.dead and soc.has_family(r.data.id):
+			giver = r
+			break
+	check("someone with family gives a job", giver != null)
+	if giver != null:
+		var list := QuestManager.all_quests().duplicate(true)
+		list.append({"id": "test_inherit", "status": "active", "giver": giver.data.id, "faction": "", "name": "Test job", "objective": "Report back to %s." % giver.data.display_name})
+		QuestManager._save_list(list, QuestManager._counter())
+		soc._pass_on_jobs(giver, soc.known_by(giver.data.id))
+		var q := QuestManager.get_quest("test_inherit")
+		var heir := wm.life.get_resident(String(q.get("giver", "")))
+		check("when they die, their family sees it through", heir != null and heir != giver and String(q["objective"]).contains(heir.data.display_name), str(q))
+		QuestManager._save_list(QuestManager.all_quests().filter(func(x): return x["id"] != "test_inherit"), QuestManager._counter())
+	# killed by the world
+	var burned := Takedowns.tally("burned")
+	var e := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 3, wm, p.global_position + Vector3(6, 0, 0), RandomNumberGenerator.new())
+	await frames(3)
+	for i in 40:
+		if e.is_dead():
+			break
+		var hot := DamageInfo.new(40.0, null, &"magic")
+		hot.element = &"fire"
+		e.combat.take_damage(hot)
+		await frames(1)
+	check("a kill by fire is counted", e.is_dead() and Takedowns.tally("burned") == burned + 1)

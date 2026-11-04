@@ -28,6 +28,7 @@ level [levels]            raise every skill (default 1 level)
 setskill <skill> <level>   put a skill straight at a level (no cap; milestones apply)
 perkpoints [n]            give extra perk points (default 5)
 spawn <enemy> [count] [level]   a creature in front of you (wolf, bandit, vampire...)
+chaos                     how much blood you have left behind, and your tally
 factions                  show each creature's side and who it is fighting (again: off); lists your standing
 faction <a> <b> <rel>     make two sides friendly, neutral or hostile (bandits undead hostile)
 standing <faction> <n>    set your standing with a side (25+ = they leave you alone)
@@ -199,6 +200,8 @@ func run(text: String) -> String:
 	match cmd:
 		"help":
 			return HELP
+		"chaos":
+			return "Chaos: %s (score %d). People killed %d, beasts %d, knocked out %d." % [Chaos.level_name(), Chaos.score(), Takedowns.tally("kills"), Takedowns.tally("beasts"), Takedowns.tally("knockouts")]
 		"factions":
 			return FactionOverlay.toggle(get_tree())
 		"faction":

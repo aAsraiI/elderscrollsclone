@@ -172,3 +172,15 @@ comes running). A blade just bites the wood. Gates still need their lever.
 - **Hiding bodies**: a body in the water is never found; at night only someone right beside it notices.
 - (Already there before 1.24: keys, lockpicks, secret doors and levers into locked places; since 1.24.7 a
   mace or hammer too.)
+
+## Consequences (1.24.9)
+
+- **Chaos** (`Chaos`, debug console `chaos`): from your tally, people you killed count, townsfolk you
+  murdered count five times, people you only knocked out count for nothing. Calm, uneasy (10), grim
+  (30), dark (80). As it rises people talk of the killings, towns feel less safe (TownNeeds), more road
+  wardens patrol, and the epilogue's last word changes.
+- **Quests outlive their giver**: when someone who gave you a job dies, their family (or a sweetheart, or a
+  friend) takes it over and pays what is owed; with nobody to take it, the job fails. The journal says so.
+- **Kills by the world**: anything that dies to a fire, a shock through water or a fall (with you behind
+  it) is counted (burned / shocked / other) and gives a little experience: a kill without a blade.
+- Not yet: the sandbox dungeon (one or two hand-made open levels).

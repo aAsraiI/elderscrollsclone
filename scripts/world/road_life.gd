@@ -130,7 +130,9 @@ func _find_road_spot(from: Vector3) -> Dictionary:
 
 
 func _pick_kind() -> String:
-	var roll := _rng.randf()
+	var roll := _rng.randf() * (1.0 + 0.25 * Chaos.level()) - 0.25 * Chaos.level() * WEIGHTS[0]  # 1.24: more wardens on the roads when the land is bloody
+	if roll < 0.0:
+		return KINDS[0]
 	for k in KINDS.size():
 		roll -= WEIGHTS[k]
 		if roll <= 0.0:

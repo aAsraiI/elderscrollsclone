@@ -350,6 +350,7 @@ func _grief() -> void:
 		TownBoards.add_grave(world, r, "slain" if killed or WorldState.has_record("kill/" + r.data.id) else "taken before their time", day)
 		var known := known_by(r.data.id)
 		var family := ""
+		_pass_on_jobs(r, known)  # 1.24: a job they gave you goes to their family
 		for other in known:
 			var kind := String(known[other])
 			if kind in ["family", "sweetheart", "friend"]:
@@ -647,3 +648,34 @@ func _catch_up() -> void:
 		var node := world.get_poi_node(t.id)
 		if node != null and not _boards.has(t.id):
 			_on_poi_spawned(t, node)
+
+
+# ---------------------------------------------------------------- quests that outlive their giver (1.24.9)
+
+## Someone who gave you a job has died: a relative (else a friend) will see it through and pay you
+func _pass_on_jobs(r: TownLife.Resident, known: Dictionary) -> void:
+	var heir := ""
+	for kind in ["family", "sweetheart", "friend"]:
+		for other in known:
+			var o := world.life.get_resident(String(other))
+			if String(known[other]) == kind and o != null and not o.dead:
+				heir = String(other)
+				break
+		if heir != "":
+			break
+	for q: Dictionary in QuestManager.all_quests():
+		if String(q.get("status", "")) != "active" or String(q.get("giver", "")) != r.data.id:
+			continue
+		var q2 := q.duplicate(true)
+		var text := ""
+		if heir != "":
+			var h := world.life.get_resident(heir)
+			q2["giver"] = heir
+			q2["objective"] = String(q2.get("objective", "")).replace(r.data.display_name, h.data.display_name)
+			text = "%s is dead. %s says they will see the job through, and pay what is owed." % [r.data.display_name, h.data.display_name]
+		else:
+			text = "%s is dead, and nobody else knows of the job. Whatever it was worth, it is worth nothing now." % r.data.display_name
+			q2["status"] = "failed"
+		QuestManager._update_quest(q2)
+		DialogueState.add_journal({"text": text, "speaker": "", "topic": "", "day": world.clock.day if world.clock != null else 1,
+			"time": world.clock.get_time_text() if world.clock != null else "", "quest_id": String(q["id"]), "quest_name": String(q.get("name", ""))})

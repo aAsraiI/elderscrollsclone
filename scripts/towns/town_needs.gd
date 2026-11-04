@@ -52,6 +52,7 @@ static func update(world: WorldManager, t: PlacedPOI, day: int) -> Dictionary:
 		if d > 650.0:
 			continue
 		s += 6 if Discovery.is_cleared(p.id) else -8
+	s -= Chaos.safety_cost()  # 1.24: the killings frighten everyone
 	var name := t.town.display_name if t.town != null else ""
 	var w := 50 + clampi(Reputation.get_rep(name) / 4, -20, 25) + (10 if (t.poi as TownData).kind == TownData.Kind.CITY else 0)
 	var out := {"food": clampi(f, 0, 100), "safety": clampi(s, 0, 100), "wealth": clampi(w, 0, 100), "day": day, "failed": failed}

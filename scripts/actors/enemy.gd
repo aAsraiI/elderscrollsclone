@@ -151,6 +151,8 @@ var _sight_until := 0.0  # 1.23: _can_see_target() is remembered until then
 var _scan_at := 0.0  # 1.24: next look round for creatures of a hostile faction
 var _warn_until := 0.0  # 1.24: a wild beast stands growling until then before it charges
 var _last_seen := Vector3.INF
+var _last_env := false
+var _last_element: StringName = &""
 var _rally_at := 0.0
 ## 1.24: you (or yours) hurt it this fight: a faction that tolerates you fights you anyway
 var _provoked := false
@@ -1611,6 +1613,8 @@ func _on_damaged(info: DamageInfo, amount: float) -> void:
 	if state == State.DEAD:
 		return
 	_alerted = true
+	_last_env = info.source == null or not is_instance_valid(info.source)  # 1.24: killed by the world (fire, a fall)?
+	_last_element = info.element
 	if _by_player(info.source):
 		_hurt_by_player = true
 		_provoked = true
@@ -1737,6 +1741,11 @@ func _on_died() -> void:
 		CreatureFactions.on_player_kill(get_tree(), self)
 		if _hurt_by_player:
 			Takedowns.count("kills" if body_kind == CreatureBody.Kind.HUMANOID else "beasts")  # 1.24: the tally (Chaos)
+		if _hurt_by_player and _last_env:
+			Takedowns.count("burned" if _last_element == &"fire" else ("shocked" if _last_element == &"shock" else "environment"))
+			var sk := get_tree().get_first_node_in_group("player").get_node_or_null("Skills") as Skills if get_tree().get_first_node_in_group("player") != null else null
+			if sk != null:
+				sk.add_deed_xp(SkillDatabase.deed_xp(sk.get_player_level(), 1.5))  # 1.24: a kill without a blade
 	var note_rng := RandomNumberGenerator.new()
 	note_rng.seed = (spawn_key if spawn_key != "" else str(get_instance_id())).hash()
 	Notes.maybe_carry(self, note_rng)  # 1.24: a letter, orders, a debt...

@@ -63,6 +63,10 @@ func bark_for(s: DialogueEngine.Speaker) -> String:
 			return "" if night else ["Fine wares, fair prices!", "Need anything? Come in, come in.", "Best goods in %s." % town][k % 3]
 		NpcData.Role.INNKEEPER:
 			return ["Warm beds and cold ale inside!", "Hungry? The stew's on."][k % 2]
+	if k % 5 == 3:
+		var dread := Chaos.remark(k)  # 1.24: the land talks of the killing
+		if dread != "":
+			return dread
 	if s.town != null and k % 3 == 2:
 		var need := TownNeeds.remark(s.town.id, k)  # 1.24: a hungry or frightened town says so
 		if need != "":

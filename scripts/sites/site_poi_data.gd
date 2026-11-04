@@ -112,6 +112,28 @@ func _markers(site: ExteriorSite, placed: PlacedPOI, map: WorldMap) -> void:
 			HarvestNode.make_ore(site, at, world, absi(placed.seed_value) + i)
 		elif n == "Keeper":
 			_keeper(site, at, placed)
+		elif n == "Bed":
+			_inn_bed(site, at, (m as Node3D).rotation.y, placed)
+
+
+# 1.26: a straw bed at a wayside inn, ten gold a night
+func _inn_bed(site: ExteriorSite, at: Vector3, yaw: float, placed: PlacedPOI) -> void:
+	var s := RestSpot.new()
+	s.kind = "bed"
+	s.building_id = "%s/inn" % placed.id
+	s.building_kind = BuildingPlot.Kind.INN
+	site.add_child(s)
+	s.position = at
+	s.rotation.y = yaw
+	var mat := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(1.0, 0.3, 2.0)
+	mat.mesh = box
+	var straw := StandardMaterial3D.new()
+	straw.albedo_color = Color(0.62, 0.52, 0.3)
+	mat.material_override = straw
+	mat.position = Vector3(0, 0.15, 0)
+	s.add_child(mat)
 
 
 # The keeper of a wayside inn: a friendly face by the fire
@@ -123,7 +145,9 @@ func _keeper(site: ExteriorSite, at: Vector3, placed: PlacedPOI) -> void:
 	var name := NameGen.person(rng)
 	e.display_name = name
 	e.talk_name = name
-	e.talk_lines = PackedStringArray(["Sit by the fire a while. The road keeps.", "Bandits on the north road, I hear. Mind yourself.", "Bed's free if you can sleep on straw."])
+	e.talk_lines = PackedStringArray(["Sit by the fire a while. The road keeps.", "Bandits on the north road, I hear. Mind yourself.", "Ten gold for the straw bed, and a hot bowl to go with it if you're buying."])
+	e.set_meta("merchant", "innkeeper")  # 1.26: food and drink for the road
+	e.set_meta("shop_id", "%s/keeper" % placed.id)
 	e.disposition = Enemy.Disposition.FRIENDLY
 	e.persist_mode = Enemy.PersistMode.NEVER
 	e.spawn_key = "%s/keeper" % placed.id

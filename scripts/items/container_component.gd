@@ -70,6 +70,7 @@ func _ready() -> void:
 		var quests := get_tree().get_first_node_in_group("quests") as QuestManager
 		if quests != null:
 			quests.fill_container(self)  # a guild job may have hidden its item in here
+		Roleplay.fill_container(self)  # 1.26: treasure from a rumoured lead
 
 	var parent := get_parent()
 	var bodies := _find_bodies(parent)

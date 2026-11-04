@@ -15,6 +15,10 @@ const DEFAULTS := {
 	"difficulty": 2,
 	## Fast travel by clicking the map twice
 	"fast_travel": true,
+	## Fast travel reaches only towns and wayside inns (1.26), and long trips may be waylaid
+	"fast_travel_towns": false,
+	## Where the story starts (1.26): "gate" (outside a town), "inn" (a wayside inn), "shipwreck" (washed up on a shore), "wilds" (alone, far from the roads)
+	"start": "gate",
 	## Quest targets on the map and compass
 	"quest_markers": true,
 	## How fast skills level (1.0 = normal)

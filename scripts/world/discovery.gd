@@ -112,6 +112,8 @@ func can_travel_to(poi: PlacedPOI) -> String:
 		return "You can't fast travel from inside."
 	if not bool(GameRules.get_rule("fast_travel")):
 		return "Fast travel is off in this world. Take a carriage from a city gate, or ride."
+	if bool(GameRules.get_rule("fast_travel_towns")) and not is_travel_hub(poi):
+		return "In this world fast travel only reaches towns and wayside inns."
 	if p.has_meta("beast_form"):
 		return "The beast can't travel."
 	for e in ActorRegistry.near(p.global_position, DANGER_RADIUS):
@@ -119,6 +121,11 @@ func can_travel_to(poi: PlacedPOI) -> String:
 		if en != null and is_instance_valid(en) and not en.is_dead() and en.disposition == Enemy.Disposition.HOSTILE and en.global_position.distance_to(p.global_position) < DANGER_RADIUS:
 			return "You can't fast travel with enemies nearby."
 	return ""
+
+
+## A town or a wayside inn (where "towns and inns only" fast travel goes)
+static func is_travel_hub(poi: PlacedPOI) -> bool:
+	return poi != null and (poi.poi is TownData or String(poi.poi.id) == "site_wayside_inn")
 
 
 ## Hours a trip from where you are to this place takes
@@ -152,6 +159,9 @@ func travel_to(poi: PlacedPOI) -> String:
 	if clock != null:
 		clock.advance_hours(hours)
 	travelled.emit(poi, hours)
+	var road := RoadEvents.of(get_tree())
+	if road != null and not is_travel_hub(poi):  # 1.26: a long trip into the wild may be waylaid
+		road.ambush_on_arrival(hours)
 	return ""
 
 

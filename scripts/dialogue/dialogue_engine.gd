@@ -478,6 +478,16 @@ static func _stable(s: Speaker, topic: String) -> int:
 # ---------------------------------------------------------------- greetings
 
 static func greeting(s: Speaker, world: WorldManager) -> String:
+	var g := _greeting(s, world)
+	if s.enemy != null and is_instance_valid(s.enemy) and s.enemy.has_meta("greeting"):
+		return g
+	if get_disposition(s) < TALK_MIN or world == null or not world.is_inside_tree():
+		return g
+	var extra := Roleplay.aside(s, world.get_tree().get_first_node_in_group("player"))  # 1.26: a word about who you are
+	return g + (" " + extra if extra != "" else "")
+
+
+static func _greeting(s: Speaker, world: WorldManager) -> String:
 	var disp := get_disposition(s)
 	if s.enemy != null and is_instance_valid(s.enemy) and s.enemy.has_meta("greeting"):
 		return String(s.enemy.get_meta("greeting"))  # a special person's own words (the Assassins Cult's contacts)
@@ -675,7 +685,7 @@ static func _generic(s: Speaker, topic: String, world: WorldManager) -> String:
 				return "I go where the road takes me."
 			return "Odd jobs around %s. Whatever pays." % town
 		"latest rumors":
-			return _rumor(s, world)
+			return _rumor(s, world) + Roleplay.lead(s, world)  # 1.26: sometimes a lead on treasure
 		"little advice":
 			var tips := [
 				"Carry lockpicks. Every one that breaks teaches your hands something.",

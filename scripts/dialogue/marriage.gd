@@ -39,7 +39,8 @@ static func can_marry(s: DialogueEngine.Speaker) -> bool:
 static func topics_for(s: DialogueEngine.Speaker) -> PackedStringArray:
 	if is_spouse(s):
 		return PackedStringArray(["our shop"])
-	if can_marry(s) and DialogueEngine.get_disposition(s) >= MIN_DISPOSITION:
+	var need := 65 if Roleplay.courted(s) >= Roleplay.COURT_NEEDED else MIN_DISPOSITION  # 1.26: courted three days
+	if can_marry(s) and DialogueEngine.get_disposition(s) >= need:
 		return PackedStringArray(["marriage"])
 	return PackedStringArray()
 

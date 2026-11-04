@@ -768,6 +768,10 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 	var settlers := Settlers.of(get_tree())
 	if settlers != null:
 		out.append_array(settlers.topics_for(s))  # 1.25: a place to live, the settlers' goods
+	var road := RoadEvents.of(get_tree())
+	if road != null:
+		out.append_array(road.topics_for(s))  # 1.26: the toll, the broken cart
+	out.append_array(Roleplay.topics_for(s))  # 1.26: lying, vows, courting
 	return out
 
 
@@ -808,6 +812,14 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 		var told_stl := stl.respond(s, topic)
 		if not told_stl.is_empty():
 			return told_stl
+	var road := RoadEvents.of(get_tree())
+	if road != null:
+		var told_road := road.respond(s, topic)
+		if not told_road.is_empty():
+			return told_road
+	var played := Roleplay.respond(s, topic, _player(), world)
+	if not played.is_empty():
+		return played
 	var wed := Marriage.respond(s, topic, _player(), world.clock.day if world != null and world.clock != null else 1)
 	if not wed.is_empty():
 		return wed

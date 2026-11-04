@@ -203,6 +203,10 @@ func _ready() -> void:
 	road_life.name = "RoadLife"
 	road_life.enabled = road_life_enabled and settings.road_traffic
 	add_child(road_life)
+	var road_events := RoadEvents.new()  # 1.26: highwaymen, the beset, ambushes and wrecks on the road
+	road_events.name = "RoadEvents"
+	road_events.enabled = encounters_enabled
+	add_child(road_events)
 	crime = CrimeManager.new()
 	crime.name = "CrimeManager"
 	add_child(crime)
@@ -534,8 +538,68 @@ func _place_player_at_spawn() -> void:
 		player.rotation.y = atan2(out.x, out.z)  # -Z (forward) points back along -out, into town
 	else:
 		player.global_position = spawn + Vector3.UP * 1.5
+	var other := alternate_start(String(GameRules.get_rule("start")), spawn)  # 1.26: another way in
+	if other.is_finite():
+		player.global_position = other
 	if player is CharacterBody3D:
 		(player as CharacterBody3D).velocity = Vector3.ZERO
+
+
+## Where another start puts you (INF = the usual town gate): "inn" by the nearest wayside inn's
+## fire, "shipwreck" on the nearest shore, wet through, "wilds" alone 250-400 m from any road
+func alternate_start(kind: String, spawn: Vector3) -> Vector3:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = world_seed + 4242
+	match kind:
+		"inn":
+			var best: PlacedPOI = null
+			for poi in pois:
+				if String(poi.poi.id) == "site_wayside_inn" and (best == null or poi.position.distance_to(spawn) < best.position.distance_to(spawn)):
+					best = poi
+			if best != null:
+				var at := best.position + Basis(Vector3.UP, best.yaw) * Vector3(0, 0, 2.0)
+				return Vector3(at.x, map.get_height(at.x, at.z) + 1.5, at.z)
+		"shipwreck":
+			if map.settings.water_enabled:
+				for r in range(60, 3000, 40):
+					for i in 24:
+						var a := float(i) / 24.0 * TAU
+						var x := spawn.x + cos(a) * r
+						var z := spawn.z + sin(a) * r
+						var h := map.get_height(x, z)
+						if h > map.settings.sea_level + 0.3 and h < map.settings.sea_level + 1.6:
+							_wake_wet.call_deferred()
+							return Vector3(x, h + 1.2, z)
+		"wilds":
+			for tries in 60:
+				var a := rng.randf() * TAU
+				var r := rng.randf_range(300.0, 900.0)
+				var x := spawn.x + cos(a) * r
+				var z := spawn.z + sin(a) * r
+				var h := map.get_height(x, z)
+				if map.is_under_water(h) or map.is_wet(x, z, h):
+					continue
+				var far := true
+				for road in map.roads.get_roads():
+					for q in (road["points"] as PackedVector3Array):
+						if Vector2(q.x - x, q.z - z).length() < 250.0:
+							far = false
+							break
+					if not far:
+						break
+				if far:
+					return Vector3(x, h + 1.5, z)
+	return Vector3.INF
+
+
+# A shipwreck start: soaked to the skin, and a word in the journal
+func _wake_wet() -> void:
+	if player == null:
+		return
+	var surv := player.get_node_or_null("Survival")
+	if surv != null and "wet" in surv:
+		surv.wet = 1.0
+	DialogueState.system_entry("The Wreck", "The ship went down in the night. I woke on the sand with the sea still in my lungs, and nothing but what I was carrying.", "")
 
 
 # Invisible walls just outside the generated area. The cliff ring normally stops you long before.

@@ -27,6 +27,7 @@ var _quiz_i := -1
 var _quiz_answers: Array = []
 
 const PAGES := ["World", "You", "Class", "Traits", "Begin"]
+const START_IDS := ["gate", "inn", "shipwreck", "wilds"]
 
 
 func _ready() -> void:
@@ -199,6 +200,8 @@ func _world_page() -> void:
 	_check(g, "Afflictions", "afflictions", "Diseases, vampirism and lycanthropy")
 	_check(g, "Ironman", "ironman", "One life: death deletes the save")
 	_check(g, "Fast travel", "fast_travel", "Click the map twice to travel (carriages always work)")
+	_check(g, "Towns and inns only", "fast_travel_towns", "Fast travel reaches only towns and wayside inns")
+	_choice(g, "Start", ["Outside a town gate", "At a wayside inn", "Shipwrecked on a shore", "Alone in the wilds"], maxi(START_IDS.find(String(rules.get("start", "gate"))), 0), func(i: int) -> void: rules["start"] = START_IDS[i])
 	_check(g, "Quest markers", "quest_markers", "Quest targets on the map and compass")
 	_check(g, "Falling damage", "fall_damage", "Long falls hurt (Acrobatics softens them)")
 	_slider(g, "Leveling speed", "xp_rate", 0.25, 3.0, 0.05, "x%.2f")

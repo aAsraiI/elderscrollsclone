@@ -33,7 +33,7 @@ static func friendly(a: Node, b: Node) -> bool:
 	var ea := a as Enemy
 	var eb := b as Enemy
 	if ea != null and eb != null and not a_player and not b_player:
-		return ea.disposition == Enemy.Disposition.HOSTILE and eb.disposition == Enemy.Disposition.HOSTILE
+		return CreatureFactions.allies(ea, eb)  # 1.24: one side or friends (was: every hostile creature)
 	return false
 
 

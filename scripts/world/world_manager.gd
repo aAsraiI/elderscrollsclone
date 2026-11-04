@@ -137,6 +137,10 @@ func _ready() -> void:
 	encounters.name = "EncounterManager"
 	encounters.enabled = encounters_enabled
 	add_child(encounters)
+	var battles := CreatureBattles.new()  # 1.24: fights between factions you can come across
+	battles.name = "CreatureBattles"
+	battles.enabled = encounters_enabled
+	add_child(battles)
 	clock = WorldClock.new()
 	clock.name = "WorldClock"
 	clock.control_environment = day_night_enabled

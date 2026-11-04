@@ -172,6 +172,8 @@ const ARC_PITCHES: Array[float] = [0.0, -10.0]
 ## A click while a swing is still finishing is remembered and fires the moment you are ready.
 ## Off for the player (PlayerCombat): a click only counts when you can swing.
 @export var buffer_clicks := true
+## 1.24: func(collider) -> bool. True = a body its swings pass through and never hurt (its own side)
+var spare_body: Callable
 ## Holding the charge long enough swings heavy by itself, without letting go (the player)
 @export var auto_power_attack := false
 ## 1.23: how far through a swing's recovery (0..1) the next swing may cut in. The blade has followed
@@ -1081,6 +1083,8 @@ func _resolve_slam(act: Dictionary) -> void:
 	var seen := {}
 	for r in found:
 		var collider: Object = r["collider"]
+		if spare_body.is_valid() and spare_body.call(collider):
+			continue  # 1.24: a slam spares its own side
 		var target := _damageable_of(collider)
 		if target == null or seen.has(target.get_instance_id()):
 			continue
@@ -1282,7 +1286,18 @@ func _cast(xf: Transform3D, yaw_deg: float, pitch_deg: float, reach: float, line
 
 func _ray(from: Vector3, to: Vector3) -> Dictionary:
 	var query := PhysicsRayQueryParameters3D.create(from, to, hit_mask, _exclude)
-	return body.get_world_3d().direct_space_state.intersect_ray(query)
+	var hit := body.get_world_3d().direct_space_state.intersect_ray(query)
+	if not spare_body.is_valid():
+		return hit
+	# 1.24: a swing passes through its own side (see spare_body), up to a few of them
+	var extra := _exclude.duplicate()
+	for i in 4:
+		if hit.is_empty() or not spare_body.call(hit["collider"]):
+			return hit
+		extra.append((hit["collider"] as CollisionObject3D).get_rid())
+		query.exclude = extra
+		hit = body.get_world_3d().direct_space_state.intersect_ray(query)
+	return {}
 
 
 # Where a slam lands: what the center ray touches, else the ground at the end of the reach

@@ -49,6 +49,8 @@ enum Kit { UNARMED, SWORD, SWORD_SHIELD, DAGGER, DAGGER_PAIR, GREATSWORD, WARHAM
 @export_range(0.0, 1.0, 0.05) var knockback_resistance := 0.0
 ## 0 = stands still until it sees you; bigger = strolls around within this many meters
 @export var wander_radius := 0.0
+## 1.24: the side it is on (data/world/creature_factions.json); empty = from that file's members, or worked out
+@export var faction := ""
 
 @export_group("Talk (neutral and friendly NPCs)")
 @export var talk_name := ""
@@ -151,6 +153,8 @@ func apply(e: Enemy, level: int, rng: RandomNumberGenerator) -> void:
 func _apply_stage10(e: Enemy, level: int, rng: RandomNumberGenerator) -> void:
 	var key := get_key()
 	e.enemy_id = key
+	if faction != "":
+		e.faction = faction
 	var tough := float(GameRules.get_rule("enemy_toughness"))
 	e.max_health *= tough
 	e.damage_mult *= tough

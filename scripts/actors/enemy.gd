@@ -148,6 +148,13 @@ var _state_time := 0.0
 var _clock := 0.0
 var _next_attack_at := 0.0
 var _sight_until := 0.0  # 1.23: _can_see_target() is remembered until then
+var _scan_at := 0.0  # 1.24: next look round for creatures of a hostile faction
+var _rally_at := 0.0
+## 1.24: you (or yours) hurt it this fight: a faction that tolerates you fights you anyway
+var _provoked := false
+var _hurt_by_player := false
+var _hurt_by_creature := false  # 1.24: hurt by another creature (a death only from those does not last)
+const RALLY_RANGE := 16.0
 var _sight_seen := false
 var _sight_target: Node3D = null
 var _circle_dir := 1.0
@@ -203,6 +210,8 @@ enum Style { DUELIST, BRUTE, MAGE, BEAST, SPIRIT, ARCHER }
 @export var style: Style = Style.DUELIST
 ## Which EnemyData made it ("wolf", "bandit"...)
 @export var enemy_id := ""
+## 1.24: the side it is on (CreatureFactions); "" = worked out from what it is the first time it is asked
+@export var faction := ""
 ## 0..1 how sharp it is: chance to dodge, block, parry and feint (EnemyData sets it from the level)
 @export_range(0.0, 1.0, 0.05) var cunning := 0.3
 ## Healing potions it can drink when hurt (humanoids)
@@ -451,7 +460,10 @@ func _build_systems() -> void:
 		combat.windup_add = telegraph_time
 		combat.lunge_speed = lunge_speed
 		add_child(combat)
-	combat.hit_mask = WORLD_LAYER  # enemies hit the world and the player (layer 1), never each other
+	combat.hit_mask = _default_hit_mask()
+	# 1.24: a swing passes through its own side and friends (no friendly fire, no blocked swings), but a
+	# neutral creature in the way is hit: and fights back (CreatureFactions)
+	combat.spare_body = func(c: Object) -> bool: return c is Enemy and c != self and CreatureFactions.allies(self, c as Node)
 	animation = combat.animation
 	magic = ActiveMagic.attach(self)
 	if starting_weapon != null and starting_weapon.is_bow:
@@ -551,6 +563,8 @@ func _physics_process(delta: float) -> void:
 	if _frenzy_until > _clock:
 		_tick_frenzy()
 	elif _target == null or not is_instance_valid(_target):
+		if state == State.CHASE or state == State.ATTACK:
+			_lose_target()  # 1.24: what it fought is gone: it calms down (it used to turn on you, seen or not)
 		_target = get_tree().get_first_node_in_group("player") as Node3D
 	# Calmed: no fighting while it lasts
 	if _calm_until > _clock and (state == State.CHASE or state == State.ATTACK):
@@ -588,6 +602,8 @@ func _physics_process(delta: float) -> void:
 			_tick_flee(delta)
 		State.PATROL:
 			_tick_patrol(delta)
+	if state == State.IDLE or state == State.WANDER or state == State.PATROL:
+		_scan_for_foes()  # 1.24: creatures of a faction it fights on sight
 	_aim_head()
 	if state == State.IDLE and is_on_floor() and velocity.length_squared() < 0.0004:
 		return  # 1.23: standing still on the ground: nothing to move (saves a physics query per idle actor per frame)
@@ -964,7 +980,7 @@ func _lose_target() -> void:
 	_alerted = false
 	if _target != null and not (is_instance_valid(_target) and _target.is_in_group("player")):
 		_target = null  # done with a creature: back to watching the player
-		combat.hit_mask = WORLD_LAYER
+		combat.hit_mask = _default_hit_mask()
 	_enter_state(State.IDLE)
 
 
@@ -1269,6 +1285,11 @@ func _tick_frenzy() -> void:
 func on_hostile_magic(source: Node3D) -> void:
 	if state == State.DEAD or source == null or source == self:
 		return
+	if _by_player(source):
+		_provoked = true
+		_hurt_by_player = true
+	if source is Enemy and CreatureFactions.allies(self, source):
+		return  # 1.24: a friend's spell caught it: an accident
 	_calm_until = -1.0
 	_alerted = true
 	if source is Enemy and disposition == Disposition.HOSTILE:
@@ -1415,6 +1436,9 @@ func _can_see_target() -> bool:
 func _can_see_target_now() -> bool:
 	if not _target_usable():
 		return false
+	# 1.24: a side you have helped enough leaves you be, unless you start something
+	if not _provoked and disposition == Disposition.HOSTILE and _target.is_in_group("player") and CreatureFactions.tolerates_player(CreatureFactions.of(self)):
+		return false
 	if _calm_until > _clock:
 		return false
 	if asleep:
@@ -1546,11 +1570,21 @@ func _on_damaged(info: DamageInfo, amount: float) -> void:
 	if state == State.DEAD:
 		return
 	_alerted = true
+	if _by_player(info.source):
+		_hurt_by_player = true
+		_provoked = true
 	# Hit by another creature (a guard, or a guard hit by a bandit): fight back against it. That
 	# doesn't make a guard or a townsperson hostile to the player.
 	var by_creature := info.source is Enemy and info.source != self and is_instance_valid(info.source)
-	if by_creature and (disposition == Disposition.HOSTILE or (info.source as Enemy).disposition == Disposition.HOSTILE):
-		fight(info.source as Enemy)
+	if by_creature and not _by_player(info.source):
+		_hurt_by_creature = true
+	if by_creature and CreatureFactions.allies(self, info.source as Node):
+		return  # 1.24: one side, or friends: an accident, no grudge
+	var rel := CreatureFactions.between(self, info.source as Node) if by_creature else CreatureFactions.Rel.NEUTRAL
+	if by_creature and (disposition == Disposition.HOSTILE or (info.source as Enemy).disposition == Disposition.HOSTILE or rel == CreatureFactions.Rel.HOSTILE):
+		fight(info.source as Enemy)  # a neutral one fights back its attacker only (even after an accident)
+	if info.source is Node3D and is_instance_valid(info.source):
+		_rally(info.source as Node3D)  # 1.24: its own side nearby joins in
 	if info.knockback > 0.0:
 		var push := Vector3(info.direction.x, 0.0, info.direction.z)
 		if push.length() > 0.001:
@@ -1648,10 +1682,14 @@ func _on_died() -> void:
 	_enter_state(State.DEAD)
 	remove_from_group("enemies")
 	ActorRegistry.remove(self)
-	if persist_mode == PersistMode.CORPSE_ONLY:
-		add_to_group("persistent")  # its corpse (and what is still in it) is saved
-	if spawn_key != "":
-		WorldState.set_record("kill/" + spawn_key, {"dead": true})
+	# 1.24: only a death you had a hand in lasts. One creature killed by another (a battle between
+	# factions) comes back when its place loads again, so the world does not empty itself
+	if _hurt_by_player or not _hurt_by_creature:
+		if persist_mode == PersistMode.CORPSE_ONLY:
+			add_to_group("persistent")  # its corpse (and what is still in it) is saved
+		if spawn_key != "":
+			WorldState.set_record("kill/" + spawn_key, {"dead": true})
+		CreatureFactions.on_player_kill(get_tree(), self)
 	QuestEvents.kill(self)
 	if enemy_id == "dragon":
 		var slain := int(WorldState.get_record("dragons_slain").get("n", 0)) + 1
@@ -1808,3 +1846,76 @@ static func restore(data: Dictionary, parent: Node) -> Enemy:
 	else:
 		e.stats.modify_vital("health", float(data.get("health", e.max_health)) - e.stats.health)
 	return e
+
+
+# ---------------------------------------------------------------- factions (Alpha 1.24)
+
+## What its swings can hit when it is not fighting a creature: the world and the player, and, for a
+## hostile one, other creatures too (its own side and friends are spared, see combat.spare_body)
+func _default_hit_mask() -> int:
+	return WORLD_LAYER | ENEMY_LAYER if disposition == Disposition.HOSTILE else WORLD_LAYER
+
+
+func is_guard() -> bool:
+	return has_meta("guard") or enemy_id == "town_guard" or enemy_id == "caravan_guard"
+
+
+## Looks around now and then for a creature of a faction it fights on sight (bandits and the undead,
+## wolves and sheep), and goes for the nearest one it can see. Cheap: a few looks a second at most,
+## and only for sides that have enemies at all.
+func _scan_for_foes() -> void:
+	if _clock < _scan_at:
+		return
+	_scan_at = _clock + randf_range(0.8, 1.4)
+	if disposition != Disposition.HOSTILE and not is_guard():
+		return
+	var foes := CreatureFactions.hostile_to(CreatureFactions.of(self))
+	if foes.is_empty():
+		return
+	var best: Enemy = null
+	var best_d := detection_range * detection_range
+	for e in ActorRegistry.near(global_position, detection_range):
+		if e == self or e.is_dead() or ActorLOD.is_frozen(e) or not foes.has(CreatureFactions.of(e)):
+			continue
+		var d := e.global_position.distance_squared_to(global_position)
+		if d < best_d and _sees(e):
+			best_d = d
+			best = e
+	if best != null:
+		fight(best)
+
+
+func _sees(n: Node3D) -> bool:
+	if head == null:
+		return true
+	var q := PhysicsRayQueryParameters3D.create(head.global_position, n.global_position + Vector3.UP * 1.0, WORLD_LAYER, [get_rid()])
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	return hit.is_empty() or not (hit["collider"] is StaticBody3D)
+
+
+## Hit: its own side close by joins in against the attacker (and friends now and then)
+func _rally(attacker: Node3D) -> void:
+	if attacker == null or not is_instance_valid(attacker) or _clock < _rally_at:
+		return
+	_rally_at = _clock + 1.0
+	for e in ActorRegistry.near(global_position, RALLY_RANGE):
+		if e == self or e.is_dead() or e.get_fight_target() != null or e == attacker:
+			continue
+		if e.disposition != Disposition.HOSTILE and not e.is_guard():
+			continue  # townsfolk run and call the guards instead
+		var r := CreatureFactions.between(e, self)
+		if r != CreatureFactions.Rel.SAME and not (r == CreatureFactions.Rel.FRIENDLY and randf() < 0.5):
+			continue
+		if attacker.is_in_group("player"):
+			if e.disposition == Disposition.HOSTILE:
+				e._provoked = true
+				e.aggro(attacker)
+		elif attacker is Enemy and not CreatureFactions.allies(e, attacker):
+			e.fight(attacker)
+
+
+## Was it hurt by you (or your allies, or by nothing at all: a trap you sprang, a fall)?
+func _by_player(src: Object) -> bool:
+	if src == null or not is_instance_valid(src):
+		return true
+	return (src as Node).is_in_group("player") or (src as Node).has_meta("player_ally")

@@ -28,6 +28,10 @@ level [levels]            raise every skill (default 1 level)
 setskill <skill> <level>   put a skill straight at a level (no cap; milestones apply)
 perkpoints [n]            give extra perk points (default 5)
 spawn <enemy> [count] [level]   a creature in front of you (wolf, bandit, vampire...)
+factions                  show each creature's side and who it is fighting (again: off); lists your standing
+faction <a> <b> <rel>     make two sides friendly, neutral or hostile (bandits undead hostile)
+standing <faction> <n>    set your standing with a side (25+ = they leave you alone)
+battle [a] [b]            two hostile groups fighting 25 m ahead (default bandits and undead)
 heal                      full health, magicka and stamina
 god                       nothing can hurt you (again: off)
 time <hour> [day]         set the clock (13.5 = half past one)
@@ -195,6 +199,26 @@ func run(text: String) -> String:
 	match cmd:
 		"help":
 			return HELP
+		"factions":
+			return FactionOverlay.toggle(get_tree())
+		"faction":
+			if args.size() < 3:
+				return "faction <a> <b> <friendly|neutral|hostile>"
+			var want := {"friendly": CreatureFactions.Rel.FRIENDLY, "neutral": CreatureFactions.Rel.NEUTRAL, "hostile": CreatureFactions.Rel.HOSTILE}
+			if not want.has(String(args[2]).to_lower()):
+				return "Relation must be friendly, neutral or hostile."
+			CreatureFactions.set_relation(String(args[0]), String(args[1]), want[String(args[2]).to_lower()])
+			return "%s and %s are now %s." % [args[0], args[1], args[2]]
+		"standing":
+			if args.size() < 2:
+				return "standing <faction> <n>"
+			CreatureFactions.add_standing(get_tree(), String(args[0]), int(args[1]) - CreatureFactions.standing(String(args[0])))
+			return "Standing with %s: %d" % [args[0], CreatureFactions.standing(String(args[0]))]
+		"battle":
+			if world == null or p == null:
+				return "No world."
+			var ahead := p.global_position - p.global_transform.basis.z * 25.0
+			return CreatureBattles.start(world, ahead, String(args[0]) if args.size() > 0 else "bandits", String(args[1]) if args.size() > 1 else "undead")
 		"clear":
 			_log.clear()
 			return ""

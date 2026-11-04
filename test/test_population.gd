@@ -384,7 +384,7 @@ func t_persistence_modes() -> void:
 	check("a garrison member's corpse is saved", garrison.is_in_group("persistent"))
 	check("a transient creature's corpse is not", not transient.is_in_group("persistent"))
 	check("killing a keyed enemy is remembered", WorldState.has_record("kill/test/g0"))
-	check("an unkeyed kill leaves no record", WorldState.records.size() == 1)
+	check("an unkeyed kill leaves no record", WorldState.records.keys().filter(func(k): return String(k).begins_with("kill/")).size() == 1)
 	var data := garrison.get_persist_data()
 	check("the corpse keeps level, size and color for the save file", int(data["level"]) == 2 and data.has("body_scale") and data.has("color"))
 	var back := Enemy.restore(data, world)

@@ -69,7 +69,15 @@ Settings > Interface > Lockpicking minigame lets you pick by hand: for each pin 
 
 Pickpocket is its own skill. At 25 you can slip things into pockets, at 100 you can lift what they wear and wield. What you take is stolen."],
 	["crime", "Stealth and Crime", "Crime and Bounty",
-		"Taking what isn't yours (red text), attacking or killing people, trespassing after dark: anyone who sees it reports it, and the town puts a bounty on you. Witnesses tell their friends.\n\nGuards will stop you: pay, go to jail and serve the time, or fight. Someone who saw you might believe a lie (\"what you saw\"). The Thieves Guild fences stolen goods."],
+		"Taking what isn't yours (red text), attacking or killing people, trespassing after dark: anyone who sees it reports it, and the town puts a bounty on you. Witnesses tell their friends.\n\nGuards will stop you: pay, go to jail and serve the time, or fight. Someone who saw you might believe a lie (\"what you saw\"). The Thieves Guild fences stolen goods.
+
+Witnesses: anyone who saw your crime can be asked to \"keep quiet\": bribe them (gold), or threaten them (a roll on Strength and Speech; fail and they call the guard). Either way they forget, and the town's bounty drops.
+
+Jail: each day inside, one skill slips a level, but every other day your cellmates teach you a level of Sneak, Security, Pickpocket, Hand to Hand or Speech.
+
+Stolen goods cool off after 7 days: no longer known as stolen. A fence can launder everything at once for a quarter of its worth (\"launder stolen goods\").
+
+Once your bounties add up to 300 or more, bounty hunters come for you in the wilds, every couple of days."],
 
 	["leveling", "Your Character", "Skills and Levels",
 		"Every skill rises by using it: swing a sword, cast a spell, pick a lock, haggle. There is no cap. Each skill gives a small bonus every 5 levels and a named milestone at 10, 25, 50, 75 and 100.\n\nSkill levels raise your character level. Each level brings a perk point, and some levels a feat. Trainers teach skills for gold (Train, in a conversation), up to their own rank: Journeymen to 50, Experts (guild officers, priests) to 75, Masters (guild leaders) to 100, and the Grandmasters of the far islands to 150. Being tired slows learning.\n\nWhen a skill reaches 50, and again at 100, a master of it sends word: raise it three more levels and their amulet, made for that skill, is yours. Past 100, a rare Tome of Mastery from the far islands raises your best skill to its next mastery step."],

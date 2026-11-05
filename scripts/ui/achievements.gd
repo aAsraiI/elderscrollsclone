@@ -104,6 +104,9 @@ const LIST := [
 	["patron", 2, "Chosen", "Do a Patron's deed and receive its artifact (kneel at a glowing shrine in the wilds).", "patrons", "n:patron", 1],
 	["pickpocket50", 2, "Cutpurse", "Pick 25 pockets.", "pickpocket", "n:pickpocket", 25],
 	["disguise", 2, "One of Us", "Walk among a faction in its clothes (Bandit Leathers, Ash Cult Robes, Smuggler's Coat).", "stealth", "n:disguise", 1],
+	["bribe", 2, "Hush Money", "Keep a witness quiet: bribe or threaten someone who saw your crime.", "crime", "n:bribe", 1],
+	["launder", 2, "Clean Hands", "Have a fence launder your stolen goods.", "crime", "n:launder", 1],
+	["hunter_kill", 2, "Not Today, Hunter", "Kill a bounty hunter (they come for you once your bounties pass 300).", "crime", "n:hunter_kill", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],
@@ -180,6 +183,8 @@ static func on_event(kind: String, data: Dictionary) -> void:
 			var e := data.get("enemy") as Enemy
 			if e != null and e._hurt_by_player:
 				note("kill")
+				if e.has_meta("bounty_hunter"):
+					note("hunter_kill")
 		"talk", "steal", "persuade", "use":
 			note(kind)
 

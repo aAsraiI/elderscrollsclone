@@ -46,6 +46,7 @@ func _run() -> void:
 		await t_pickpocket()
 		await t_lockpick()
 		await t_light_noise()
+		await t_outlaw()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -177,3 +178,36 @@ func t_light_noise() -> void:
 	check("then the faction is on to you", not Disguises.fools(b, p))
 	b.queue_free()
 	eq.unequip_item(garb)
+
+
+func t_outlaw() -> void:
+	print("-- bounty hunters, jail, witnesses, stolen goods")
+	var crime := wm.crime
+	var town := wm.get_nearest_town(p.global_position)
+	check("a town and the law", crime != null and town != null)
+	if crime == null or town == null:
+		return
+	crime.set_bounty(town.id, 500)
+	var hunters := OutlawLife.send_hunters(wm, p, wm.clock.day)
+	check("bounty hunters come for a big bounty", hunters.size() >= 2 and hunters.all(func(e: Enemy) -> bool: return e.has_meta("bounty_hunter")))
+	for e in hunters:
+		e.queue_free()
+	check("not two days running", int(WorldState.get_record("hunters").get("day", -1)) == wm.clock.day)
+	# jail
+	var sk := p.get_node("Skills") as Skills
+	sk.set_level(&"one_handed", 40)
+	var before := sk.get_level(&"sneak") + sk.get_level(&"security") + sk.get_level(&"pickpocket") + sk.get_level(&"hand_to_hand") + sk.get_level(&"speech")
+	var r := crime.serve_jail(town, 400)
+	var after := sk.get_level(&"sneak") + sk.get_level(&"security") + sk.get_level(&"pickpocket") + sk.get_level(&"hand_to_hand") + sk.get_level(&"speech")
+	check("jail: skills slip a level a day", (r["lost"] as PackedStringArray).size() >= 1)
+	check("and cellmates teach thieves' skills", after > before and not (r["learned"] as PackedStringArray).is_empty(), str(r))
+	check("the bounty is paid off", CrimeManager.get_bounty(town.id) == 0)
+	# stolen goods
+	var gem := load("res://data/treasure/%s" % Array(DirAccess.get_files_at("res://data/treasure")).filter(func(f: String) -> bool: return f.ends_with(".tres"))[0]) as ItemData
+	var inv := p.get_node("Inventory") as Inventory
+	inv.add_item(gem, 2)
+	CrimeManager.add_stolen(gem, 2)
+	check("it is stolen", CrimeManager.stolen_count(inv, gem) == 2)
+	check("a fence asks a share to launder it", OutlawLife.launder_price(inv) == ceili(gem.value * 2 * OutlawLife.LAUNDER_SHARE))
+	check("after a week it cools off", OutlawLife.cool_off(wm.clock.day + OutlawLife.COOL_DAYS) == 2 and CrimeManager.stolen_count(inv, gem) == 0)
+	check("bribes cost more for more crimes", OutlawLife.BRIBE_PER_CRIME > 0 and OutlawLife.threat_chance(p) > 0.05)

@@ -107,6 +107,7 @@ static func add_stolen(item: ItemData, count: int) -> void:
 	var ledger := stolen_ledger().duplicate()
 	ledger[path] = int(ledger.get(path, 0)) + count
 	WorldState.set_record(STOLEN, {"items": ledger})
+	OutlawLife.note_stolen_day(path)  # 1.29
 
 
 static func remove_stolen(item: ItemData, count: int) -> void:
@@ -272,6 +273,7 @@ func _process(delta: float) -> void:
 	if _creature_timer >= 1.0:
 		_creature_timer = 0.0
 		_defend_town(p)
+		OutlawLife.tick(self, p)  # 1.29: bounty hunters, stolen goods cooling off
 
 
 # Inside a closed home or shop: the people there tell you to leave, then report you
@@ -390,6 +392,10 @@ func _guards(town: PlacedPOI) -> Array[Enemy]:
 # ---------------------------------------------------------------- arrest
 
 ## Days in jail for a bounty
+## 1.29: what the company in a cell teaches
+const JAIL_TAUGHT := ["sneak", "security", "pickpocket", "hand_to_hand", "speech"]
+
+
 static func jail_days(bounty: int) -> int:
 	return clampi(ceili(float(bounty) / 100.0), 1, 7)
 
@@ -426,17 +432,35 @@ func serve_jail(town: PlacedPOI, bounty: int) -> Dictionary:
 	confiscate(inv)
 	set_bounty(town.id, 0)
 	var lost := PackedStringArray()
+	var learned := PackedStringArray()
 	var skills := p.get_node_or_null("Skills") as Skills
 	if skills != null:
-		var with_xp: Array = []
-		for id in skills.xp:
-			if float(skills.xp[id]) > 0.0:
-				with_xp.append(id)
-		with_xp.shuffle()
-		for i in mini(days, with_xp.size()):
-			skills.xp[with_xp[i]] = 0.0
-			var def := SkillDatabase.get_skill(with_xp[i])
-			lost.append(def.display_name if def != null else String(with_xp[i]))
+		# 1.29: like Oblivion, each day behind bars one skill slips a level; and the company you keep
+		# teaches you a thing or two (every other day, a level in a thief's skill)
+		var rusty: Array = []
+		for id in skills.levels:
+			if int(skills.levels[id]) > SkillDatabase.START_LEVEL and not JAIL_TAUGHT.has(String(id)):
+				rusty.append(id)
+		rusty.shuffle()
+		for i in mini(days, rusty.size()):
+			skills.set_level(rusty[i], int(skills.levels[rusty[i]]) - 1)
+			var def := SkillDatabase.get_skill(rusty[i])
+			lost.append(def.display_name if def != null else String(rusty[i]))
+		if rusty.size() < days:  # nothing above where it started: the progress toward the next level goes
+			var with_xp: Array = []
+			for id in skills.xp:
+				if float(skills.xp[id]) > 0.0 and not rusty.has(id):
+					with_xp.append(id)
+			with_xp.shuffle()
+			for i in mini(days - rusty.size(), with_xp.size()):
+				skills.xp[with_xp[i]] = 0.0
+				var d3 := SkillDatabase.get_skill(with_xp[i])
+				lost.append(d3.display_name if d3 != null else String(with_xp[i]))
+		for i in days / 2:
+			var t := StringName(JAIL_TAUGHT[(i + days) % JAIL_TAUGHT.size()])
+			skills.set_level(t, skills.get_level(t) + 1)
+			var d2 := SkillDatabase.get_skill(t)
+			learned.append(d2.display_name if d2 != null else String(t))
 	if world.clock != null:
 		world.clock.advance_hours(float(days) * 24.0)
 	var layout := town.town
@@ -450,8 +474,10 @@ func serve_jail(town: PlacedPOI, bounty: int) -> Dictionary:
 	var text := "You served %d day%s in jail." % [days, "" if days == 1 else "s"]
 	if not lost.is_empty():
 		text += " Your %s skill%s grew rusty." % [", ".join(lost), "" if lost.size() == 1 else "s"]
+	if not learned.is_empty():
+		text += " Your cellmates taught you %s." % ", ".join(learned)
 	Locks.toast(get_tree(), text, true)
-	return {"days": days, "lost": lost}
+	return {"days": days, "lost": lost, "learned": learned}
 
 
 func _player() -> Node3D:

@@ -22,7 +22,7 @@ extends Node
 signal crime_reported(kind: String, town_id: String, bounty: int, witnessed: bool)
 signal bounty_changed(town_id: String, bounty: int)
 
-const BOUNTY := {"trespass": 5, "lockpick": 5, "assault": 40, "murder": 1000, "resist": 5}
+const BOUNTY := {"trespass": 5, "lockpick": 5, "pickpocket": 25, "assault": 40, "murder": 1000, "resist": 5}
 ## At this bounty guards attack instead of arresting
 const ATTACK_ON_SIGHT := 1000
 ## Awareness (see Stealth) a person needs to count as a witness

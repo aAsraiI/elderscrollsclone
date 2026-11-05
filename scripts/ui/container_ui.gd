@@ -17,6 +17,8 @@ var _weight_label: Label
 var _container: ContainerComponent
 var _is_open := false
 var _open_frame := -1
+## 1.29: picking someone's pockets (every take is a roll; see Pickpocket)
+var _victim: Enemy
 
 
 func _ready() -> void:
@@ -40,6 +42,15 @@ func _ready() -> void:
 	if equipment != null:
 		equipment.equipped.connect(func(_slot, _item): _refresh())
 		equipment.unequipped.connect(func(_slot, _item): _refresh())
+
+
+## 1.29: someone's pockets: every take is a roll, a failed one closes the window and they turn on you
+func open_pockets(container: ContainerComponent, victim: Enemy) -> bool:
+	if not open(container):
+		return false
+	_victim = victim
+	_title_label.text = "%s (sneaking: each thing is a chance)" % container.display_name
+	return true
 
 
 ## Returns false if it couldn't open (e.g. another menu is already open).
@@ -67,6 +78,7 @@ func open(container: ContainerComponent) -> bool:
 
 func _close() -> void:
 	_is_open = false
+	_victim = null
 	_root.visible = false
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -292,6 +304,27 @@ func _transfer_selected(single: bool) -> void:
 	var amount: int = 1 if single else data["count"]
 	var from_inv: Inventory = _container.inventory if tree == _left else inventory
 	var to_inv: Inventory = inventory if tree == _left else _container.inventory
+	if _victim != null and is_instance_valid(_victim):  # 1.29: picking pockets
+		var player := get_parent() as Node3D
+		if tree == _left:
+			var eq := _victim.get_node_or_null("Equipment") as Equipment
+			if eq != null and eq.is_equipped(item) and not Pickpocket.can_lift_worn(player):
+				_details.text = "They are wearing that (Pickpocket 100 lifts worn things)."
+				return
+			if not Pickpocket.try_take(player, _victim, item, amount):
+				var v := _victim
+				_close()
+				Pickpocket.caught(player, v)
+				return
+			if from_inv.remove_item(item, amount):
+				to_inv.add_item(item, amount)
+			return
+		elif not Pickpocket.can_plant(player):
+			_details.text = "Slipping things into pockets takes Pickpocket 25."
+			return
+		if from_inv.remove_item(item, amount):
+			to_inv.add_item(item, amount)
+		return
 	if from_inv.remove_item(item, amount):
 		to_inv.add_item(item, amount)
 		_note_ownership(item, amount, tree == _left)
@@ -311,7 +344,7 @@ func _note_ownership(item: ItemData, amount: int, taken: bool) -> void:
 
 
 func _take_all() -> void:
-	if _container == null:
+	if _container == null or _victim != null:
 		return
 	# Total per item first, because stacks change while we move things
 	var totals := {}

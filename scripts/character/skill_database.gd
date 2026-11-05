@@ -284,6 +284,17 @@ static func _stealth() -> void:
 		.at(75, "Safecracker", "Even master locks yield.", {"security_bonus": 0.10, "agility": 5.0})
 		.at(100, "Master Locksmith", "No lock in the realm holds you.", {"security_bonus": 0.20})
 		.mastered({"security_bonus": 0.05}))
+	_add(SkillData.new(&"pickpocket", "Pickpocket", "Stealth",  # 1.29
+			"Lifting purses and slipping things into pockets.",
+			"Picking pockets (sneak up on someone unaware and press E)")
+		.effect("pickpocket_bonus", 0.004, "pickpocket chance")
+		.attribute("agility", 0.15)
+		.at(10, "Light Touch", "Your fingers are quick.", {"pickpocket_bonus": 0.05})
+		.at(25, "Plant", "You can slip things into pockets, too.", {"pickpocket_bonus": 0.05})
+		.at(50, "Cutpurse", "Heavy purses come away easily.", {"pickpocket_bonus": 0.10})
+		.at(75, "Misdirection", "Nobody feels a thing.", {"pickpocket_bonus": 0.10})
+		.at(100, "Master Thief", "You can lift even what they wear and wield.", {"pickpocket_bonus": 0.15}, true)
+		.mastered({"pickpocket_bonus": 0.03}))
 
 
 static func _movement() -> void:

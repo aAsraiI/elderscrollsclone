@@ -133,7 +133,7 @@ static func format_effect(stat: String, per_tier: float, amount: float, label: S
 ## Stats always shown as a percentage, and stats always shown as plain points
 const PERCENT_STATS: Array[String] = ["crit_chance", "crit_mult", "armor_pen", "life_leech", "execute_bonus", "damage_reduction",
 	"poise_bonus", "fall_resist", "harvest_bonus", "mining_bonus", "farming_bonus", "gem_find", "crop_growth", "follower_damage",
-	"follower_health", "persuade_bonus", "blessing_mult", "skill_xp_pct", "sneak_attack_bonus", "security_bonus", "block_strength",
+	"follower_health", "persuade_bonus", "blessing_mult", "skill_xp_pct", "sneak_attack_bonus", "security_bonus", "pickpocket_bonus", "block_strength",
 	"spell_power", "spell_absorb", "reflect", "bane_undead", "bane_beast", "mounted_damage"]
 const FLAT_STATS: Array[String] = ["max_health", "max_magicka", "max_stamina", "carry_capacity", "armor", "damage", "unarmed_damage",
 	"strength", "agility", "endurance", "wisdom", "stealth", "charisma", "health_regen", "magicka_regen", "reach_bonus"]
@@ -156,7 +156,7 @@ const LABELS := {
 	"magicka_cost_mult": "spell cost", "blessing_mult": "shrine blessing strength", "sneak_speed_mult": "speed while sneaking",
 	"noise_mult": "noise", "unarmed_damage": "unarmed damage", "block_strength": "block strength",
 	"sneak_attack_bonus": "sneak attack damage", "buy_price_mult": "buy prices", "sell_price_mult": "sell prices",
-	"security_bonus": "lockpicking forgiveness", "smithing_potency": "smithing", "alchemy_potency": "potion strength",
+	"security_bonus": "lockpicking forgiveness", "pickpocket_bonus": "pickpocket chance", "smithing_potency": "smithing", "alchemy_potency": "potion strength",
 	"enchanting_potency": "enchantment strength", "cooking_potency": "meal strength", "skill_xp_pct": "skill XP",
 	"spell_power": "spell strength", "spell_absorb": "chance to absorb spells", "reflect": "chance to reflect spells",
 	"resist_fire": "fire resistance", "resist_frost": "frost resistance", "resist_shock": "shock resistance",

@@ -37,10 +37,16 @@ func _ready() -> void:
 
 
 func get_prompt() -> String:
+	var p := get_tree().get_first_node_in_group("player") as Node3D
+	if get_parent() is Enemy and Pickpocket.can(p, get_parent() as Enemy):  # 1.29: sneaking up on them
+		return "Pick %s's pockets" % speaker
 	return "Talk to %s" % speaker
 
 
 func interact(_actor: Inventory) -> void:
+	var p := get_tree().get_first_node_in_group("player") as Node3D
+	if get_parent() is Enemy and Pickpocket.can(p, get_parent() as Enemy) and Pickpocket.open(p, get_parent() as Enemy):
+		return
 	# The dialogue window (made by player.gd) when there is one, the speech bubble otherwise
 	var ui := get_tree().get_first_node_in_group("dialogue_ui") as DialogueUI
 	if ui != null and get_parent() is Enemy and ui.open_with(get_parent() as Enemy):

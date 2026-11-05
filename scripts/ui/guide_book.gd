@@ -55,7 +55,13 @@ Members of the Mages Guild can ask a guild mage about \"magical research\": for 
 	["stealth", "Stealth and Crime", "Sneaking",
 		"Ctrl sneaks. The eye on screen shows whether anyone has seen you. Darkness, sneaking, light armour and the Sneak skill help; running, torches and heavy armour hurt.\n\nAn attack on someone who hasn't seen you is a sneak attack: daggers and bows do the most. Sneak up behind someone unaware and press E to knock them out. Hide bodies in water or the dark.\n\nA foe who loses you searches where you were last seen, then gives up."],
 	["locks", "Stealth and Crime", "Locks",
-		"Locked doors and chests need a key or a lockpick. With lockpicks in your pack, E tries the lock: the chance depends on Security against the lock's level. A failed try breaks a pick. Some locks open only with their key.\n\nPicking a lock that isn't yours is a crime if someone sees."],
+		"Locked doors and chests need a key or a lockpick. With lockpicks in your pack, E tries the lock: the chance depends on Security against the lock's level. A failed try breaks a pick. Some locks open only with their key.\n\nPicking a lock that isn't yours is a crime if someone sees.
+
+Settings > Interface > Lockpicking minigame lets you pick by hand: for each pin a marker sweeps along a bar, and you press E (or Space, or click) while it is in the bright gap. A miss breaks a pick and drops a pin. Security widens the gap."],
+	["pickpocket", "Stealth and Crime", "Picking Pockets",
+		"Sneak (Ctrl) up to someone who hasn't noticed you and press E: their pockets open. Every thing you take is a chance (shown by your skill, its weight and worth, and how aware they are); sleepers are easy. Fail and they feel it: they turn on you and it is a crime.
+
+Pickpocket is its own skill. At 25 you can slip things into pockets, at 100 you can lift what they wear and wield. What you take is stolen."],
 	["crime", "Stealth and Crime", "Crime and Bounty",
 		"Taking what isn't yours (red text), attacking or killing people, trespassing after dark: anyone who sees it reports it, and the town puts a bounty on you. Witnesses tell their friends.\n\nGuards will stop you: pay, go to jail and serve the time, or fight. Someone who saw you might believe a lie (\"what you saw\"). The Thieves Guild fences stolen goods."],
 

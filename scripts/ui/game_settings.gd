@@ -34,6 +34,7 @@ const DEFAULTS := {
 	"music_volume": 0.5,
 	"sfx_volume": 0.8,
 	"tutorial": true,
+	"lock_minigame": false,  # 1.29
 	"controller_look": 3.0,
 	"graphics_preset": 3,  # 0 custom, 1 low, 2 medium, 3 high, 4 ultra (see PRESETS)
 	"view_distance": 10,  # terrain chunks drawn around you (64 m each)
@@ -78,6 +79,7 @@ const OPTIONS := [
 	{"tab": "Interface", "key": "show_compass", "label": "Compass", "kind": "check"},
 	{"tab": "Interface", "key": "show_date", "label": "Date and weather in the corner", "kind": "check"},
 	{"tab": "Interface", "key": "tutorial", "label": "Tutorial notices (the Guide is in the journal)", "kind": "check"},
+	{"tab": "Interface", "key": "lock_minigame", "label": "Lockpicking minigame (set each pin by hand)", "kind": "check"},
 	{"tab": "Gameplay", "key": "controller_look", "label": "Controller look speed", "kind": "slider", "min": 1.0, "max": 6.0, "step": 0.25, "fmt": "%.2f"},
 	{"tab": "Interface", "key": "show_fps", "label": "FPS counter", "kind": "check"},
 	{"tab": "Interface", "key": "quest_popups", "label": "Quest notices", "kind": "check"},

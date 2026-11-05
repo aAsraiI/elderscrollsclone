@@ -71,6 +71,13 @@ func interact(actor: Inventory) -> void:
 		Locks.toast(get_tree(), "Unlocked with the %s" % key_name)
 		open()
 		return
+	if LockpickGame.wanted() and LockpickGame.start(get_tree(), actor, lock_level, func(r: int) -> void:
+			if r == Locks.PickResult.OPENED and is_instance_valid(self):
+				Locks.toast(get_tree(), "You picked the lock")
+				open()
+			elif r == Locks.PickResult.FAILED:
+				Locks.toast(get_tree(), "Your last lockpick broke", true)):
+		return  # 1.29: the minigame
 	match Locks.try_pick(actor, lock_level, _rng):
 		Locks.PickResult.OPENED:
 			Locks.toast(get_tree(), "You picked the lock")

@@ -92,6 +92,18 @@ func try_unlock(actor: Inventory) -> bool:
 		set_locked(false)
 		Locks.toast(get_tree(), "Unlocked with your key")
 		return true
+	if LockpickGame.wanted() and LockpickGame.start(get_tree(), actor, lock_level, func(r: int) -> void:
+			if r == -1 or not is_instance_valid(self):
+				return
+			var crime2 := get_tree().get_first_node_in_group("crime") as CrimeManager
+			if crime2 != null:
+				crime2.on_lock_attempt(building_id)
+			if r == Locks.PickResult.OPENED:
+				set_locked(false)
+				Locks.toast(get_tree(), "You picked the lock")
+			else:
+				Locks.toast(get_tree(), "Your last lockpick broke", true)):
+		return false  # 1.29: the minigame decides (press E again to go in)
 	var result := Locks.try_pick(actor, lock_level, _rng)
 	if result == Locks.PickResult.OPENED or result == Locks.PickResult.FAILED:
 		var crime := get_tree().get_first_node_in_group("crime") as CrimeManager

@@ -164,8 +164,13 @@ func _pick(land: String, at: Vector3) -> Dictionary:
 			continue  # bears sleep through the winter
 		if quiet and PREDATORS.has(String(en["kind"])):
 			continue
+		var w := int(en.get("weight", 1))
+		if _is_dawn() and SHY.has(String(en["kind"])):
+			w *= 2  # 1.31: shy beasts come out at dawn
+		en = en.duplicate()
+		en["weight"] = w
 		ok.append(en)
-		total += int(en.get("weight", 1))
+		total += w
 	if ok.is_empty():
 		return {}
 	var roll := _rng.randi_range(0, total - 1)
@@ -391,3 +396,11 @@ func _scavengers(p: Node3D) -> void:
 			(s as Enemy).set_meta("wild_scavenger", true)
 			(s as Enemy).set_meta("scavenge_to", e.global_position)
 		return
+
+
+## 1.31: deer, hares and the like come out at dawn
+const SHY := ["deer", "white_stag", "fox", "boar", "goat", "hare", "rabbit", "elk"]
+
+
+func _is_dawn() -> bool:
+	return world.clock != null and world.clock.hour >= 5.0 and world.clock.hour < 8.0

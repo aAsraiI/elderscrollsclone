@@ -30,6 +30,8 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Cast a line"  # 1.30
 	if String(item.id) == "falconers_glove":
 		return "Loose the hawk"  # 1.30
+	if String(item.id) == "treasure_map":
+		return "Study the map"  # 1.31
 	if String(item.id) == "bandage":
 		return "Bandage yourself"  # 1.30
 	if String(item.id) == "herbal_remedy":
@@ -124,6 +126,8 @@ static func use(player: Node, item: ItemData) -> void:
 					Locks.toast(tree, why3, true)
 		"Loose the hawk":
 			Locks.toast(tree, HuntingLife.loose_hawk(player, item))
+		"Study the map":
+			Locks.toast(tree, WorldEvents.read_map(player as Node3D, item))
 		"Bandage yourself":
 			var sv := player.get_node_or_null("Survival") as Survival
 			if sv != null:

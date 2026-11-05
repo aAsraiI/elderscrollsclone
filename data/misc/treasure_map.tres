@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"treasure_map"
+display_name = "Treasure Map"
+description = "An old map with an X on it. Study it (E in the inventory) to mark the place on your own map; you'll need a pickaxe or shovel to dig there."
+item_type = 9
+weight = 0.1
+value = 120
+stackable = true
+max_stack = 20
+loot_tags = PackedStringArray("camp", "thief", "vault", "coast")

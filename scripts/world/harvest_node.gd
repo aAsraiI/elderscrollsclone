@@ -139,7 +139,7 @@ func _ready() -> void:
 	shape.shape = s
 	shape.position = Vector3(0, s.radius * 0.8, 0)
 	add_child(shape)
-	if kind == "ore":
+	if kind == "ore" and item_id == "":  # 1.31: a meteor presets its Star Ore
 		item_id = _pick_ore()
 	_build_visual()
 	_refresh()

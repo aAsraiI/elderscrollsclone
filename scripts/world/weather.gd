@@ -7,9 +7,9 @@ extends Node
 ## closes in. Rain and snow are particles around the camera (not inside buildings or dungeons).
 ## Rain makes fire spells weaker and lightning stronger (WET_MULT); snow piles up on the ground.
 
-enum Kind { CLEAR, CLOUDY, OVERCAST, RAIN, STORM, SNOW, BLIZZARD, FOG, SANDSTORM }
+enum Kind { CLEAR, CLOUDY, OVERCAST, RAIN, STORM, SNOW, BLIZZARD, FOG, SANDSTORM, ASHSTORM }
 
-const NAMES: Array[String] = ["Clear", "Cloudy", "Overcast", "Rain", "Thunderstorm", "Snow", "Blizzard", "Fog", "Sandstorm"]
+const NAMES: Array[String] = ["Clear", "Cloudy", "Overcast", "Rain", "Thunderstorm", "Snow", "Blizzard", "Fog", "Sandstorm", "Ash storm"]
 ## Damage multipliers for magic that hits someone standing in the rain
 const WET_MULT := {&"fire": 0.75, &"shock": 1.25}
 ## sun, sky, ambient, fog (density x), fog_tint, cloud (sky greyness), wind
@@ -23,13 +23,15 @@ const LOOK := {
 	Kind.BLIZZARD: [0.2, 0.4, 0.7, 7.0, 0.85, 0.95, 2.0],
 	Kind.FOG: [0.55, 0.7, 0.85, 7.5, 0.8, 0.5, 0.3],
 	Kind.SANDSTORM: [0.4, 0.55, 0.8, 8.0, 0.9, 0.6, 2.0],
+	Kind.ASHSTORM: [0.25, 0.4, 0.65, 8.0, 0.9, 0.9, 2.0],  # 1.31
 }
-const FOG_COLORS := {Kind.SANDSTORM: Color(0.75, 0.6, 0.4), Kind.FOG: Color(0.75, 0.78, 0.8), Kind.BLIZZARD: Color(0.85, 0.88, 0.92)}
+const FOG_COLORS := {Kind.ASHSTORM: Color(0.35, 0.32, 0.3), Kind.SANDSTORM: Color(0.75, 0.6, 0.4), Kind.FOG: Color(0.75, 0.78, 0.8), Kind.BLIZZARD: Color(0.85, 0.88, 0.92)}
 ## Chances per climate and season (winter turns rain into snow outside the desert)
 const TABLE := {
 	"temperate": {Kind.CLEAR: 34, Kind.CLOUDY: 24, Kind.OVERCAST: 12, Kind.RAIN: 15, Kind.STORM: 6, Kind.FOG: 9},
 	"wet": {Kind.CLEAR: 18, Kind.CLOUDY: 20, Kind.OVERCAST: 16, Kind.RAIN: 26, Kind.STORM: 10, Kind.FOG: 10},
 	"cold": {Kind.CLEAR: 26, Kind.CLOUDY: 20, Kind.OVERCAST: 14, Kind.SNOW: 30, Kind.BLIZZARD: 10},
+	"ash": {Kind.CLEAR: 34, Kind.CLOUDY: 18, Kind.OVERCAST: 18, Kind.ASHSTORM: 30},  # 1.31: the Ashlands and the dead lands
 	"arid": {Kind.CLEAR: 62, Kind.CLOUDY: 15, Kind.OVERCAST: 5, Kind.SANDSTORM: 14, Kind.RAIN: 4},
 }
 
@@ -146,14 +148,14 @@ func _process(delta: float) -> void:
 	var snowing := current == Kind.SNOW or current == Kind.BLIZZARD
 	var raining := current == Kind.RAIN or current == Kind.STORM
 	var season_snow := 0.0
-	if clock != null and clock.get_season() == 0 and _climate != "arid":
+	if clock != null and clock.get_season() == 0 and _climate != "arid" and _climate != "ash":
 		season_snow = 0.55
 	snow_cover = move_toward(snow_cover, maxf(season_snow, 1.0 if snowing else 0.0), delta * (0.01 if snowing else 0.004))
 	wetness = move_toward(wetness, 1.0 if raining else 0.0, delta * (0.03 if raining else 0.008))
 	_update_lightning(delta)
 	_follow_camera()
 	var show := bool(GameSettings.get_value("weather_effects")) and not _inside() and blend > 0.3
-	_show_particles(show and raining, show and snowing, show and current == Kind.SANDSTORM)
+	_show_particles(show and raining, show and snowing, show and (current == Kind.SANDSTORM or current == Kind.ASHSTORM))
 	if _rain != null:
 		_rain.amount_ratio = 1.0 if current == Kind.STORM else 0.6
 	if _snow != null:
@@ -167,7 +169,7 @@ func _roll(clock: WorldClock) -> void:
 	_climate = c
 	var table: Dictionary = TABLE[c].duplicate()
 	var season := clock.get_season() if clock != null else 1
-	if season == 0 and c != "arid":
+	if season == 0 and c != "arid" and c != "ash":
 		table[Kind.SNOW] = int(table.get(Kind.RAIN, 0)) + int(table.get(Kind.SNOW, 0)) + 8
 		table[Kind.BLIZZARD] = int(table.get(Kind.STORM, 0)) + int(table.get(Kind.BLIZZARD, 0))
 		table.erase(Kind.RAIN)
@@ -202,6 +204,8 @@ func _climate_here() -> String:
 	if world == null or cam == null or world.map == null:
 		return "temperate"
 	var biome := world.get_biome_at(cam.global_position.x, cam.global_position.z)
+	if biome != null and String(biome.id) in ["ashlands", "deadlands"]:
+		return "ash"  # 1.31
 	return biome.get_climate() if biome != null else "temperate"
 
 

@@ -88,6 +88,10 @@ func _process(delta: float) -> void:
 			_stats.modify_vital("health", -3.0)
 		if heat >= 90.0:
 			_stats.modify_vital("health", -2.0)  # heatstroke
+		var sky := Weather.get_instance(get_tree())
+		if sky != null and sky.enabled and sky.current == Weather.Kind.ASHSTORM and not sky._inside():
+			_stats.modify_vital("health", -1.0)  # 1.31: ash in the lungs
+			thirst = minf(thirst + 1.0, 100.0)
 		if thirst >= 100.0:
 			_stats.modify_vital("health", -2.0)  # 1.30: parched
 

@@ -155,6 +155,7 @@ func _watch_world() -> void:
 	var wm := get_tree().get_first_node_in_group("world_manager") as WorldManager
 	if wm == null or wm.map == null or (wm.dungeons != null and wm.dungeons.is_inside()):
 		return
+	ExploredMap.reveal(_player.global_position.x, _player.global_position.z)  # 1.31: the map's fog clears as you go
 	var band := wm.map.get_level_band(_player.global_position.x, _player.global_position.z)
 	var best := Achievements.count("far_land")
 	if int(band.x) > best:

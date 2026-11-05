@@ -314,6 +314,7 @@ func draw_map(canvas: Control) -> void:
 	if _land_tex != null:
 		canvas.draw_texture_rect(_land_tex, Rect2(world_to_screen(_land_rect.position), _land_rect.size * px_scale), false)
 	_draw_rivers(canvas, px_scale)
+	_draw_fog(canvas, px_scale)  # 1.31
 	_draw_biome_names(canvas, font)
 	if _night_layer and ClanTerritory.can_see_night(get_tree()):
 		_draw_night_layer(canvas, font)
@@ -491,6 +492,23 @@ func _paint_land(map: WorldMap) -> Image:
 				c.a = 1.0
 			img.set_pixel(i, j, c)
 	return img
+
+
+## 1.31: grey over what you have not been to (ExploredMap)
+var _fog_tex: ImageTexture
+
+
+func _draw_fog(canvas: Control, px_scale: float) -> void:
+	if not bool(GameSettings.get_value("map_fog")):
+		return
+	var b := _bounds()
+	var ox := floorf(b.position.x / ExploredMap.CELL) * ExploredMap.CELL
+	var oz := floorf(b.position.y / ExploredMap.CELL) * ExploredMap.CELL
+	if _fog_tex == null or ExploredMap.image_dirty:
+		var whole := Rect2(ox, oz, b.size.x + (b.position.x - ox), b.size.y + (b.position.y - oz))
+		_fog_tex = ImageTexture.create_from_image(ExploredMap.make_image(whole))
+	var sz := Vector2(_fog_tex.get_width(), _fog_tex.get_height()) * ExploredMap.CELL
+	canvas.draw_texture_rect(_fog_tex, Rect2(world_to_screen(Vector2(ox, oz)), sz * px_scale), false)
 
 
 func _draw_rivers(canvas: Control, px_scale: float) -> void:

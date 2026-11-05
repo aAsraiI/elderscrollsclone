@@ -93,6 +93,8 @@ Once your bounties add up to 300 or more, bounty hunters come for you in the wil
 	["survival", "Body and Survival", "Food, Rest and Weather",
 		"With Survival on (World settings), you grow hungry, tired and cold. Eat to stop hunger, sleep in a bed to rest, and dress warmly in the cold: each piece of clothing has its own warmth. A fire within a few metres keeps the cold off. Deserts and summer middays heat you, and rain and swimming soak you: dry off by a fire.\n\nMeals give buffs even with Survival off.
 
+Ash storms in the Ashlands choke you (a little damage and thirst while you are out in one). On a clear night a star may fall within sight: find the crater for Star Ore.
+
 Seasons: spring flowers only bloom in spring and summer, fish bite slowly in winter, and bears sleep the winter through.
 
 Thirst: you grow thirsty too, faster in the heat. Fill a Waterskin (innkeepers sell them, or a tanning rack makes one) by using it facing water, and drink from it on the road; ale, milk and potions help a little."],
@@ -103,7 +105,7 @@ Thirst: you grow thirsty too, faster in the heat. Fill a Waterskin (innkeepers s
 
 Fallen trees in forests, highlands and the tundra can be chopped with an axe for firewood and logs. A workbench splits a log into firewood."],
 	["night", "Body and Survival", "Night",
-		"At night people go home and lock their doors, and the roads are more dangerous: ambushes wait for you. Some creatures only come out after dark. Carry a torch or a light spell, or wait (T) for dawn."],
+		"At night people go home and lock their doors, and the roads are more dangerous: ambushes wait for you. Some creatures only come out after dark, and the dead walk far more at night; shy beasts like deer come out at dawn. Carry a torch or a light spell, or wait (T) for dawn."],
 	["disease", "Body and Survival", "Disease",
 		"Bites and blows from rats, wolves and the dead can make you sick: the Character page shows what you have. Pray at a temple shrine, drink a Cure Disease potion or cast Cure Disease.
 
@@ -139,7 +141,11 @@ Gear wears down as you use it (World settings: Gear wears down). Below half its 
 		"Books are pages you turn (arrow keys or Back / Next). Skill books raise a skill the first time you read one. Notes on the dead and in dungeons tell what happened there, and sometimes lead to treasure."],
 
 	["map", "Travel and the World", "The Map and Compass",
-		"M opens the map. Places you have found are marked on it, and on the compass at the top of the screen when near. Quest targets show on both. Click the map to put down your own marker."],
+		"M opens the map. Places you have found are marked on it, and on the compass at the top of the screen when near. Quest targets show on both. Click the map to put down your own marker.
+
+The map is greyed over until you have been near a place (Settings > Interface > Map fog turns this off). Innkeepers sell a map of the land around them (\"a map of these parts\"): it clears the fog and marks the places there.
+
+A Treasure Map (on bandits, in camps and chests) marks a spot when you study it. Dig there with a pickaxe or shovel: a buried chest, and sometimes those who guard it."],
 	["travel", "Travel and the World", "Fast Travel and Roads",
 		"On the map, pick a place you have found to travel there; time passes on the way (World settings may limit it to towns and inns). A long trip into the wilds may end in an ambush.\n\nRoads have highwaymen who want a toll, travellers in trouble and stranded carters. Carriages at town gates and ships at port piers take you further for gold."],
 	["horses", "Travel and the World", "Horses",

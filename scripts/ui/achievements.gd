@@ -68,6 +68,8 @@ const LIST := [
 	["skin", 1, "Skin and Bone", "Skin a beast: F on its body with a blade in your pack.", "hunting", "n:skin", 1],
 	["snare", 1, "Patient Hunter", "Catch something in a snare.", "hunting", "n:snare", 1],
 	["camp", 1, "Under the Stars", "Pitch camp with a Camping Kit, anywhere outside.", "camping", "n:camp", 1],
+	["treasure", 1, "X Marks the Spot", "Dig up the treasure from a Treasure Map (with a pickaxe or shovel).", "map", "n:treasure_dug", 1],
+	["map_bought", 1, "Cartographer's Friend", "Buy a map of the land from an innkeeper.", "map", "n:map_bought", 1],
 	["arena", 1, "Blood on the Sand", "Win a bout at an arena (strike the gong in a Fighters Guild hall).", "arena", "arena", 1],
 	["museum", 1, "For Posterity", "Donate an artifact to an Antiquarian Museum.", "museum", "museum", 1],
 	["spells5", 1, "Spell Collector", "Know 5 spells. Spell tomes are sold by mages and found in dungeons.", "magic", "spells", 5],
@@ -116,6 +118,7 @@ const LIST := [
 	["remedy", 2, "Physician, Heal Thyself", "Cure a disease with an Herbal Remedy.", "disease", "n:remedy", 1],
 	["bandage", 2, "Field Dressing", "Bind your wounds with a Bandage.", "health", "n:bandage", 1],
 	["fetch", 2, "Good Boy, Good Find", "Have a tamed animal fetch you something from a body.", "taming", "n:fetch", 1],
+	["explorer_fog", 2, "Off the Edge of the Map", "Clear 150 patches of map fog by exploring.", "map", "explored", 150],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],
@@ -320,6 +323,8 @@ static func _value(check: String, tree: SceneTree) -> int:
 			for part in ["apiary", "orchard", "pen"]:
 				fp += 1 if Homestead.has_part(part) else 0
 			return fp
+		"explored":
+			return ExploredMap.count()
 		"regency":
 			return 1 if Regency.is_settled() else 0
 		"far_land":

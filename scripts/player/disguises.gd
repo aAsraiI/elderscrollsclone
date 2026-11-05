@@ -76,6 +76,8 @@ static func maybe_drop(e: Enemy) -> void:
 	var f := CreatureFactions.of(e)
 	if not ITEMS.has(f):
 		return
+	if absi((str(e.get_instance_id()) + "|map").hash()) % 100 < 6 and ResourceLoader.exists("res://data/misc/treasure_map.tres"):
+		e.inventory.add_item(load("res://data/misc/treasure_map.tres") as ItemData, 1)  # 1.31
 	var h := absi((e.spawn_key if e.spawn_key != "" else str(e.get_instance_id()) + "|garb").hash())
 	if float(h % 1000) / 1000.0 < DROP_CHANCE and ResourceLoader.exists(ITEMS[f]):
 		e.inventory.add_item(load(ITEMS[f]) as ItemData, 1)

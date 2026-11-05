@@ -317,4 +317,19 @@ func _toast(text: String) -> void:
 
 # An encounter's weight today: the festivals change some (the Blood Moon brings the wolves)
 func _weight(enc: EncounterData) -> float:
-	return enc.weight * Festivals.encounter_factor(get_tree().get_first_node_in_group("world_clock") as WorldClock, enc.get_key())
+	var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
+	return enc.weight * Festivals.encounter_factor(clock, enc.get_key()) * _hour_factor(enc.get_key(), clock)
+
+
+## 1.31: the dead walk more at night and hardly at all by day
+const NIGHT_WORDS := ["skeleton", "undead", "wight", "ghoul", "zombie", "ghost", "wraith", "dead"]
+
+
+static func _hour_factor(key: String, clock: WorldClock) -> float:
+	if clock == null:
+		return 1.0
+	var k := key.to_lower()
+	for w in NIGHT_WORDS:
+		if k.contains(w):
+			return 2.5 if clock.is_night() else 0.4
+	return 1.0

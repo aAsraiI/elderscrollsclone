@@ -210,6 +210,9 @@ func _ready() -> void:
 	road_events.name = "RoadEvents"
 	road_events.enabled = encounters_enabled
 	add_child(road_events)
+	var world_events := WorldEvents.new()  # 1.31: meteors, treasure
+	world_events.name = "WorldEvents"
+	add_child(world_events)
 	crime = CrimeManager.new()
 	crime.name = "CrimeManager"
 	add_child(crime)

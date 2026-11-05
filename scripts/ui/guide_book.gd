@@ -89,9 +89,15 @@ Once your bounties add up to 300 or more, bounty hunters come for you in the wil
 		"Z uses your race's power, once a day. Your birthsign gives a lasting gift. Every ring of standing stones keeps one sign: press E on the altar stone to take it as yours instead (once a day)."],
 
 	["survival", "Body and Survival", "Food, Rest and Weather",
-		"With Survival on (World settings), you grow hungry, tired and cold. Eat to stop hunger, sleep in a bed to rest, and dress warmly in the cold: each piece of clothing has its own warmth. A fire within a few metres keeps the cold off. Deserts and summer middays heat you, and rain and swimming soak you: dry off by a fire.\n\nMeals give buffs even with Survival off."],
+		"With Survival on (World settings), you grow hungry, tired and cold. Eat to stop hunger, sleep in a bed to rest, and dress warmly in the cold: each piece of clothing has its own warmth. A fire within a few metres keeps the cold off. Deserts and summer middays heat you, and rain and swimming soak you: dry off by a fire.\n\nMeals give buffs even with Survival off.
+
+Thirst: you grow thirsty too, faster in the heat. Fill a Waterskin (innkeepers sell them, or a tanning rack makes one) by using it facing water, and drink from it on the road; ale, milk and potions help a little."],
 	["rest", "Body and Survival", "Waiting and Sleeping",
 		"T waits up to a day (not with enemies near). In a bed, it sleeps: rent a room from an innkeeper, or sleep in a bed you own. A comfortable sleep (a house, a fire, furnishings) leaves you Well Rested for longer, which speeds learning."],
+	["camping", "Body and Survival", "Camping",
+		"A Camping Kit (innkeepers, or a workbench) pitches camp anywhere outside, away from towns: use it from the inventory. You get a tent, a bedroll to sleep in, and a fire to cook at and warm yourself by. One camp at a time; E on the tent strikes it. Sleeping out is a risk: one night in four something finds you, unless a follower or a tamed animal keeps watch.
+
+Fallen trees in forests, highlands and the tundra can be chopped with an axe for firewood and logs. A workbench splits a log into firewood."],
 	["night", "Body and Survival", "Night",
 		"At night people go home and lock their doors, and the roads are more dangerous: ambushes wait for you. Some creatures only come out after dark. Carry a torch or a light spell, or wait (T) for dawn."],
 	["disease", "Body and Survival", "Disease",

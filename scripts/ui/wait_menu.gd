@@ -176,6 +176,9 @@ func _wait() -> void:
 	if _bed != null and is_instance_valid(_bed):
 		_bed.on_slept()
 		Achievements.note("sleep")  # 1.27
+		var ambush := Campsite.night_ambush(get_parent() as Node3D, _bed)  # 1.30: sleeping out
+		if ambush != "":
+			Locks.toast(get_tree(), ambush, true)
 		var surv := get_parent().get_node_or_null("Survival") as Survival
 		if surv != null:
 			surv.on_sleep(hours)

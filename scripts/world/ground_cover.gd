@@ -221,6 +221,8 @@ static func scatter(map: WorldMap, coord: Vector2i, chunk_size: float, quads: in
 		var what := "rock"
 		if near[k] > 0.35 and rng.randf() < 0.6:
 			what = "clay"
+		elif bid in ["forest", "highlands", "tundra"] and rng.randf() < 0.25:
+			what = "deadwood"  # 1.30: a fallen tree to chop
 		elif bid in ["forest", "plains", "highlands", "lakeland", "swamp", "tundra"] and rng.randf() < 0.45:
 			what = "branches"
 		elif bid in ["plains", "lakeland", "swamp", "forest", "coast"] and rng.randf() < 0.5:

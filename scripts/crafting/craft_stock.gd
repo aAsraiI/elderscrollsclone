@@ -99,6 +99,8 @@ static func extra_for(merchant_id: String, _level_min: int, level_max: int) -> A
 			for k in ["raw_meat", "potato", "salt", "milk", "egg", "flour"]:
 				out.append(_e(MAT + k + ".tres", 0.6, 1, 4))
 			out.append(_e("res://data/misc/sellsword_contract.tres", 0.9, 1, 2))
+			out.append(_e("res://data/misc/waterskin.tres", 0.7, 1, 2))  # 1.30
+			out.append(_e("res://data/misc/camping_kit.tres", 0.3, 1, 1))
 		"alchemy":
 			for id in Alchemy.INGREDIENTS:
 				out.append(_e(ING + id + ".tres", 0.45, 1, 4))

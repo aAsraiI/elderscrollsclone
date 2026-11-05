@@ -21,6 +21,7 @@ const STAGE_NAMES := {
 	"cold": ["", "Chilly", "Cold", "Freezing"],
 	"heat": ["", "Warm", "Hot", "Heatstroke"],  # 1.25
 	"wet": ["", "Damp", "Wet", "Soaked"],  # 1.25
+	"thirst": ["", "Dry", "Thirsty", "Parched"],  # 1.30
 }
 const PENALTIES := {
 	"hunger": [{}, {}, {"stamina_regen_mult": -0.2, "max_stamina": -10.0}, {"stamina_regen_mult": -0.4, "max_stamina": -25.0, "damage_pct": -0.15}],
@@ -28,6 +29,7 @@ const PENALTIES := {
 	"cold": [{}, {"move_speed_mult": -0.03}, {"move_speed_mult": -0.08, "stamina_regen_mult": -0.25}, {"move_speed_mult": -0.15, "stamina_regen_mult": -0.5, "damage_pct": -0.1}],
 	"heat": [{}, {}, {"stamina_regen_mult": -0.25, "max_stamina": -10.0}, {"stamina_regen_mult": -0.5, "max_stamina": -25.0, "move_speed_mult": -0.08}],
 	"wet": [{}, {}, {"stamina_regen_mult": -0.1}, {"stamina_regen_mult": -0.2, "move_speed_mult": -0.04}],
+	"thirst": [{}, {}, {"stamina_regen_mult": -0.25, "magicka_regen_pct": -0.15}, {"stamina_regen_mult": -0.5, "magicka_regen_pct": -0.3, "max_stamina": -20.0}],  # 1.30
 }
 
 var hunger := 10.0
@@ -36,7 +38,9 @@ var cold := 0.0
 var _last_hours := -1.0
 var heat := 0.0  # 1.25
 var wet := 0.0  # 1.25
-var _stages := {"hunger": 0, "fatigue": 0, "cold": 0, "heat": 0, "wet": 0}
+var thirst := 10.0  # 1.30: rises 5 an hour (faster in the heat); water lowers it
+const THIRST_PER_HOUR := 5.0
+var _stages := {"hunger": 0, "fatigue": 0, "cold": 0, "heat": 0, "wet": 0, "thirst": 0}
 var _hurt_timer := 0.0
 var _stats: Stats
 
@@ -66,6 +70,8 @@ func _process(delta: float) -> void:
 		if aff == null or not aff.vampire:
 			hunger = minf(hunger + HUNGER_PER_HOUR * hours * _need_mult(), 100.0)
 		fatigue = minf(fatigue + FATIGUE_PER_HOUR * hours * _need_mult(), 100.0)
+		if aff == null or not aff.vampire:
+			thirst = minf(thirst + THIRST_PER_HOUR * hours * _need_mult() * (1.0 + heat / 100.0), 100.0)
 		var target := cold_target()
 		cold = move_toward(cold, target, COLD_RATE * hours * (2.0 if target < cold else 1.0))
 		var ht := heat_target()
@@ -81,6 +87,8 @@ func _process(delta: float) -> void:
 			_stats.modify_vital("health", -3.0)
 		if heat >= 90.0:
 			_stats.modify_vital("health", -2.0)  # heatstroke
+		if thirst >= 100.0:
+			_stats.modify_vital("health", -2.0)  # 1.30: parched
 
 
 ## How cold it is here, 0..100 (where your cold drifts to)
@@ -131,7 +139,7 @@ func _stage(v: float) -> int:
 
 
 func _update_stages() -> void:
-	var values := {"hunger": hunger, "fatigue": fatigue, "cold": cold, "heat": heat, "wet": wet}
+	var values := {"hunger": hunger, "fatigue": fatigue, "cold": cold, "heat": heat, "wet": wet, "thirst": thirst}
 	for k in values:
 		var s := _stage(values[k])
 		if s != _stages[k]:
@@ -156,6 +164,8 @@ func on_eat(item: ItemData) -> void:
 	if item.effect_group == "potion" and item.magic_effects.is_empty():
 		food = 2.0
 	hunger = maxf(hunger - minf(food, 60.0), 0.0)
+	if item.use_verb == "Drink" or item.effect_group == "potion":
+		thirst = maxf(thirst - 25.0, 0.0)  # 1.30: drinks quench thirst
 	if item.id == &"ale" or item.id == &"wine" or item.id == &"spiced_wine":
 		cold = maxf(cold - 10.0, 0.0)
 	_update_stages()
@@ -174,7 +184,7 @@ func status_lines() -> PackedStringArray:
 	var out := PackedStringArray()
 	if not enabled():
 		return out
-	for k in ["hunger", "fatigue", "cold", "heat", "wet"]:
+	for k in ["hunger", "thirst", "fatigue", "cold", "heat", "wet"]:
 		var s: int = _stages[k]
 		if s >= 1:
 			out.append("%s%s" % ["✖ " if s >= 2 else "", STAGE_NAMES[k][s]])
@@ -182,7 +192,7 @@ func status_lines() -> PackedStringArray:
 
 
 func to_dict() -> Dictionary:
-	return {"hunger": hunger, "fatigue": fatigue, "cold": cold, "heat": heat, "wet": wet, "meals": meals}
+	return {"hunger": hunger, "fatigue": fatigue, "cold": cold, "heat": heat, "wet": wet, "thirst": thirst, "meals": meals}
 
 
 func from_dict(d: Dictionary) -> void:
@@ -191,6 +201,7 @@ func from_dict(d: Dictionary) -> void:
 	cold = float(d.get("cold", 0.0))
 	heat = float(d.get("heat", 0.0))
 	wet = float(d.get("wet", 0.0))
+	thirst = float(d.get("thirst", 10.0))
 	meals = d.get("meals", [])
 	_apply_meals()
 	_last_hours = -1.0
@@ -369,3 +380,9 @@ func comfort(at: Vector3) -> int:
 ## Minutes of Well Rested a sleep gives in this much comfort
 static func rest_minutes(comfort_level: int) -> float:
 	return 240.0 + 120.0 * float(comfort_level)
+
+
+## 1.30: a long drink of water (a waterskin, or straight from a river)
+func drink_water(amount: float = 60.0) -> void:
+	thirst = maxf(thirst - amount, 0.0)
+	_update_stages()

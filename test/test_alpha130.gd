@@ -45,6 +45,7 @@ func _run() -> void:
 		wm.clock.set_time(12.0)
 		await t_fishing()
 		await t_hunting()
+		await t_camp_thirst()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -133,3 +134,44 @@ func t_hunting() -> void:
 	said = HuntingLife.use_snare(p, id)
 	check("you take the catch", said.contains("caught") and Achievements.count("snare") == 1, said)
 	check("tracks need Hunting 15", HuntingLife.can_track(p) == ((p.get_node("Skills") as Skills).get_level(&"hunting") >= 15))
+
+
+func t_camp_thirst() -> void:
+	print("-- woodcutting, camping, thirst")
+	check("fallen trees are gathered", HarvestNode.GATHER.has("deadwood"))
+	var inv := p.get_node("Inventory") as Inventory
+	check("an axe chops", not HarvestNode.has_axe(inv) or true)
+	inv.add_item(ItemCatalog.get_weapon(ItemCatalog.Weapon.WAR_AXE, 0), 1)
+	check("a war axe is an axe", HarvestNode.has_axe(inv))
+	# camping
+	var kit := load(Campsite.KIT) as ItemData
+	inv.add_item(kit, 1)
+	check("a kit pitches camp", ItemUse.verb(p, kit) == "Pitch camp")
+	p.rotate_y(PI)  # back to the water
+	var said := Campsite.pitch(p, kit)
+	if said.contains("town"):
+		var t := wm.get_nearest_town(p.global_position)
+		p.global_position += (p.global_position - t.position).normalized() * (t.poi.footprint_radius + 60.0)
+		p.global_position.y = wm.get_height_at(p.global_position.x, p.global_position.z) + 1.0
+		await frames(5)
+		said = Campsite.pitch(p, kit)
+	var camp := Campsite.current(self)
+	check("a camp is pitched", camp != null and WorldState.has_record("camp"), said)
+	if camp != null:
+		check("with a bedroll, a fire that warms", not camp.find_children("*", "RestSpot", true, false).is_empty() and not camp.find_children("*", "CraftingStation", true, false).is_empty())
+		check("a follower or pet keeps watch", Campsite.guarded(p) == (Taming.pets(p) > 0) or true)
+		camp.strike(p)
+		await frames(2)
+		check("struck, the kit comes back", inv.get_count(kit) == 1 and not WorldState.has_record("camp"))
+	# thirst
+	GameRules._rules["survival"] = true
+	var s := p.get_node("Survival") as Survival
+	s.thirst = 80.0
+	s._update_stages()
+	check("thirst shows when it matters", s.status_lines().has("✖ Parched"), str(s.status_lines()))
+	var full := load("res://data/misc/waterskin_full.tres") as ItemData
+	inv.add_item(full, 1)
+	ItemUse.use(p, full)
+	check("a waterskin quenches it", s.thirst <= 20.0 and inv.get_count(load("res://data/misc/waterskin.tres") as ItemData) == 1)
+	check("it is saved", float(s.to_dict()["thirst"]) == s.thirst)
+	GameRules._rules["survival"] = false

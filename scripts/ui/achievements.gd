@@ -67,6 +67,7 @@ const LIST := [
 	["fish", 1, "Gone Fishing", "Catch a fish: use a Fishing Pole facing water and press E when it bites.", "fishing", "n:fish", 1],
 	["skin", 1, "Skin and Bone", "Skin a beast: F on its body with a blade in your pack.", "hunting", "n:skin", 1],
 	["snare", 1, "Patient Hunter", "Catch something in a snare.", "hunting", "n:snare", 1],
+	["camp", 1, "Under the Stars", "Pitch camp with a Camping Kit, anywhere outside.", "camping", "n:camp", 1],
 	["arena", 1, "Blood on the Sand", "Win a bout at an arena (strike the gong in a Fighters Guild hall).", "arena", "arena", 1],
 	["museum", 1, "For Posterity", "Donate an artifact to an Antiquarian Museum.", "museum", "museum", 1],
 	["spells5", 1, "Spell Collector", "Know 5 spells. Spell tomes are sold by mages and found in dungeons.", "magic", "spells", 5],

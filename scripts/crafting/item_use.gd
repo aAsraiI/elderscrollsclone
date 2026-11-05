@@ -28,6 +28,12 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Breathe from the bladder"
 	if Fishing.is_pole(item):
 		return "Cast a line"  # 1.30
+	if String(item.id) == "waterskin":
+		return "Fill it"  # 1.30
+	if String(item.id) == "waterskin_full":
+		return "Drink"
+	if String(item.id) == "camping_kit":
+		return "Pitch camp"  # 1.30
 	if String(item.id) == "snare":
 		return "Set the snare"
 	if String(item.id).ends_with("_barding"):
@@ -110,6 +116,13 @@ static func use(player: Node, item: ItemData) -> void:
 				var why3 := fi.cast()
 				if why3 != "":
 					Locks.toast(tree, why3, true)
+		"Fill it":
+			Locks.toast(tree, fill_waterskin(player, item))
+		"Drink":
+			if String(item.id) == "waterskin_full":
+				Locks.toast(tree, drink_waterskin(player, item))
+		"Pitch camp":
+			Locks.toast(tree, Campsite.pitch(player as Node3D, item))
 		"Set the snare":
 			Locks.toast(tree, HuntingLife.set_snare(player as Node3D, item))
 		"Put it on your horse":
@@ -190,3 +203,28 @@ static func read_scroll(player: Node, item: ItemData) -> String:
 	(player.get_node("Inventory") as Inventory).remove_item(item, 1)
 	Achievements.note("scroll")
 	return ""
+
+
+## 1.30: waterskins. Fill an empty one facing water; drink a full one (thirst, in Survival mode)
+static func fill_waterskin(player: Node, skin: ItemData) -> String:
+	var f := Fishing.of(player)
+	if f == null or f.water_ahead() == "":
+		return "Face open water close by to fill it."
+	var inv := player.get_node("Inventory") as Inventory
+	inv.remove_item(skin, 1)
+	inv.add_item(load("res://data/misc/waterskin_full.tres") as ItemData, 1)
+	var s := player.get_node_or_null("Survival") as Survival
+	if s != null:
+		s.drink_water(40.0)  # and a drink while you are at it
+	return "You drink your fill and top up the waterskin."
+
+
+static func drink_waterskin(player: Node, skin: ItemData) -> String:
+	var inv := player.get_node("Inventory") as Inventory
+	inv.remove_item(skin, 1)
+	inv.add_item(load("res://data/misc/waterskin.tres") as ItemData, 1)
+	var s := player.get_node_or_null("Survival") as Survival
+	if s != null:
+		s.drink_water(60.0)
+	Achievements.note("drink")
+	return "You drink from the waterskin."

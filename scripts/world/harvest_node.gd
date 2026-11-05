@@ -304,6 +304,9 @@ func get_prompt() -> String:
 	if kind in GATHER:
 		if not is_ready():
 			return ""
+		if kind == "deadwood":
+			var p0 := get_tree().get_first_node_in_group("player")
+			return "Chop the fallen tree" + ("" if has_axe(p0.get_node_or_null("Inventory") as Inventory if p0 != null else null) else "  (needs an axe)")
 		return ("Break up the rock" + ("" if _has_pickaxe() else "  (needs a pickaxe)")) if kind == "rock" else "Gather %s" % item.display_name
 	return "Mine %s" % item.display_name.trim_suffix(" Ore") + " Vein" + ("" if _has_pickaxe() else "  (needs a pickaxe)")
 
@@ -368,7 +371,7 @@ const PICKS := [["stone_pickaxe", "Stone Pickaxe"], ["pickaxe", "Pickaxe"], ["st
 const ORE_TIER := {"iron_ore": 0, "corundum_ore": 0, "silver_ore": 1, "gold_ore": 1, "obsidian_ore": 2, "ebony_ore": 2,
 	"dragonstone_ore": 3, "star_ore": 3, "void_ore": 4, "sun_ore": 4, "astral_ore": 4, "primordial_ore": 4}
 ## What you can gather without a tool (or with a pick, for rock): kind -> [item id, regrow days, extra id, extra chance]
-const GATHER := {"rock": ["stone", 2, "flint", 0.3], "branches": ["firewood", 2, "", 0.0], "fibre": ["plant_fibre", 2, "", 0.0], "clay": ["clay", 3, "", 0.0]}
+const GATHER := {"rock": ["stone", 2, "flint", 0.3], "branches": ["firewood", 2, "", 0.0], "deadwood": ["firewood", 4, "log", 0.9], "fibre": ["plant_fibre", 2, "", 0.0], "clay": ["clay", 3, "", 0.0]}
 
 
 ## The best pick in a bag (-1 = none)
@@ -398,10 +401,15 @@ func _gather(actor: Inventory) -> void:
 	if kind == "rock" and pick_tier(actor) < 0:
 		Locks.toast(get_tree(), "You need a pickaxe to break stone (a stone one will do)", true)
 		return
+	if kind == "deadwood" and not has_axe(actor):  # 1.30: woodcutting
+		Locks.toast(get_tree(), "You need an axe to chop this (a war axe or battleaxe will do)", true)
+		return
 	var item := load(MAT + String(g[0]) + ".tres") as ItemData
 	if item == null:
 		return
 	var count := 1 + (1 if randf() < 0.4 else 0)
+	if kind == "deadwood":
+		count = 3 + (1 if randf() < 0.5 else 0)
 	actor.add_item(item, count)
 	Achievements.note("harvest")  # 1.27
 	var got := "%s x%d" % [item.display_name, count]
@@ -423,6 +431,13 @@ static var _gather_meshes := {}
 
 func _gather_visual() -> void:
 	match kind:
+		"deadwood":  # 1.30: a fallen tree
+			var trunk := CylinderMesh.new()
+			trunk.top_radius = 0.22
+			trunk.bottom_radius = 0.28
+			trunk.height = 3.2
+			trunk.radial_segments = 7
+			_add_part(trunk, _material(Color(0.33, 0.24, 0.15)), Transform3D(Basis(Vector3.UP, float(absi(key.hash()) % 628) / 100.0) * Basis(Vector3.FORWARD, PI * 0.5), Vector3(0, 0.25, 0)))
 		"rock":
 			_add_part(NatureMeshes.rock_mesh(2), _material(Color(0.45, 0.44, 0.42)), Transform3D(Basis.from_scale(Vector3(0.7, 0.5, 0.6)), Vector3(0, 0.15, 0)))
 		"branches":
@@ -451,3 +466,14 @@ func _gather_visual() -> void:
 				s.rings = 4
 				_gather_meshes["clay"] = s
 			_add_part(_gather_meshes["clay"], _material(Color(0.55, 0.38, 0.28)), Transform3D(Basis.IDENTITY, Vector3(0, 0.02, 0)))
+
+
+## 1.30: an axe in the pack (war axe, battleaxe) chops fallen trees
+static func has_axe(inv: Inventory) -> bool:
+	if inv == null:
+		return false
+	for s in inv.stacks:
+		var it: ItemData = s.item
+		if it != null and it.item_type == ItemData.ItemType.WEAPON and (String(it.animation_set) in ["waraxe", "battleaxe", "axe"] or it.display_name.to_lower().contains("axe")) and not it.is_thrown:
+			return true
+	return false

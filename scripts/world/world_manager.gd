@@ -123,6 +123,7 @@ func _ready() -> void:
 	_load_initial()
 	DeathRules.restore.call_deferred(get_tree())  # 1.26: graves left by the "grave" death rule
 	HuntingLife.restore.call_deferred(get_tree())  # 1.30: snares
+	Campsite.restore.call_deferred(get_tree())  # 1.30: your camp
 	if auto_environment:
 		_setup_environment()
 	_make_water()

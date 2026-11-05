@@ -68,6 +68,8 @@ Settings > Interface > Lockpicking minigame lets you pick by hand: for each pin 
 		"Sneak (Ctrl) up to someone who hasn't noticed you and press E: their pockets open. Every thing you take is a chance (shown by your skill, its weight and worth, and how aware they are); sleepers are easy. Fail and they feel it: they turn on you and it is a crime.
 
 Pickpocket is its own skill. At 25 you can slip things into pockets, at 100 you can lift what they wear and wield. What you take is stolen."],
+	["heists", "Stealth and Crime", "Heists",
+		"Members of the Thieves Guild can ask the guild's fence (a city pawnbroker) about \"a heist\". The fence names a rich house in town and the strongbox in it. Get in (night is best; pick the lock or find another way), take the Heist Prize from the strongbox past the night watchmen who walk their rounds, and get out. Back at the fence, \"the heist\" pays: the full purse if no one saw you inside, half if a watchman did. One a day."],
 	["crime", "Stealth and Crime", "Crime and Bounty",
 		"Taking what isn't yours (red text), attacking or killing people, trespassing after dark: anyone who sees it reports it, and the town puts a bounty on you. Witnesses tell their friends.\n\nGuards will stop you: pay, go to jail and serve the time, or fight. Someone who saw you might believe a lie (\"what you saw\"). The Thieves Guild fences stolen goods.
 

@@ -47,6 +47,8 @@ func _run() -> void:
 		await t_lockpick()
 		await t_light_noise()
 		await t_outlaw()
+		await t_heist()
+		await t_heist_inside()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -211,3 +213,61 @@ func t_outlaw() -> void:
 	check("a fence asks a share to launder it", OutlawLife.launder_price(inv) == ceili(gem.value * 2 * OutlawLife.LAUNDER_SHARE))
 	check("after a week it cools off", OutlawLife.cool_off(wm.clock.day + OutlawLife.COOL_DAYS) == 2 and CrimeManager.stolen_count(inv, gem) == 0)
 	check("bribes cost more for more crimes", OutlawLife.BRIBE_PER_CRIME > 0 and OutlawLife.threat_chance(p) > 0.05)
+
+
+func t_heist() -> void:
+	print("-- heists")
+	var city: PlacedPOI = null
+	for t in wm.towns:
+		if (t.poi as TownData).kind == TownData.Kind.CITY:
+			city = t
+			break
+	if city == null:
+		city = wm.get_nearest_town(p.global_position)
+	var b := Heists.target_in(city)
+	check("a city has a rich house to rob", b != null)
+	if b == null:
+		return
+	check("a noble seat or a house", b.kind == BuildingPlot.Kind.SEAT or b.kind == BuildingPlot.Kind.HOUSE)
+	var fence := DialogueEngine.Speaker.new()
+	fence.name = "Test Fence"
+	fence.town = city
+	fence.enemy = Enemy.create()
+	fence.enemy.set_meta("leader_of", "thieves")
+	check("only for the Thieves Guild", Heists.topics_for(fence, wm).is_empty())
+	Factions._store("thieves", 1, 0)
+	check("a member can ask the fence", Heists.topics_for(fence, wm).has("a heist"))
+	var said := Heists.respond(fence, "a heist", p, wm)
+	check("the fence names a house", Heists.active() and String(Heists.record()["building"]) == b.id, str(said))
+	check("and the topic becomes the heist", Heists.topics_for(fence, wm).has("the heist"))
+	check("no prize, no pay", String(Heists.respond(fence, "the heist", p, wm).get("text", "")).contains("strongbox"))
+	var inv := p.get_node("Inventory") as Inventory
+	inv.add_item(load(Heists.PRIZE) as ItemData, 1)
+	var gold := Currency.get_gold(inv)
+	Heists.respond(fence, "the heist", p, wm)
+	check("unseen, the full purse", Currency.get_gold(inv) - gold == Heists.pay_for(p) and Achievements.count("clean_heist") == 1)
+	check("one a day", String(Heists.respond(fence, "a heist", p, wm).get("text", "")).contains("tomorrow"))
+	fence.enemy.free()
+
+
+func t_heist_inside() -> void:
+	print("-- the heist house")
+	var city := wm.get_nearest_town(p.global_position)
+	var b := Heists.target_in(city)
+	if b == null:
+		check("a house to rob", false)
+		return
+	WorldState.set_record("heist", {"state": "active", "building": b.id, "town": city.town.display_name, "owner": "x", "day": wm.clock.day, "seen": false})
+	var inv := p.get_node("Inventory") as Inventory
+	var prize := load(Heists.PRIZE) as ItemData
+	inv.remove_item(prize, inv.get_count(prize))
+	var bw := wm.get_building(b.id)
+	await wm.dungeons.enter(b.id, bw.get_door_position() if bw != null and bw.has_method("get_door_position") else p.global_position, 0.0)
+	await frames(10)
+	var root := wm.dungeons.get_interior_root()
+	var boxes := root.find_children("*", "", true, false).filter(func(n: Node) -> bool: return n.has_meta("heist_box")) if root != null else []
+	var watch := get_nodes_in_group("enemies").filter(func(e: Node) -> bool: return e.has_meta("watchman"))
+	check("inside, the strongbox is there", boxes.size() == 1)
+	check("and the night watch walks", watch.size() == Heists.WATCHMEN)
+	await wm.dungeons.exit()
+	await frames(5)

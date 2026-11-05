@@ -71,6 +71,8 @@ func _hook() -> void:
 			caster.spell_cast.connect(func(_s: SpellData) -> void: Achievements.note("cast"))
 	world.discovery.travelled.connect(func(_p: PlacedPOI, _h: float) -> void: Achievements.note("travel"))
 	world.discovery.discovered.connect(func(_p: PlacedPOI) -> void: hint("map"))
+	if world.dungeons != null:
+		world.dungeons.entered.connect(func(id: String) -> void: Heists.on_entered(get_tree(), id))  # 1.29: the heist's strongbox and watch
 	var skills := _player.get_node_or_null("Skills") as Skills
 	if skills != null:
 		skills.skill_leveled_up.connect(func(id: StringName, l: int) -> void:
@@ -142,6 +144,7 @@ func _watch() -> void:
 			hint("islands")
 	if Homestead.built().size() >= 3:
 		hint("raids")
+	Heists.watch(get_tree(), _player)  # 1.29
 	_watch_world()
 	_watch_quests()
 

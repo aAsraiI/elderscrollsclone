@@ -107,6 +107,7 @@ const LIST := [
 	["bribe", 2, "Hush Money", "Keep a witness quiet: bribe or threaten someone who saw your crime.", "crime", "n:bribe", 1],
 	["launder", 2, "Clean Hands", "Have a fence launder your stolen goods.", "crime", "n:launder", 1],
 	["hunter_kill", 2, "Not Today, Hunter", "Kill a bounty hunter (they come for you once your bounties pass 300).", "crime", "n:hunter_kill", 1],
+	["heist", 2, "The Job", "Pull off a heist for the Thieves Guild (ask the fence about \"a heist\").", "heists", "n:heist", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],
@@ -126,6 +127,7 @@ const LIST := [
 
 	# ---- 5 Beyond the Islands: the endgame, islands of level 100 to 200
 	["patrons_all", 3, "Favoured of All", "Receive the artifacts of all eight Patrons.", "patrons", "n:patron", 8],
+	["clean_heist", 3, "Ghost", "Pull off a heist without a single watchman seeing you.", "heists", "n:clean_heist", 1],
 	["far_isle", 4, "Over the Horizon", "Set foot on an island of level 100 or more. Ships sail from port towns.", "islands", "far_land", 100],
 	["level100", 4, "Hundredfold", "Reach level 100.", "islands", "level", 100],
 	["skill125", 4, "Beyond Mastery", "Raise any skill to 125.", "leveling", "skill_max", 125],

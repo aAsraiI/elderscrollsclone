@@ -774,6 +774,7 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 	out.append_array(Roleplay.topics_for(s))  # 1.26: lying, vows, courting
 	out.append_array(Rituals.topics_for(s))  # 1.28: the Mages Guild's research
 	out.append_array(OutlawLife.topics_for(s))  # 1.29: bribing or threatening a witness
+	out.append_array(Heists.topics_for(s, world))  # 1.29: the Thieves Guild's heists
 	out.append_array(OutlawLife.fence_topics(s, world))  # 1.29: laundering
 	return out
 
@@ -820,6 +821,9 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 		var told_road := road.respond(s, topic)
 		if not told_road.is_empty():
 			return told_road
+	var heist := Heists.respond(s, topic, _player(), world)  # 1.29
+	if not heist.is_empty():
+		return heist
 	var hushed := OutlawLife.respond(s, topic, _player(), world)  # 1.29
 	if not hushed.is_empty():
 		return hushed

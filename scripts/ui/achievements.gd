@@ -164,7 +164,10 @@ const LIST := [
 ]
 
 static var _by_id := {}
+const RECOUNT_MS := 10000
 static var _cache_ver := -1
+static var _quest_at := -1
+static var _quest_counts := {}
 static var _found := 0
 static var _cleared := 0
 
@@ -257,11 +260,17 @@ static func _value(check: String, tree: SceneTree) -> int:
 		"quests_taken", "quests_done", "jobs_done":
 			if world == null:
 				return 0
-			var n := 0
-			for q: Dictionary in QuestLog.all(world):
-				if check == "quests_taken" or (q["status"] == "completed" and (check == "quests_done" or q["source"] == "job")):
-					n += 1
-			return n
+			var t := Time.get_ticks_msec()
+			if _quest_at < 0 or t - _quest_at >= RECOUNT_MS:  # 1.31: the quest list is costly to build
+				_quest_at = t
+				_quest_counts = {"quests_taken": 0, "quests_done": 0, "jobs_done": 0}
+				for q: Dictionary in QuestLog.all(world):
+					_quest_counts["quests_taken"] += 1
+					if q["status"] == "completed":
+						_quest_counts["quests_done"] += 1
+						if q["source"] == "job":
+							_quest_counts["jobs_done"] += 1
+			return int(_quest_counts[check])
 		"guilds":
 			var g := 0
 			for id in Factions.GUILDS:
@@ -342,9 +351,10 @@ static func _value(check: String, tree: SceneTree) -> int:
 
 ## found/ records: how many places are found and cleared (counted again only when the world changed)
 static func _count_places() -> void:
-	if _cache_ver == WorldState.version:
-		return
-	_cache_ver = WorldState.version
+	var now := Time.get_ticks_msec()
+	if _cache_ver >= 0 and now - _cache_ver < RECOUNT_MS:
+		return  # 1.31: at most every 10 s: this walks every saved record
+	_cache_ver = now
 	_found = 0
 	_cleared = 0
 	for k: String in WorldState.records:

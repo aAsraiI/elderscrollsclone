@@ -83,7 +83,12 @@ func t_explore() -> void:
 		check("and it's gone", (WorldState.get_record("treasure").get("list", []) as Array).is_empty())
 	# a meteor
 	var at := Vector3.INF
-	for i in 30:
+	for i in 60:
+		p.rotate_y(0.9)
+		if i % 10 == 9:  # somewhere else: this spot is all water or town
+			var here := ev.pick_treasure_spot(p)
+			if here.is_finite():
+				p.global_position = here + Vector3.UP
 		at = ev.fall(p)
 		if at.is_finite():
 			break

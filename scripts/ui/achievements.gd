@@ -103,6 +103,7 @@ const LIST := [
 	["blood_perk", 2, "Children of the Night", "Take a Vampire or Werewolf perk, bought with blood points from feeding or devouring.", "vampire", "blood_perks", 1],
 	["patron", 2, "Chosen", "Do a Patron's deed and receive its artifact (kneel at a glowing shrine in the wilds).", "patrons", "n:patron", 1],
 	["pickpocket50", 2, "Cutpurse", "Pick 25 pockets.", "pickpocket", "n:pickpocket", 25],
+	["disguise", 2, "One of Us", "Walk among a faction in its clothes (Bandit Leathers, Ash Cult Robes, Smuggler's Coat).", "stealth", "n:disguise", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],

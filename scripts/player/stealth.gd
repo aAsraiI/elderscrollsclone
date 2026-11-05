@@ -53,6 +53,7 @@ var _eye_label: Label
 class Eye extends Control:
 	var level := 0
 	var fill := 0.0
+	var light := 1.0  # 1.29: the light gem: how lit you are
 
 	func _draw() -> void:
 		var c := size / 2.0
@@ -67,6 +68,10 @@ class Eye extends Control:
 		draw_colored_polygon(pts, Color(0, 0, 0, 0.45))
 		draw_polyline(pts, col, 2.0, true)
 		draw_circle(c, 6.5, col if level > 0 else Color(col, 0.5))
+		# 1.29: the light gem below the eye: dark when you are in shadow, bright when lit
+		var gem := Color(0.25, 0.22, 0.12).lerp(Color(1.0, 0.92, 0.55), clampf(light, 0.0, 1.0))
+		var g := c + Vector2(0, 20)
+		draw_colored_polygon(PackedVector2Array([g + Vector2(0, -6), g + Vector2(6, 0), g + Vector2(0, 6), g + Vector2(-6, 0)]), gem)
 
 
 func _ready() -> void:
@@ -169,14 +174,44 @@ func _noise_mult() -> float:
 func _noise_radius_raw() -> float:
 	if _time < _noise_until:
 		return 6.0 if sneaking else 12.0
-	if sneaking or _player == null:
+	if _player == null:
 		return 0.0
 	var speed := Vector2(_player.velocity.x, _player.velocity.z).length()
-	if speed > 6.0:
-		return 14.0
-	if speed > 0.5:
-		return 5.0
-	return 0.0
+	if speed <= 0.5:
+		return 0.0
+	var heavy := heavy_pieces()
+	var ground := ground_noise()
+	if sneaking:
+		return float(heavy) * 0.8 * ground  # 1.29: plate clanks even when you creep
+	var r := 14.0 if speed > 6.0 else 5.0
+	return r * ground * (1.0 + 0.12 * float(heavy))
+
+
+## 1.29: pieces of heavy armour worn (metal is loud)
+func heavy_pieces() -> int:
+	var eq := _player.get_node_or_null("Equipment") as Equipment if _player != null else null
+	if eq == null:
+		return 0
+	var n := 0
+	for slot in eq.slots:
+		var it: ItemData = eq.slots[slot]
+		if it != null and it.governing_skill == "heavy_armor":
+			n += 1
+	return n
+
+
+## 1.29: how the ground carries your steps: stone and boards indoors are loud, a town's cobbles
+## less, grass, earth and snow in the wild are quiet
+func ground_noise() -> float:
+	var dm := get_tree().get_first_node_in_group("dungeon_manager") as DungeonManager
+	if dm != null and dm.is_inside():
+		return 1.3
+	var w := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if w != null:
+		var t := w.get_nearest_town(_player.global_position)
+		if t != null and Vector2(t.position.x - _player.global_position.x, t.position.z - _player.global_position.z).length() < t.poi.footprint_radius:
+			return 1.1
+	return 0.8
 
 
 func _process(delta: float) -> void:
@@ -309,9 +344,11 @@ func _update_hud() -> void:
 	for id in awareness:
 		best = maxf(best, float(awareness[id]))
 	var eye := _eye as Eye
-	if eye.level != level or absf(eye.fill - best) > 0.02:
+	var lit := light_level()
+	if eye.level != level or absf(eye.fill - best) > 0.02 or absf(eye.light - lit) > 0.03:
 		eye.level = level
 		eye.fill = best
+		eye.light = lit
 		eye.queue_redraw()
 	_eye_label.text = ["Hidden", "Noticed", "Seen"][level]
 	_eye_label.add_theme_color_override("font_color", [Color(0.8, 0.8, 0.85), Color(1.0, 0.8, 0.25), Color(1.0, 0.35, 0.3)][level])
@@ -325,6 +362,8 @@ const DARK_DUNGEON := 0.2
 const DARK_NIGHT := 0.25
 ## How strongly a lamp at full energy lights you when you stand right under it
 const LAMP_STRENGTH := 0.55
+## 1.29: how much your own lit lantern adds
+const OWN_LIGHT := 0.35
 
 var _light_cache := 0.0
 var _light_until := 0  # msec: the cached light level is good until then
@@ -363,10 +402,15 @@ func _measure_light() -> float:
 	else:
 		var clock := get_tree().get_first_node_in_group("world_clock") as WorldClock
 		if clock != null:
-			base = DARK_NIGHT + (1.0 - DARK_NIGHT) * clock.get_daylight()
+			var moon := 1.0 - absf(clock.get_moon_phase() - 0.5) * 2.0  # 1.29: a full moon lights you, a new moon hides you
+			var night := DARK_NIGHT * (0.6 + 0.8 * moon)
+			base = night + (1.0 - night) * clock.get_daylight()
 	if base >= 0.95:
 		return base  # broad daylight: lamps change nothing
 	var lamps := 0.0
+	var own := _player.get_node_or_null("LanternLight") as LanternLight  # 1.29: your own lantern or torch gives you away
+	if own != null and own.is_lit():
+		lamps += OWN_LIGHT
 	for l in _nearby_lights(dm, inside):
 		if not is_instance_valid(l) or not l.is_visible_in_tree():
 			continue

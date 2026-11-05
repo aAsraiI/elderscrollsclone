@@ -1486,6 +1486,8 @@ func _can_see_target_now() -> bool:
 		wake()  # you came too close
 	if lurking:
 		return false
+	if not _alerted and _target.is_in_group("player") and Disguises.fools(self, _target as Node3D):
+		return false  # 1.29: dressed as one of us
 	# The player's Stealth decides when an unalerted creature has really seen them (darkness,
 	# sneaking, Sneak skill). Once alerted it keeps track the simple way below.
 	if not _alerted and _target.has_meta("stealth"):
@@ -1755,6 +1757,8 @@ func _on_died() -> void:
 	var note_rng := RandomNumberGenerator.new()
 	note_rng.seed = (spawn_key if spawn_key != "" else str(get_instance_id())).hash()
 	Notes.maybe_carry(self, note_rng)  # 1.24: a letter, orders, a debt...
+	if _hurt_by_player:
+		Disguises.maybe_drop(self)  # 1.29: their clothes
 	QuestEvents.kill(self)
 	if enemy_id == "dragon":
 		var slain := int(WorldState.get_record("dragons_slain").get("n", 0)) + 1

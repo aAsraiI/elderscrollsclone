@@ -53,7 +53,13 @@ Members of the Mages Guild can ask a guild mage about \"magical research\": for 
 		"Soul Trap a creature just before it dies and its soul fills the smallest empty soul gem that holds it. At an arcane enchanter, a filled gem puts an effect you know on a weapon or a piece of armour. Enchanted weapons run down: recharge them with another filled gem."],
 
 	["stealth", "Stealth and Crime", "Sneaking",
-		"Ctrl sneaks. The eye on screen shows whether anyone has seen you. Darkness, sneaking, light armour and the Sneak skill help; running, torches and heavy armour hurt.\n\nAn attack on someone who hasn't seen you is a sneak attack: daggers and bows do the most. Sneak up behind someone unaware and press E to knock them out. Hide bodies in water or the dark.\n\nA foe who loses you searches where you were last seen, then gives up."],
+		"Ctrl sneaks. The eye on screen shows whether anyone has seen you. Darkness, sneaking, light armour and the Sneak skill help; running, torches and heavy armour hurt.\n\nAn attack on someone who hasn't seen you is a sneak attack: daggers and bows do the most. Sneak up behind someone unaware and press E to knock them out. Hide bodies in water or the dark.\n\nA foe who loses you searches where you were last seen, then gives up.
+
+Light: the gem under the eye shows how lit you are. Lamps, torches and your own lantern give you away; a full moon lights the night, a new moon hides you.
+
+Noise: heavy armour clanks, even when you sneak, and stone floors and boards are louder than grass and earth.
+
+Disguises: wear Bandit Leathers, Ash Cult Robes or a Smuggler's Coat (some of those you kill carry them) and that faction takes you for one of their own. Don't stand close to one for long: a close look sees through it, and the whole faction is on to you for a while. Attacking one gives you away."],
 	["locks", "Stealth and Crime", "Locks",
 		"Locked doors and chests need a key or a lockpick. With lockpicks in your pack, E tries the lock: the chance depends on Security against the lock's level. A failed try breaks a pick. Some locks open only with their key.\n\nPicking a lock that isn't yours is a crime if someone sees.
 

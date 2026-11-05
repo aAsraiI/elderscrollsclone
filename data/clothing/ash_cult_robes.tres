@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_fwmdf"]
+
+[resource]
+script = ExtResource("1_fwmdf")
+id = &"ash_cult_robes"
+display_name = "Ash Cult Robes"
+description = "Grey robes of the Ash Cult. Worn, cultists take you for one of their own, until one looks closely."
+item_type = 2
+equip_slot = 2
+weight = 1.5
+value = 60
+loot_tags = PackedStringArray("thief")
+disguise_faction = "cultists"
+ingredient_effects = PackedStringArray()

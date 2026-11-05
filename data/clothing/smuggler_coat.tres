@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_emdbf"]
+
+[resource]
+script = ExtResource("1_emdbf")
+id = &"smuggler_coat"
+display_name = "Smuggler's Coat"
+description = "A salt-stained coat with hidden pockets. Worn, smugglers take you for one of their own, until one looks closely."
+item_type = 2
+equip_slot = 2
+weight = 1.0
+value = 60
+loot_tags = PackedStringArray("thief")
+disguise_faction = "smugglers"
+ingredient_effects = PackedStringArray()

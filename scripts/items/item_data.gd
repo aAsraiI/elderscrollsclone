@@ -86,6 +86,9 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 @export var is_thrown := false
 ## 1.27: a lance: made for the saddle (twice the gallop bonus), clumsy on foot (60% damage)
 @export var is_lance := false
+## 1.29: a disguise: worn, the members of this creature faction (CreatureFactions) take you for one of
+## their own until someone looks closely (Disguises)
+@export var disguise_faction := ""
 
 @export_group("Magic and crafting")
 ## Magic effects when eaten or drunk (alchemy potions, cooked food), or on a poison:

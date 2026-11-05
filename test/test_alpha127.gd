@@ -43,6 +43,9 @@ func _run() -> void:
 		(p.get_node("Stats") as Stats).revive()
 		wm.clock.set_time(12.0)
 		GameRules._rules["encounter_rate"] = 0.0
+		GameSettings.get_value("quest_popups")
+		GameSettings._values["quest_popups"] = true  # in memory only: the player's own settings file is left alone
+		GameSettings._values["tutorial"] = true
 		await t_data()
 		await t_achievements()
 		await t_guide()
@@ -199,17 +202,25 @@ func t_ranged() -> void:
 	check("it will not shoot arrows", rc.best_arrow() == null)
 	inv.add_item(bolt, 10)
 	check("it shoots bolts", rc.best_arrow() == bolt)
+	for i in 240:  # wait out any stagger from whatever was about
+		if not (p.get_node("MeleeCombat") as MeleeCombat).is_stunned():
+			break
+		await physics_frame
 	var shots := Achievements.count("shot")
 	rc.begin_draw()
 	check("one click shoots at full power", inv.get_count(bolt) == 9 and Achievements.count("shot") == shots + 1, "%d bolts, shots %d->%d, stunned %s" % [inv.get_count(bolt), shots, Achievements.count("shot"), (p.get_node("MeleeCombat") as MeleeCombat).is_stunned()])
 	var mc := p.get_node("MeleeCombat") as MeleeCombat
 	check("then it has to be wound again", rc.reload_ratio() < 0.2 and not rc.begin_draw() and inv.get_count(bolt) == 9)
 	await secs(cb.draw_time + 0.2)
-	check("and is ready after its reload time", rc.reload_ratio() >= 1.0)
+	check("and is ready after its reload time", rc.reload_ratio() >= 1.0, "paused %s ratio %.2f mouse %d" % [paused, rc.reload_ratio(), Input.mouse_mode])
 	var knife := load("res://data/ranged/iron_throwing_knife.tres") as ItemData
 	inv.add_item(knife, 3)
 	eq.equip(knife)
 	await frames(2)
+	for i in 240:
+		if not (p.get_node("MeleeCombat") as MeleeCombat).is_stunned():
+			break
+		await physics_frame
 	check("throwing knives go in the hand as a stack", eq.get_main_hand() == knife and rc.best_arrow() == knife)
 	rc.begin_draw()
 	var flying := root.find_children("*", "Arrow", true, false)

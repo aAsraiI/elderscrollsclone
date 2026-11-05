@@ -366,6 +366,9 @@ func _draw_enemy_bar(c: Control, t: MeleeCombat) -> void:
 		enemy_name = String(t.body.get("display_name"))
 		if (t.body as Node).has_meta("combat_style"):  # 1.27: the fighting style, on the health bar
 			enemy_name = "%s (%s)" % [enemy_name, CombatStyles.NAMES.get(String(t.body.get_meta("combat_style")), "")]
+		var res := resist_text(t.body as Node)  # 1.28: what it shrugs off and what hurts it
+		if res != "":
+			enemy_name += "   " + res
 		if "level" in t.body:
 			enemy_name += "   Lv %d" % int(t.body.get("level"))
 	var font := ThemeDB.fallback_font
@@ -378,3 +381,30 @@ func _draw_enemy_bar(c: Control, t: MeleeCombat) -> void:
 		var poise_ratio := clampf(t.poise / t.max_poise, 0.0, 1.0)
 		var poise_color := Color(1.0, 0.75, 0.2, 0.9 * fade) if not t.is_stunned() else Color(1.0, 0.4, 0.2, fade)
 		c.draw_rect(Rect2(x, y + 7.0, BAR_W * poise_ratio, 2.0), poise_color)
+
+
+## 1.28: a creature's resistances, short, for the health bar: "immune: fire  ·  weak: frost"
+static func resist_text(body: Node) -> String:
+	if body == null or not body.has_meta("resists"):
+		return ""
+	var res: Dictionary = body.get_meta("resists")
+	var immune := PackedStringArray()
+	var resist := PackedStringArray()
+	var weak := PackedStringArray()
+	for k in res:
+		var el := String(k).trim_prefix("resist_")
+		var v := float(res[k])
+		if v >= 1.0:
+			immune.append(el)
+		elif v >= 0.3:
+			resist.append(el)
+		elif v < 0.0:
+			weak.append(el)
+	var parts := PackedStringArray()
+	if not immune.is_empty():
+		parts.append("immune: " + ", ".join(immune))
+	if not resist.is_empty():
+		parts.append("resists: " + ", ".join(resist))
+	if not weak.is_empty():
+		parts.append("weak: " + ", ".join(weak))
+	return "  ·  ".join(parts)

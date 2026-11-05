@@ -180,6 +180,8 @@ func _instant(d: Dictionary, amount: float, caster: Node, dot: bool) -> void:
 	if not d["harm"]:
 		stats.modify_vital(vital if vital != "" else "health", amount)
 		return
+	if not dot and d["element"] in COMBO_ELEMENTS:
+		amount = _combo(d["element"], amount, caster)  # 1.28: two elements in a row
 	var taken := amount
 	if vital == "health" or d["element"] != &"":
 		taken = _hurt(amount, d["element"] if d["element"] != &"" else &"magic", caster, dot)
@@ -204,6 +206,9 @@ func _instant(d: Dictionary, amount: float, caster: Node, dot: bool) -> void:
 # Health damage goes through MeleeCombat like a weapon hit, so blocking, resistances, the hit
 # reaction, the damage number and death all work the same way
 func _hurt(amount: float, element: StringName, caster: Node, dot: bool) -> float:
+	amount = _warded(amount, caster)  # 1.28
+	if amount <= 0.0:
+		return 0.0
 	if combat == null:
 		var before := stats.health
 		stats.modify_vital("health", -amount)
@@ -249,6 +254,9 @@ func _control(d: Dictionary, mag: float, dur: float, caster: Node, group: String
 			return false
 	var fx := _add_fx(id, mag, dur, group, source, caster)
 	match id:
+		&"silence":  # 1.28: a counterspell: no casting while it lasts
+			host.set_meta("silenced_until", Time.get_ticks_msec() + int(dur * 1000.0))
+			notice.emit("Silenced", Color(0.7, 0.8, 1.0))
 		&"paralyze":
 			if combat != null:
 				combat.stun(dur)
@@ -332,6 +340,8 @@ func _special(d: Dictionary, mag: float, dur: float, caster: Node, group: String
 					if "can_fly" in host and not bool(host.get("noclip")):
 						host.set("can_fly", false)
 						host.call("set_flying", false)
+		&"ward":  # 1.28: a pool that soaks up spell harm (_hurt)
+			fx["pool"] = mag
 		&"water_walk":  # 1.28
 			host.set_meta("water_walk", true)
 			fx["end"] = func() -> void:
@@ -458,3 +468,69 @@ func from_dict(data: Dictionary) -> void:
 		apply_one({"id": StringName(e.get("id", "")), "mag": float(e.get("mag", 0.0)), "dur": maxf(float(e.get("left", 1.0)), 0.5)},
 			null, String(e.get("source", "")), String(e.get("group", "spell")), 1.0, false)
 	changed.emit()
+
+
+# ---------------------------------------------------------------- 1.28: spell combos
+
+## Two different elements within COMBO_WINDOW seconds of each other set something off:
+##   fire then frost (or frost then fire)  Thermal Shock  x1.5
+##   frost then shock                       Shatter        x1.4 and a stagger
+##   shock then frost                       Conduction     x1.3
+##   shock then fire                        Overload       bursts: 40% of the hit to everyone within 4 m
+##   poison and fire (either order)         Ignite         x1.5
+const COMBO_ELEMENTS := [&"fire", &"frost", &"shock", &"poison"]
+const COMBO_WINDOW := 4.0
+const COMBOS := {
+	"fire>frost": ["Thermal Shock", 1.5], "frost>fire": ["Thermal Shock", 1.5], "frost>shock": ["Shatter", 1.4],
+	"shock>frost": ["Conduction", 1.3], "shock>fire": ["Overload", 1.0], "poison>fire": ["Ignite", 1.5], "fire>poison": ["Ignite", 1.5],
+}
+
+
+func _combo(element: StringName, amount: float, caster: Node) -> float:
+	var now := Time.get_ticks_msec()
+	var last: Dictionary = host.get_meta("last_element", {})
+	host.set_meta("last_element", {"el": String(element), "t": now})
+	if last.is_empty() or String(last["el"]) == String(element) or now - int(last["t"]) > int(COMBO_WINDOW * 1000.0):
+		return amount
+	var key := "%s>%s" % [last["el"], element]
+	if not COMBOS.has(key):
+		return amount
+	host.set_meta("last_element", {})  # one combo per pair
+	var c: Array = COMBOS[key]
+	notice.emit(String(c[0]), Color(1.0, 0.75, 0.3))
+	if caster != null and is_instance_valid(caster) and caster.is_in_group("player"):
+		Achievements.note("combo")
+	match key:
+		"frost>shock":
+			if combat != null:
+				combat.stun(1.0)
+		"shock>fire":
+			for other in MagicHit.creatures_in(host.get_world_3d(), host.global_position, 4.0, [host]):
+				var om := ActiveMagic.of(other)
+				if om != null and not MagicHit.friendly(caster, other):
+					om._hurt(amount * 0.4, &"fire", caster, true)
+	return amount * float(c[1])
+
+
+# ---------------------------------------------------------------- 1.28: wards
+
+## A ward soaks up spell harm until its pool runs dry (then it breaks). The player's ward trains Mysticism.
+func _warded(amount: float, caster: Node) -> float:
+	if caster == host:
+		return amount
+	for fx in effects:
+		if fx["id"] == &"ward" and float(fx.get("pool", 0.0)) > 0.0:
+			var soak := minf(float(fx["pool"]), amount)
+			fx["pool"] = float(fx["pool"]) - soak
+			if is_player:
+				var sk := host.get_node_or_null("Skills") as Skills
+				if sk != null:
+					sk.add_xp(&"mysticism", soak * 0.15)
+				Achievements.note("ward")
+			if float(fx["pool"]) <= 0.0:
+				fx["left"] = 0.0
+				notice.emit("Ward broken", Color(0.7, 0.8, 1.0))
+			else:
+				notice.emit("Warded", Color(0.7, 0.8, 1.0))
+			return amount - soak
+	return amount

@@ -44,6 +44,7 @@ func _run() -> void:
 		(p.get_node("Stats") as Stats).revive()
 		wm.clock.set_time(12.0)
 		await t_spells()
+		await t_combos()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -110,3 +111,44 @@ func t_spells() -> void:
 		check("without it you sink", p.global_position.y < sea - 0.3, "%.2f vs %.2f" % [p.global_position.y, sea])
 	if town != null:
 		pass
+
+
+func t_combos() -> void:
+	print("-- combos, wards, counterspells, resistances")
+	var at := p.global_position + Vector3(0, 0, 6)
+	at.y = wm.get_height_at(at.x, at.z) + 0.5
+	var foe := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 10, wm, at, RandomNumberGenerator.new())
+	await frames(3)
+	foe.stats.add_modifiers("test", {"max_health": 5000.0})
+	foe.stats.revive()
+	var fm := ActiveMagic.of(foe)
+	var hp := foe.stats.health
+	fm.apply_one({"id": "fire_damage", "mag": 20.0, "dur": 0.0}, p, "t", "spell")
+	var first := hp - foe.stats.health
+	hp = foe.stats.health
+	fm.apply_one({"id": "frost_damage", "mag": 20.0, "dur": 0.0}, p, "t", "spell")
+	var second := hp - foe.stats.health
+	check("fire then frost hits harder (Thermal Shock)", second > first * 1.3, "%.1f then %.1f" % [first, second])
+	check("a combo counts", Achievements.count("combo") >= 1)
+	hp = foe.stats.health
+	fm.apply_one({"id": "shock_damage", "mag": 20.0, "dur": 0.0}, p, "t", "spell")
+	check("one combo per pair", hp - foe.stats.health < second, "%.1f" % (hp - foe.stats.health))
+	# counterspell
+	fm.apply_one({"id": "silence", "mag": 0.0, "dur": 8.0}, p, "t", "spell")
+	check("a counterspell silences", foe.has_meta("silenced_until") and int(foe.get_meta("silenced_until")) > Time.get_ticks_msec())
+	foe.queue_free()
+	# a ward on the player
+	var pm := ActiveMagic.of(p)
+	var st := p.get_node("Stats") as Stats
+	pm.apply_one({"id": "ward", "mag": 50.0, "dur": 30.0}, p, "t", "spell")
+	var php := st.health
+	pm.apply_one({"id": "fire_damage", "mag": 30.0, "dur": 0.0}, foe if is_instance_valid(foe) else null, "t", "spell")
+	check("a ward soaks up spell harm", absf(st.health - php) < 0.5, "%.1f" % (php - st.health))
+	pm.apply_one({"id": "frost_damage", "mag": 40.0, "dur": 0.0}, null, "t", "spell")
+	check("until it breaks", st.health < php, "%.1f" % (php - st.health))
+	# resistances on the health bar
+	var w := Node.new()
+	w.set_meta("resists", {"resist_fire": 1.0, "resist_frost": -0.5, "resist_poison": 0.5})
+	var txt := CombatFeedback.resist_text(w)
+	check("the health bar shows resistances", txt.contains("immune: fire") and txt.contains("weak: frost") and txt.contains("resists: poison"), txt)
+	w.free()

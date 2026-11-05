@@ -170,6 +170,10 @@ static func _ensure() -> void:
 	# ---- 1.28: Levitate, Water Walking
 	_add(3, "levitate_spell", "Levitate", F.SELF, [["levitate", 0, 45]])
 	_add(2, "water_walking_spell", "Water Walking", F.SELF, [["water_walk", 0, 90]])
+	_add(1, "lesser_ward", "Lesser Ward", F.SELF, [["ward", 60, 30]])
+	_add(2, "steadfast_ward", "Steadfast Ward", F.SELF, [["ward", 130, 30]])
+	_add(3, "greater_ward", "Greater Ward", F.SELF, [["ward", 240, 30]])
+	_add(2, "counterspell", "Counterspell", F.TARGET, [["silence", 0, 8]])
 
 	# ---- 1.28: the far islands: Grandmaster (5) and Ascendant (6)
 	_add(5, "meteor", "Meteor", F.TARGET, [["fire_damage", 160, 0]], 6.0)

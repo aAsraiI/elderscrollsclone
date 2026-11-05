@@ -1184,6 +1184,8 @@ func _tick_archer(delta: float, to_target: Vector3, dist: float) -> void:
 func _try_cast(dist: float) -> bool:
 	if spells.is_empty() or caster == null or _casting != null or _cast_cd > 0.0 or dist > 24.0:
 		return false
+	if has_meta("silenced_until") and Time.get_ticks_msec() < int(get_meta("silenced_until")):
+		return false  # 1.28: a counterspell
 	if _calm_until > _clock:
 		return false
 	if asleep or lurking:

@@ -242,6 +242,8 @@ static func _ensure() -> void:
 	_add(&"absorb_magicka", "Absorb Magicka", M, 1.0, Kind.INSTANT, {"harm": true, "ench_w": true, "absorb": "magicka", "vital": "magicka"})
 	_add(&"spell_absorption", "Spell Absorption", M, 0.12, Kind.BUFF, {"stat": "spell_absorb", "per": 0.01, "unit": "%", "ench_a": true, "self_only": true})
 	_add(&"reflect", "Reflect", M, 0.14, Kind.BUFF, {"stat": "reflect", "per": 0.01, "unit": "%", "ench_a": true, "self_only": true})
+	_add(&"ward", "Ward", M, 0.35, Kind.SPECIAL, {"self_only": true, "unit": " pts", "max": 600.0, "desc": "Soaks up this much harm from spells before it breaks. Trains Mysticism."})  # 1.28
+	_add(&"silence", "Silence", M, 3.0, Kind.CONTROL, {"harm": true, "mag": false, "max_dur": 20.0, "desc": "The target cannot cast spells."})  # 1.28
 	_add(&"mark", "Mark", M, 15.0, Kind.SPECIAL, {"mag": false, "dur": false, "self_only": true,
 		"desc": "Remembers this place (outdoors). Recall brings you back."})
 	_add(&"recall", "Recall", M, 20.0, Kind.SPECIAL, {"mag": false, "dur": false, "self_only": true,

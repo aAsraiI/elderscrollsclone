@@ -93,6 +93,8 @@ Once your bounties add up to 300 or more, bounty hunters come for you in the wil
 	["survival", "Body and Survival", "Food, Rest and Weather",
 		"With Survival on (World settings), you grow hungry, tired and cold. Eat to stop hunger, sleep in a bed to rest, and dress warmly in the cold: each piece of clothing has its own warmth. A fire within a few metres keeps the cold off. Deserts and summer middays heat you, and rain and swimming soak you: dry off by a fire.\n\nMeals give buffs even with Survival off.
 
+Seasons: spring flowers only bloom in spring and summer, fish bite slowly in winter, and bears sleep the winter through.
+
 Thirst: you grow thirsty too, faster in the heat. Fill a Waterskin (innkeepers sell them, or a tanning rack makes one) by using it facing water, and drink from it on the road; ale, milk and potions help a little."],
 	["rest", "Body and Survival", "Waiting and Sleeping",
 		"T waits up to a day (not with enemies near). In a bed, it sleeps: rent a room from an innkeeper, or sleep in a bed you own. A comfortable sleep (a house, a fire, furnishings) leaves you Well Rested for longer, which speeds learning."],
@@ -154,7 +156,7 @@ Gear wears down as you use it (World settings: Gear wears down). Below half its 
 	["followers", "Towns and People", "Followers and Pets",
 		"Sellswords in inns can be hired; others follow you after a quest. Talk to a follower to trade items with them, tell them to wait, or send them home. A tamed animal follows you too."],
 	["taming", "Towns and People", "Taming",
-		"Walk up to a calm wolf, boar, fox, bear, hound, rat or stalker with raw meat in your pack and press E. A tamed animal follows you and fights for you."],
+		"Walk up to a calm wolf, boar, fox, bear, hound, rat or stalker with raw meat in your pack and press E. A tamed animal follows you and fights for you. It also brings you things from bodies it finds. With Hunting 50, a Falconer's Glove looses a hawk: it shows what lives around you and often brings back small game (once an hour)."],
 	["marriage", "Towns and People", "Courting and Marriage",
 		"Wear an Amulet of Mara (sold in temples) and talk to someone who likes you a lot (80): they may marry you. Court someone (\"spend time together\", once a day) and they will marry you sooner. A spouse moves into your home and shares a little of their earnings."],
 	["guilds", "Quests and Guilds", "Guilds",
@@ -175,7 +177,9 @@ Gear wears down as you use it (World settings: Gear wears down). Below half its 
 	["homes", "Homes and Settlers", "Houses",
 		"Houses for sale have a sign; ask a guard or the steward about homes. A house is yours to sleep in and store things in: chests in your own house never empty."],
 	["homestead", "Homes and Settlers", "Your Homestead",
-		"Buy a plot outside a town (ask the steward) and build it up part by part with materials: a hall, walls, a garden, a forge. Settlers can live there: free prisoners from dungeon cells or ask travellers. Give them jobs (farmer, hunter, woodcutter, guard, smith) and keep them fed."],
+		"Buy a plot outside a town (ask the steward) and build it up part by part with materials: a hall, walls, a garden, a forge. Settlers can live there: free prisoners from dungeon cells or ask travellers. Give them jobs (farmer, hunter, woodcutter, guard, smith) and keep them fed.
+
+After the garden you can add Beehives (honey), an Orchard (apples) and a Livestock Pen (eggs and milk). The steward keeps what they bring in each day (\"the settlers' goods\"); Farming makes them yield more, and the seasons matter: the orchard bears most in autumn and nothing in winter, the bees sleep through the winter."],
 	["raids", "Homes and Settlers", "Raids and the Blood Moon",
 		"A homestead that has grown draws raiders every week or two: guards and walls help. On the last night of every month the blood moon rises and hordes walk (Interface > Blood moon)."],
 	["stations", "Homes and Settlers", "Workstations Nearby",

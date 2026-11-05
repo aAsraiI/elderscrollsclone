@@ -26,6 +26,9 @@ const PARTS := [
 	["workshop", "a Workshop", 700, Vector3(-7, 0, 0)],
 	["storeroom", "a Storeroom", 400, Vector3(0, 0, 7)],
 	["garden", "a Garden", 300, Vector3(7, 0, 7)],
+	["apiary", "Beehives", 400, Vector3(-7, 0, 7)],  # 1.30: honey (Farming)
+	["orchard", "an Orchard", 500, Vector3(0, 0, 14)],  # 1.30: apples
+	["pen", "a Livestock Pen", 600, Vector3(-14, 0, 0)],  # 1.30: eggs and milk
 ]
 
 var _house: Node3D
@@ -230,6 +233,9 @@ func _build() -> void:
 		if id == "garden":
 			_garden(mid)
 			continue
+		if id in ["apiary", "orchard", "pen"]:
+			_farm_part(id, mid)  # 1.30
+			continue
 		_room(mid, id, world, at.y)
 		match id:
 			"hall":
@@ -290,7 +296,7 @@ func _room(mid: Vector3, id: String, world: WorldManager, base_y: float) -> void
 func _room_at(at: Vector3) -> String:
 	for p in PARTS:
 		var id := String(p[0])
-		if id != "steward" and id != "garden" and has_part(id) and Vector3(p[3]).is_equal_approx(at):
+		if not id in ["steward", "garden", "apiary", "orchard", "pen"] and has_part(id) and Vector3(p[3]).is_equal_approx(at):
 			return id
 	return ""
 
@@ -355,3 +361,56 @@ class DraftingTable extends StaticBody3D:
 
 	func interact(inv: Inventory) -> void:
 		Locks.toast(get_tree(), homestead.build_next(inv))
+
+
+# ---------------------------------------------------------------- 1.30: beehives, orchard, livestock
+
+## What each brings in a day (into the steward's store, like the settlers' goods); Farming adds more
+const FARM_OUTPUT := {
+	"apiary": [["res://data/materials/honey.tres", 2]],
+	"orchard": [["res://data/consumables/apple.tres", 4]],
+	"pen": [["res://data/materials/egg.tres", 3], ["res://data/materials/milk.tres", 2]],
+}
+
+
+func _farm_part(id: String, mid: Vector3) -> void:
+	var wood := InteriorBuilder.WOOD
+	match id:
+		"apiary":
+			for i in 3:
+				POIBuilder.add_box(_house, Vector3(0.6, 0.7, 0.6), mid + Vector3(-2.0 + i * 2.0, 0.35, 0.0), Color(0.75, 0.62, 0.35))
+				POIBuilder.add_box(_house, Vector3(0.7, 0.08, 0.7), mid + Vector3(-2.0 + i * 2.0, 0.74, 0.0), wood)
+		"orchard":
+			for i in 6:
+				var at := mid + Vector3(-2.5 + (i % 3) * 2.5, 0.0, -1.5 + (i / 3) * 3.0)
+				POIBuilder.add_box(_house, Vector3(0.25, 1.6, 0.25), at + Vector3(0, 0.8, 0), wood.darkened(0.2))
+				POIBuilder.add_box(_house, Vector3(1.6, 1.2, 1.6), at + Vector3(0, 2.0, 0), Color(0.25, 0.42, 0.18))
+		"pen":
+			var half := ROOM * 0.5
+			for side in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
+				var along := Vector3(absf(side.z), 0, absf(side.x))
+				POIBuilder.add_box(_house, along * ROOM + Vector3(0.1, 0.9, 0.1), mid + side * half + Vector3(0, 0.45, 0), wood)
+			POIBuilder.add_box(_house, Vector3(1.2, 0.9, 0.6), mid + Vector3(1.5, 0.45, 1.5), Color(0.82, 0.8, 0.75))  # a ewe
+			POIBuilder.add_box(_house, Vector3(1.6, 1.2, 0.8), mid + Vector3(-1.4, 0.6, -1.2), Color(0.45, 0.32, 0.22))  # a cow
+
+
+## The farm's day: into the steward's store (Settlers.daily calls this every day)
+static func farm_day() -> int:
+	if not owns():
+		return 0
+	var tree := Engine.get_main_loop() as SceneTree
+	var player := tree.get_first_node_in_group("player") if tree != null else null
+	var sk := player.get_node_or_null("Skills") as Skills if player != null else null
+	var extra := 1.0 + (float(sk.get_level(&"farming")) / 100.0 if sk != null else 0.0)
+	var store := WorldState.get_record(Settlers.STORE).duplicate()
+	var n := 0
+	for id in FARM_OUTPUT:
+		if not has_part(id):
+			continue
+		for o in FARM_OUTPUT[id]:
+			var c := maxi(roundi(float(o[1]) * extra * Seasons.farm_mult(id)), 0)
+			store[o[0]] = int(store.get(o[0], 0)) + c
+			n += c
+	if n > 0:
+		WorldState.set_record(Settlers.STORE, store)
+	return n

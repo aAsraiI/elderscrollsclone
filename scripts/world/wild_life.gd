@@ -77,6 +77,8 @@ func _spawn_group(p: Node3D) -> void:
 	var entry: Dictionary = legend if not legend.is_empty() else _pick(land, at)
 	if entry.is_empty():
 		return
+	if legend.is_empty() and not Seasons.animal_awake(String(entry["kind"])):
+		return  # 1.30: bears sleep through the winter
 	spawn(entry, at, not legend.is_empty())
 
 

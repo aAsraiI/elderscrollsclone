@@ -96,6 +96,7 @@ func _process(delta: float) -> void:
 
 ## A day at the homestead: work, food, beds, mood; some may leave
 func daily() -> void:
+	Homestead.farm_day()  # 1.30: beehives, orchard and pen, settlers or not
 	var list := all().duplicate(true)
 	if list.is_empty():
 		return
@@ -167,6 +168,9 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 			if it != null and inv != null and int(store[path]) > 0:
 				inv.add_item(it, int(store[path]))
 				got.append("%s x%d" % [it.display_name, int(store[path])])
+		var sk2 := p.get_node_or_null("Skills") as Skills if p != null else null
+		if sk2 != null and not got.is_empty():
+			sk2.add_xp(&"farming", 2.0 * got.size())  # 1.30: tending the farm
 		WorldState.erase_record(STORE)
 		return _say("Here is what the settlers brought in: %s." % ", ".join(got) if not got.is_empty() else "Nothing yet.")
 	return {}

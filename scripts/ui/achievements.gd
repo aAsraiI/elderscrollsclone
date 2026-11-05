@@ -115,6 +115,7 @@ const LIST := [
 	["fish_species", 2, "Collector of the Deep", "Catch 6 different kinds of fish.", "fishing", "fish_species", 6],
 	["remedy", 2, "Physician, Heal Thyself", "Cure a disease with an Herbal Remedy.", "disease", "n:remedy", 1],
 	["bandage", 2, "Field Dressing", "Bind your wounds with a Bandage.", "health", "n:bandage", 1],
+	["fetch", 2, "Good Boy, Good Find", "Have a tamed animal fetch you something from a body.", "taming", "n:fetch", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],
@@ -135,6 +136,8 @@ const LIST := [
 	# ---- 5 Beyond the Islands: the endgame, islands of level 100 to 200
 	["patrons_all", 3, "Favoured of All", "Receive the artifacts of all eight Patrons.", "patrons", "n:patron", 8],
 	["clean_heist", 3, "Ghost", "Pull off a heist without a single watchman seeing you.", "heists", "n:clean_heist", 1],
+	["hawk", 3, "Eyes in the Sky", "Loose a hawk with a Falconer's Glove (Hunting 50).", "taming", "n:hawk", 1],
+	["farm", 3, "Lord of the Land", "Build Beehives, an Orchard and a Livestock Pen at your homestead.", "homestead", "farm_parts", 3],
 	["far_isle", 4, "Over the Horizon", "Set foot on an island of level 100 or more. Ships sail from port towns.", "islands", "far_land", 100],
 	["level100", 4, "Hundredfold", "Reach level 100.", "islands", "level", 100],
 	["skill125", 4, "Beyond Mastery", "Raise any skill to 125.", "leveling", "skill_max", 125],
@@ -312,6 +315,11 @@ static func _value(check: String, tree: SceneTree) -> int:
 			return bp
 		"fish_species":
 			return (WorldState.get_record("fish_caught").get("ids", []) as Array).size()
+		"farm_parts":
+			var fp := 0
+			for part in ["apiary", "orchard", "pen"]:
+				fp += 1 if Homestead.has_part(part) else 0
+			return fp
 		"regency":
 			return 1 if Regency.is_settled() else 0
 		"far_land":

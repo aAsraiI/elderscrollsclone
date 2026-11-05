@@ -145,6 +145,7 @@ func _watch() -> void:
 	if Homestead.built().size() >= 3:
 		hint("raids")
 	Heists.watch(get_tree(), _player)  # 1.29
+	HuntingLife.pet_fetch(_player, 1.0)  # 1.30: pets bring you things
 	_watch_world()
 	_watch_quests()
 

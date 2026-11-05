@@ -1757,6 +1757,7 @@ func _on_died() -> void:
 	var note_rng := RandomNumberGenerator.new()
 	note_rng.seed = (spawn_key if spawn_key != "" else str(get_instance_id())).hash()
 	Notes.maybe_carry(self, note_rng)  # 1.24: a letter, orders, a debt...
+	HuntingLife.note_dead(self)  # 1.30: a pet may fetch from the body
 	if _hurt_by_player:
 		Disguises.maybe_drop(self)  # 1.29: their clothes
 	QuestEvents.kill(self)

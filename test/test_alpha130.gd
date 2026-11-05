@@ -47,6 +47,7 @@ func _run() -> void:
 		await t_hunting()
 		await t_camp_thirst()
 		await t_disease_wounds()
+		await t_companions_seasons()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -216,3 +217,39 @@ func t_disease_wounds() -> void:
 	s.maybe_bleed(light, 1.0)
 	check("a scratch does not bleed", not s.is_bleeding())
 	GameRules._rules["survival"] = false
+
+
+func t_companions_seasons() -> void:
+	print("-- companions, the farm, the seasons")
+	var sk := p.get_node("Skills") as Skills
+	var glove := load("res://data/misc/falconers_glove.tres") as ItemData
+	check("the hawk needs Hunting 50", HuntingLife.loose_hawk(p, glove).contains("Hunting"))
+	sk.set_level(&"hunting", 50)
+	var said := HuntingLife.loose_hawk(p, glove)
+	check("then it flies", said.contains("circles") and ActiveMagic.of(p).has_effect(&"detect_life"), said)
+	check("once an hour", HuntingLife.loose_hawk(p, glove).contains("resting"))
+	# fetching
+	var at := p.global_position + Vector3(3, 0, 0)
+	at.y = wm.get_height_at(at.x, at.z) + 0.5
+	var wolf := Population.spawn_enemy(load("res://data/enemies/wolf.tres"), 3, wm, at, RandomNumberGenerator.new())
+	await frames(3)
+	wolf.set_meta("pet", true)
+	var f := p.get_node("Followers") as Followers
+	f._make_follower(wolf)
+	var body := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 3, wm, at + Vector3(2, 0, 0), RandomNumberGenerator.new())
+	await frames(3)
+	body.inventory.add_item(load("res://data/materials/raw_meat.tres") as ItemData, 3)
+	body.stats.modify_vital("health", -999999.0)
+	await frames(5)
+	HuntingLife._fetch_t = 0.0
+	said = HuntingLife.pet_fetch(p, 1.0)
+	check("a pet fetches from a body", said.contains("brings you"), said)
+	# the farm and the seasons
+	check("autumn's orchard bears twice", Seasons.farm_mult("orchard", Seasons.AUTUMN) == 2.0 and Seasons.farm_mult("orchard", Seasons.WINTER) == 0.0)
+	check("spring flowers only in spring and summer", Seasons.herb_in_season("red_mountain_flower", Seasons.SPRING) and not Seasons.herb_in_season("red_mountain_flower", Seasons.WINTER))
+	check("bears sleep in winter", not Seasons.animal_awake("frost_bear", Seasons.WINTER) and Seasons.animal_awake("wolf", Seasons.WINTER))
+	check("fish bite slowly in winter", Seasons.bite_mult(Seasons.WINTER) > Seasons.bite_mult(Seasons.SPRING))
+	WorldState.set_record("homestead", {"town": "x", "pos": [0, 0, 0], "yaw": 0.0, "built": ["hall", "pen"], "paid": 1})
+	check("the pen brings in goods", Homestead.farm_day() > 0 and WorldState.get_record(Settlers.STORE).has("res://data/materials/egg.tres"))
+	WorldState.erase_record("homestead")
+	WorldState.erase_record(Settlers.STORE)

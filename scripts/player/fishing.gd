@@ -91,7 +91,7 @@ func cast() -> String:
 	_at = _player.global_position
 	var st := _player.get_node_or_null("Stats") as Stats
 	var bonus := st.get_stat("fishing_bonus") if st != null else 0.0
-	_left = randf_range(4.0, 11.0) * clampf(1.0 - bonus, 0.35, 1.0)
+	_left = randf_range(4.0, 11.0) * clampf(1.0 - bonus, 0.35, 1.0) * Seasons.bite_mult()  # 1.30: winter is slow
 	Locks.toast(get_tree(), "You cast your line... (E on the pole again reels in)")
 	return ""
 

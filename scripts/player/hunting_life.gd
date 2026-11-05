@@ -226,3 +226,79 @@ class SnareNode extends StaticBody3D:
 	func interact(actor: Inventory) -> void:
 		if actor != null:
 			Locks.toast(get_tree(), HuntingLife.use_snare(actor.get_parent(), snare_id))
+
+
+# ---------------------------------------------------------------- 1.30.4: companions that fetch
+
+const FETCH_RANGE := 15.0
+
+
+## A tamed beast brings you something from a body it finds near (Tutorial calls this every second;
+## a pet fetches at most once every FETCH_SECONDS)
+const FETCH_SECONDS := 20.0
+static var _fetch_t := 0.0
+## Bodies of the last minutes (the dead leave the ActorRegistry): Enemy._on_died notes them
+static var _recent_dead: Array = []
+
+
+static func note_dead(e: Enemy) -> void:
+	_recent_dead.append(weakref(e))
+	if _recent_dead.size() > 24:
+		_recent_dead.pop_front()
+
+
+static func pet_fetch(player: Node, dt: float) -> String:
+	_fetch_t -= dt
+	if _fetch_t > 0.0:
+		return ""
+	_fetch_t = FETCH_SECONDS
+	var f := player.get_node_or_null("Followers") as Followers
+	if f == null:
+		return ""
+	for pet in f._alive():
+		if not pet.has_meta("pet"):
+			continue
+		for n in _recent_dead:
+			var body := (n as WeakRef).get_ref() as Enemy
+			if body == null or not is_instance_valid(body) or body.global_position.distance_to(pet.global_position) > FETCH_RANGE or not body.is_dead() or body.has_meta("fetched") or body.inventory == null or body.inventory.stacks.is_empty():
+				continue
+			var stack = body.inventory.stacks[randi() % body.inventory.stacks.size()]
+			var it: ItemData = stack.item
+			body.inventory.remove_item(it, 1)
+			(player.get_node("Inventory") as Inventory).add_item(it, 1)
+			body.set_meta("fetched", true)
+			Achievements.note("fetch")
+			var said := "Your %s brings you %s." % [pet.display_name.to_lower(), it.display_name]
+			Locks.toast(player.get_tree(), said)
+			return said
+	return ""
+
+
+# ---------------------------------------------------------------- 1.30.4: the hawk
+
+## A Falconer's Glove (Hunting 50): loose your hawk. It shows what lives around you (Detect Life,
+## 120 m, 30 s) and often brings back small game. Once an hour.
+const HAWK_SKILL := 50
+const HAWK_HOURS := 1.0
+
+
+static func loose_hawk(player: Node, glove: ItemData) -> String:
+	var sk := player.get_node_or_null("Skills") as Skills
+	if sk == null or sk.get_level(&"hunting") < HAWK_SKILL:
+		return "The hawk won't come to your fist yet (Hunting %d)." % HAWK_SKILL
+	var w := player.get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if w != null and w.dungeons != null and w.dungeons.is_inside():
+		return "Not under a roof."
+	var now := _hours(player.get_tree())
+	if now - float(WorldState.get_record("hawk").get("at", -99.0)) < HAWK_HOURS:
+		return "Your hawk is still resting."
+	WorldState.set_record("hawk", {"at": now})
+	var m := ActiveMagic.of(player)
+	if m != null:
+		m.apply_one({"id": "detect_life", "mag": 120.0, "dur": 30.0}, player, "Hawk", "power")
+	sk.add_xp(&"hunting", 6.0)
+	Achievements.note("hawk")
+	if randf() < 0.6:
+		(player.get_node("Inventory") as Inventory).add_item(load("res://data/materials/raw_meat.tres") as ItemData, 1)
+		return "Your hawk circles high, shows you what moves below, and comes back with a hare."
+	return "Your hawk circles high and shows you what moves below."

@@ -273,6 +273,8 @@ func _today() -> int:
 
 
 func is_ready() -> bool:
+	if kind == "herb" and not Seasons.herb_in_season(item_id):
+		return false  # 1.30: a spring flower out of season
 	var rec := WorldState.get_record(key)
 	if rec.is_empty():
 		return true
@@ -299,6 +301,8 @@ func get_prompt() -> String:
 	var item := _item()
 	if item == null:
 		return ""
+	if kind == "herb" and not Seasons.herb_in_season(item_id):
+		return "%s (it flowers in spring and summer)" % item.display_name
 	if kind == "herb":
 		return "Pick %s" % item.display_name
 	if kind in GATHER:

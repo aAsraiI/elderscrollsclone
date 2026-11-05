@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_26d36"]
+
+[resource]
+script = ExtResource("1_26d36")
+id = &"waterskin"
+display_name = "Waterskin (empty)"
+description = "Fill it at any water (E in the inventory, facing water) and drink from it on the road."
+item_type = 9
+weight = 0.5
+value = 10
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("shop", "camp")
+ingredient_effects = PackedStringArray()

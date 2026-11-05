@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_dtjsp"]
+
+[resource]
+script = ExtResource("1_dtjsp")
+id = &"fish_sea_bass"
+display_name = "Sea Bass"
+description = "A fresh sea bass. Cook it at a pot or fire."
+item_type = 7
+weight = 0.4
+value = 7
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

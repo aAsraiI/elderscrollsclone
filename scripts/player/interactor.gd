@@ -60,6 +60,11 @@ func _physics_process(delta: float) -> void:
 		var target := _get_target()
 		if target != null and target.has_method("get_prompt"):
 			prompt = target.get_prompt()
+		if target != null and owner != null:
+			var sk_p := HuntingLife.prompt(owner, target)  # 1.30
+			if sk_p != "":
+				prompt = (prompt + "
+" + sk_p) if prompt != "" else sk_p
 		var aff := Afflictions.of(get_tree()) if target != null else null
 		if aff != null:
 			var extra := aff.feed_prompt(target)
@@ -89,6 +94,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		var aff := Afflictions.of(get_tree())
 		var t := _get_target()
 		if aff != null and t != null and aff.feed(t, (event as InputEventKey).shift_pressed):
+			get_viewport().set_input_as_handled()
+		elif t != null and HuntingLife.skin_target(t) != null:  # 1.30: skinning a beast
+			Locks.toast(get_tree(), HuntingLife.skin(owner, t))
 			get_viewport().set_input_as_handled()
 		return
 	if not event.is_action_pressed("interact"):

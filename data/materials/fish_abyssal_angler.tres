@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_3jigy"]
+
+[resource]
+script = ExtResource("1_3jigy")
+id = &"fish_abyssal_angler"
+display_name = "Abyssal Angler"
+description = "A fresh abyssal angler. A rare catch: collectors pay well for one."
+item_type = 7
+weight = 2.0
+value = 900
+stackable = true
+max_stack = 999
+treasure = true
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

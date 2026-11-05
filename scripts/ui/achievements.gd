@@ -64,6 +64,9 @@ const LIST := [
 	["scroll", 1, "Words on Paper", "Read a scroll: it casts its spell once, for free, whatever your skill.", "magic", "n:scroll", 1],
 	["combo", 1, "Elemental", "Set off a spell combo: hit a foe with two different elements within 4 s (fire then frost...).", "magic", "n:combo", 1],
 	["pickpocket", 1, "Light Touch", "Pick someone's pocket: sneak up unseen and press E.", "pickpocket", "n:pickpocket", 1],
+	["fish", 1, "Gone Fishing", "Catch a fish: use a Fishing Pole facing water and press E when it bites.", "fishing", "n:fish", 1],
+	["skin", 1, "Skin and Bone", "Skin a beast: F on its body with a blade in your pack.", "hunting", "n:skin", 1],
+	["snare", 1, "Patient Hunter", "Catch something in a snare.", "hunting", "n:snare", 1],
 	["arena", 1, "Blood on the Sand", "Win a bout at an arena (strike the gong in a Fighters Guild hall).", "arena", "arena", 1],
 	["museum", 1, "For Posterity", "Donate an artifact to an Antiquarian Museum.", "museum", "museum", 1],
 	["spells5", 1, "Spell Collector", "Know 5 spells. Spell tomes are sold by mages and found in dungeons.", "magic", "spells", 5],
@@ -108,6 +111,7 @@ const LIST := [
 	["launder", 2, "Clean Hands", "Have a fence launder your stolen goods.", "crime", "n:launder", 1],
 	["hunter_kill", 2, "Not Today, Hunter", "Kill a bounty hunter (they come for you once your bounties pass 300).", "crime", "n:hunter_kill", 1],
 	["heist", 2, "The Job", "Pull off a heist for the Thieves Guild (ask the fence about \"a heist\").", "heists", "n:heist", 1],
+	["fish_species", 2, "Collector of the Deep", "Catch 6 different kinds of fish.", "fishing", "fish_species", 6],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],
@@ -303,6 +307,8 @@ static func _value(check: String, tree: SceneTree) -> int:
 					if PerkDatabase.SHIFT_TREES.has(String(PerkDatabase.get_perk(String(id)).get("tree", ""))):
 						bp += 1
 			return bp
+		"fish_species":
+			return (WorldState.get_record("fish_caught").get("ids", []) as Array).size()
 		"regency":
 			return 1 if Regency.is_settled() else 0
 		"far_land":

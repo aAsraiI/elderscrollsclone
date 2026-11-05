@@ -104,6 +104,10 @@ Each feeding earns a blood point for the Vampire perk tree (Character > Perks, s
 		"You are a werewolf. Press B to change, once a day; the full moon changes you anyway. In beast form, F on a body devours it. Being seen changing is a crime.
 
 Each body devoured earns a blood point for the Werewolf perk tree (Character > Perks): Feral, Thick Hide, The Hunt and on to Alpha. Its perks work in beast form."],
+	["fishing", "Body and Survival", "Fishing",
+		"Use a Fishing Pole (from the inventory or a favourite key) facing water close by: a pier, a boat or a bank. Wait for a bite, then press E quickly to land it. Move and the line goes slack. What bites depends on the water (sea, rivers and lakes, swamps, the frozen north, the far islands) and the hour: dawn and dusk are best, and some fish only rise at night. Rare fish (Moonscale, Golden Koi, Gloomfin, Abyssal Angler, Leviathan Scale) are worth a lot. Trains Fishing."],
+	["hunting", "Body and Survival", "Hunting, Skinning and Snares",
+		"With a blade in your pack, F on a dead beast skins and butchers it: more pelts and meat the better your Hunting. Set a Snare (workbench) on the ground outside and come back after a few hours: it may hold small game. With Hunting 15 you see the tracks beasts leave in snow, sand and mud, and can follow them."],
 	["swimming", "Body and Survival", "Water",
 		"You can swim, slowly in armour. Under water your breath runs out: watch the bar and come up. An Air Bladder gives more. A Raft Kit (workbench) makes a raft at the water's edge."],
 

@@ -113,6 +113,11 @@ static func _ensure() -> void:
 	# ---- workbench (tinkering)
 	_add("workbench", "res://data/misc/lockpick.tres", 5, [["iron_ingot", 1]], 1, "tinkering")
 	_add("workbench", "res://data/misc/repair_hammer.tres", 2, [["iron_ingot", 1], ["firewood", 1]], 1, "smithing")  # 1.27
+	_add("workbench", "res://data/misc/snare.tres", 2, [["res://data/clutter/rope.tres", 1], ["firewood", 1]], 1, "survival")  # 1.30
+	_add("workbench", "res://data/clutter/fishing_pole.tres", 1, [["firewood", 1], ["plant_fibre", 2]], 1, "survival")
+	_add("workbench", "res://data/misc/camping_kit.tres", 1, [["leather", 3], ["firewood", 2], ["res://data/clutter/rope.tres", 1]], 5, "survival")
+	_add("tanning_rack", "res://data/misc/waterskin.tres", 1, [["leather", 1], ["plant_fibre", 1]], 1, "survival")
+	_add("workbench", "res://data/misc/bandage.tres", 3, [["plant_fibre", 2]], 1, "medicine")
 	_add("workbench", MAT + "pickaxe.tres", 1, [["iron_ingot", 2], ["leather_strips", 1]], 1, "tinkering")
 	for metal in ["silver", "gold"]:
 		for kind in ["ring", "amulet"]:
@@ -131,6 +136,9 @@ static func _ensure() -> void:
 	# ---- cooking pot
 	_cook("roast_meat", 1, [["raw_meat", 1]], 1)
 	_cook("smoked_fish", 1, [["raw_fish", 1], ["salt", 1]], 1)
+	for fid in Fishing.FISH:  # 1.30: the fish you catch cook like any other
+		if int(Fishing.FISH[fid][3]) < 2:
+			_cook("smoked_fish", 1, [["fish_" + fid, 1], ["salt", 1]], 1)
 	_cook("bread", 2, [["flour", 1], ["salt", 1]], 1)
 	_cook("hearty_stew", 1, [["raw_meat", 1], ["potato", 1], ["carrot", 1]], 10)
 	_cook("vegetable_soup", 1, [["potato", 1], ["carrot", 1], ["cabbage", 1], ["leek", 1]], 1)

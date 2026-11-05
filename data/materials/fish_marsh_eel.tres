@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_3e7d8"]
+
+[resource]
+script = ExtResource("1_3e7d8")
+id = &"fish_marsh_eel"
+display_name = "Marsh Eel"
+description = "A fresh marsh eel. Cook it at a pot or fire."
+item_type = 7
+weight = 0.4
+value = 14
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

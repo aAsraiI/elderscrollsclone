@@ -401,7 +401,7 @@ func _ensure_helpers() -> void:
 		right.name = "SpellCasterRight"
 		right.hand = "right"
 		add_child(right)
-	for extra in [["Afflictions", Afflictions], ["Survival", Survival], ["Powers", Powers], ["NightVision", NightVision], ["ThirdPerson", ThirdPerson], ["Swimming", Swimming], ["Rider", Rider], ["SoundFX", SoundFX], ["Tutorial", Tutorial], ["Followers", Followers], ["RangedCombat", RangedCombat], ["CouncilUI", CouncilUI], ["DebugConsole", DebugConsole], ["Homestead", Homestead], ["PerkAbilities", PerkAbilities], ["Rituals", Rituals]]:
+	for extra in [["Afflictions", Afflictions], ["Survival", Survival], ["Powers", Powers], ["NightVision", NightVision], ["ThirdPerson", ThirdPerson], ["Swimming", Swimming], ["Rider", Rider], ["SoundFX", SoundFX], ["Tutorial", Tutorial], ["Followers", Followers], ["RangedCombat", RangedCombat], ["CouncilUI", CouncilUI], ["DebugConsole", DebugConsole], ["Homestead", Homestead], ["PerkAbilities", PerkAbilities], ["Rituals", Rituals], ["Fishing", Fishing]]:
 		if get_node_or_null(extra[0]) == null:
 			var n: Node = extra[1].new()
 			n.name = extra[0]

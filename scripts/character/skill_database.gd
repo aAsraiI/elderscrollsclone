@@ -488,6 +488,18 @@ static func _wilderness() -> void:
 		.at(100, "One with the Wild", "The wild is your home.", {"max_health": 40.0, "stamina_regen_mult": 0.20, "resist_disease": 0.50})
 		.mastered({"max_health": 10.0})
 		.weight(0.5))
+	_add(SkillData.new(&"fishing", "Fishing", "Wilderness",  # 1.30
+			"Patience, a line and a good spot.",
+			"Catching fish (use a Fishing Pole facing water)")
+		.effect("fishing_bonus", 0.005, "bite speed and rare fish")
+		.attribute("wisdom", 0.10)
+		.at(10, "Steady Hands", "Fish bite sooner.", {"fishing_bonus": 0.05})
+		.at(25, "Good Spots", "You find the fish where others don't.", {"fishing_bonus": 0.05})
+		.at(50, "Angler", "Rare fish come to your line.", {"fishing_bonus": 0.10})
+		.at(75, "Old Salt", "You land two where others land one.", {"fishing_bonus": 0.10})
+		.at(100, "Master Angler", "The legends of the deep rise for you.", {"fishing_bonus": 0.15}, true)
+		.mastered({"fishing_bonus": 0.03})
+		.weight(0.5))
 	_add(SkillData.new(&"hunting", "Hunting", "Wilderness",
 			"Tracking and killing beasts.",
 			"Killing beasts and monsters of the wild")

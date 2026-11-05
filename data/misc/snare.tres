@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_r0ej2"]
+
+[resource]
+script = ExtResource("1_r0ej2")
+id = &"snare"
+display_name = "Snare"
+description = "Set it on the ground outside (E in the inventory). Come back in a few hours: small game may be caught in it. Trains Hunting."
+item_type = 9
+weight = 0.5
+value = 8
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("shop", "camp")
+ingredient_effects = PackedStringArray()

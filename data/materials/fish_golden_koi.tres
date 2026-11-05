@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_1u3gc"]
+
+[resource]
+script = ExtResource("1_1u3gc")
+id = &"fish_golden_koi"
+display_name = "Golden Koi"
+description = "A fresh golden koi. A rare catch: collectors pay well for one."
+item_type = 7
+weight = 0.4
+value = 150
+stackable = true
+max_stack = 999
+treasure = true
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

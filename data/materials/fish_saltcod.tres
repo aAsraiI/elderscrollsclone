@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_l5xev"]
+
+[resource]
+script = ExtResource("1_l5xev")
+id = &"fish_saltcod"
+display_name = "Saltcod"
+description = "A fresh saltcod. Cook it at a pot or fire."
+item_type = 7
+weight = 0.4
+value = 6
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

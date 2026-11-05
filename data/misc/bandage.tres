@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_l5crr"]
+
+[resource]
+script = ExtResource("1_l5crr")
+id = &"bandage"
+display_name = "Bandage"
+description = "Use it (E in the inventory) to stop bleeding and close a wound a little. Better with Medicine."
+item_type = 9
+weight = 0.1
+value = 6
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("shop", "camp")
+ingredient_effects = PackedStringArray()

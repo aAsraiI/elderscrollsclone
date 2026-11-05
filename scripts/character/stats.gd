@@ -42,6 +42,7 @@ const DEFAULT_BASE_STATS := {
 	"sell_price_mult": 1.0,
 	"security_bonus": 0.0,
 	"pickpocket_bonus": 0.0,  # 1.29
+	"fishing_bonus": 0.0,  # 1.30
 	"smithing_potency": 0.0,
 	"alchemy_potency": 0.0,
 	"enchanting_potency": 0.0,

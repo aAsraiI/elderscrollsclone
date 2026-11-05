@@ -6,11 +6,12 @@
 script = ExtResource("1_v0uig")
 id = &"fishing_pole"
 display_name = "Fishing Pole"
-description = "Worth a few coins to the right buyer."
+description = "Use it (E in the inventory, or a favourite key) facing water close by to cast a line; press E when a fish bites. Trains Fishing."
 weight = 2.0
 value = 6
 stackable = true
 max_stack = 99
-junk = true
+junk = false
+item_type = 9
 loot_tags = PackedStringArray("coast", "home")
 ingredient_effects = PackedStringArray()

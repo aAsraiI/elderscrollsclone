@@ -56,6 +56,8 @@ func _process(delta: float) -> void:
 		_fade_t = 1.0
 		_fade_prints()
 		_blood()
+		if not inside:
+			_beast_tracks()  # 1.30: what a hunter can follow
 		_blood_trails()
 	_sound_t -= delta
 	if _sound_t <= 0.0:
@@ -361,3 +363,37 @@ func _drop(at: Vector3) -> void:
 	_drops.multimesh.set_instance_color(_drop_i, Color(0.35, 0.02, 0.02, 0.9))
 	_drop_born[_drop_i] = _clock
 	_drop_i = (_drop_i + 1) % DROPS
+
+
+# ---------------------------------------------------------------- 1.30: beast tracks
+
+const TRACK_RANGE := 45.0
+const TRACK_BIOMES := ["tundra", "snow_mountains", "frozen_crown", "desert", "swamp", "badlands"]
+
+
+## With Hunting 15 or more you see the tracks beasts leave in snow, sand and mud (once a second)
+func _beast_tracks() -> void:
+	if not HuntingLife.can_track(_player):
+		return
+	var b0 := world.get_biome_at(_player.global_position.x, _player.global_position.z)
+	if b0 == null or not TRACK_BIOMES.has(String(b0.id)):
+		return
+	for n in ActorRegistry.near(_player.global_position, TRACK_RANGE):
+		var e := n as Enemy
+		if e == null or e.is_dead() or e.body_kind == CreatureBody.Kind.HUMANOID:
+			continue
+		var p := e.global_position
+		var last: Vector3 = e.get_meta("track_at", Vector3.INF)
+		e.set_meta("track_at", p)
+		if not last.is_finite() or Vector2(p.x - last.x, p.z - last.z).length() < 0.8:
+			continue
+		if _prints == null:
+			_prints = _make_prints()
+			world.add_child(_prints)
+		var dir := Vector3(p.x - last.x, 0.0, p.z - last.z).normalized()
+		var at := Vector3(p.x, world.get_height_at(p.x, p.z) + 0.03, p.z)
+		var basis := Basis(Vector3.UP, atan2(dir.x, dir.z)).scaled(Vector3(1.3, 1.0, 0.6))
+		_prints.multimesh.set_instance_transform(_print_i, Transform3D(basis, at))
+		_prints.multimesh.set_instance_color(_print_i, Color(0.18, 0.1, 0.04, 0.6))
+		_print_born[_print_i] = _clock
+		_print_i = (_print_i + 1) % PRINTS

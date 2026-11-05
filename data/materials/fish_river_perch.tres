@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_rcuwi"]
+
+[resource]
+script = ExtResource("1_rcuwi")
+id = &"fish_river_perch"
+display_name = "River Perch"
+description = "A fresh river perch. Cook it at a pot or fire."
+item_type = 7
+weight = 0.4
+value = 5
+stackable = true
+max_stack = 999
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

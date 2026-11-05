@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_lb82s"]
+
+[resource]
+script = ExtResource("1_lb82s")
+id = &"camping_kit"
+display_name = "Camping Kit"
+description = "A tent, a bedroll and a fire pit. Pitch camp anywhere outside (E in the inventory): sleep, cook, and rest safe while a follower keeps watch. Take it down again with E."
+item_type = 9
+weight = 8.0
+value = 60
+loot_tags = PackedStringArray("shop", "camp")
+ingredient_effects = PackedStringArray()

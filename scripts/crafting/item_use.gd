@@ -26,6 +26,10 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Build a raft"
 	if String(item.id) == "air_bladder":
 		return "Breathe from the bladder"
+	if Fishing.is_pole(item):
+		return "Cast a line"  # 1.30
+	if String(item.id) == "snare":
+		return "Set the snare"
 	if String(item.id).ends_with("_barding"):
 		return "Put it on your horse"  # 1.27
 	if String(item.id) == "repair_hammer":
@@ -100,6 +104,14 @@ static func use(player: Node, item: ItemData) -> void:
 				Locks.toast(tree, why, true)
 		"Study the tome":
 			Locks.toast(tree, mastery_tome(player, item))
+		"Cast a line":
+			var fi := Fishing.of(player)
+			if fi != null:
+				var why3 := fi.cast()
+				if why3 != "":
+					Locks.toast(tree, why3, true)
+		"Set the snare":
+			Locks.toast(tree, HuntingLife.set_snare(player as Node3D, item))
 		"Put it on your horse":
 			Locks.toast(tree, Rider.put_on_barding(player, item))
 		"Mend your gear":

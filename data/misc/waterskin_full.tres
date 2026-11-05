@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_kdnbp"]
+
+[resource]
+script = ExtResource("1_kdnbp")
+id = &"waterskin_full"
+display_name = "Waterskin (full)"
+description = "Fresh water. Drink it (E in the inventory) to quench your thirst."
+item_type = 9
+weight = 1.5
+value = 12
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("shop", "camp")
+ingredient_effects = PackedStringArray()

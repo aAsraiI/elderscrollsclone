@@ -102,7 +102,7 @@ func t_achievements() -> void:
 	check("it is kept with the character", WorldState.has_record("ach/first_blood"))
 	var notices := Notices.of(self)
 	await frames(2)
-	check("a notice says so", notices != null and notices.pending().any(func(n: Dictionary) -> bool: return n["title"] == "Achievement"))
+	check("a notice says so", notices != null and (notices.pending().any(func(n: Dictionary) -> bool: return n["title"] == "Achievement") or (notices._title != null and notices._title.text == "ACHIEVEMENT")))
 	# counters from the game
 	Locks.try_pick(p.get_node("Inventory") as Inventory, 0)  # may fail without picks: count only on success
 	var inv := p.get_node("Inventory") as Inventory

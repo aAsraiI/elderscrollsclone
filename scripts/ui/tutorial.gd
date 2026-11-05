@@ -8,8 +8,8 @@ extends Node
 ## they count that have a signal (parries, sneak attacks, spells, arrows, fast travel).
 
 const BASICS := ["welcome", "menus", "saving", "achievements"]
-## Achievements checked per tick (one tick a second): the whole list every ~12 s
-const CHECKS_PER_TICK := 8
+## Achievements checked per tick (one tick a second): the whole list every ~11 s
+const CHECKS_PER_TICK := 10
 
 var _check := 2.0
 var _player: Node3D

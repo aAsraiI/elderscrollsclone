@@ -16,6 +16,9 @@ const DRAFT := 0.6
 var from_town := ""
 ## 1.25: a raft you built yourself (logs and rope): slower, no sail
 var is_raft := false
+## 1.31: a ship of your own (Ship's Deed): bigger, faster, can take the open sea; it has a hull (ShipLife)
+var is_ship := false
+var hull := 100.0
 var speed := 0.0
 var _player: CharacterBody3D
 var _sail: Node3D
@@ -25,9 +28,13 @@ var _aground_told := false
 var _save_timer := 0.0
 
 
-static func make(parent: Node3D, at: Vector3, yaw: float, town: String, raft: bool = false) -> Boat:
+static func make(parent: Node3D, at: Vector3, yaw: float, town: String, raft: bool = false, ship: bool = false, hull_left: float = 100.0) -> Boat:
 	var b := Boat.new()
 	b.is_raft = raft
+	b.is_ship = ship
+	b.hull = hull_left
+	if ship:
+		b.scale = Vector3(2.2, 2.2, 2.2)
 	b.name = "Boat"
 	b.from_town = town
 	b.position = at
@@ -43,7 +50,7 @@ static func restore(player: Node3D) -> void:
 		return
 	var scene := player.get_tree().current_scene
 	var pos := SaveUtil.array_to_vec3(rec.get("pos"), player.global_position)
-	var b := make(scene, pos, float(rec.get("yaw", 0.0)), "", bool(rec.get("raft", false)))
+	var b := make(scene, pos, float(rec.get("yaw", 0.0)), "", bool(rec.get("raft", false)), bool(rec.get("ship", false)), float(rec.get("hull", 100.0)))
 
 
 ## Did the player take this town's boat away? (then its pier stays empty)
@@ -100,6 +107,8 @@ func is_boarded() -> bool:
 
 
 func get_prompt() -> String:
+	if is_ship and not is_boarded():
+		return "Board your ship (hull %d%%)" % roundi(hull)
 	return ("Board the raft" if is_raft else "Board the boat") if not is_boarded() else ""
 
 
@@ -155,12 +164,14 @@ func _unhandled_input(event: InputEvent) -> void:
 ## player.gd calls this instead of walking while you are in the boat
 func steer(delta: float, input_dir: Vector2, sail: bool) -> void:
 	var want := -input_dir.y * (SAIL if sail and input_dir.y < 0.0 and not is_raft else ROW * (0.7 if is_raft else 1.0))
+	if is_ship:
+		want *= ShipLife.speed_mult(self)  # 1.31: a ship runs before the wind
 	if want < 0.0:
 		want *= 0.4  # backing water is slow
 	speed = move_toward(speed, want, (2.5 if sail else 3.5) * delta)
 	_sail.visible = sail and input_dir.y < 0.0
 	rotation.y -= input_dir.x * TURN * delta * clampf(absf(speed) * 0.3 + 0.35, 0.35, 1.0)
-	var fwd := -global_transform.basis.z
+	var fwd := (-global_transform.basis.z).normalized()
 	var next := global_position + fwd * speed * delta
 	var probe := next + fwd * signf(speed) * 2.4
 	if absf(speed) > 0.01 and _map != null and _map.get_height(probe.x, probe.z) > _sea - DRAFT:
@@ -178,6 +189,8 @@ func steer(delta: float, input_dir: Vector2, sail: bool) -> void:
 
 func _process(delta: float) -> void:
 	_save_timer -= delta
+	if is_boarded() and is_ship:
+		ShipLife.tick(self, delta)  # 1.31: storms and sea monsters
 	if is_boarded() and _save_timer <= 0.0:
 		_save_timer = 5.0
 		_remember()
@@ -186,7 +199,7 @@ func _process(delta: float) -> void:
 func _remember() -> void:
 	var rec := WorldState.get_record("boat")
 	var from := String(rec.get("from", from_town)) if from_town == "" else from_town
-	WorldState.set_record("boat", {"pos": SaveUtil.vec3_to_array(global_position), "yaw": rotation.y, "from": from, "raft": is_raft})
+	WorldState.set_record("boat", {"pos": SaveUtil.vec3_to_array(global_position), "yaw": rotation.y, "from": from, "raft": is_raft, "ship": is_ship, "hull": hull})
 
 
 # 1.25: five logs lashed together, a pole to push with

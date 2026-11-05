@@ -30,6 +30,10 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Cast a line"  # 1.30
 	if String(item.id) == "falconers_glove":
 		return "Loose the hawk"  # 1.30
+	if String(item.id) == "rope":
+		return "Throw it up a cliff"  # 1.31
+	if String(item.id) == "ships_deed":
+		return "Launch your ship"  # 1.31
 	if String(item.id) == "treasure_map":
 		return "Study the map"  # 1.31
 	if String(item.id) == "bandage":
@@ -46,6 +50,8 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Set the snare"
 	if String(item.id).ends_with("_barding"):
 		return "Put it on your horse"  # 1.27
+	if String(item.id) == "repair_hammer" and _player != null and _player.has_meta("boat") and (_player.get_meta("boat") as Boat).is_ship:
+		return "Patch the hull"  # 1.31
 	if String(item.id) == "repair_hammer":
 		return "Mend your gear"  # 1.27
 	if String(item.id) == "horse_deed":
@@ -126,6 +132,10 @@ static func use(player: Node, item: ItemData) -> void:
 					Locks.toast(tree, why3, true)
 		"Loose the hawk":
 			Locks.toast(tree, HuntingLife.loose_hawk(player, item))
+		"Throw it up a cliff":
+			Locks.toast(tree, Climbing.throw_rope(player as Node3D, item))
+		"Launch your ship":
+			Locks.toast(tree, ShipLife.launch(player as Node3D, item))
 		"Study the map":
 			Locks.toast(tree, WorldEvents.read_map(player as Node3D, item))
 		"Bandage yourself":
@@ -147,6 +157,8 @@ static func use(player: Node, item: ItemData) -> void:
 			Locks.toast(tree, HuntingLife.set_snare(player as Node3D, item))
 		"Put it on your horse":
 			Locks.toast(tree, Rider.put_on_barding(player, item))
+		"Patch the hull":
+			Locks.toast(tree, ShipLife.patch(player, item))
 		"Mend your gear":
 			Locks.toast(tree, Durability.use_hammer(player, item))
 		"Call your horse":

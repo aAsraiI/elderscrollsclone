@@ -19,7 +19,7 @@ extends RefCounted
 
 const ASIDE_CHANCE := 0.35
 ## Topics from here and RoadEvents: not quest steps (QuestMarkers puts no mark for them)
-const SIDE_TOPICS := ["a map of these parts", "a heist", "the heist", "keep quiet (bribe)", "keep quiet (threaten)", "launder stolen goods", "magical research", "what you saw", "take a vow", "my vow", "spend time together", "pay the toll", "refuse the toll", "the broken cart"]
+const SIDE_TOPICS := ["a ship of my own", "a map of these parts", "a heist", "the heist", "keep quiet (bribe)", "keep quiet (threaten)", "launder stolen goods", "magical research", "what you saw", "take a vow", "my vow", "spend time together", "pay the toll", "refuse the toll", "the broken cart"]
 const VOW_DAYS := 3
 const COURT_NEEDED := 3
 const COURT_DISP := 60

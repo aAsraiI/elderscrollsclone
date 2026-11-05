@@ -45,6 +45,7 @@ func _run() -> void:
 		wm.clock.set_time(12.0)
 		await t_explore()
 		await t_sites()
+		await t_ships_climbing()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -200,3 +201,57 @@ func t_sites() -> void:
 	check("a beginner only meets caravans", low == "caravan" or (p.get_node("Skills") as Skills).get_player_level() >= 15)
 	for e in walkers:
 		e.queue_free()
+
+
+func t_ships_climbing() -> void:
+	print("-- ships, climbing")
+	var deed := load(ShipLife.DEED) as ItemData
+	check("a deed launches a ship", ItemUse.verb(p, deed) == "Launch your ship")
+	var inv := p.get_node("Inventory") as Inventory
+	inv.add_item(deed, 1)
+	var scene := current_scene
+	var water := Vector3.INF
+	for r in range(40, 2000, 40):
+		for a in 16:
+			var q := p.global_position + Vector3(cos(a * TAU / 16.0), 0, sin(a * TAU / 16.0)) * r
+			if wm.map.is_sea(q.x, q.z) and wm.get_height_at(q.x, q.z) < wm.map.get_water_level(q.x, q.z) - 3.0:
+				water = q
+				break
+		if water.is_finite():
+			break
+	check("there is sea", water.is_finite())
+	if not water.is_finite():
+		return
+	water.y = wm.settings.sea_level
+	var ship := Boat.make(scene, water, 0.0, "", false, true)
+	await frames(3)
+	check("a ship is a big, faster boat", ship.is_ship and ShipLife.speed_mult(ship) > 1.0)
+	wm.ensure_area_loaded(water, 1)
+	ship.board(p)
+	await frames(2)
+	check("she has a hull", ship.hull == 100.0)
+	ship._remember()
+	check("saved with her hull", bool(WorldState.get_record("boat").get("ship", false)))
+	var e := ShipLife.rise(ship)
+	check("a serpent rises", e != null and e.has_meta("sea_monster"))
+	await secs(6.0)
+	check("it keeps pace and bites the hull", ship.hull < 100.0 and e.global_position.distance_to(ship.global_position) < 8.0, "%.1f %.1f" % [ship.hull, e.global_position.distance_to(ship.global_position)])
+	var gold := Currency.get_gold(inv)
+	e._hurt_by_player = true
+	e.stats.modify_vital("health", -99999999.0)
+	await frames(6)
+	check("killed, it leaves gold", Currency.get_gold(inv) > gold and Achievements.count("sea_monster") == 1)
+	var hammer := load("res://data/misc/repair_hammer.tres") as ItemData
+	inv.add_item(hammer, 1)
+	check("a hammer patches the hull aboard", ItemUse.verb(p, hammer) == "Patch the hull")
+	ship.hull = 20.0
+	ItemUse.use(p, hammer)
+	check("and does", ship.hull > 20.0)
+	ShipLife.wear(ship, 9999.0)
+	await frames(3)
+	check("at no hull she sinks", not is_instance_valid(ship) or ship.is_queued_for_deletion())
+	check("and you are off her", not p.has_meta("boat"))
+	# climbing
+	check("rock can be climbed, sheer walls can't", Climbing.rock_face(Vector3(0.7, 0.3, 0)) and not Climbing.rock_face(Vector3(1, 0, 0)))
+	var rope := load(Climbing.ROPE) as ItemData
+	check("a rope is thrown up a cliff", ItemUse.verb(p, rope) == "Throw it up a cliff")

@@ -160,6 +160,12 @@ Some old places are shut by puzzles. Read the plaque: pull levers in the right o
 Ruined cities on the far islands are held by the dead. Kill them all and the charter stone wakes: for gold you can bring settlers back, and the city pays you taxes.
 
 Giants, dragons and caravans travel the land, so keep your eyes on the horizon."],
+	["ships", "Travel and the World", "Your Own Ship",
+		"Innkeepers in port towns sell a Ship's Deed (\"a ship of my own\", 8,000 gold). Use it facing deep water at the shore and your ship is launched; use it again and she comes to you. Sail her like a boat, only much faster, and between the islands.
+
+The open sea is not safe. Storms wear the hull and slow her. Sea serpents rise beside the ship: they bite the hull and you until you kill them (arrows and spells work best), and leave old gold behind. A Repair Hammer patches the hull aboard. At no hull at all she sinks and you swim; the deed launches another."],
+	["climbing", "Travel and the World", "Climbing",
+		"Against a steep rock face, hold Space and W to climb. It uses stamina (run out and you drop) and trains Acrobatics. Sheer built walls can't be climbed. A Rope (use it from the inventory, facing a cliff) makes a line you can climb freely, like a ladder."],
 	["realms", "Travel and the World", "Realms",
 		"Some quests open a gate to another realm: a land apart with its own sky. Each has a hub with people, guarded sites with treasure, and a heart whose master you must defeat to conquer it. Leaving puts you back at the gate."],
 

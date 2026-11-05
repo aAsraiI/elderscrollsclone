@@ -774,6 +774,7 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 	out.append_array(Roleplay.topics_for(s))  # 1.26: lying, vows, courting
 	out.append_array(Rituals.topics_for(s))  # 1.28: the Mages Guild's research
 	out.append_array(ExploredMap.topics_for(s))  # 1.31: maps
+	out.append_array(ShipLife.topics_for(s))  # 1.31: ships
 	out.append_array(OutlawLife.topics_for(s))  # 1.29: bribing or threatening a witness
 	out.append_array(Heists.topics_for(s, world))  # 1.29: the Thieves Guild's heists
 	out.append_array(OutlawLife.fence_topics(s, world))  # 1.29: laundering
@@ -825,6 +826,9 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 	var heist := Heists.respond(s, topic, _player(), world)  # 1.29
 	if not heist.is_empty():
 		return heist
+	var shipped := ShipLife.respond(s, topic, _player())  # 1.31
+	if not shipped.is_empty():
+		return shipped
 	var mapped := ExploredMap.respond(s, topic, _player(), world)  # 1.31
 	if not mapped.is_empty():
 		return mapped

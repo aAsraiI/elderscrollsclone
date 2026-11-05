@@ -99,10 +99,33 @@ static func trains(s: DialogueEngine.Speaker, world: WorldManager) -> Array:
 	return out
 
 
+## 1.27: trainers by rank: [name, how far they teach]. Anyone who trains is at least a Journeyman;
+## guild officers and temple priests are Experts, guild leaders Masters, and the trainers of the
+## far islands (land of level 100 and more) Grandmasters.
+const TRAINER_RANKS := [["Journeyman", 50], ["Expert", 75], ["Master", 100], ["Grandmaster", 150]]
+
+
+static func trainer_rank(s: DialogueEngine.Speaker, world: WorldManager) -> int:
+	var r := 0
+	var prof := DialogueEngine.profile_for(s, world)
+	if prof.train_max >= 45 or s.role == NpcData.Role.GUILD_MEMBER:
+		r = 1
+	if Factions.leader_of(s, world) != "":
+		r = 2
+	if world != null and world.map != null and s.position != Vector3.ZERO and world.map.get_level_band(s.position.x, s.position.z).x >= 100.0:
+		r = 3
+	return r
+
+
+static func trainer_rank_name(s: DialogueEngine.Speaker, world: WorldManager) -> String:
+	return String(TRAINER_RANKS[trainer_rank(s, world)][0])
+
+
 static func train_max(s: DialogueEngine.Speaker, world: WorldManager) -> int:
 	var m := DialogueEngine.profile_for(s, world).train_max
 	if s.role == NpcData.Role.GUILD_MEMBER:
 		m = maxi(m, 40 + 10 * Factions.rank(s.faction))  # a guild trains its own further
+	m = maxi(m, int(TRAINER_RANKS[trainer_rank(s, world)][1]))  # 1.27
 	return m
 
 

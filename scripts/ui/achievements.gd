@@ -89,6 +89,8 @@ const LIST := [
 	["levelup_build", 2, "Your Own Way", "Take a feat (Character > Perks, top of the page).", "perks", "feats", 1],
 
 	# ---- 4 Master: the main island's great deeds
+	["trial", 2, "Proven", "Finish a skill trial: at 50 a master sends word; raise the skill 3 more levels.", "leveling", "n:trial", 1],
+	["loadout", 2, "Two Minds", "Save a build as a loadout (Character > Level Up) and take one up at a temple shrine.", "perks", "n:loadout", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],
@@ -110,6 +112,7 @@ const LIST := [
 	["far_isle", 4, "Over the Horizon", "Set foot on an island of level 100 or more. Ships sail from port towns.", "islands", "far_land", 100],
 	["level100", 4, "Hundredfold", "Reach level 100.", "islands", "level", 100],
 	["skill125", 4, "Beyond Mastery", "Raise any skill to 125.", "leveling", "skill_max", 125],
+	["mastery_tome", 4, "Grandmaster's Lesson", "Study a Tome of Mastery, found in the vaults of the far islands.", "leveling", "n:mastery_tome", 1],
 	["level150", 4, "Living Legend", "Reach level 150.", "islands", "level", 150],
 	["far_isle2", 4, "The Last Shores", "Set foot on an island of level 175 or more.", "islands", "far_land", 175],
 	["realms_all", 4, "Walker of Worlds", "Conquer every realm.", "realms", "realms", 10],

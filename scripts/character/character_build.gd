@@ -19,6 +19,10 @@ const VITAL_PER_POINT := 10.0
 const VITALS := {"health": "max_health", "magicka": "max_magicka", "stamina": "max_stamina"}
 ## Gold per player level to undo every choice (perks, feats, attributes, vitals) and pick again
 const RESPEC_GOLD_PER_LEVEL := 50
+## 1.27: taking up a saved loadout at a shrine costs this much per level
+const LOADOUT_GOLD_PER_LEVEL := 15
+const LOADOUT_SLOTS := ["A", "B"]
+const SHRINE_REACH := 5.0
 
 var skills: Skills
 ## perk id -> rank
@@ -30,6 +34,8 @@ var vitals: Dictionary = {}
 ## Extra perk points from quests, books and the like
 var bonus_perk_points := 0
 var respecs := 0
+## 1.27: saved builds, "A" and "B": {"owned", "attr", "vitals"}
+var loadouts: Dictionary = {}
 
 
 func _init(p_skills: Skills = null) -> void:
@@ -312,7 +318,7 @@ static func archetype(sk: Skills) -> String:
 
 func to_dict() -> Dictionary:
 	return {"owned": owned.duplicate(), "attr": attr_spent.duplicate(), "vitals": vitals.duplicate(),
-		"bonus": bonus_perk_points, "respecs": respecs}
+		"bonus": bonus_perk_points, "respecs": respecs, "loadouts": loadouts.duplicate(true)}
 
 
 func from_dict(d: Dictionary) -> void:
@@ -324,4 +330,46 @@ func from_dict(d: Dictionary) -> void:
 	vitals = (d.get("vitals", {}) as Dictionary).duplicate()
 	bonus_perk_points = int(d.get("bonus", 0))
 	respecs = int(d.get("respecs", 0))
+	loadouts = (d.get("loadouts", {}) as Dictionary).duplicate(true)
 	apply()
+
+
+# ---------------------------------------------------------------- 1.27: loadouts
+
+## Keeps the perks, feats and points you have now as loadout A or B (free, anywhere)
+func save_loadout(slot: String) -> void:
+	loadouts[slot] = {"owned": owned.duplicate(), "attr": attr_spent.duplicate(), "vitals": vitals.duplicate()}
+
+
+func loadout_cost() -> int:
+	return LOADOUT_GOLD_PER_LEVEL * _level()
+
+
+## Is the player at a temple shrine? (taking up a loadout needs one)
+static func at_shrine(player: Node3D) -> bool:
+	if player == null or not player.is_inside_tree():
+		return false
+	for s in player.get_tree().get_nodes_in_group("shrines"):
+		if (s as Node3D).global_position.distance_to(player.global_position) <= SHRINE_REACH:
+			return true
+	return false
+
+
+## Takes up a saved loadout: every choice now is undone and the saved ones made. "" = done.
+func load_loadout(slot: String, inventory: Inventory, player: Node3D) -> String:
+	if not loadouts.has(slot):
+		return "Nothing is saved as loadout %s." % slot
+	if player != null and not at_shrine(player):
+		return "Pray at a temple shrine to change your build."
+	var cost := loadout_cost()
+	if inventory != null and Currency.get_gold(inventory) < cost:
+		return "You need %d gold for the offering." % cost
+	if inventory != null:
+		Currency.spend_gold(inventory, cost)
+	var l: Dictionary = loadouts[slot]
+	owned = (l["owned"] as Dictionary).duplicate()
+	attr_spent = (l["attr"] as Dictionary).duplicate()
+	vitals = (l["vitals"] as Dictionary).duplicate()
+	apply()
+	Achievements.note("loadout")
+	return ""

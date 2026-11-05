@@ -8,6 +8,8 @@ extends RefCounted
 static func verb(_player: Node, item: ItemData) -> String:
 	if item == null:
 		return ""
+	if String(item.id) == "tome_of_mastery":
+		return "Study the tome"  # 1.27
 	if item.teaches_spell != "":
 		return "Read"
 	if LoreBooks.is_book(item):
@@ -76,6 +78,8 @@ static func use(player: Node, item: ItemData) -> void:
 					Locks.toast(tree, "A sellsword joins you")
 				else:
 					Locks.toast(tree, why, true)
+		"Study the tome":
+			Locks.toast(tree, mastery_tome(player, item))
 		"Mend your gear":
 			Locks.toast(tree, Durability.use_hammer(player, item))
 		"Call your horse":
@@ -118,3 +122,24 @@ static func _build_raft(player: Node, item: ItemData) -> String:
 			Locks.toast(player.get_tree(), "You lash the logs together. Your raft floats.")
 			return ""
 	return "Face open water, at its edge, to build a raft."
+
+
+## 1.27: a Tome of Mastery raises your best skill of 100 or more to its next mastery step (125, 150...)
+static func mastery_tome(player: Node, item: ItemData) -> String:
+	var sk := player.get_node_or_null("Skills") as Skills
+	if sk == null:
+		return ""
+	var best := &""
+	for id in sk.levels:
+		if int(sk.levels[id]) >= SkillDatabase.MASTERY_START and (best == &"" or int(sk.levels[id]) > int(sk.levels[best])):
+			best = id
+	if best == &"":
+		return "The tome is beyond you. Come back when a skill is at 100."
+	var lvl := int(sk.levels[best])
+	var step := SkillDatabase.MASTERY_STEP
+	var next := SkillDatabase.MASTERY_START + ((lvl - SkillDatabase.MASTERY_START) / step + 1) * step
+	sk.set_level(best, next)
+	(player.get_node("Inventory") as Inventory).remove_item(item, 1)
+	Achievements.note("mastery_tome")
+	var def := SkillDatabase.get_skill(best)
+	return "You study the tome for days. %s rises to %d." % [def.display_name if def != null else String(best).capitalize(), next]

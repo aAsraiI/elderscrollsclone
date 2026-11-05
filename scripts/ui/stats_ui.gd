@@ -877,6 +877,31 @@ func _refresh_build() -> void:
 		else:
 			_refresh())
 	_build_box.add_child(respec)
+	# 1.27: two saved builds; save anywhere, take one up at a temple shrine for an offering
+	for slot in CharacterBuild.LOADOUT_SLOTS:
+		var lrow := HBoxContainer.new()
+		var save_btn := Button.new()
+		save_btn.text = "Save this build as loadout %s" % slot
+		save_btn.focus_mode = Control.FOCUS_NONE
+		var key: String = slot
+		save_btn.pressed.connect(func() -> void:
+			skills.build.save_loadout(key)
+			msg.text = "Saved as loadout %s." % key
+			msg.remove_theme_color_override("font_color"))
+		lrow.add_child(save_btn)
+		var take := Button.new()
+		take.text = "Take up loadout %s (%d gold, at a shrine)" % [slot, b.loadout_cost()]
+		take.focus_mode = Control.FOCUS_NONE
+		take.disabled = not b.loadouts.has(slot)
+		take.pressed.connect(func() -> void:
+			var err := skills.build.load_loadout(key, inventory, get_parent() as Node3D)
+			if err != "":
+				msg.text = err
+				msg.add_theme_color_override("font_color", Color.INDIAN_RED)
+			else:
+				_refresh())
+		lrow.add_child(take)
+		_build_box.add_child(lrow)
 	_build_box.add_child(msg)
 
 

@@ -73,7 +73,9 @@ func _hook() -> void:
 	world.discovery.discovered.connect(func(_p: PlacedPOI) -> void: hint("map"))
 	var skills := _player.get_node_or_null("Skills") as Skills
 	if skills != null:
-		skills.skill_leveled_up.connect(func(_id: StringName, _l: int) -> void: hint("leveling"))
+		skills.skill_leveled_up.connect(func(id: StringName, l: int) -> void:
+			hint("leveling")
+			SignatureTrials.on_level(get_tree(), skills, id, l))  # 1.27.4: trials at 50 and 100
 		skills.player_leveled_up.connect(func(_l: int) -> void: hint("perks"))
 
 

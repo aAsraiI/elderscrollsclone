@@ -34,6 +34,8 @@ static func make_shrine(root: Node3D, at: Vector3) -> RestSpot:
 
 func _ready() -> void:
 	collision_layer = INTERACTABLE_LAYER
+	if kind == "shrine":
+		add_to_group("shrines")  # 1.27: loadouts are taken up at a shrine
 	collision_mask = 0
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()

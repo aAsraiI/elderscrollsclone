@@ -50,6 +50,7 @@ func _run() -> void:
 		await t_ranged()
 		await t_durability()
 		await t_build()
+		await t_mastery()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -179,7 +180,7 @@ func t_journal() -> void:
 func t_ranged() -> void:
 	print("-- crossbows, thrown weapons, where it hits")
 	for e in get_nodes_in_group("enemies"):  # nothing wanders in and knocks the bow about
-		if not e.has_meta("player_ally"):
+		if not e.has_meta("player_ally") and (e as Enemy).disposition == Enemy.Disposition.HOSTILE:
 			e.queue_free()
 	await frames(2)
 	var inv := p.get_node("Inventory") as Inventory
@@ -308,3 +309,42 @@ func t_build() -> void:
 		sk.set_level(&"sneak", sk.get_level(&"sneak") + 1)
 		sk.set_level(&"security", sk.get_level(&"security") + 1)
 	check("a build earns a title", sk.get_player_level() < 10 or CharacterBuild.title(sk) != "", "%d %s" % [sk.get_player_level(), CharacterBuild.archetype(sk)])
+
+
+func t_mastery() -> void:
+	print("-- loadouts, trials, tomes, trainers")
+	var sk := p.get_node("Skills") as Skills
+	var inv := p.get_node("Inventory") as Inventory
+	var b := sk.build
+	b.owned.clear()
+	b.owned["w_brawn"] = 1
+	b.save_loadout("A")
+	b.owned.clear()
+	b.owned["g_toughness"] = 1
+	b.save_loadout("B")
+	check("two builds can be saved", b.loadouts.has("A") and b.loadouts.has("B"))
+	check("taking one up needs a shrine", b.load_loadout("A", inv, p) != "")
+	var shrine := RestSpot.make_shrine(wm, p.global_position + Vector3(1, 0, 0))
+	await frames(2)
+	Currency.add_gold(inv, b.loadout_cost() + 5)
+	check("at a shrine it works", b.load_loadout("A", inv, p) == "" and b.rank_of("w_brawn") == 1 and b.rank_of("g_toughness") == 0)
+	shrine.queue_free()
+	var saved := b.to_dict()
+	check("loadouts are saved with the character", (saved["loadouts"] as Dictionary).has("B"))
+	# trials
+	sk.set_level(&"archery", 50)
+	SignatureTrials.on_level(self, sk, &"archery", 50)
+	check("at 50 a master sends word", SignatureTrials.state(&"archery", 50) == "active")
+	var before := inv.stacks.size()
+	sk.set_level(&"archery", 53)
+	SignatureTrials.on_level(self, sk, &"archery", 53)
+	check("three levels on, the trial is done", SignatureTrials.state(&"archery", 50) == "done")
+	check("and the amulet is yours", inv.stacks.any(func(s) -> bool: return s.item.display_name == "Archery Master's Amulet"), str(inv.stacks.size() - before))
+	# a tome of mastery
+	var tome := load("res://data/books/tome_of_mastery.tres") as ItemData
+	inv.add_item(tome, 1)
+	check("a tome waits for a skill of 100", ItemUse.mastery_tome(p, tome).contains("beyond you"))
+	sk.set_level(&"lore", 104)
+	ItemUse.use(p, tome)
+	check("it raises the best skill to its next mastery step", sk.get_level(&"lore") == 125 and inv.get_count(tome) == 0, str(sk.get_level(&"lore")))
+	check("trainer ranks go to 150", Services.TRAINER_RANKS[-1][1] == 150)

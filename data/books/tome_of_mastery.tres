@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"tome_of_mastery"
+display_name = "Tome of Mastery"
+description = "Written by a grandmaster of the far islands. Study it and your best skill of 100 or more rises to its next mastery step. Used up."
+item_type = 6
+weight = 2.0
+value = 6000
+tier = 7
+min_level = 100
+loot_tags = PackedStringArray("vault", "library", "legendary")

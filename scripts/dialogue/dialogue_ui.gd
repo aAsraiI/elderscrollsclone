@@ -369,7 +369,7 @@ func use_service(id: String) -> void:
 			ask("duties")
 		"train":
 			var sk := _player.get_node("Skills") as Skills
-			_log.append_text("\n[i]Training (%d left at this level):[/i]\n" % Services.trainings_left(_player))
+			_log.append_text("\n[i]%s trainer, teaches up to %d (%d trainings left at this level):[/i]\n" % [Services.trainer_rank_name(speaker, _world), Services.train_max(speaker, _world), Services.trainings_left(_player)])  # 1.27
 			for skill in Services.trains(speaker, _world):
 				var lvl := sk.get_level(StringName(skill))
 				var line := "%s %d" % [String(skill).capitalize(), lvl]

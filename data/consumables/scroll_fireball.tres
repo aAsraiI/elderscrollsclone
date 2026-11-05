@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_b3smj"]
+
+[resource]
+script = ExtResource("1_b3smj")
+id = &"scroll_fireball"
+display_name = "Scroll of Fireball"
+description = "Read it (E in the inventory) to cast Fireball once, for free, whatever your skill. Used up."
+item_type = 6
+weight = 0.2
+value = 60
+stackable = true
+max_stack = 99
+min_level = 5
+loot_tags = PackedStringArray("mage", "library", "camp")
+use_verb = "Read"
+ingredient_effects = PackedStringArray()
+scroll_spell = "fireball"

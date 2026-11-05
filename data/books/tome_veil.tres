@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ww7td"]
+
+[resource]
+script = ExtResource("1_ww7td")
+id = &"tome_veil"
+display_name = "Spell Tome: Veil of Night"
+description = "Grandmaster Illusion spell. Read it to learn the spell. Written on the far islands."
+item_type = 6
+weight = 1.0
+value = 6000
+tier = 8
+min_level = 100
+loot_tags = PackedStringArray("mage", "library", "vault")
+ingredient_effects = PackedStringArray()
+teaches_spell = "veil"

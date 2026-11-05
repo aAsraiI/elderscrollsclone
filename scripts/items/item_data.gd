@@ -97,6 +97,8 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 @export var ingredient_effects: PackedStringArray = []
 ## A spell tome: reading it teaches this spell (SpellCatalog id)
 @export var teaches_spell := ""
+## 1.28: a scroll: reading it casts this spell once, for free, whatever your skill (used up)
+@export var scroll_spell := ""
 ## Soul gem size: 0 = not a soul gem, 1 = Petty .. 5 = Grand
 @export_range(0, 5) var soul_gem_size := 0
 @export var soul_filled := false

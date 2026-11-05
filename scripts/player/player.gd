@@ -46,6 +46,9 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var debug_speed := 1.0
 ## Flight is allowed: double-tap jump to take off or land (Space up, Ctrl down, Shift faster)
 var can_fly := false
+## 1.28: Levitate flies at this part of the debug flying speed, and never over a town
+const LEVITATE_MULT := 0.45
+var _no_fly_check := 0.0
 var flying := false
 ## Fly through walls and the ground (implies flight)
 var noclip := false
@@ -192,8 +195,15 @@ func _physics_process(delta: float) -> void:
 	if flying:
 		_fly(delta)
 		return
+	var on_water := has_meta("water_walk") and velocity.y <= 0.0 and _on_water()  # 1.28: Water Walking: the surface holds you
+	if on_water:
+		velocity.y = 0.0
+		if Input.is_action_just_pressed("jump") and not _is_paralyzed():
+			velocity.y = jump_velocity
 	# Gravity and jumping
-	if not is_on_floor():
+	if on_water:
+		pass
+	elif not is_on_floor():
 		var fall := clampf(_stats.get_stat("fall_mult"), 0.1, 1.0) if _stats != null and velocity.y < 0.0 else 1.0
 		velocity.y -= gravity * delta * fall
 	elif Input.is_action_just_pressed("jump") and not _is_paralyzed():
@@ -303,6 +313,15 @@ func _fly(delta: float) -> void:
 	var dir: Vector3 = (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 	var up := (1.0 if Input.is_action_pressed("jump") else 0.0) - (1.0 if InputMap.has_action("sneak") and Input.is_action_pressed("sneak") else 0.0)
 	var speed := FLY_SPEED * debug_speed * (FLY_SPRINT if Input.is_action_pressed("sprint") else 1.0)
+	if has_meta("levitating") and not noclip:
+		speed *= LEVITATE_MULT  # 1.28: a spell, not a god
+		_no_fly_check -= delta
+		if _no_fly_check <= 0.0:
+			_no_fly_check = 0.5
+			if over_town():
+				set_flying(false)
+				Locks.toast(get_tree(), "The town's wards pull you down: no levitating here.", true)
+				return
 	velocity = velocity.lerp(Vector3(dir.x * speed, up * speed, dir.z * speed), clampf(10.0 * delta, 0.0, 1.0))
 	if noclip:
 		global_position += velocity * delta
@@ -504,3 +523,24 @@ func _register_input_actions() -> void:
 		var ev := InputEventKey.new()
 		ev.physical_keycode = bindings[action]
 		InputMap.action_add_event(action, ev)
+
+
+## 1.28: is the player over a town? (Levitate does not work there)
+func over_town() -> bool:
+	var w := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if w == null:
+		return false
+	var t := w.get_nearest_town(global_position)
+	return t != null and Vector2(t.position.x - global_position.x, t.position.z - global_position.z).length() < t.poi.footprint_radius + 15.0
+
+
+## 1.28: standing on open water with Water Walking: lifts you onto the surface. True while you are on it.
+func _on_water() -> bool:
+	var w := get_tree().get_first_node_in_group("world_manager") as WorldManager
+	if w == null or w.map == null or (w.dungeons != null and w.dungeons.is_inside()):
+		return false
+	var sea := w.map.get_water_level(global_position.x, global_position.z)
+	if global_position.y > sea + 0.15 or global_position.y < sea - 1.6 or w.get_height_at(global_position.x, global_position.z) > sea - 0.2:
+		return false
+	global_position.y = sea
+	return true

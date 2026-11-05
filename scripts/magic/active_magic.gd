@@ -320,6 +320,23 @@ func _special(d: Dictionary, mag: float, dur: float, caster: Node, group: String
 			stats.add_modifiers(key, {"noise_mult": -0.8})
 		&"slowfall":
 			stats.add_modifiers(key, {"fall_mult": -0.75})
+		&"levitate":  # 1.28: the player may fly while it lasts (player.gd; never over a town)
+			host.set_meta("levitating", true)
+			if is_player:
+				Achievements.note("levitate")
+			if "can_fly" in host:
+				host.set("can_fly", true)
+			fx["end"] = func() -> void:
+				if is_instance_valid(host) and not _has_other(&"levitate", fx):
+					host.remove_meta("levitating")
+					if "can_fly" in host and not bool(host.get("noclip")):
+						host.set("can_fly", false)
+						host.call("set_flying", false)
+		&"water_walk":  # 1.28
+			host.set_meta("water_walk", true)
+			fx["end"] = func() -> void:
+				if is_instance_valid(host) and not _has_other(&"water_walk", fx):
+					host.remove_meta("water_walk")
 		&"telekinesis":
 			host.set_meta("telekinesis", true)
 			fx["end"] = func() -> void:

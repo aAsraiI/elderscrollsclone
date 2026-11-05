@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_8miv6"]
+
+[resource]
+script = ExtResource("1_8miv6")
+id = &"scroll_mass_paralysis"
+display_name = "Scroll of Mass Paralysis"
+description = "Read it (E in the inventory) to cast Mass Paralysis once, for free, whatever your skill. Used up."
+item_type = 6
+weight = 0.2
+value = 400
+stackable = true
+max_stack = 99
+min_level = 30
+loot_tags = PackedStringArray("vault")
+use_verb = "Read"
+ingredient_effects = PackedStringArray()
+scroll_spell = "mass_paralysis"

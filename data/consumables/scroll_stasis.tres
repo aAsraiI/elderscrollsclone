@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_jmwng"]
+
+[resource]
+script = ExtResource("1_jmwng")
+id = &"scroll_stasis"
+display_name = "Scroll of Stasis"
+description = "Read it (E in the inventory) to cast Stasis once, for free, whatever your skill. Used up."
+item_type = 6
+weight = 0.2
+value = 3500
+stackable = true
+max_stack = 99
+min_level = 150
+loot_tags = PackedStringArray("vault")
+use_verb = "Read"
+ingredient_effects = PackedStringArray()
+scroll_spell = "stasis"

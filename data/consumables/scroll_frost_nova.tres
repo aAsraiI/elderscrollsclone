@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_hdxj5"]
+
+[resource]
+script = ExtResource("1_hdxj5")
+id = &"scroll_frost_nova"
+display_name = "Scroll of Frost Nova"
+description = "Read it (E in the inventory) to cast Frost Nova once, for free, whatever your skill. Used up."
+item_type = 6
+weight = 0.2
+value = 70
+stackable = true
+max_stack = 99
+min_level = 8
+loot_tags = PackedStringArray("mage", "library")
+use_verb = "Read"
+ingredient_effects = PackedStringArray()
+scroll_spell = "frost_nova"

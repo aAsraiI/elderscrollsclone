@@ -61,6 +61,7 @@ const LIST := [
 	["repair", 1, "Good as New", "Mend worn gear: a Repair Hammer from the inventory, or a smith's Repair button.", "smithing", "n:repair", 1],
 	["ability", 2, "A Move of Your Own", "Take Shield Charge, Whirlwind Sprint or Shadow Step (Perks) and use it with G.", "perks", "n:ability", 1],
 	["synergy", 2, "Greater Than the Parts", "Earn a synergy: two perks from different trees that unlock a hidden third.", "perks", "n:synergy", 1],
+	["scroll", 1, "Words on Paper", "Read a scroll: it casts its spell once, for free, whatever your skill.", "magic", "n:scroll", 1],
 	["arena", 1, "Blood on the Sand", "Win a bout at an arena (strike the gong in a Fighters Guild hall).", "arena", "arena", 1],
 	["museum", 1, "For Posterity", "Donate an artifact to an Antiquarian Museum.", "museum", "museum", 1],
 	["spells5", 1, "Spell Collector", "Know 5 spells. Spell tomes are sold by mages and found in dungeons.", "magic", "spells", 5],
@@ -93,6 +94,7 @@ const LIST := [
 	["loadout", 2, "Two Minds", "Save a build as a loadout (Character > Level Up) and take one up at a temple shrine.", "perks", "n:loadout", 1],
 	["birthstone", 2, "Under a New Star", "Take a new birthsign at a ring of standing stones (E on the altar stone).", "powers", "n:birthstone", 1],
 	["lancer", 2, "Lancer", "Put barding on your horse (use it from the inventory near your horse).", "horses", "n:barding", 1],
+	["levitate", 2, "Into the Sky", "Levitate: cast Levitate (Alteration), then double-tap Space.", "magic", "n:levitate", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],
@@ -115,6 +117,7 @@ const LIST := [
 	["level100", 4, "Hundredfold", "Reach level 100.", "islands", "level", 100],
 	["skill125", 4, "Beyond Mastery", "Raise any skill to 125.", "leveling", "skill_max", 125],
 	["mastery_tome", 4, "Grandmaster's Lesson", "Study a Tome of Mastery, found in the vaults of the far islands.", "leveling", "n:mastery_tome", 1],
+	["island_spell", 4, "Grandmaster of the Arts", "Learn a Grandmaster or Ascendant spell, sold only on the far islands.", "magic", "island_spells", 1],
 	["level150", 4, "Living Legend", "Reach level 150.", "islands", "level", 150],
 	["far_isle2", 4, "The Last Shores", "Set foot on an island of level 175 or more.", "islands", "far_land", 175],
 	["realms_all", 4, "Walker of Worlds", "Conquer every realm.", "realms", "realms", 10],
@@ -269,6 +272,13 @@ static func _value(check: String, tree: SceneTree) -> int:
 			for id in RealmManager.REALMS:
 				done += 1 if RealmManager.is_conquered(id) else 0
 			return done
+		"island_spells":
+			var bk := player.get_node_or_null("Spellbook") as Spellbook if player != null else null
+			var n := 0
+			if bk != null:
+				for id in bk.spells:
+					n += 1 if SpellCatalog.rank_of(String(id)) in [5, 6] else 0
+			return n
 		"regency":
 			return 1 if Regency.is_settled() else 0
 		"far_land":

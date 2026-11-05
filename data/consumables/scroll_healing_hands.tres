@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_abqcm"]
+
+[resource]
+script = ExtResource("1_abqcm")
+id = &"scroll_healing_hands"
+display_name = "Scroll of Healing Hands"
+description = "Read it (E in the inventory) to cast Healing Hands once, for free, whatever your skill. Used up."
+item_type = 6
+weight = 0.2
+value = 30
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("mage", "library", "shop", "camp")
+use_verb = "Read"
+ingredient_effects = PackedStringArray()
+scroll_spell = "healing_hands"

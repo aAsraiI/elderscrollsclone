@@ -187,6 +187,8 @@ static func _ensure() -> void:
 	_add(&"slow", "Slow", A, 0.1, Kind.BUFF, {"harm": true, "stat": "move_speed_mult", "per": -0.01, "unit": "%", "alch": true, "max": 80.0})
 	_add(&"jump", "Jump", A, 0.06, Kind.BUFF, {"stat": "jump_mult", "per": 0.01, "unit": "%", "alch": true, "ench_a": true, "self_only": true})
 	_add(&"slowfall", "Slowfall", A, 2.5, Kind.SPECIAL, {"mag": false, "self_only": true, "alch": true, "desc": "Fall gently and take no falling damage."})
+	_add(&"levitate", "Levitate", A, 6.0, Kind.SPECIAL, {"mag": false, "self_only": true, "alch": true, "desc": "Rise into the air: double-tap Space to lift off or land, Space up, Ctrl down. Not over towns."})  # 1.28
+	_add(&"water_walk", "Water Walking", A, 1.5, Kind.SPECIAL, {"mag": false, "self_only": true, "alch": true, "ench_a": true, "desc": "Walk on water as if it were stone."})  # 1.28
 	_add(&"open_lock", "Open", A, 0.6, Kind.SPECIAL, {"dur": false, "no_self": true, "unit": "", "max": 100.0,
 		"desc": "Opens a lock up to this level."})
 	_add(&"paralyze", "Paralyze", A, 12.0, Kind.CONTROL, {"harm": true, "mag": false, "alch": true, "ench_w": true, "max_dur": 15.0})

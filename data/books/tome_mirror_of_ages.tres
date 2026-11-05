@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_cyjom"]
+
+[resource]
+script = ExtResource("1_cyjom")
+id = &"tome_mirror_of_ages"
+display_name = "Spell Tome: Mirror of Ages"
+description = "Ascendant Mysticism spell. Read it to learn the spell. Written on the far islands."
+item_type = 6
+weight = 1.0
+value = 15000
+tier = 10
+min_level = 150
+loot_tags = PackedStringArray("mage", "library", "vault")
+ingredient_effects = PackedStringArray()
+teaches_spell = "mirror_of_ages"

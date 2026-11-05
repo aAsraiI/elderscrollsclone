@@ -6,7 +6,9 @@ extends RefCounted
 
 const F := SpellData.Form
 const TOME_DIR := "res://data/books/"
-const RANK_NAMES := ["Novice", "Apprentice", "Adept", "Expert", "Master"]
+const RANK_NAMES := ["Novice", "Apprentice", "Adept", "Expert", "Master", "Grandmaster", "Ascendant"]
+## 1.28: ranks 5 and 6 are taught only on the far islands (tomes of level 100 and 150)
+const ISLAND_RANKS := {5: 100, 6: 150}
 ## What a player starts the game knowing
 const STARTING := ["flames", "healing"]
 
@@ -165,6 +167,36 @@ static func _ensure() -> void:
 	_add(2, "drain_magicka_spell", "Drain Magicka", F.TARGET, [["absorb_magicka", 30, 0]])
 	_add(3, "life_leech", "Life Leech", F.BEAM, [["absorb_health", 30, 0]])
 
+	# ---- 1.28: Levitate, Water Walking
+	_add(3, "levitate_spell", "Levitate", F.SELF, [["levitate", 0, 45]])
+	_add(2, "water_walking_spell", "Water Walking", F.SELF, [["water_walk", 0, 90]])
+
+	# ---- 1.28: the far islands: Grandmaster (5) and Ascendant (6)
+	_add(5, "meteor", "Meteor", F.TARGET, [["fire_damage", 160, 0]], 6.0)
+	_add(5, "glacial_lance", "Glacial Lance", F.TARGET, [["frost_damage", 150, 0], ["slow", 50, 5]])
+	_add(6, "sunfire", "Sunfire", F.NOVA, [["fire_damage", 220, 0], ["weakness_fire", 30, 10]], 10.0)
+	_add(6, "thunderstorm", "Thunderstorm", F.BEAM, [["shock_damage", 260, 0]], 3.0)
+	_add(5, "radiant_heal", "Radiant Healing", F.NOVA, [["restore_health", 400, 0]], 10.0)
+	_add(5, "aegis", "Aegis", F.SELF, [["resist_fire", 60, 60], ["resist_frost", 60, 60], ["resist_shock", 60, 60], ["shield", 100, 60]])
+	_add(6, "resurgence", "Resurgence", F.SELF, [["restore_health", 900, 0], ["restore_stamina", 500, 0]])
+	_add(6, "sanctuary", "Sanctuary", F.NOVA, [["restore_health", 300, 0], ["calm", 150, 20]], 12.0)
+	_add(5, "starflesh", "Starflesh", F.SELF, [["shield", 160, 60]])
+	_add(5, "time_slip", "Time Slip", F.SELF, [["haste", 60, 30]])
+	_add(6, "astral_flesh", "Astral Flesh", F.SELF, [["shield", 260, 60]])
+	_add(6, "stasis", "Stasis", F.NOVA, [["paralyze", 0, 8]], 10.0)
+	_add(5, "dread_legion", "Dread Legion", F.TARGET, [["reanimate", 150, 120]])
+	_add(5, "eternal_blade", "Eternal Blade", F.SELF, [["bound_greatsword", 0, 600]])
+	_add(6, "sovereign_dead", "Sovereign of the Dead", F.TARGET, [["reanimate", 300, 180]])
+	_add(6, "greater_troll", "Conjure Elder Troll", F.SELF, [["summon_troll", 0, 180]])
+	_add(5, "dominion", "Dominion", F.NOVA, [["calm", 200, 60]], 20.0)
+	_add(5, "veil", "Veil of Night", F.SELF, [["invisibility", 0, 90], ["muffle", 0, 90]])
+	_add(6, "madness", "Madness", F.NOVA, [["frenzy", 200, 40]], 20.0)
+	_add(6, "dread", "Dread", F.NOVA, [["fear", 200, 30]], 20.0)
+	_add(5, "soul_rend", "Soul Rend", F.BEAM, [["absorb_health", 150, 0], ["soul_trap", 0, 30]])
+	_add(5, "spellbreaker", "Spellbreaker", F.SELF, [["reflect", 50, 60], ["spell_absorption", 50, 60]])
+	_add(6, "void_drain", "Void Drain", F.TARGET, [["absorb_health", 300, 0], ["absorb_magicka", 150, 0]])
+	_add(6, "mirror_of_ages", "Mirror of Ages", F.SELF, [["reflect", 80, 60]])
+
 	# ---- Vampire powers (learned by becoming a vampire, no tomes)
 	_add(9, "vampiric_drain", "Vampiric Drain", F.TOUCH, [["absorb_health", 18, 0], ["absorb_stamina", 10, 0]])
 	_add(9, "vampires_sight", "Vampire's Sight", F.SELF, [["night_eye", 0, 120]])
@@ -187,11 +219,11 @@ static func _add(rank: int, id: String, name: String, form: SpellData.Form, effe
 	_order.append(id)
 
 
-## Tome ids that a learner may buy (rank <= 4)
+## Tome ids that a learner may buy (rank <= 6; 5 and 6 only on the far islands)
 static func tome_ids() -> Array[String]:
 	_ensure()
 	var out: Array[String] = []
 	for id in _order:
-		if rank_of(id) <= 4:
+		if rank_of(id) <= 6:
 			out.append(id)
 	return out

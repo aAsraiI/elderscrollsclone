@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_q2kvo"]
+
+[resource]
+script = ExtResource("1_q2kvo")
+id = &"scroll_levitate_spell"
+display_name = "Scroll of Levitate"
+description = "Read it (E in the inventory) to cast Levitate once, for free, whatever your skill. Used up."
+item_type = 6
+weight = 0.2
+value = 160
+stackable = true
+max_stack = 99
+min_level = 15
+loot_tags = PackedStringArray("mage", "library", "vault")
+use_verb = "Read"
+ingredient_effects = PackedStringArray()
+scroll_spell = "levitate_spell"

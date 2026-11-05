@@ -8,6 +8,8 @@ extends RefCounted
 static func verb(_player: Node, item: ItemData) -> String:
 	if item == null:
 		return ""
+	if item.scroll_spell != "":
+		return "Read the scroll"  # 1.28: casts it once, for free
 	if String(item.id) == "tome_of_mastery":
 		return "Study the tome"  # 1.27
 	if item.teaches_spell != "":
@@ -80,6 +82,10 @@ static func use(player: Node, item: ItemData) -> void:
 					Locks.toast(tree, "A sellsword joins you")
 				else:
 					Locks.toast(tree, why, true)
+		"Read the scroll":
+			var why := read_scroll(player, item)
+			if why != "":
+				Locks.toast(tree, why, true)
 		"Study the tome":
 			Locks.toast(tree, mastery_tome(player, item))
 		"Put it on your horse":
@@ -147,3 +153,16 @@ static func mastery_tome(player: Node, item: ItemData) -> String:
 	Achievements.note("mastery_tome")
 	var def := SkillDatabase.get_skill(best)
 	return "You study the tome for days. %s rises to %d." % [def.display_name if def != null else String(best).capitalize(), next]
+
+
+## 1.28: a scroll casts its spell once, for free and at full strength, whatever your skill. "" = cast.
+static func read_scroll(player: Node, item: ItemData) -> String:
+	var spell := SpellCatalog.get_spell(item.scroll_spell)
+	var caster := player.get_node_or_null("SpellCaster") as SpellCaster
+	if spell == null or caster == null:
+		return "The words fade as you read them."
+	if not caster.cast_now(spell, true):
+		return "You can't cast now."
+	(player.get_node("Inventory") as Inventory).remove_item(item, 1)
+	Achievements.note("scroll")
+	return ""

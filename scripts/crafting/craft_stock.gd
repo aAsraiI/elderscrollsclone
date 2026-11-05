@@ -116,6 +116,8 @@ static func extra_for(merchant_id: String, _level_min: int, level_max: int) -> A
 				out.append(_e(SoulGems.DIR + s + "_soul_gem.tres", 0.35, 1, 2))
 		"mages":
 			var max_rank := clampi(level_max / 15, 1, 4)
+			if level_max >= 100:
+				max_rank = 5 if level_max < 150 else 6  # 1.28: Grandmaster and Ascendant tomes, only on the far islands
 			for id in SpellCatalog.tome_ids():
 				if SpellCatalog.rank_of(id) <= max_rank:
 					out.append(_e(SpellCatalog.TOME_DIR + "tome_" + id + ".tres", 0.5 if SpellCatalog.rank_of(id) <= 1 else 0.3, 1, 1))

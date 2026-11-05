@@ -690,6 +690,10 @@ func _refresh_perks() -> void:
 	var sections: Array = [["Feats  (%d feat point%s)" % [fp, "" if fp == 1 else "s"], PerkDatabase.feats()]]
 	for tree_name in PerkDatabase.TREES:
 		sections.append([tree_name, PerkDatabase.perks_in(tree_name)])
+	for tree_name in PerkDatabase.SHIFT_TREES:  # 1.28: only while you carry the curse
+		var kind: String = PerkDatabase.SHIFT_TREES[tree_name]
+		if b.cursed(kind):
+			sections.append(["%s  (%d blood point%s)" % [tree_name, b.shift_points(kind), "" if b.shift_points(kind) == 1 else "s"], PerkDatabase.perks_in(tree_name)])
 	for s in sections:
 		var header := _perk_tree.create_item(root)
 		header.set_text(0, String(s[0]))

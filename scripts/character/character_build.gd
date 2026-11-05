@@ -55,7 +55,7 @@ func perk_points_earned() -> int:
 func perk_points_spent() -> int:
 	var n := 0
 	for id in owned:
-		if not bool(PerkDatabase.get_perk(id).get("feat", false)):
+		if not bool(PerkDatabase.get_perk(id).get("feat", false)) and not PerkDatabase.SHIFT_TREES.has(String(PerkDatabase.get_perk(id).get("tree", ""))):
 			n += int(owned[id])
 	return n
 
@@ -116,6 +116,13 @@ func why_not(id: String) -> String:
 	for r in p["requires"]:
 		if rank_of(String(r)) <= 0:
 			return "Needs the perk %s" % PerkDatabase.get_perk(String(r)).get("name", r)
+	var shift := String(PerkDatabase.SHIFT_TREES.get(String(p["tree"]), ""))
+	if shift != "":  # 1.28: the shapeshifters' trees are bought with blood
+		if not cursed(shift):
+			return "Only for a %s" % shift
+		if shift_points(shift) <= 0:
+			return "No blood points (%s)" % ("feed to earn them" if shift == "vampire" else "devour bodies in beast form to earn them")
+		return ""
 	if bool(p["feat"]):
 		if feat_points() <= 0:
 			return "No feat points (one at levels 10, 25, 50, 75, 100, then every 25)"
@@ -179,6 +186,9 @@ func apply() -> void:
 		var p := PerkDatabase.get_perk(id)
 		if p.is_empty():
 			continue
+		var shift := String(PerkDatabase.SHIFT_TREES.get(String(p.get("tree", "")), ""))
+		if shift != "" and not shift_active(shift):
+			continue  # 1.28: a vampire's perks while a vampire, a werewolf's in beast form
 		for k in p["stats"]:
 			perks[k] = float(perks.get(k, 0.0)) + float(p["stats"][k]) * int(owned[id])
 	for syn in synergies():  # 1.27: two perks from different trees give a hidden third
@@ -373,3 +383,38 @@ func load_loadout(slot: String, inventory: Inventory, player: Node3D) -> String:
 	apply()
 	Achievements.note("loadout")
 	return ""
+
+
+# ---------------------------------------------------------------- 1.28: the shapeshifters' points
+
+## One blood point per feeding (vampire) or body devoured (werewolf): Afflictions calls this
+static func earn_shift_point(kind: String) -> void:
+	var rec: Dictionary = WorldState.get_record("shift_points").duplicate()
+	rec[kind] = int(rec.get(kind, 0)) + 1
+	WorldState.set_record("shift_points", rec)
+
+
+func shift_points(kind: String) -> int:
+	var spent := 0
+	for id in owned:
+		if String(PerkDatabase.SHIFT_TREES.get(String(PerkDatabase.get_perk(id).get("tree", "")), "")) == kind:
+			spent += int(owned[id])
+	return int(WorldState.get_record("shift_points").get(kind, 0)) - spent
+
+
+func _afflictions() -> Afflictions:
+	var p := skills.get_parent() if skills != null else null
+	return p.get_node_or_null("Afflictions") as Afflictions if p != null else null
+
+
+## Does the player carry this curse?
+func cursed(kind: String) -> bool:
+	var a := _afflictions()
+	return a != null and (a.vampire if kind == "vampire" else a.werewolf)
+
+
+## Do this curse's perks work right now? (a vampire always; a werewolf in beast form)
+func shift_active(kind: String) -> bool:
+	if not cursed(kind):
+		return false
+	return kind == "vampire" or (skills != null and skills.get_parent() != null and skills.get_parent().has_meta("beast_form"))

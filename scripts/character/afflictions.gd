@@ -169,6 +169,7 @@ func become_vampire() -> void:
 	if werewolf:
 		cure_werewolf()
 	vampire = true
+	_rebuild_perks.call_deferred()  # 1.28
 	vampire_since = now()
 	last_fed = now()
 	cure_diseases()
@@ -182,6 +183,7 @@ func cure_vampire() -> void:
 	if not vampire:
 		return
 	vampire = false
+	_rebuild_perks.call_deferred()
 	_stats.remove_modifiers("vampire")
 	_stats.remove_modifiers("vampire_sun")
 	var book := _player.get_node_or_null("Spellbook") as Spellbook
@@ -374,6 +376,7 @@ func feed(target: Object, bottle: bool) -> bool:
 			return false
 		e.set_meta("devoured", true)
 		bodies_eaten += 1
+		CharacterBuild.earn_shift_point("werewolf")  # 1.28: blood for the Werewolf tree
 		_stats.modify_vital("health", 60.0)
 		beast_left += 30.0
 		_apply_beast_mods()
@@ -390,6 +393,7 @@ func feed(target: Object, bottle: bool) -> bool:
 		Locks.toast(get_tree(), "You fill a bottle with blood")
 	elif vampire:
 		_fed(40.0 if kind == "sleeper" else 25.0)
+		CharacterBuild.earn_shift_point("vampire")  # 1.28: blood for the Vampire tree
 		Locks.toast(get_tree(), "You feed. The hunger fades.")
 	else:
 		return false
@@ -509,6 +513,7 @@ func start_beast_form(forced: bool) -> void:
 		_stored_gear["spell"] = book.equipped_id
 		book.unequip_spell()
 	_player.set_meta("beast_form", true)
+	_rebuild_perks()  # 1.28
 	_apply_beast_mods()
 	_stats.modify_vital("health", _stats.get_stat("max_health"))
 	_show_tint(true)
@@ -528,6 +533,7 @@ func end_beast_form() -> void:
 	beast = false
 	beast_forced = false
 	_player.remove_meta("beast_form")
+	_rebuild_perks()
 	_stats.remove_modifiers("beast")
 	var eq := _player.get_node_or_null("Equipment") as Equipment
 	for slot in _stored_gear:
@@ -611,3 +617,10 @@ func from_dict(d: Dictionary) -> void:
 	else:
 		_stats.remove_modifiers("lycanthrope")
 	changed.emit()
+
+
+## 1.28: the shapeshifters' perks switch on and off with the curse and the beast form
+func _rebuild_perks() -> void:
+	var sk := _player.get_node_or_null("Skills") as Skills if _player != null else null
+	if sk != null and sk.build != null:
+		sk.build.apply()

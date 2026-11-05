@@ -260,10 +260,11 @@ func _hud() -> void:
 	notices.push("Quest started", "A")
 	notices.push("Quest started", "A")
 	notices.push("Objective updated", "B")
-	check("notices queue up, repeats dropped", notices.pending().size() == 2)
+	var mine := func() -> int: return notices.pending().filter(func(n: Dictionary) -> bool: return n["text"] in ["A", "B", "C"]).size()  # 1.27: achievements and the Guide use the queue too
+	check("notices queue up, repeats dropped", mine.call() == 2)
 	GameSettings.set_value("quest_popups", false)
 	notices.push("Quest started", "C")
-	check("notices can be turned off", notices.pending().size() == 2)
+	check("notices can be turned off", mine.call() == 2)
 	GameSettings.set_value("quest_popups", true)
 	var camp := wm.get_poi(String(q["target"]))
 	await _go(camp.position + Vector3(0, 0, 25))

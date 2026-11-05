@@ -71,9 +71,13 @@ Members of the Mages Guild can ask a guild mage about \"magical research\": for 
 	["disease", "Body and Survival", "Disease",
 		"Bites and blows from rats, wolves and the dead can make you sick: the Character page shows what you have. Pray at a temple shrine, drink a Cure Disease potion or cast Cure Disease."],
 	["vampire", "Body and Survival", "Vampirism",
-		"You are a vampire. Food is useless: press F on sleeping people or fresh bodies to feed (Shift+F fills a bottle). The sun burns you when you are hungry, and a ravenous vampire is hunted in town. Priests know of a cure."],
+		"You are a vampire. Food is useless: press F on sleeping people or fresh bodies to feed (Shift+F fills a bottle). The sun burns you when you are hungry, and a ravenous vampire is hunted in town. Priests know of a cure.
+
+Each feeding earns a blood point for the Vampire perk tree (Character > Perks, shown while you are a vampire): Unholy Vigor, Night Stalker, Drain Mastery and on to Vampire Lord."],
 	["werewolf", "Body and Survival", "Lycanthropy",
-		"You are a werewolf. Press B to change, once a day; the full moon changes you anyway. In beast form, F on a body devours it. Being seen changing is a crime."],
+		"You are a werewolf. Press B to change, once a day; the full moon changes you anyway. In beast form, F on a body devours it. Being seen changing is a crime.
+
+Each body devoured earns a blood point for the Werewolf perk tree (Character > Perks): Feral, Thick Hide, The Hunt and on to Alpha. Its perks work in beast form."],
 	["swimming", "Body and Survival", "Water",
 		"You can swim, slowly in armour. Under water your breath runs out: watch the bar and come up. An Air Bladder gives more. A Raft Kit (workbench) makes a raft at the water's edge."],
 

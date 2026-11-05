@@ -99,6 +99,7 @@ const LIST := [
 	["levitate", 2, "Into the Sky", "Levitate: cast Levitate (Alteration), then double-tap Space.", "magic", "n:levitate", 1],
 	["ritual", 2, "The Old Ways", "Perform a ritual in a ritual circle (ritual books and chalk: Mages Guild halls).", "rituals", "n:ritual", 1],
 	["research", 2, "Scholar", "Have the Mages Guild research a spell effect for you (ask a guild mage).", "rituals", "n:research", 1],
+	["blood_perk", 2, "Children of the Night", "Take a Vampire or Werewolf perk, bought with blood points from feeding or devouring.", "vampire", "blood_perks", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],
@@ -283,6 +284,13 @@ static func _value(check: String, tree: SceneTree) -> int:
 				for id in bk.spells:
 					n += 1 if SpellCatalog.rank_of(String(id)) in [5, 6] else 0
 			return n
+		"blood_perks":
+			var bp := 0
+			if skills != null and skills.build != null:
+				for id in skills.build.owned:
+					if PerkDatabase.SHIFT_TREES.has(String(PerkDatabase.get_perk(String(id)).get("tree", ""))):
+						bp += 1
+			return bp
 		"regency":
 			return 1 if Regency.is_settled() else 0
 		"far_land":

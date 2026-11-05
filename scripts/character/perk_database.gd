@@ -14,6 +14,10 @@ extends RefCounted
 ##          feat}. ranks = 0 means no limit.
 
 const TREES: Array[String] = ["Warrior", "Guardian", "Marksman", "Spellcaster", "Shadow", "Wanderer", "Artisan", "Leader"]
+## 1.28: the shapeshifters' trees. Bought with blood (CharacterBuild.shift_points: one per feeding or body
+## devoured), shown only while you carry the curse, and working only as one: a vampire always, a werewolf
+## in beast form.
+const SHIFT_TREES := {"Vampire": "vampire", "Werewolf": "werewolf"}
 ## Player levels that give a feat point; past the last one, every FEAT_EVERY levels
 const FEAT_LEVELS: Array[int] = [10, 25, 50, 75, 100]
 const FEAT_EVERY := 25
@@ -96,6 +100,8 @@ static func _ensure() -> void:
 	_wanderer()
 	_artisan()
 	_leader()
+	_vampire()
+	_werewolf()
 	_feats()
 
 
@@ -288,3 +294,28 @@ static func _feats() -> void:
 	_f("f_mythic_hero", "Mythic Hero", 200, "The stuff of myth.", {"damage_pct": 0.30, "spell_power": 0.30, "max_health": 200.0})
 	# always one more to take
 	_f("f_paragon", "Paragon", 100, "Take it as often as you like.", {"damage_pct": 0.02, "spell_power": 0.02, "max_health": 10.0, "max_magicka": 10.0, "max_stamina": 10.0}, UNLIMITED)
+
+
+# ---------------------------------------------------------------- 1.28: the shapeshifters
+
+static func _vampire() -> void:
+	var t := "Vampire"
+	_p("v_unholy_vigor", "Unholy Vigor", t, "The blood keeps you whole.", {"max_health": 20.0}, 3, 1, 0)
+	_p("v_blood_strength", "Blood Strength", t, "Every blow carries the hunger.", {"damage_pct": 0.05}, 3, 1, 0)
+	_p("v_night_stalker", "Night Stalker", t, "You move through the dark unseen.", {"stealth": 10.0, "noise_mult": -0.1}, 2, 1, 0)
+	_p("v_cold_blood", "Cold Blood", t, "Frost can hardly touch what is already dead.", {"resist_frost": 0.25}, 1, 1, 0, ["v_unholy_vigor"])
+	_p("v_mistwalker", "Mistwalker", t, "You drift as much as walk.", {"move_speed_mult": 0.05}, 2, 1, 0, ["v_night_stalker"])
+	_p("v_drain_mastery", "Drain Mastery", t, "Your drains and spells bite deeper.", {"spell_power": 0.1}, 2, 1, 0, ["v_blood_strength"])
+	_p("v_dark_gift", "Dark Gift", t, "The night feeds you magicka.", {"max_magicka": 40.0, "magicka_regen_pct": 0.2}, 2, 1, 0, ["v_drain_mastery"])
+	_p("v_lord", "Vampire Lord", t, "The full power of the blood.", {"damage_pct": 0.10, "max_health": 50.0, "life_leech": 0.03}, 1, 1, 0, ["v_cold_blood", "v_mistwalker", "v_dark_gift"])
+
+
+static func _werewolf() -> void:
+	var t := "Werewolf"
+	_p("ww_feral", "Feral", t, "Claws that tear deeper (in beast form).", {"damage_pct": 0.10}, 3, 1, 0)
+	_p("ww_thick_hide", "Thick Hide", t, "Fur like mail (in beast form).", {"armor": 20.0}, 3, 1, 0)
+	_p("ww_hunt", "The Hunt", t, "You run down anything (in beast form).", {"move_speed_mult": 0.06}, 2, 1, 0)
+	_p("ww_frenzy", "Frenzy", t, "Wild, telling blows (in beast form).", {"crit_chance": 0.04}, 2, 1, 0, ["ww_feral"])
+	_p("ww_regrowth", "Regrowth", t, "Wounds close as you watch (in beast form).", {"health_regen": 1.0}, 2, 1, 0, ["ww_thick_hide"])
+	_p("ww_howl", "Terrible Howl", t, "Every blow staggers (in beast form).", {"poise_bonus": 0.25}, 1, 1, 0, ["ww_hunt"])
+	_p("ww_alpha", "Alpha", t, "Lord of the pack (in beast form).", {"damage_pct": 0.20, "life_leech": 0.04, "max_health": 60.0}, 1, 1, 0, ["ww_frenzy", "ww_regrowth", "ww_howl"])

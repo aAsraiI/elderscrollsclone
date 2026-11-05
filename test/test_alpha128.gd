@@ -46,6 +46,7 @@ func _run() -> void:
 		await t_spells()
 		await t_combos()
 		await t_rituals()
+		await t_shifters()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -193,3 +194,36 @@ func t_rituals() -> void:
 	WorldState.set_record("research", {"ids": [String(eid)]})
 	check("researched, the spellmaker can use it", (p.get_node("Spellbook") as Spellbook).known_effects().has(eid))
 	check("research is for guild members", Rituals.topics_for(null).is_empty())
+
+
+func t_shifters() -> void:
+	print("-- the shapeshifters' trees")
+	var sk := p.get_node("Skills") as Skills
+	var b := sk.build
+	var aff := p.get_node("Afflictions") as Afflictions
+	var st := p.get_node("Stats") as Stats
+	check("the trees exist", PerkDatabase.perks_in("Vampire").size() >= 7 and PerkDatabase.perks_in("Werewolf").size() >= 7)
+	check("not for the uncursed", b.why_not("v_unholy_vigor").begins_with("Only for"))
+	aff.vampire = true
+	check("a vampire needs blood points", b.why_not("v_unholy_vigor").begins_with("No blood points"))
+	var perk_pts := b.perk_points()
+	CharacterBuild.earn_shift_point("vampire")
+	check("feeding gives one", b.shift_points("vampire") == 1 and b.why_not("v_unholy_vigor") == "")
+	var hp := st.get_stat("max_health")
+	b.take("v_unholy_vigor")
+	check("it works for a vampire", st.get_stat("max_health") >= hp + 19.0)
+	check("and costs blood, not perk points", b.shift_points("vampire") == 0 and b.perk_points() == perk_pts)
+	aff.vampire = false
+	b.apply()
+	check("cured, it stops", absf(st.get_stat("max_health") - hp) < 0.5)
+	aff.werewolf = true
+	CharacterBuild.earn_shift_point("werewolf")
+	b.take("ww_thick_hide")
+	var arm := st.get_stat("armor")
+	p.set_meta("beast_form", true)
+	b.apply()
+	check("a werewolf's perks work in beast form", st.get_stat("armor") >= arm + 19.0)
+	p.remove_meta("beast_form")
+	b.apply()
+	check("and not out of it", absf(st.get_stat("armor") - arm) < 0.5)
+	aff.werewolf = false

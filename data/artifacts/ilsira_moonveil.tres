@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_ikw88"]
+
+[resource]
+script = ExtResource("1_ikw88")
+id = &"ilsira_moonveil"
+display_name = "Moonveil Cowl"
+description = "Ilsira's veil. You are harder to see, and locks give way."
+item_type = 2
+equip_slot = 1
+weight = 5.800000000000001
+value = 3728
+governing_skill = "heavy_armor"
+stat_modifiers = {
+"armor": 9.3,
+"security_bonus": 0.2,
+"stealth": 15.0
+}
+tier = 5
+min_level = 41
+loot_tags = PackedStringArray()
+armor_set = &"ebon_heavy"
+ingredient_effects = PackedStringArray()
+animation_set = &"helmet"

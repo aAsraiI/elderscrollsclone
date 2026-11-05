@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_3w2pg"]
+
+[resource]
+script = ExtResource("1_3w2pg")
+id = &"vael_emberheart"
+display_name = "Emberheart"
+description = "Vael's own blade, warm as a coal. Your spells burn hotter."
+item_type = 1
+equip_slot = 6
+weight = 5.5
+value = 3400
+governing_skill = "one_handed"
+stat_modifiers = {
+"resist_fire": 0.5,
+"spell_power": 0.15
+}
+tier = 4
+min_level = 28
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()
+weapon_damage = 37.5
+reach = 2.2
+attack_style = 1
+arc_degrees = 100.0
+attack_cooldown = 0.7
+attack_windup = 0.12
+stamina_cost = 6.9
+knockback = 2.88
+poise_damage = 19.5
+animation_set = &"sword"
+metadata/_custom_type_script = "uid://dd71arb7pvb2r"

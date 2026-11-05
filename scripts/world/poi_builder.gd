@@ -72,6 +72,8 @@ static func build_shape(root: Node3D, shape: int, s: float, color: Color, placed
 			_ruins(root, s, color, rng)
 		SimplePOIData.Shape.SHRINE:
 			_shrine(root, s, color)
+			if placed != null:
+				PatronShrine.make(root, Vector3.ZERO, placed.id)  # 1.28: sacred to a Patron
 		SimplePOIData.Shape.DRAGON_LAIR:
 			_dragon_lair(root, s, color, placed, map, rng)
 

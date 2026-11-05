@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_xd6si"]
+
+[resource]
+script = ExtResource("1_xd6si")
+id = &"thornwood_band"
+display_name = "Thornmother's Band"
+description = "Mother Thornwood's band of living root. Beasts fear you; wounds close."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 9840
+stat_modifiers = {
+"bane_beast": 0.25,
+"health_regen": 1.5,
+"max_health": 82.5
+}
+tier = 7
+min_level = 60
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

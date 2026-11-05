@@ -100,6 +100,7 @@ const LIST := [
 	["ritual", 2, "The Old Ways", "Perform a ritual in a ritual circle (ritual books and chalk: Mages Guild halls).", "rituals", "n:ritual", 1],
 	["research", 2, "Scholar", "Have the Mages Guild research a spell effect for you (ask a guild mage).", "rituals", "n:research", 1],
 	["blood_perk", 2, "Children of the Night", "Take a Vampire or Werewolf perk, bought with blood points from feeding or devouring.", "vampire", "blood_perks", 1],
+	["patron", 2, "Chosen", "Do a Patron's deed and receive its artifact (kneel at a glowing shrine in the wilds).", "patrons", "n:patron", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],
@@ -118,6 +119,7 @@ const LIST := [
 	["level_all", 3, "Jack of All Trades", "Have 15 skills at 25 or more.", "leveling", "skills25", 15],
 
 	# ---- 5 Beyond the Islands: the endgame, islands of level 100 to 200
+	["patrons_all", 3, "Favoured of All", "Receive the artifacts of all eight Patrons.", "patrons", "n:patron", 8],
 	["far_isle", 4, "Over the Horizon", "Set foot on an island of level 100 or more. Ships sail from port towns.", "islands", "far_land", 100],
 	["level100", 4, "Hundredfold", "Reach level 100.", "islands", "level", 100],
 	["skill125", 4, "Beyond Mastery", "Raise any skill to 125.", "leveling", "skill_max", 125],

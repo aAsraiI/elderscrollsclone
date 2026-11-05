@@ -175,6 +175,11 @@ func _watch_quests() -> void:
 		if e.talk_name != "" and e.disposition != Enemy.Disposition.HOSTILE:
 			hint("talking")
 			break
+	if not GuideBook.has_come_up("patrons"):
+		for s in get_tree().get_nodes_in_group("patron_shrines"):
+			if (s as Node3D).global_position.distance_to(_player.global_position) < 25.0:
+				hint("patrons")  # 1.28
+				break
 	for id in RealmManager.REALMS:
 		if RealmManager.is_open(id):
 			hint("realms")

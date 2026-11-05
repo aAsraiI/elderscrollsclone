@@ -47,6 +47,7 @@ func _run() -> void:
 		await t_combos()
 		await t_rituals()
 		await t_shifters()
+		await t_patrons()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -227,3 +228,37 @@ func t_shifters() -> void:
 	b.apply()
 	check("and not out of it", absf(st.get_stat("armor") - arm) < 0.5)
 	aff.werewolf = false
+
+
+func t_patrons() -> void:
+	print("-- the patrons")
+	check("eight patrons, each with an artifact", Patrons.IDS.size() == 8 and Patrons.IDS.all(func(id: String) -> bool: return Patrons.artifact(id) != null))
+	check("their gifts are not museum relics", Patrons.IDS.all(func(id: String) -> bool: return not Patrons.artifact(id).artifact))
+	var shrine := PatronShrine.make(wm, p.global_position + Vector3(2, 0, 0), "test_shrine")
+	await frames(2)
+	var id := shrine.patron
+	var sk := p.get_node("Skills") as Skills
+	check("a shrine is sacred to one patron", Patrons.IDS.has(id) and shrine.get_prompt().begins_with("Kneel"))
+	var need := int(Patrons.LIST[id][2])
+	if sk.get_player_level() < need:
+		check("it is cold to the young", Patrons.kneel(id, p).contains("cold"))
+		for i in 60:
+			if sk.get_player_level() >= need:
+				break
+			for s in [&"lore", &"speech", &"alchemy"]:
+				sk.set_level(s, sk.get_level(s) + 3)
+	var said := Patrons.kneel(id, p)
+	check("kneeling gives a deed", Patrons.state(id) == "active", said)
+	check("not done yet", Patrons.kneel(id, p).contains("waits"))
+	var check_key := String(Patrons.LIST[id][3])
+	var n := int(Patrons.LIST[id][4])
+	if check_key.begins_with("tally:"):
+		for i in n:
+			Takedowns.count(check_key.substr(6))
+	else:
+		Achievements.note(check_key.substr(2), n)
+	var inv := p.get_node("Inventory") as Inventory
+	said = Patrons.kneel(id, p)
+	check("done, the artifact is yours", Patrons.state(id) == "done" and inv.get_count(Patrons.artifact(id)) == 1, said)
+	check("only once", Patrons.kneel(id, p).contains("silent"))
+	shrine.queue_free()

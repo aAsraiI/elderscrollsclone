@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_sbfj7"]
+
+[resource]
+script = ExtResource("1_sbfj7")
+id = &"sythara_loom"
+display_name = "Loom of Sythara"
+description = "The Weaver's amulet: the threads of magic come easier."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 9840
+stat_modifiers = {
+"magicka_cost_mult": -0.15,
+"max_magicka": 162.5
+}
+tier = 7
+min_level = 60
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

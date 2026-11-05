@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_4evch"]
+
+[resource]
+script = ExtResource("1_4evch")
+id = &"dorun_heart"
+display_name = "Heart of the Deep"
+description = "A stone from under the mountains. You carry more and mine better."
+item_type = 2
+equip_slot = 9
+weight = 0.3
+value = 9840
+stat_modifiers = {
+"armor": 15.0,
+"carry_capacity": 80.0,
+"max_stamina": 82.5,
+"mining_bonus": 0.3
+}
+tier = 7
+min_level = 60
+loot_tags = PackedStringArray()
+ingredient_effects = PackedStringArray()

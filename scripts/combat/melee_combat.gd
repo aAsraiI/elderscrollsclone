@@ -1413,4 +1413,5 @@ func _charge_mult() -> float:
 	if h == null or not is_instance_valid(h):
 		return 1.0
 	var speed := Vector2(h.velocity.x, h.velocity.z).length()
-	return (1.0 + CHARGE_BONUS * clampf(speed / Rider.GALLOP, 0.0, 1.0)) * (1.0 + maxf(stats.get_stat("mounted_damage"), 0.0))
+	var lance := 2.0 if equipment != null and equipment.get_main_hand() != null and equipment.get_main_hand().is_lance else 1.0  # 1.27
+	return (1.0 + CHARGE_BONUS * lance * clampf(speed / Rider.GALLOP, 0.0, 1.0)) * (1.0 + maxf(stats.get_stat("mounted_damage"), 0.0))

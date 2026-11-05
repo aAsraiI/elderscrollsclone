@@ -173,6 +173,7 @@ func on_arrow_hit(arrow: Arrow, target: Node, point: Vector3) -> void:
 	var victim := (target.get("body") as Node3D) if "body" in target else target as Node3D
 	var e := victim as Enemy
 	_locational(e, point, info)  # 1.27: head and legs
+	info.amount *= CombatStyles.arrow_mult(victim, info.direction)  # 1.27: a shieldbearer turns arrows from the front
 	if host != null and is_instance_valid(host) and host.is_in_group("player") and e != null:
 		var stealth: Variant = host.get_meta("stealth", null)
 		if stealth != null and is_instance_valid(stealth):

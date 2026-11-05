@@ -91,6 +91,8 @@ const LIST := [
 	# ---- 4 Master: the main island's great deeds
 	["trial", 2, "Proven", "Finish a skill trial: at 50 a master sends word; raise the skill 3 more levels.", "leveling", "n:trial", 1],
 	["loadout", 2, "Two Minds", "Save a build as a loadout (Character > Level Up) and take one up at a temple shrine.", "perks", "n:loadout", 1],
+	["birthstone", 2, "Under a New Star", "Take a new birthsign at a ring of standing stones (E on the altar stone).", "powers", "n:birthstone", 1],
+	["lancer", 2, "Lancer", "Put barding on your horse (use it from the inventory near your horse).", "horses", "n:barding", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],

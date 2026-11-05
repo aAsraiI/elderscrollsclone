@@ -220,6 +220,7 @@ func update_awareness(dt: float) -> void:
 			gain += 0.6 + 3.0 * (1.0 - d / reach)
 		if d < noise:
 			gain += 2.0
+		gain *= float(e.get_meta("keen", 1.0))  # 1.27: trackers (CombatStyles) are hard to sneak past
 		a = clampf(a + gain * dt if gain > 0.0 else a - 0.25 * dt, 0.0, 1.2)
 		awareness[id] = a
 		if d < 15.0 and a < SEEN:

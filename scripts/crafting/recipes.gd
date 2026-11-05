@@ -104,8 +104,10 @@ static func _ensure() -> void:
 		var ingot: String = MAT + TIER_INGOT[tier] + ".tres"
 		for made in [["_crossbow", 1, [[ingot, 3], [MAT + "leather_strips.tres", 1]]], ["_bolt", 20, [[ingot, 1]]],
 				["_throwing_knife", 8, [[ingot, 1]]], ["_throwing_axe", 4, [[ingot, 1], [MAT + "leather_strips.tres", 1]]],
-				["_javelin", 4, [[ingot, 1], [MAT + "firewood.tres", 1]]]]:
-			var path := "res://data/ranged/%s%s.tres" % [key, made[0]]
+				["_javelin", 4, [[ingot, 1], [MAT + "firewood.tres", 1]]], ["_lance", 1, [[ingot, 3], [MAT + "firewood.tres", 1]]],
+				["_barding", 1, [[ingot, 6], [MAT + "leather_strips.tres", 4]]]]:
+			var folder := "weapons" if made[0] == "_lance" else ("misc" if made[0] == "_barding" else "ranged")
+			var path := "res://data/%s/%s%s.tres" % [folder, key, made[0]]
 			if ResourceLoader.exists(path):
 				_add_path("forge", path, made[1], made[2], TIER_LEVEL[tier], "smithing")
 	# ---- workbench (tinkering)

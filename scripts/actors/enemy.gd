@@ -435,6 +435,7 @@ func _build_systems() -> void:
 			stats.add_modifiers("level", {"damage_pct": damage_mult - 1.0})
 		if has_meta("resists"):
 			stats.add_modifiers("innate", get_meta("resists"))
+	CombatStyles.maybe_take.call_deferred(self)  # 1.27: some foes answer how you fight
 
 	inventory = get_node_or_null("Inventory") as Inventory
 	if inventory == null:

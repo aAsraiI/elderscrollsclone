@@ -66,6 +66,8 @@ static func outgoing_mult(attacker: Node, victim: Node, info: DamageInfo, rng: R
 	if is_player(attacker) and info.weapon != null and info.kind != &"spell":
 		m *= Durability.weapon_mult(info.weapon)  # 1.27: a worn weapon hits softer
 		Durability.wear_weapon(info.weapon, attacker)
+		if info.weapon.is_lance and not attacker.has_meta("riding"):
+			m *= 0.6  # 1.27: a lance is clumsy on foot
 	if is_player(attacker):
 		var st := stats_of(attacker)
 		if st != null:

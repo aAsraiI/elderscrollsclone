@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_hcih4"]
+
+[resource]
+script = ExtResource("1_hcih4")
+id = &"steel_barding"
+display_name = "Steel Horse Barding"
+description = "Armour for your horse. Use it (E in the inventory) near your horse. While you ride you have +25 armour."
+item_type = 9
+weight = 35.0
+value = 900
+stat_modifiers = {
+"barding_armor": 25.0
+}
+min_level = 10
+loot_tags = PackedStringArray("smithy", "shop")
+ingredient_effects = PackedStringArray()

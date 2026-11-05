@@ -84,6 +84,8 @@ enum SecondaryAction { NONE, BLOCK, SLAM }
 @export var is_bolt := false
 ## 1.27: a thrown weapon (knife, axe, javelin): equip the stack, left click throws one (RangedCombat)
 @export var is_thrown := false
+## 1.27: a lance: made for the saddle (twice the gallop bonus), clumsy on foot (60% damage)
+@export var is_lance := false
 
 @export_group("Magic and crafting")
 ## Magic effects when eaten or drunk (alchemy potions, cooked food), or on a poison:

@@ -31,7 +31,9 @@ A crossbow shoots at full power with one click, then has to be wound again; its 
 
 Where you hit matters: a head shot does half again as much, a leg hit slows them for a few seconds. All of these train Archery and are made at a forge.\n\nSneaking archers do extra damage to anyone who hasn't seen them."],
 	["foes", "Fighting", "Foes and Factions",
-		"Every creature belongs to a side. Wolves hunt deer, bandits fight the dead, and some sides leave each other be. Battles happen without you: wait for the winner, or join in.\n\nKilling a side's enemies raises your standing with it; at 25 it stops attacking you. Only what you kill stays dead: creatures killed by others come back.\n\nBosses have tricks: necromancers raise the dead, trolls heal unless burned, queens bring out their young."],
+		"Every creature belongs to a side. Wolves hunt deer, bandits fight the dead, and some sides leave each other be. Battles happen without you: wait for the winner, or join in.\n\nKilling a side's enemies raises your standing with it; at 25 it stops attacking you. Only what you kill stays dead: creatures killed by others come back.\n\nBosses have tricks: necromancers raise the dead, trolls heal unless burned, queens bring out their young.
+
+Some people fight to answer how you fight: Shieldbearers turn arrows from the front (Chargers run at archers), Warded foes shrug off magic, Trackers spot sneaks quickly, and Duelists block and parry more. Their style shows by their name on the health bar."],
 	["dungeons", "Fighting", "Dungeons",
 		"Caves, crypts, mines and ruins are marked on the map once found. Each has a master in its deepest room: kill it and the dungeon is cleared, and its boss chest is yours. Cleared places fill up again after a few weeks (World settings).\n\nWatch for traps: sneak, or have Security 25, to see pressure plates. Levers open gates; a loose stone may hide a secret door. Fire sets off gas clouds. The deeper floors are darker: bring a torch or a light spell."],
 
@@ -54,7 +56,7 @@ Where you hit matters: a head shot does half again as much, a leg hit slows them
 	["perks", "Your Character", "Perks, Feats and Points",
 		"C > Perks: eight trees (Warrior, Guardian, Marksman, Spellcaster, Shadow, Wanderer, Artisan, Leader). Spend a perk point to take one.\n\nSome perks give a move of your own: Shield Charge (Guardian), Whirlwind Sprint (Wanderer) and Shadow Step (Shadow). G uses it, Shift+G picks the next one you own. Two perks from different trees can unlock a hidden third, a synergy (Spellblade, Shadow Archer, Juggernaut...). From level 10 people give you a title by your build: the Unseen, Stormcaller...\n\nFeats (top of the page) are big build-defining choices, some with a price. C > Level Up spends attribute and vital points and shows your build's name. Its \"Start over\" button undoes every choice, for gold. You can also save two builds as loadouts A and B and take one up again at a temple shrine, for an offering."],
 	["powers", "Your Character", "Powers and Standing Stones",
-		"Z uses your race's power, once a day. Your birthsign gives a lasting gift."],
+		"Z uses your race's power, once a day. Your birthsign gives a lasting gift. Every ring of standing stones keeps one sign: press E on the altar stone to take it as yours instead (once a day)."],
 
 	["survival", "Body and Survival", "Food, Rest and Weather",
 		"With Survival on (World settings), you grow hungry, tired and cold. Eat to stop hunger, sleep in a bed to rest, and dress warmly in the cold: each piece of clothing has its own warmth. A fire within a few metres keeps the cold off. Deserts and summer middays heat you, and rain and swimming soak you: dry off by a fire.\n\nMeals give buffs even with Survival off."],
@@ -91,7 +93,7 @@ Gear wears down as you use it (World settings: Gear wears down). Below half its 
 	["travel", "Travel and the World", "Fast Travel and Roads",
 		"On the map, pick a place you have found to travel there; time passes on the way (World settings may limit it to towns and inns). A long trip into the wilds may end in an ambush.\n\nRoads have highwaymen who want a toll, travellers in trouble and stranded carters. Carriages at town gates and ships at port piers take you further for gold."],
 	["horses", "Travel and the World", "Horses",
-		"Stables outside the bigger towns sell horses. E on your horse mounts it, E again dismounts; Shift gallops. Riding raises the Riding skill. Your horse waits where you left it."],
+		"Stables outside the bigger towns sell horses. E on your horse mounts it, E again dismounts; Shift gallops. Riding raises the Riding skill. Your horse waits where you left it.\n\nYou can fight from the saddle with more reach, and a gallop adds to every blow. A lance (forge) doubles that charge but is clumsy on foot. Horse barding (forge) gives you armour while you ride: use it from the inventory near your horse."],
 	["islands", "Travel and the World", "The Far Islands",
 		"The world is islands. The main island is for levels 1 to 100; across the sea lie islands of level 100 to 200 with harder foes, new metals (Voidsteel, Sunsteel, Astral, Primordial) and legendary arms. Ships sail from every port town. Going too far too soon is deadly: the map shows each island's level."],
 	["realms", "Travel and the World", "Realms",

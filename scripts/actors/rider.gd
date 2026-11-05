@@ -52,6 +52,7 @@ func mount(h: Horse) -> void:
 	horse = h
 	h.set_meta("ridden", true)
 	_player.set_meta("riding", h)
+	_barding_on(true)  # 1.27
 	h.add_collision_exception_with(_player)
 	_player.add_collision_exception_with(h)
 
@@ -62,6 +63,7 @@ func dismount() -> void:
 	var h := horse
 	h.remove_meta("ridden")
 	_player.remove_meta("riding")
+	_barding_on(false)
 	var side := h.global_transform.basis.x * 1.4
 	_player.global_position = h.global_position + side + Vector3.UP * 0.6
 	_player.velocity = Vector3.ZERO
@@ -135,3 +137,39 @@ func _restore() -> void:
 	if world != null:
 		world.ensure_area_loaded(pos)
 	horse = Horse.spawn_at(get_tree().current_scene, pos + Vector3.UP * 0.5, float(rec.get("yaw", 0.0)))
+
+
+# ---------------------------------------------------------------- 1.27: horse barding
+
+## The armour your horse wears gives you this much armour while you ride
+static func barding_armor() -> float:
+	return float(WorldState.get_record("barding").get("armor", 0.0))
+
+
+func _barding_on(on: bool) -> void:
+	var st := _player.get_node_or_null("Stats") as Stats
+	if st == null:
+		return
+	if on and barding_armor() > 0.0:
+		st.add_modifiers("barding", {"armor": barding_armor()})
+	else:
+		st.remove_modifiers("barding")
+
+
+## A barding from the inventory goes on your horse (it must be near). The old one comes back.
+static func put_on_barding(player: Node, item: ItemData) -> String:
+	var rider := player.get_node_or_null("Rider") as Rider
+	if rider == null or rider.horse == null or not is_instance_valid(rider.horse) \
+			or rider.horse.global_position.distance_to((player as Node3D).global_position) > 8.0:
+		return "Your horse needs to be close by."
+	var inv := player.get_node("Inventory") as Inventory
+	var old := String(WorldState.get_record("barding").get("path", ""))
+	var armor := float(item.stat_modifiers.get("barding_armor", 15.0))
+	inv.remove_item(item, 1)
+	if old != "" and ResourceLoader.exists(old):
+		inv.add_item(load(old) as ItemData, 1)
+	WorldState.set_record("barding", {"path": item.resource_path, "armor": armor, "name": item.display_name})
+	if rider.is_riding():
+		rider._barding_on(true)
+	Achievements.note("barding")
+	return "Your horse wears the %s now (+%d armour while you ride)." % [item.display_name, roundi(armor)]

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_neb8i"]
+
+[resource]
+script = ExtResource("1_neb8i")
+id = &"astral_barding"
+display_name = "Astral Horse Barding"
+description = "Armour for your horse. Use it (E in the inventory) near your horse. While you ride you have +90 armour."
+item_type = 9
+weight = 30.0
+value = 40000
+stat_modifiers = {
+"barding_armor": 90.0
+}
+min_level = 150
+loot_tags = PackedStringArray("smithy", "shop")
+ingredient_effects = PackedStringArray()

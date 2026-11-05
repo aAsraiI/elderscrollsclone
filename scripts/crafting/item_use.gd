@@ -20,6 +20,8 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Build a raft"
 	if String(item.id) == "air_bladder":
 		return "Breathe from the bladder"
+	if String(item.id).ends_with("_barding"):
+		return "Put it on your horse"  # 1.27
 	if String(item.id) == "repair_hammer":
 		return "Mend your gear"  # 1.27
 	if String(item.id) == "horse_deed":
@@ -80,6 +82,8 @@ static func use(player: Node, item: ItemData) -> void:
 					Locks.toast(tree, why, true)
 		"Study the tome":
 			Locks.toast(tree, mastery_tome(player, item))
+		"Put it on your horse":
+			Locks.toast(tree, Rider.put_on_barding(player, item))
 		"Mend your gear":
 			Locks.toast(tree, Durability.use_hammer(player, item))
 		"Call your horse":

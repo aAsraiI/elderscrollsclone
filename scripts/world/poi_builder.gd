@@ -88,6 +88,7 @@ static func _standing_stones(root: Node3D, s: float, color: Color, placed: Place
 		add_box(root, Vector3(1.1, h, 0.8) * Vector3(s, 1.0, s), Vector3(lx, gy + h * 0.5 - 0.4, lz), color.darkened(rng.randf_range(0.0, 0.25)), -a + PI * 0.5, Vector3(rng.randf_range(-0.06, 0.06), 0.0, rng.randf_range(-0.06, 0.06)))
 	var cy := ground_y(placed, map, 0.0, 0.0)
 	add_box(root, Vector3(2.6, 0.5, 1.5) * s, Vector3(0.0, cy + 0.15, 0.0), color.darkened(0.3))
+	BirthStone.make(root, Vector3(0.0, cy, 0.0), placed.id.hash() if placed != null else 0)  # 1.27: the stone keeps a sign
 
 
 static func _camp(root: Node3D, s: float, _color: Color, rng: RandomNumberGenerator) -> void:

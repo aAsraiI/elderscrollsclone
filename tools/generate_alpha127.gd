@@ -9,6 +9,10 @@ const DIR := "res://data/ranged/"
 const NAMES := ["Iron", "Steel", "Silver", "Obsidian", "Ebon", "Dragonbone", "Starforged", "Voidsteel", "Sunsteel", "Astral", "Primordial"]
 
 ## kind -> [name, damage x (bow + arrow), speed, cooldown, weight, value x arrow value, stack value floor, model, poise]
+## [id, name, armour while riding, weight, value, level]
+const BARDING := [["iron_barding", "Iron Horse Barding", 15, 30.0, 300, 1], ["steel_barding", "Steel Horse Barding", 25, 35.0, 900, 10],
+	["ebon_barding", "Ebon Horse Barding", 45, 40.0, 4000, 35], ["astral_barding", "Astral Horse Barding", 90, 30.0, 40000, 150]]
+
 const THROWN := {
 	"throwing_knife": ["Throwing Knife", 0.75, 34.0, 0.4, 0.5, 4, 2, &"dagger", 6.0],
 	"throwing_axe": ["Throwing Axe", 1.0, 28.0, 0.7, 1.5, 8, 4, &"waraxe", 14.0],
@@ -72,6 +76,36 @@ func _initialize() -> void:
 			it.poise_damage = float(d[8])
 			it.two_handed = false
 			made += _save(it, key + "_" + kind)
+	# ---- lances (from each tier's spear) and horse barding (iron, steel, ebon, astral)
+	for t in LevelCurve.TIER_KEYS.size():
+		var key: String = LevelCurve.TIER_KEYS[t]
+		var spear := load("res://data/weapons/%s_spear.tres" % key) as ItemData
+		if spear == null:
+			continue
+		var lance := spear.duplicate() as ItemData
+		lance.id = StringName(key + "_lance")
+		lance.display_name = NAMES[t] + " Lance"
+		lance.description = "Made for the saddle: at a gallop it strikes with twice the charge. Clumsy on foot."
+		lance.is_lance = true
+		lance.two_handed = true
+		lance.weapon_damage = snappedf(spear.weapon_damage * 1.25, 0.5)
+		lance.reach = spear.reach + 1.0
+		lance.weight = snappedf(spear.weight * 1.5, 0.5)
+		lance.value = int(spear.value * 1.4)
+		lance.resource_path = ""
+		made += int(ResourceSaver.save(lance, "res://data/weapons/%s_lance.tres" % key) == OK)
+	for b in BARDING:
+		var it := ItemData.new()
+		it.id = StringName(b[0])
+		it.display_name = b[1]
+		it.description = "Armour for your horse. Use it (E in the inventory) near your horse. While you ride you have +%d armour." % b[2]
+		it.item_type = ItemData.ItemType.TOOL
+		it.weight = float(b[3])
+		it.value = int(b[4])
+		it.min_level = int(b[5])
+		it.stat_modifiers = {"barding_armor": float(b[2])}
+		it.loot_tags = PackedStringArray(["smithy", "shop"])
+		made += int(ResourceSaver.save(it, "res://data/misc/%s.tres" % b[0]) == OK)
 	print("made %d items" % made)
 	quit()
 

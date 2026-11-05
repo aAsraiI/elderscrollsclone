@@ -364,6 +364,8 @@ func _draw_enemy_bar(c: Control, t: MeleeCombat) -> void:
 	var enemy_name := "Enemy"
 	if t.body != null and "display_name" in t.body:
 		enemy_name = String(t.body.get("display_name"))
+		if (t.body as Node).has_meta("combat_style"):  # 1.27: the fighting style, on the health bar
+			enemy_name = "%s (%s)" % [enemy_name, CombatStyles.NAMES.get(String(t.body.get_meta("combat_style")), "")]
 		if "level" in t.body:
 			enemy_name += "   Lv %d" % int(t.body.get("level"))
 	var font := ThemeDB.fallback_font

@@ -51,6 +51,7 @@ func _run() -> void:
 		await t_durability()
 		await t_build()
 		await t_mastery()
+		await t_styles()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -348,3 +349,54 @@ func t_mastery() -> void:
 	ItemUse.use(p, tome)
 	check("it raises the best skill to its next mastery step", sk.get_level(&"lore") == 125 and inv.get_count(tome) == 0, str(sk.get_level(&"lore")))
 	check("trainer ranks go to 150", Services.TRAINER_RANKS[-1][1] == 150)
+
+
+func t_styles() -> void:
+	print("-- standing stones, fighting styles, the saddle")
+	var stone := BirthStone.make(wm, p.global_position + Vector3(2, 0, 0), 12345)
+	await frames(2)
+	var ch: Dictionary = (p.get_meta("character", {}) as Dictionary).duplicate()
+	ch["sign"] = "sword" if stone.sign_id != "sword" else "staff"
+	p.set_meta("character", ch)
+	check("a stone offers its sign", stone.get_prompt().begins_with("Take "))
+	var said := stone.take(p)
+	check("and it becomes yours", String((p.get_meta("character") as Dictionary)["sign"]) == stone.sign_id, said)
+	check("its gift replaces the old one", (p.get_node("Stats") as Stats).has_method("get_stat"))
+	ch = (p.get_meta("character") as Dictionary).duplicate()
+	ch["sign"] = "wind" if stone.sign_id != "wind" else "tower"
+	p.set_meta("character", ch)
+	check("only once a day", stone.take(p).contains("tomorrow"))
+	stone.queue_free()
+	# styles
+	var at := p.global_position + Vector3(0, 0, 8)
+	at.y = wm.get_height_at(at.x, at.z) + 0.5
+	var foe := Population.spawn_enemy(load("res://data/enemies/bandit.tres"), 5, wm, at, RandomNumberGenerator.new())
+	await frames(3)
+	foe.remove_meta("combat_style")
+	var name0 := foe.display_name
+	CombatStyles.take(foe, "warded")
+	check("a warded foe resists magic", foe.stats.get_stat("resist_magic") >= 0.39 and foe.display_name == name0)
+	CombatStyles.take(foe, "shieldbearer")
+	var front := -foe.global_transform.basis.z
+	check("a shieldbearer turns arrows from the front", CombatStyles.arrow_mult(foe, -front) == 0.5 and CombatStyles.arrow_mult(foe, front) == 1.0)
+	check("the style answers your best skill", CombatStyles.player_kind(self) in ["archer", "mage", "sneak", "fighter"])
+	foe.queue_free()
+	# lances and barding
+	var lance := load("res://data/weapons/steel_lance.tres") as ItemData
+	check("lances exist", lance != null and lance.is_lance and lance.reach > 2.0)
+	var info := DamageInfo.new(10.0, p, &"melee")
+	info.weapon = lance
+	check("a lance is clumsy on foot", BuildHooks.outgoing_mult(p, null, info, RandomNumberGenerator.new()) < 0.7)
+	var bard := load("res://data/misc/steel_barding.tres") as ItemData
+	var inv := p.get_node("Inventory") as Inventory
+	inv.add_item(bard, 1)
+	check("barding needs your horse near", ItemUse.verb(p, bard) == "Put it on your horse" and Rider.put_on_barding(p, bard).contains("close"))
+	var rider := p.get_node("Rider") as Rider
+	rider.horse = Horse.spawn_at(get_root().get_node("."), p.global_position + Vector3(2, 0, 0))
+	await frames(3)
+	check("near it, it goes on", Rider.put_on_barding(p, bard).contains("+25") and Rider.barding_armor() == 25.0)
+	var armor := (p.get_node("Stats") as Stats).get_stat("armor")
+	rider.mount(rider.horse)
+	check("riding, you have its armour", (p.get_node("Stats") as Stats).get_stat("armor") >= armor + 24.0)
+	rider.dismount()
+	check("and not on foot", absf((p.get_node("Stats") as Stats).get_stat("armor") - armor) < 0.5)

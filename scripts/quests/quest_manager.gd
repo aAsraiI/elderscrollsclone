@@ -772,6 +772,7 @@ func _extra_topics(s: DialogueEngine.Speaker) -> PackedStringArray:
 	if road != null:
 		out.append_array(road.topics_for(s))  # 1.26: the toll, the broken cart
 	out.append_array(Roleplay.topics_for(s))  # 1.26: lying, vows, courting
+	out.append_array(Rituals.topics_for(s))  # 1.28: the Mages Guild's research
 	return out
 
 
@@ -817,6 +818,9 @@ func respond(s: DialogueEngine.Speaker, topic: String) -> Dictionary:
 		var told_road := road.respond(s, topic)
 		if not told_road.is_empty():
 			return told_road
+	var studied := Rituals.respond(s, topic, _player(), world)  # 1.28
+	if not studied.is_empty():
+		return studied
 	var played := Roleplay.respond(s, topic, _player(), world)
 	if not played.is_empty():
 		return played

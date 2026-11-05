@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_4fwx6"]
+
+[resource]
+script = ExtResource("1_4fwx6")
+id = &"ritual_book_dawn"
+display_name = "Ritual: Dawn's Blessing"
+description = "+25% health, magicka and stamina for half an hour. Perform it (E in the inventory) standing in a ritual circle: it takes 6 seconds of stillness, 120 magicka and a filled soul gem. The book is kept."
+item_type = 6
+weight = 2.0
+value = 1500
+min_level = 20
+loot_tags = PackedStringArray("mage", "library", "vault")
+ingredient_effects = PackedStringArray()

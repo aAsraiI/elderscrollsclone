@@ -8,6 +8,10 @@ extends RefCounted
 static func verb(_player: Node, item: ItemData) -> String:
 	if item == null:
 		return ""
+	if Rituals.ritual_of(item) != "":
+		return "Perform the ritual"  # 1.28
+	if String(item.id) == "ritual_chalk":
+		return "Draw a ritual circle"
 	if item.scroll_spell != "":
 		return "Read the scroll"  # 1.28: casts it once, for free
 	if String(item.id) == "tome_of_mastery":
@@ -82,6 +86,14 @@ static func use(player: Node, item: ItemData) -> void:
 					Locks.toast(tree, "A sellsword joins you")
 				else:
 					Locks.toast(tree, why, true)
+		"Perform the ritual":
+			var r := Rituals.of(player)
+			if r != null:
+				var why2 := r.perform(Rituals.ritual_of(item))
+				if why2 != "":
+					Locks.toast(tree, why2, true)
+		"Draw a ritual circle":
+			Locks.toast(tree, Rituals.draw_circle(player as Node3D, item))
 		"Read the scroll":
 			var why := read_scroll(player, item)
 			if why != "":

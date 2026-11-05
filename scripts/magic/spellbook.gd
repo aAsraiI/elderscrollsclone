@@ -79,6 +79,8 @@ func new_custom_id() -> String:
 ## Every effect you could put into a new spell: the effects of the spells you know
 func known_effects() -> Array[StringName]:
 	var out: Array[StringName] = []
+	for r in Rituals.researched():  # 1.28: what the Mages Guild worked out for you
+		out.append(StringName(r))
 	for id in spells:
 		for e in (spells[id] as SpellData).effects:
 			var eid := StringName(e["id"])

@@ -57,5 +57,28 @@ func _initialize() -> void:
 		it.max_stack = 99
 		it.loot_tags = PackedStringArray(d[2])
 		made += int(ResourceSaver.save(it, "res://data/consumables/scroll_%s.tres" % id) == OK)
+	for id in Rituals.LIST:
+		var r: Array = Rituals.LIST[id]
+		var it := ItemData.new()
+		it.id = StringName("ritual_book_" + id)
+		it.display_name = "Ritual: %s" % r[0]
+		it.description = "%s Perform it (E in the inventory) standing in a ritual circle: it takes %d seconds of stillness, %d magicka and a filled soul gem. The book is kept." % [r[1], int(Rituals.RITUAL_SECONDS), int(Rituals.MAGICKA)]
+		it.item_type = ItemData.ItemType.BOOK
+		it.weight = 2.0
+		it.value = 1500
+		it.min_level = 20
+		it.loot_tags = PackedStringArray(["mage", "library", "vault"])
+		made += int(ResourceSaver.save(it, "res://data/books/ritual_book_%s.tres" % id) == OK)
+	var chalk := ItemData.new()
+	chalk.id = &"ritual_chalk"
+	chalk.display_name = "Ritual Chalk"
+	chalk.description = "Draws a ritual circle where you stand (E in the inventory). It fades after an hour."
+	chalk.item_type = ItemData.ItemType.MISC
+	chalk.weight = 0.2
+	chalk.value = 15
+	chalk.stackable = true
+	chalk.max_stack = 99
+	chalk.loot_tags = PackedStringArray(["mage", "shop"])
+	made += int(ResourceSaver.save(chalk, "res://data/misc/ritual_chalk.tres") == OK)
 	print("made %d items" % made)
 	quit()

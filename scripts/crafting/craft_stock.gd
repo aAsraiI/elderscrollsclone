@@ -124,4 +124,8 @@ static func extra_for(merchant_id: String, _level_min: int, level_max: int) -> A
 			for s in ["petty", "lesser", "common", "greater", "grand"]:
 				out.append(_e(SoulGems.DIR + s + "_soul_gem.tres", 0.6 - 0.1 * ["petty", "lesser", "common", "greater", "grand"].find(s), 1, 3))
 			out.append(_e(FOOD + "magicka_potion.tres", 0.6, 1, 3))
+			out.append(_e("res://data/misc/ritual_chalk.tres", 0.8, 2, 5))  # 1.28: rituals
+			if level_max >= 20:
+				for rid in Rituals.LIST:
+					out.append(_e("res://data/books/ritual_book_%s.tres" % rid, 0.25, 1, 1))
 	return out.filter(func(e: LootEntry) -> bool: return e.item != null)

@@ -101,6 +101,9 @@ func _watch() -> void:
 	var dm := tree.get_first_node_in_group("dungeon_manager") as DungeonManager
 	if dm != null and dm.is_in_building() and dm.get_interior_root() != null and not dm.get_interior_root().find_children("*", "CraftingStation", true, false).is_empty():
 		hint("crafting")
+	var inv0 := _player.get_node_or_null("Inventory") as Inventory
+	if inv0 != null and not GuideBook.has_come_up("rituals") and inv0.stacks.any(func(s) -> bool: return s.item != null and Rituals.ritual_of(s.item) != ""):
+		hint("rituals")  # 1.28
 	if dm != null and dm.is_inside() and not dm.is_in_building():
 		hint("dungeons")
 		if Achievements.count("dungeon") == 0:

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_p5r48"]
+
+[resource]
+script = ExtResource("1_p5r48")
+id = &"ritual_chalk"
+display_name = "Ritual Chalk"
+description = "Draws a ritual circle where you stand (E in the inventory). It fades after an hour."
+weight = 0.2
+value = 15
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("mage", "shop")
+ingredient_effects = PackedStringArray()

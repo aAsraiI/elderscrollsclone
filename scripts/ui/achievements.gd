@@ -97,6 +97,8 @@ const LIST := [
 	["lancer", 2, "Lancer", "Put barding on your horse (use it from the inventory near your horse).", "horses", "n:barding", 1],
 	["ward", 2, "Not Today, Mage", "Soak up a spell with a ward (Lesser Ward, Mysticism).", "magic", "n:ward", 1],
 	["levitate", 2, "Into the Sky", "Levitate: cast Levitate (Alteration), then double-tap Space.", "magic", "n:levitate", 1],
+	["ritual", 2, "The Old Ways", "Perform a ritual in a ritual circle (ritual books and chalk: Mages Guild halls).", "rituals", "n:ritual", 1],
+	["research", 2, "Scholar", "Have the Mages Guild research a spell effect for you (ask a guild mage).", "rituals", "n:research", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],

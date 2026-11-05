@@ -25,6 +25,8 @@ static func place(parent: Node3D, p_kind: String, at: Vector3, yaw: float = 0.0)
 
 func _ready() -> void:
 	collision_layer = WORLD_LAYER | INTERACTABLE_LAYER
+	if kind == "spell_altar":
+		add_to_group("ritual_circles")  # 1.28: an Altar of Spellmaking is a ritual circle
 	collision_mask = 0
 	_build_model()
 	var looks := get_children().filter(func(c: Node) -> bool: return String(c.name).begins_with("Look_"))

@@ -45,6 +45,7 @@ func _run() -> void:
 		wm.clock.set_time(12.0)
 		await t_spells()
 		await t_combos()
+		await t_rituals()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -152,3 +153,43 @@ func t_combos() -> void:
 	var txt := CombatFeedback.resist_text(w)
 	check("the health bar shows resistances", txt.contains("immune: fire") and txt.contains("weak: frost") and txt.contains("resists: poison"), txt)
 	w.free()
+
+
+func t_rituals() -> void:
+	print("-- rituals and research")
+	var r := Rituals.of(p)
+	var inv := p.get_node("Inventory") as Inventory
+	var st := p.get_node("Stats") as Stats
+	check("the player can perform rituals", r != null)
+	var book := load("res://data/books/ritual_book_ward.tres") as ItemData
+	inv.add_item(book, 1)
+	check("a ritual book is performed", ItemUse.verb(p, book) == "Perform the ritual")
+	check("it needs a circle", r.perform("ward").contains("circle"))
+	var chalk := load("res://data/misc/ritual_chalk.tres") as ItemData
+	inv.add_item(chalk, 1)
+	ItemUse.use(p, chalk)
+	await frames(2)
+	check("chalk draws a circle", Rituals.in_circle(p) and inv.get_count(chalk) == 0)
+	check("and it needs a filled soul gem", r.perform("ward").contains("soul gem"))
+	var gem := load(SoulGems.DIR + "common_soul_gem_filled.tres") as ItemData
+	inv.add_item(gem, 2)
+	st.modify_vital("magicka", 100000.0)
+	check("in the circle it begins", r.perform("ward") == "" and r.is_channelling())
+	p.velocity = Vector3.ZERO
+	await secs(Rituals.RITUAL_SECONDS + 0.5)
+	var am := ActiveMagic.of(p)
+	check("after the channel it takes hold", not r.is_channelling() and am.has_effect(&"ward"), "channelling %s" % r.is_channelling())
+	check("the gem is used, the book kept", inv.get_count(gem) == 1 and inv.get_count(book) == 1)
+	r.perform("storm")
+	p.global_position += Vector3(3, 0, 0)
+	await frames(5)
+	check("moving breaks it", not r.is_channelling())
+	check("raise the fallen needs the dead", r.finish("raise").contains("no dead"))
+	# research
+	var open := Rituals.open_research(p)
+	check("there are effects to research", not open.is_empty())
+	var eid := open[0]
+	check("not known before", not (p.get_node("Spellbook") as Spellbook).known_effects().has(eid))
+	WorldState.set_record("research", {"ids": [String(eid)]})
+	check("researched, the spellmaker can use it", (p.get_node("Spellbook") as Spellbook).known_effects().has(eid))
+	check("research is for guild members", Rituals.topics_for(null).is_empty())

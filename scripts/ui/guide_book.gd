@@ -18,7 +18,9 @@ const PAGES := [
 	["achievements", "Getting Started", "Achievements",
 		"J > Achievements lists everything there is to do, from the first steps to the far islands, in five chapters. Each one says how to do it and which Guide page tells you more. The top of the page shows the next few to try: following them takes you through almost the whole game."],
 	["health", "Getting Started", "Health and Healing",
-		"When you are hurt, H drinks your best health potion. Food heals a little and a good meal gives a buff to your maximum health and stamina for a while. Resting (T) heals you too, but not with enemies near.\n\nHealers in temples cure you, and the Restoration school has healing spells."],
+		"When you are hurt, H drinks your best health potion. Food heals a little and a good meal gives a buff to your maximum health and stamina for a while. Resting (T) heals you too, but not with enemies near.
+
+In Survival mode a heavy blow opens a wound: you bleed until you use a Bandage (temples, or a workbench from plant fibre), which also heals a little, more with Medicine.\n\nHealers in temples cure you, and the Restoration school has healing spells."],
 	["heavy", "Getting Started", "Carrying Too Much",
 		"Everything has a weight. Carry more than your limit (shown in the inventory) and you slow to a walk and cannot sprint or fast travel. Drop things (Q drops one, Shift+Q all), sell them, or leave them in a chest you own. Strength raises the limit."],
 
@@ -101,7 +103,9 @@ Fallen trees in forests, highlands and the tundra can be chopped with an axe for
 	["night", "Body and Survival", "Night",
 		"At night people go home and lock their doors, and the roads are more dangerous: ambushes wait for you. Some creatures only come out after dark. Carry a torch or a light spell, or wait (T) for dawn."],
 	["disease", "Body and Survival", "Disease",
-		"Bites and blows from rats, wolves and the dead can make you sick: the Character page shows what you have. Pray at a temple shrine, drink a Cure Disease potion or cast Cure Disease."],
+		"Bites and blows from rats, wolves and the dead can make you sick: the Character page shows what you have. Pray at a temple shrine, drink a Cure Disease potion or cast Cure Disease.
+
+A disease comes on slowly (half its effect for a day), then you are sick, and after five days it turns severe (twice as bad), with symptoms: fevers, aches, a cough that gives you away when you sneak. An Herbal Remedy (temples, or an alchemy lab) may cure the worst of it, more often with Medicine; with Medicine 50 a night's sleep beats a disease that is not yet severe."],
 	["vampire", "Body and Survival", "Vampirism",
 		"You are a vampire. Food is useless: press F on sleeping people or fresh bodies to feed (Shift+F fills a bottle). The sun burns you when you are hungry, and a ravenous vampire is hunted in town. Priests know of a cure.
 

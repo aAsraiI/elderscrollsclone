@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"herbal_remedy"
+display_name = "Herbal Remedy"
+description = "Bitter herbs boiled down. Take it (E in the inventory) for a chance to cure your worst sickness; Medicine makes it work more often."
+item_type = 9
+weight = 0.3
+value = 25
+stackable = true
+max_stack = 99
+loot_tags = PackedStringArray("shop", "temple")

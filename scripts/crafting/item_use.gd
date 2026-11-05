@@ -28,6 +28,10 @@ static func verb(_player: Node, item: ItemData) -> String:
 		return "Breathe from the bladder"
 	if Fishing.is_pole(item):
 		return "Cast a line"  # 1.30
+	if String(item.id) == "bandage":
+		return "Bandage yourself"  # 1.30
+	if String(item.id) == "herbal_remedy":
+		return "Take the remedy"
 	if String(item.id) == "waterskin":
 		return "Fill it"  # 1.30
 	if String(item.id) == "waterskin_full":
@@ -116,6 +120,14 @@ static func use(player: Node, item: ItemData) -> void:
 				var why3 := fi.cast()
 				if why3 != "":
 					Locks.toast(tree, why3, true)
+		"Bandage yourself":
+			var sv := player.get_node_or_null("Survival") as Survival
+			if sv != null:
+				Locks.toast(tree, sv.bandage(item))
+		"Take the remedy":
+			var af := player.get_node_or_null("Afflictions") as Afflictions
+			if af != null:
+				Locks.toast(tree, af.take_remedy(item))
 		"Fill it":
 			Locks.toast(tree, fill_waterskin(player, item))
 		"Drink":

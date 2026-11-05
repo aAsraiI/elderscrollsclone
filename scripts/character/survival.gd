@@ -55,6 +55,7 @@ func enabled() -> bool:
 
 func _process(delta: float) -> void:
 	_tick_meals(delta)  # 1.25: meals wear off (survival mode or not)
+	_tick_wounds(delta)  # 1.30
 	if not enabled() or _stats == null or _stats.is_dead:
 		return
 	var aff := get_parent().get_node_or_null("Afflictions") as Afflictions
@@ -188,6 +189,8 @@ func status_lines() -> PackedStringArray:
 		var s: int = _stages[k]
 		if s >= 1:
 			out.append("%s%s" % ["✖ " if s >= 2 else "", STAGE_NAMES[k][s]])
+	if is_bleeding():
+		out.append("✖ Bleeding (%d)" % wounds.size())  # 1.30
 	return out
 
 
@@ -386,3 +389,53 @@ static func rest_minutes(comfort_level: int) -> float:
 func drink_water(amount: float = 60.0) -> void:
 	thirst = maxf(thirst - amount, 0.0)
 	_update_stages()
+
+
+# ---------------------------------------------------------------- 1.30: bleeding
+
+## A heavy blow (or one that takes a sixth of your health) opens a wound in Survival mode: you
+## bleed BLEED_PER_SEC for BLEED_SECONDS, up to three wounds at once, until a Bandage closes them.
+const BLEED_PER_SEC := 0.8
+const BLEED_SECONDS := 25.0
+const BLEED_MAX := 3
+var wounds: Array = []  # seconds left on each open wound
+
+
+func maybe_bleed(info: DamageInfo, taken: float) -> void:
+	if not enabled() or _stats == null or taken <= 0.0 or info.kind == &"magic":
+		return
+	if not (info.heavy or taken >= _stats.get_stat("max_health") / 6.0):
+		return
+	if wounds.size() >= BLEED_MAX:
+		wounds[0] = BLEED_SECONDS
+		return
+	wounds.append(BLEED_SECONDS)
+	Locks.toast(get_tree(), "You are bleeding! (a Bandage stops it)", true)
+
+
+func is_bleeding() -> bool:
+	return not wounds.is_empty()
+
+
+func _tick_wounds(delta: float) -> void:
+	if wounds.is_empty() or _stats == null or _stats.is_dead:
+		return
+	_stats.modify_vital("health", -BLEED_PER_SEC * wounds.size() * delta)
+	for i in range(wounds.size() - 1, -1, -1):
+		wounds[i] = float(wounds[i]) - delta
+		if float(wounds[i]) <= 0.0:
+			wounds.remove_at(i)
+
+
+## A Bandage: closes every wound and heals a little (more with Medicine). Trains Medicine.
+func bandage(item: ItemData) -> String:
+	var sk := get_parent().get_node_or_null("Skills") as Skills
+	var med := float(sk.get_level(&"medicine")) if sk != null else 15.0
+	var was := wounds.size()
+	wounds.clear()
+	_stats.modify_vital("health", 8.0 + med * 0.5)
+	(get_parent().get_node("Inventory") as Inventory).remove_item(item, 1)
+	if sk != null:
+		sk.add_xp(&"medicine", 4.0 + was * 2.0)
+	Achievements.note("bandage")
+	return "You bind your wounds." if was > 0 else "You bandage yourself up."

@@ -630,6 +630,10 @@ func take_damage(info: DamageInfo) -> float:
 			_apply_poise(info)
 	if final > 0.5 and not info.dot and info.element == &"" and info.result != &"blocked" and HitFX.bleeds(body):
 		HitFX.blood(get_tree(), _fx_point(info), info.direction, clampf(final / maxf(stats.get_stat("max_health"), 1.0) * 4.0, 0.2, 1.5))
+	if body != null and body.is_in_group("player") and not info.dot and info.element == &"" and info.result != &"blocked" and not stats.is_dead:
+		var surv := body.get_node_or_null("Survival") as Survival
+		if surv != null:
+			surv.maybe_bleed(info, final)  # 1.30: a heavy blow opens a wound (Survival mode)
 	damaged.emit(info, final)
 	return final
 

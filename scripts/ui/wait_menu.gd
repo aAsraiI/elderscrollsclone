@@ -182,6 +182,11 @@ func _wait() -> void:
 		var surv := get_parent().get_node_or_null("Survival") as Survival
 		if surv != null:
 			surv.on_sleep(hours)
+		var aff2 := get_parent().get_node_or_null("Afflictions") as Afflictions
+		if aff2 != null:
+			var slept_off := aff2.sleep_off()  # 1.30: Medicine 50
+			if slept_off != "":
+				Locks.toast(get_tree(), slept_off)
 		if stats != null:
 			stats.modify_vital("health", stats.get_stat("max_health"))
 		var aff := get_parent().get_node_or_null("Afflictions") as Afflictions

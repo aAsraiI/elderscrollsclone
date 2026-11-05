@@ -113,6 +113,8 @@ const LIST := [
 	["hunter_kill", 2, "Not Today, Hunter", "Kill a bounty hunter (they come for you once your bounties pass 300).", "crime", "n:hunter_kill", 1],
 	["heist", 2, "The Job", "Pull off a heist for the Thieves Guild (ask the fence about \"a heist\").", "heists", "n:heist", 1],
 	["fish_species", 2, "Collector of the Deep", "Catch 6 different kinds of fish.", "fishing", "fish_species", 6],
+	["remedy", 2, "Physician, Heal Thyself", "Cure a disease with an Herbal Remedy.", "disease", "n:remedy", 1],
+	["bandage", 2, "Field Dressing", "Bind your wounds with a Bandage.", "health", "n:bandage", 1],
 	["level50", 3, "Master", "Reach level 50.", "leveling", "level", 50],
 	["skill100", 3, "Grandmaster", "Raise any skill to 100.", "leveling", "skill_max", 100],
 	["skills50", 3, "Many Talents", "Have 5 skills at 50 or more.", "leveling", "skills50", 5],

@@ -127,8 +127,9 @@ func cure_diseases() -> int:
 func _apply_disease_mods() -> void:
 	var mods := {}
 	for id in diseases:
+		var st := disease_stage(id)  # 1.30: half while it comes on, twice as bad once it is severe
 		for k in DISEASES[id]["stats"]:
-			mods[k] = float(mods.get(k, 0.0)) + float(DISEASES[id]["stats"][k])
+			mods[k] = float(mods.get(k, 0.0)) + float(DISEASES[id]["stats"][k]) * [0.5, 1.0, 2.0][st]
 	if mods.is_empty():
 		_stats.remove_modifiers("disease")
 	else:
@@ -155,6 +156,7 @@ func _process(delta: float) -> void:
 				become_vampire()
 			else:
 				become_werewolf()
+	_tick_diseases(t)  # 1.30: stages and symptoms
 	if vampire:
 		_tick_vampire(t)
 	if werewolf:
@@ -583,7 +585,7 @@ func _show_tint(on: bool) -> void:
 func status_lines() -> PackedStringArray:
 	var out := PackedStringArray()
 	for id in diseases:
-		out.append("✖ " + String(DISEASES[id]["name"]))
+		out.append("✖ %s%s" % [DISEASES[id]["name"], ["  (coming on)", "", "  (severe)"][disease_stage(id)]])
 	if vampire:
 		out.append("Vampire (%s), %s" % [VAMPIRE_AGES[vampire_age()], HUNGER_NAMES[hunger_stage()]])
 	if werewolf:
@@ -624,3 +626,100 @@ func _rebuild_perks() -> void:
 	var sk := _player.get_node_or_null("Skills") as Skills if _player != null else null
 	if sk != null and sk.build != null:
 		sk.build.apply()
+
+
+# ---------------------------------------------------------------- 1.30: disease stages
+
+## Hours a disease is coming on (half its effect), and after how many it turns severe (twice)
+const DISEASE_ONSET := 24.0
+const DISEASE_SEVERE := 120.0
+const STAGE_NAMES := ["Coming on", "Sick", "Severe"]
+## What each disease does to you now and then, once it has come on
+const SYMPTOMS := {
+	"rattle_fever": "You shiver with fever.", "bone_break_fever": "Your bones ache.", "rockjoint": "Your joints lock up for a moment.",
+	"ash_cough": "You cough, loudly.", "witbane": "Your thoughts blur.", "swamp_rot": "Your skin crawls and itches.",
+}
+var _symptom_t := 0.0
+var _stage_seen := {}
+
+
+## 0 coming on, 1 sick, 2 severe
+func disease_stage(id: String) -> int:
+	if id in ["sanguine_vampiris", "sanies_lupinus"] or not diseases.has(id):
+		return 1
+	var h := now() - float(diseases[id])
+	return 0 if h < DISEASE_ONSET else (1 if h < DISEASE_SEVERE else 2)
+
+
+func _tick_diseases(_t: float) -> void:
+	var changed_stage := false
+	for id in diseases:
+		var st := disease_stage(id)
+		if int(_stage_seen.get(id, -1)) != st:
+			if int(_stage_seen.get(id, -1)) >= 0 and st > int(_stage_seen[id]):
+				Locks.toast(get_tree(), "%s: %s" % [DISEASES[id]["name"], ["it is coming on", "you are sick", "it has grown severe"][st]], true)
+			_stage_seen[id] = st
+			changed_stage = true
+	if changed_stage:
+		_apply_disease_mods()
+	_symptom_t -= 1.0
+	if _symptom_t > 0.0:
+		return
+	_symptom_t = 45.0
+	for id in diseases:
+		if disease_stage(id) >= 1 and SYMPTOMS.has(id) and randf() < (0.3 if disease_stage(id) == 2 else 0.15):
+			Locks.toast(get_tree(), SYMPTOMS[id])
+			var stealth: Variant = _player.get_meta("stealth", null)
+			if id == "ash_cough" and stealth != null and is_instance_valid(stealth):
+				stealth.make_noise(1.5)  # a cough gives you away
+			if disease_stage(id) == 2:
+				_stats.modify_vital("stamina", -15.0)
+			break
+
+
+## Cures one disease (the worst). Returns its name, or "".
+func cure_one() -> String:
+	var worst := ""
+	for id in diseases:
+		if id in ["sanguine_vampiris", "sanies_lupinus"]:
+			continue
+		if worst == "" or disease_stage(id) > disease_stage(worst):
+			worst = id
+	if worst == "":
+		return ""
+	diseases.erase(worst)
+	_stage_seen.erase(worst)
+	_apply_disease_mods()
+	changed.emit()
+	return String(DISEASES[worst]["name"])
+
+
+## A Herbal Remedy: a chance by Medicine to cure your worst disease
+func take_remedy(remedy: ItemData) -> String:
+	var inv := _player.get_node("Inventory") as Inventory
+	var sk := _player.get_node_or_null("Skills") as Skills
+	var med := float(sk.get_level(&"medicine")) if sk != null else 15.0
+	if diseases.is_empty():
+		return "You are not sick."
+	inv.remove_item(remedy, 1)
+	if sk != null:
+		sk.add_xp(&"medicine", 6.0)
+	if randf() < clampf(0.3 + med * 0.006, 0.3, 0.95):
+		var n := cure_one()
+		Achievements.note("remedy")
+		return "The remedy works: the %s passes." % n if n != "" else "The remedy does nothing for this."
+	return "The remedy tastes foul and does nothing. (Medicine makes it work more often.)"
+
+
+## Sleeping it off: with Medicine 50 a night's sleep beats a disease that is not yet severe
+func sleep_off() -> String:
+	var sk := _player.get_node_or_null("Skills") as Skills
+	if sk == null or sk.get_level(&"medicine") < 50:
+		return ""
+	for id in diseases.keys():
+		if not id in ["sanguine_vampiris", "sanies_lupinus"] and disease_stage(id) < 2:
+			diseases.erase(id)
+			_apply_disease_mods()
+			changed.emit()
+			return "You sleep off the %s." % DISEASES[id]["name"]
+	return ""

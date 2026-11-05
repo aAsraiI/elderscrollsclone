@@ -111,6 +111,8 @@ static func extra_for(merchant_id: String, _level_min: int, level_max: int) -> A
 		"temple":
 			for id in SpellCatalog.ids_for(&"restoration", 3):
 				out.append(_e(SpellCatalog.TOME_DIR + "tome_" + id + ".tres", 0.4, 1, 1))
+			out.append(_e("res://data/consumables/herbal_remedy.tres", 0.8, 1, 3))  # 1.30
+			out.append(_e("res://data/misc/bandage.tres", 0.8, 2, 6))
 		"jeweler":
 			for k in ["silver_ingot", "gold_ingot"]:
 				out.append(_e(MAT + k + ".tres", 0.6, 1, 4))

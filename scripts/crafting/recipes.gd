@@ -119,6 +119,7 @@ static func _ensure() -> void:
 	_add("tanning_rack", "res://data/misc/waterskin.tres", 1, [["leather", 1], ["plant_fibre", 1]], 1, "survival")
 	_add("workbench", "res://data/misc/bandage.tres", 3, [["plant_fibre", 2]], 1, "medicine")
 	_add("workbench", MAT + "firewood.tres", 4, [["log", 1]], 1, "survival")  # split a log
+	_add("alchemy_lab", "res://data/consumables/herbal_remedy.tres", 2, [["plant_fibre", 1], ["res://data/ingredients/juniper_berries.tres", 1]], 5, "medicine")  # 1.30
 	_add("workbench", MAT + "pickaxe.tres", 1, [["iron_ingot", 2], ["leather_strips", 1]], 1, "tinkering")
 	for metal in ["silver", "gold"]:
 		for kind in ["ring", "amulet"]:

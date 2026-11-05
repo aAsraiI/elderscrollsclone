@@ -46,6 +46,7 @@ func _run() -> void:
 		await t_fishing()
 		await t_hunting()
 		await t_camp_thirst()
+		await t_disease_wounds()
 	print("")
 	print("RESULT: %d passed, %d failed" % [passes, fails])
 	quit(1 if fails > 0 else 0)
@@ -174,4 +175,44 @@ func t_camp_thirst() -> void:
 	ItemUse.use(p, full)
 	check("a waterskin quenches it", s.thirst <= 20.0 and inv.get_count(load("res://data/misc/waterskin.tres") as ItemData) == 1)
 	check("it is saved", float(s.to_dict()["thirst"]) == s.thirst)
+	GameRules._rules["survival"] = false
+
+
+func t_disease_wounds() -> void:
+	print("-- disease stages, bleeding")
+	var aff := p.get_node("Afflictions") as Afflictions
+	var st := p.get_node("Stats") as Stats
+	var base := st.get_stat("stamina_regen_mult")
+	aff.catch("rattle_fever")
+	check("a disease comes on", aff.disease_stage("rattle_fever") == 0 and st.get_stat("stamina_regen_mult") < base)
+	var coming := st.get_stat("stamina_regen_mult")
+	aff.diseases["rattle_fever"] = aff.now() - 200.0
+	aff._tick_diseases(aff.now())
+	check("and turns severe", aff.disease_stage("rattle_fever") == 2 and st.get_stat("stamina_regen_mult") < coming, "%.2f %.2f" % [coming, st.get_stat("stamina_regen_mult")])
+	check("the HUD says so", " ".join(aff.status_lines()).contains("severe"))
+	var remedy := load("res://data/consumables/herbal_remedy.tres") as ItemData
+	var inv := p.get_node("Inventory") as Inventory
+	inv.add_item(remedy, 20)
+	var tries := 0
+	while not aff.diseases.is_empty() and tries < 20:
+		ItemUse.use(p, remedy)
+		tries += 1
+	check("a remedy cures it in the end", aff.diseases.is_empty(), str(tries))
+	# bleeding
+	GameRules._rules["survival"] = true
+	var s := p.get_node("Survival") as Survival
+	var hit := DamageInfo.new(10.0, null, &"melee")
+	hit.heavy = true
+	s.maybe_bleed(hit, 10.0)
+	check("a heavy blow opens a wound", s.is_bleeding())
+	var hp := st.health
+	await secs(2.0)
+	check("you bleed", st.health < hp)
+	var bandage := load("res://data/misc/bandage.tres") as ItemData
+	inv.add_item(bandage, 1)
+	ItemUse.use(p, bandage)
+	check("a bandage stops it", not s.is_bleeding() and inv.get_count(bandage) == 0)
+	var light := DamageInfo.new(1.0, null, &"melee")
+	s.maybe_bleed(light, 1.0)
+	check("a scratch does not bleed", not s.is_bleeding())
 	GameRules._rules["survival"] = false

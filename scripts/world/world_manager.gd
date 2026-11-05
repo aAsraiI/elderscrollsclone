@@ -213,6 +213,13 @@ func _ready() -> void:
 	var world_events := WorldEvents.new()  # 1.31: meteors, treasure
 	world_events.name = "WorldEvents"
 	add_child(world_events)
+	var world_sites := WorldSites.new()  # 1.31: landmarks, drowned ruins, puzzles, ruined cities
+	world_sites.name = "WorldSites"
+	add_child(world_sites)
+	var roamers := Roamers.new()  # 1.31: giants, dragons and caravans on the move
+	roamers.name = "Roamers"
+	roamers.enabled = encounters_enabled
+	add_child(roamers)
 	crime = CrimeManager.new()
 	crime.name = "CrimeManager"
 	add_child(crime)

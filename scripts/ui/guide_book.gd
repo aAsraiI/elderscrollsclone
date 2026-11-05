@@ -152,6 +152,14 @@ A Treasure Map (on bandits, in camps and chests) marks a spot when you study it.
 		"Stables outside the bigger towns sell horses. E on your horse mounts it, E again dismounts; Shift gallops. Riding raises the Riding skill. Your horse waits where you left it.\n\nYou can fight from the saddle with more reach, and a gallop adds to every blow. A lance (forge) doubles that charge but is clumsy on foot. Horse barding (forge) gives you armour while you ride: use it from the inventory near your horse."],
 	["islands", "Travel and the World", "The Far Islands",
 		"The world is islands. The main island is for levels 1 to 100; across the sea lie islands of level 100 to 200 with harder foes, new metals (Voidsteel, Sunsteel, Astral, Primordial) and legendary arms. Ships sail from every port town. Going too far too soon is deadly: the map shows each island's level."],
+	["sites", "Travel and the World", "Landmarks and Old Places",
+		"The land has great landmarks you can see from far off: a giant statue, a fallen tower, a half-sunk temple, the bones of a titan. Each has something left at its foot, and finding one puts it on your map. Under the sea lie drowned ruins and sea caves: swim down (an Air Bladder or Water Breathing helps).
+
+Some old places are shut by puzzles. Read the plaque: pull levers in the right order, turn pillars to show the right signs, or turn mirrors until the sunstone's beam reaches the lens. A cage then sinks and the chest is yours. Lore 25 reads a lever clue plainly.
+
+Ruined cities on the far islands are held by the dead. Kill them all and the charter stone wakes: for gold you can bring settlers back, and the city pays you taxes.
+
+Giants, dragons and caravans travel the land, so keep your eyes on the horizon."],
 	["realms", "Travel and the World", "Realms",
 		"Some quests open a gate to another realm: a land apart with its own sky. Each has a hub with people, guarded sites with treasure, and a heart whose master you must defeat to conquer it. Leaving puts you back at the gate."],
 
